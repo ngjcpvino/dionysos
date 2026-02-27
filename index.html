@@ -1,1 +1,42 @@
 
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Dionysos</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <header id="topNav">
+    <div id="burger" onclick="toggleMenu()"></div>
+    <div id="searchBtn" onclick="startScanFromHome()">
+      <img src="https://i.ibb.co/xqZ284dg/loupe2.png" alt="Recherche">
+    </div>
+    <h1 id="page-title-nav" class="page-title-nav"></h1>
+  </header>
+
+  <nav id="sideMenu" class="side-menu">
+    <div class="confirm-dialog-close" onclick="closeMenu()">✕</div>
+    <a onclick="changeView('accueil');closeMenu()">ACCUEIL</a>
+    <a onclick="changeView('liste');closeMenu()">CAVE À VIN</a>
+    <a onclick="changeView('emplacements');closeMenu()">EMPLACEMENTS</a>
+    <a onclick="changeView('historique');closeMenu()">HISTORIQUE</a>
+    <a onclick="changeView('racheter');closeMenu()">LISTE D'ACHAT</a>
+    <a onclick="changeView('recherche');closeMenu()">RECHERCHE</a>
+    <a onclick="changeView('aranger');closeMenu()">À RANGER</a>
+    <a onclick="changeView('promotions');closeMenu()">PROMOTIONS SAQ</a>
+    <a onclick="window.open('https://www.saq.com','_blank');closeMenu()">OUVRIR SAQ</a>
+    <a onclick="refreshApp();closeMenu()">🔄 RAFRAÎCHIR</a>
+  </nav>
+
+  <main id="mainWrapper">
+    <!-- Les vues seront ajoutées ici étape par étape -->
+  </main>
+
+  <script src="scripts-config.js"></script>
+  <script src="scripts.js"></script>
+
+</body>
+</html>
