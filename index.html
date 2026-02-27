@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header id="topNav">
+  <div id="burger" onclick="toggleMenu()"></div>
+  <div id="searchBtn" onclick="startScanFromHome()"><img src="https://i.ibb.co/xqZ284dg/loupe2.png" alt="Recherche"></div>
+  <h1 id="page-title-nav" class="page-title-nav"></h1>
+</header>
+
+<nav id="sideMenu" class="side-menu">
+  <div class="confirm-dialog-close" onclick="closeMenu()">&#x2715;</div>
+  <a onclick="changeView('accueil');closeMenu()">ACCUEIL</a>
+  <a onclick="changeView('liste');closeMenu()">CAVE A VIN</a>
+  <a onclick="changeView('emplacements');closeMenu()">EMPLACEMENTS</a>
+  <a onclick="changeView('historique');closeMenu()">HISTORIQUE</a>
+  <a onclick="changeView('racheter');closeMenu()">LISTE D'ACHAT</a>
+  <a onclick="changeView('recherche');closeMenu()">RECHERCHE</a>
+  <a onclick="changeView('aranger');closeMenu()">&#xC0; RANGER</a>
+  <a onclick="changeView('promotions');closeMenu()">PROMOTIONS SAQ</a>
+  <a onclick="window.open('https://www.saq.com','_blank');closeMenu()">OUVRIR SAQ</a>
+  <a onclick="refreshApp();closeMenu()">&#x1F504; RAFRA&#xCE;CHIR</a>
+</nav>
+
+<main id="mainWrapper">
+
+  <section id="view-accueil" class="view-section active">
+    <div id="view-titre">
+      <h1 class="page-title">DIONYSOS</h1>
+      <p class="subtitle">VIA VINOSTO</p>
+    </div>
+    <div class="bloc-niveau-1 mt-20">
+      <div onclick="changeView('liste');closeMenu()" class="accueil-cave-btn">
+        <div class="accueil-cave-label">Les vins de Bacchus</div>
+        <div class="accueil-separator"></div>
+        <div id="total-bouteilles" class="accueil-total-text"></div>
+      </div>
+    </div>
+    <div class="bloc-niveau-1 mt-20">
+      <div onclick="toggleCepagesAccueil()" class="accueil-section-item">
+        <span id="cepages-count-text">C&#xE9;pages</span>
+        <span id="cepages-accueil-arrow">&#x25BC;</span>
+      </div>
+    </div>
+    <div class="bloc-niveau-1 mt-20">
+      <div id="liste-cepages"></div>
+      <div onclick="toggleAppellationsAccueil()" class="accueil-section-item">
+        <span id="appellations-count-text">Appellations</span>
+        <span id="appellations-accueil-arrow">&#x25BC;</span>
+      </div>
+      <div id="liste-appellations"></div>
+    </div>
+    <div class="bloc-niveau-2 mt-20">
+      <input type="tel" id="manual-barcode-input" class="filter-input" placeholder="Code-barres...">
+      <button onclick="soumettreCodeBarreManuel()" class="btn-primary" style="height:40px;padding:0 15px;font-size:13px;white-space:nowrap;">OK</button>
+    </div>
+  </section>
+
+  <section id="view-liste" class="view-section">
+    <div class="page-header">
+      <h1 class="page-title">Les vins de Bacchus</h1>
+      <button onclick="changeView('accueil')" class="btn-close-form">&#x2715;</button>
+    </div>
+    <div class="filter-container">
+      <div class="filter-row">
+        <select id="filter-couleur" onchange="appliquerFiltres()" class="filter-select"></select>
+        <select id="filter-cepage" onchange="appliquerFiltres()" class="filter-select"></select>
+        <select id="filter-pays" onchange="appliquerFiltres()" class="filter-select"></select>
+        <select id="filter-appellation" onchange="appliquerFiltres()" class="filter-select"></select>
+        <select id="filter-accords" onchange="appliquerFiltres()" class="filter-select"></select>
+      </div>
+      <div class="filter-separator"></div>
+      <div class="filter-row">
+        <input id="filter-nom" type="text" placeholder="Rechercher un vin par nom..." onkeyup="rechercherParNom()" class="filter-input">
+        <div onclick="reinitialiserFiltres()" class="filter-reset">&#x2715;</div>
+      </div>
+    </div>
+    <div id="inventory-cards" class="mt-20"></div>
+  </section>
+
+  <section id="view-racheter" class="view-section">
+    <div class="page-header">
+      <h1 class="page-title">LISTE D'ACHAT</h1>
+      <button onclick="changeView('accueil')" class="btn-close-form">&#x2715;</button>
+    </div>
+    <div class="filter-container">
+      <div class="filter-row">
+        <select id="select-succursale" class="filter-select-gros" onchange="lancerVerificationGraphQL()">
+          <option value="">Choisir une succursale...</option>
+        </select>
+      </div>
+    </div>
+    <div id="btn-ajouter-succursale" onclick="document.getElementById('form-succursale').style.display='block';this.style.display='none';" class="btn-add-bottle" style="margin:10px 15px;box-sizing:border-box;width:calc(100% - 30px);">+ AJOUTER UNE SUCCURSALE</div>
+    <div id="form-succursale" class="form-succursale" style="margin:10px 15px;padding:20px;box-sizing:border-box;background:rgba(0,0,0,0.85);border:1px solid rgba(201,129,60,0.3);">
+      <label style="display:block;margin-bottom:8px;color:var(--gold);font-size:14px;">NOUVELLE SUCCURSALE</label>
+      <select id="select-toutes-succursales" class="filter-select-gros" style="margin-bottom:10px;" onchange="remplirSuccursaleSelectionnee()">
+        <option value="">Choisir une succursale...</option>
+      </select>
+      <div class="succursale-inputs">
+        <input type="text" id="new-succursale-nom" placeholder="Nom">
+        <input type="text" id="new-succursale-numero" placeholder="Num&#xE9;ro">
+      </div>
+      <div class="succursale-form-actions">
+        <button onclick="sauvegarderSuccursale()" class="btn-primary" style="flex:1;height:36px;font-size:12px;padding:0 10px;">AJOUTER</button>
+        <button onclick="document.getElementById('form-succursale').style.display='none';document.getElementById('btn-ajouter-succursale').style.display='block';" class="btn-secondary" style="flex:1;height:36px;font-size:12px;padding:0 10px;">ANNULER</button>
+      </div>
+    </div>
+    <div id="dispo-status" class="dispo-status-bar"></div>
+    <div id="racheter-list" class="mt-20"></div>
+  </section>
+
+  <section id="view-promotions" class="view-section">
+    <div class="page-header">
+      <h1 class="page-title">PROMOTIONS SAQ</h1>
+      <button onclick="changeView('accueil')" class="btn-close-form">&#x2715;</button>
+    </div>
+    <div class="filter-container">
+      <div class="filter-row">
+        <select id="select-succursale-promo" onchange="rafraichirDispoPromos()" class="filter-select-gros">
+          <option value="">Choisir une succursale...</option>
+        </select>
+      </div>
+    </div>
+    <div id="promotions-list" class="mt-20"></div>
+  </section>
+
+  <section id="view-aranger" class="view-section">
+    <div class="page-header">
+      <h1 class="page-title">&#xC0; RANGER</h1>
+      <button onclick="changeView('accueil')" class="btn-close-form">&#x2715;</button>
+    </div>
+    <div id="aranger-list" class="mt-20"></div>
+  </section>
+
+  <section id="view-emplacements" class="view-section">
+    <div class="page-header">
+      <h1 class="page-title">EMPLACEMENTS</h1>
+      <button onclick="changeView('accueil')" class="btn-close-form">&#x2715;</button>
+    </div>
+    <div class="filter-container">
+      <div class="filter-row">
+        <select id="filter-meuble-emp" onchange="appliquerFiltresEmplacements()" class="filter-select"></select>
+        <select id="filter-rangee-emp" onchange="appliquerFiltresEmplacements()" class="filter-select"></select>
+        <select id="filter-espace-emp" onchange="appliquerFiltresEmplacements()" class="filter-select"></select>
+        <div onclick="reinitialiserFiltresEmplacements()" class="filter-reset">&#x2715;</div>
+      </div>
+    </div>
+    <div id="emplacements-table" class="mt-20"></div>
+  </section>
+
+  <section id="view-completer" class="view-section">
+    <div class="page-header">
+      <h1 class="page-title">&#xC0; COMPLETER</h1>
+      <button onclick="changeView('accueil')" class="btn-close-form">&#x2715;</button>
+    </div>
+    <div id="completer-list" class="mt-20" style="padding:0 10px"></div>
+  </section>
+
+  <section id="view-recherche" class="view-section">
+    <div class="page-header">
+      <h1 class="page-title">RECHERCHE AVANC&#xC9;E</h1>
+      <button onclick="changeView('accueil')" class="btn-close-form">&#x2715;</button>
+    </div>
+    <div class="bloc-niveau-2">
+      <div class="succursale-inputs">
+        <div><label>Classification</label><select id="search-classification" class="filter-select"></select></div>
+        <div><label>Particularit&#xE9;</label><select id="search-particularite" class="filter-select"></select></div>
+        <div><label>Producteur</label><select id="search-producteur" class="filter-select"></select></div>
+        <div><label>Agent promo</label><select id="search-agent" class="filter-select"></select></div>
+        <div><label>Ar&#xF4;mes</label><select id="search-aromes" class="filter-select"></select></div>
+        <div><label>Acidit&#xE9;</label><select id="search-acidite" class="filter-select"></select></div>
+        <div><label>Sucrosit&#xE9;</label><select id="search-sucrosite" class="filter-select"></select></div>
+        <div><label>Corps</label><select id="search-corps" class="filter-select"></select></div>
+        <div><label>Bouche</label><select id="search-bouche" class="filter-select"></select></div>
+        <div><label>Divers</label><select id="search-divers" class="filter-select"></select></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:20px;">
+        <button onclick="executeSearch()" class="btn-primary" style="flex:1;">RECHERCHER</button>
+        <button onclick="resetSearch()" class="filter-reset" style="width:50px;border:1px solid rgba(201,129,60,0.3);">&#x2715;</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="view-historique" class="view-section">
+    <div class="page-header">
+      <h1 class="page-title">HISTORIQUE</h1>
+      <button onclick="changeView('accueil')" class="btn-close-form">&#x2715;</button>
+    </div>
+    <div class="filter-container">
+      <div class="filter-row">
+        <input id="search-plat" type="text" placeholder="Rechercher un plat..." onkeyup="filtrerHistoriqueParPlat()" class="filter-input">
+        <div onclick="reinitialiserRechercheHistorique()" class="filter-reset">&#x2715;</div>
+      </div>
+    </div>
+    <div id="historique-list" class="mt-20"></div>
+  </section>
+
+</main>
+
+<div id="completeScannedOverlay" class="overlay-popup" style="display:none">
+  <div class="popup-window">
+    <div class="popup-header">
+      <h2 class="popup-title">COMPL&#xC9;TER LE VIN</h2>
+      <button onclick="closeCompleteScannedPopup()" class="btn-close-form">&#x2715;</button>
+    </div>
+    <div class="popup-content">
+      <input type="hidden" id="complete-row">
+      <input type="hidden" id="complete-codebarre">
+      <div class="field-container">
+        <label>CODE-BARRES</label>
+        <input id="complete-codebarre-display" type="text" readonly style="background:rgba(230,161,0,0.1);color:var(--white);border:none;">
+      </div>
+      <div class="field-container">
+        <label>CODE SAQ</label>
+        <div style="display:flex;gap:10px;align-items:stretch;">
+          <button onclick="ouvrirPageSAQFromComplete()" style="width:100px;height:50px;background:var(--gold);color:#000;border:none;cursor:pointer;font-size:14px;flex-shrink:0;">GO SAQ</button>
+          <input type="text" id="complete-codesaq" placeholder="Copiez le code SAQ..." style="flex:1;height:50px;padding:0 15px;font-size:16px;color:#fff;background:rgba(255,255,255,0.05);border:1px solid rgba(230,161,0,0.3);">
+          <button onclick="saveCompleteScanned()" class="btn-primary" style="width:100px;height:50px;padding:0;font-size:16px;flex-shrink:0;">GO</button>
+        </div>
+      </div>
+      <div class="field-container" style="margin-top:20px;padding-top:15px;border-top:1px solid rgba(255,255,255,0.1);">
+        <label>NOTE</label>
+        <input id="complete-note-display" type="text" readonly style="background:transparent;border:none;color:var(--white-60);font-size:13px;padding:0;height:auto;">
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="ficheVinOverlay" class="fichevin-overlay">
+  <div id="fichevin-window-inner" class="fichevin-window">
+    <div class="fichevin-header">
+      <div>
+        <h2 id="fiche-nom" class="fv-title">NOM DU VIN</h2>
+        <div id="fiche-origine" class="fv-origine"></div>
+      </div>
+      <div class="fiche-header-actions">
+        <div class="succursale-form-actions">
+          <button id="btn-edit-fiche" onclick="toggleEditMode()" class="fiche-icon-btn edit">&#x270E;</button>
+          <button id="btn-save-fiche" onclick="saveFiche()" class="fiche-icon-btn save" style="display:none;">&#x2713;</button>
+          <button onclick="fermerFiche()" class="fiche-icon-btn">&#x2715;</button>
+        </div>
+        <div id="fiche-prix-header" style="font-size:14px;font-weight:300;color:#c9813c;"></div>
+      </div>
+    </div>
+    <div id="fiche-photo" style="text-align:right;margin:1px 0;"></div>
+    <div id="fiche-content">Chargement...</div>
+  </div>
+</div>
+
+<div id="newWineOverlay" class="overlay-popup" style="display:none">
+  <div class="popup-window">
+    <div class="popup-header">
+      <h2 class="popup-title">NOUVEAU VIN SCANN&#xC9;</h2>
+      <button onclick="closeNewWinePopup()" class="btn-close-form">&#x2715;</button>
+    </div>
+    <div class="popup-content">
+      <div class="field-container">
+        <label>CODE-BARRES</label>
+        <div style="display:flex;gap:8px;">
+          <input id="newwine-codebarre" type="text" placeholder="Ex: 0012345678901" style="flex:1">
+          <button onclick="startScanFromPopup()" class="btn-scan">SCAN</button>
+        </div>
+      </div>
+      <div class="field-container">
+        <label>NOTE</label>
+        <textarea id="newwine-note" rows="3" placeholder="Notes..."></textarea>
+      </div>
+      <div class="field-container">
+        <label>QUANTIT&#xC9;</label>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <button onclick="adjustQuantity(-1)" class="btn-secondary" style="width:50px;height:45px;">&#x2212;</button>
+          <input id="newwine-quantite" type="number" value="1" readonly style="text-align:center;width:80px;height:45px;">
+          <button onclick="adjustQuantity(1)" class="btn-secondary" style="width:50px;height:45px;">+</button>
+        </div>
+      </div>
+      <div id="emplacements-container"></div>
+    </div>
+    <div class="popup-actions">
+      <button id="btn-save-newwine" onclick="saveNewWineImproved()" class="btn-primary">GO</button>
+      <button onclick="closeNewWinePopup()" class="btn-secondary">ANNULER</button>
+    </div>
+  </div>
+</div>
+
+<div id="edit-fiche-popup" class="overlay-popup" style="left:0;right:0;width:100vw;"></div>
+
+<div id="scannerContainer" class="scanner-container">
+  <div id="scanner-box">
+    <div id="interactive"></div>
+    <div class="laser-line"></div>
+  </div>
+  <div class="scanner-controls">
+    <p class="scanner-help">Alignez le code-barres avec la ligne</p>
+    <button type="button" class="btn-secondary" onclick="stopScanner()">ANNULER LE SCAN</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+<script src="scripts-config.js"></script>
+<script src="scripts-init.js"></script>
+<script src="scripts-inventaire.js"></script>
+<script src="scripts-fiche.js"></script>
+<script src="scripts-scanner.js"></script>
+<script src="scripts-listes.js"></script>
+
+</body>
+</html>
