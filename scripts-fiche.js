@@ -480,7 +480,7 @@ function saveFiche() {
 }
 
 function confirmerSuppressionBouteille(row, bottle) {
-  afficherConfirmation(
+afficherConfirmation(
     'Supprimer la bouteille',
     'Supprimer cette bouteille ? Cette action est irréversible.',
     function() {
@@ -490,7 +490,9 @@ function confirmerSuppressionBouteille(row, bottle) {
         ouvrirFicheVin(CURRENT_WINE_CODEBARRE);
         chargerInventaire();
       }).catch(function(err) { afficherMessage('Erreur: ' + err); });
-    }
+    },
+    null,
+    'SUPPRIMER'
   );
 }
 
@@ -753,7 +755,7 @@ function afficherMessage(m) {
   }, 3000);
 }
 
-function afficherConfirmation(title, message, onConfirm, onCancel) {
+function afficherConfirmation(title, message, onConfirm, onCancel, labelConfirm) {
   let overlay = document.getElementById('confirmOverlay');
   if (!overlay) {
     overlay = document.createElement('div');
@@ -761,7 +763,7 @@ function afficherConfirmation(title, message, onConfirm, onCancel) {
     overlay.className = 'confirm-overlay';
     document.body.appendChild(overlay);
   }
-  overlay.innerHTML = '<div class="confirm-dialog"><button onclick="document.getElementById(\'confirmOverlay\').style.display=\'none\'" class="confirm-dialog-close">✕</button><h3 class="color-primary mb-20 fs-14 text-uppercase">' + title + '</h3><p class="color-white mb-20 fs-14">' + message + '</p><div class="confirm-dialog-buttons"><button id="confirmBtn" class="confirm-dialog-button confirm-dialog-button-primary">OUI, SANTÉ !</button><button id="cancelBtn" class="confirm-dialog-button confirm-dialog-button-secondary">ANNULER</button></div></div>';
+  overlay.innerHTML = '<div class="confirm-dialog"><button onclick="document.getElementById(\'confirmOverlay\').style.display=\'none\'" class="confirm-dialog-close">✕</button><h3 class="color-primary mb-20 fs-14 text-uppercase">' + title + '</h3><p class="color-white mb-20 fs-14">' + message + '</p><div class="confirm-dialog-buttons"><button id="confirmBtn" class="confirm-dialog-button confirm-dialog-button-primary">>' + (labelConfirm || 'OUI, SANTÉ !') + '</button><button id="cancelBtn" class="confirm-dialog-button confirm-dialog-button-secondary">ANNULER</button></div></div>';
   overlay.style.display = 'flex';
   document.getElementById('confirmBtn').onclick = function() { overlay.style.display = 'none'; if (onConfirm) onConfirm(); };
   document.getElementById('cancelBtn').onclick = function() { overlay.style.display = 'none'; if (onCancel) onCancel(); };
