@@ -1,5 +1,5 @@
 # DIONYSOS — Cahier de charges
-*Dernière mise à jour : 28 février 2026*
+*Dernière mise à jour : 28 février 2026 — migration terminée*
 
 ---
 
@@ -14,7 +14,7 @@
 | scripts-clean.html | JavaScript frontend |
 | REFERENCE.html | Règles du projet |
 
-### Nouvelle architecture (GitHub Pages) — EN COURS
+### Nouvelle architecture (GitHub Pages) — COMPLÈTE ET FONCTIONNELLE
 | Fichier | Rôle |
 |---|---|
 | index.html | Structure HTML |
@@ -59,14 +59,27 @@ scripts-config.js → scripts-init.js → scripts-inventaire.js → scripts-fich
 ## 3. PONT ENTRE GITHUB PAGES ET APPS SCRIPT
 
 Tous les appels au backend passent par appelBackend(action, data) définie dans scripts-config.js.
+⚠️ La migration est TERMINÉE — tous les google.script.run ont été remplacés dans les 5 fichiers.
 
-ANCIEN (Apps Script uniquement) :
-  google.script.run.withSuccessHandler(fn).getInventoryData();
+SYNTAXE À UTILISER pour tout nouvel appel :
 
-NOUVEAU (GitHub Pages) :
-  appelBackend('getInventoryData').then(fn).catch(err => afficherMessage(err));
+  // Lecture simple
+  appelBackend('getInventoryData').then(fn).catch(function(err) { afficherMessage('Erreur: ' + err); });
 
-A FAIRE : Remplacer tous les google.script.run dans les 5 fichiers scripts par des appels appelBackend().
+  // Avec paramètres
+  appelBackend('getWineBottles', { codebarre: codebarre }).then(fn).catch(function(err) { afficherMessage('Erreur: ' + err); });
+
+  // Écriture sans retour
+  appelBackend('updateWineField', { codebarre: cb, field: 'Accords', value: val }).catch(function(err) { afficherMessage('Erreur: ' + err); });
+
+  // Écriture avec confirmation
+  appelBackend('saveWineEdits', data).then(function() { afficherMessage('OK'); }).catch(function(err) { afficherMessage('Erreur: ' + err); });
+
+POINTS IMPORTANTS :
+- index.html : balise base target top retirée (elle bloquait le chargement des JS)
+- doPost() dans Code.gs corrigé — les noms de paramètres correspondent exactement au frontend
+- Après chaque modification de Code.gs : Déployer → Gérer les déploiements → Nouvelle version
+- Images/icônes : créer un dossier /images/ sur GitHub, accès via src="images/fichier.png"
 
 ---
 
@@ -165,21 +178,19 @@ Toutes accessibles via doPost() avec appelBackend(action, data).
 
 ## 9. ÉTAT DE LA MIGRATION — 28 FÉVRIER 2026
 
-### Complété
+### MIGRATION COMPLÈTE ET FONCTIONNELLE ✅
+
 - Repo GitHub créé : github.com/ngjcpvino/dionysos
 - GitHub Pages activé : https://ngjcpvino.github.io/dionysos/
 - Google Cloud configuré : URL GitHub ajoutée aux origines OAuth2
-- doPost() ajouté dans Code.gs — backend testé et fonctionnel
-- styles.css créé et uploadé (1200+ lignes, 24 sections)
-- index.html créé avec toute la structure HTML
-- scripts-config.js créé avec appelBackend()
-- JavaScript divisé en 5 modules : scripts-init, scripts-inventaire, scripts-fiche, scripts-scanner, scripts-listes
-- Navigation fonctionnelle sur GitHub Pages
+- doPost() dans Code.gs — backend testé et fonctionnel
+- styles.css uploadé (1200+ lignes, 24 sections)
+- index.html : balise base target top retirée
+- scripts-config.js créé avec appelBackend() et URL du serveur
+- Tous les google.script.run remplacés dans les 5 fichiers JS
+- Navigation, inventaire, fiche vin, scanner, listes, promotions SAQ — tout fonctionne
 
-### Prochaine étape prioritaire
-- Uploader scripts-config.js sur GitHub (résout le 404)
-- Remplacer tous les google.script.run dans les 5 fichiers JS par appelBackend()
-- C'est la seule chose qui manque pour que l'app soit pleinement fonctionnelle
+### Aucune étape en attente
 
 ---
 
