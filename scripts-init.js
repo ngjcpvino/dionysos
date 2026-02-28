@@ -16,7 +16,7 @@ let CURRENT_WINE_BOTTLES = [];
 // ==================== INITIALISATION ====================
 
 window.onload = function() {
-  google.script.run.withSuccessHandler(initConfig).getConfig();
+  appelBackend('getConfig').then(initConfig).catch(function(err) { afficherMessage('Erreur: ' + err); });
   chargerInventaire();
 };
 
