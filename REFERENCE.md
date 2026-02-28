@@ -9,7 +9,7 @@ Il est infatigable — "abandonner n'est pas dans mon vocabulaire".
 Il préfère les réponses courtes et solutions directes, sans explications inutiles.
 Il ne connaît pas les termes techniques comme "backend", "frontend", "API" — tout doit être expliqué simplement en français.
 Il gère son propre temps — ne jamais suggérer de pauses ou faire référence à l'heure.
-Il est curieux et veut toujours ameliorer ce projet
+Il est curieux et veut toujours ameliorer ce projet.
 ---
 
 ## 1. ARCHITECTURE DU PROJET
@@ -199,8 +199,12 @@ Toutes accessibles via doPost() avec appelBackend(action, data).
 - Tous les google.script.run remplacés dans les 5 fichiers JS
 - Navigation, inventaire, fiche vin, scanner, listes, promotions SAQ — tout fonctionne
 
-### Aucune étape en attente
+### Étapes en attente
 
+- Tenter de corriger le style
+- Ajouter des éléments pour améliorer de projet
+- Solution pour photos
+  
 ---
 
 ## 10. CHARTE DES COULEURS — ACCORDS METS-VIN
