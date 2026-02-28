@@ -83,17 +83,14 @@ function soumettreCodeBarreManuel() {
 }
 
 function traiterResultatScan(code) {
-  google.script.run
-    .withSuccessHandler(function(result) {
-      if (result.exists) {
-        afficherMessage('Vin trouvé !');
-        ouvrirFicheVin(code);
-      } else {
-        showNewWinePopup(code);
-      }
-    })
-    .withFailureHandler(function(err) { afficherMessage('Erreur de vérification'); })
-    .checkWineExists(code);
+  appelBackend('checkWineExists', { codebarre: code }).then(function(result) {
+    if (result.exists) {
+      afficherMessage('Vin trouvé !');
+      ouvrirFicheVin(code);
+    } else {
+      showNewWinePopup(code);
+    }
+  }).catch(function(err) { afficherMessage('Erreur de vérification'); });
 }
 
 // ==================== POPUP NOUVEAU VIN ====================
@@ -183,18 +180,16 @@ function checkEmplacementDispo(bottleNum) {
   const statusDiv = document.getElementById('emplacement-status-' + bottleNum);
   if (!meuble || !rangee || !espace) { statusDiv.innerHTML = ''; return; }
   statusDiv.innerHTML = 'Vérification...';
-  google.script.run
-    .withSuccessHandler(function(result) {
-      if (result.available) {
-        statusDiv.innerHTML = '<span style="color:#4caf50;">✓ Libre</span>';
-        statusDiv.setAttribute('data-available', 'true');
-      } else {
-        statusDiv.innerHTML = '<span style="color:#f44336;">✗ Occupé par : ' + result.message + '</span>';
-        statusDiv.setAttribute('data-available', 'false');
-        document.getElementById('btn-save-newwine').disabled = true;
-      }
-    })
-    .checkLocationAvailable(meuble, rangee, espace);
+  appelBackend('checkLocationAvailable', { meuble: meuble, rangee: rangee, espace: espace }).then(function(result) {
+    if (result.available) {
+      statusDiv.innerHTML = '<span style="color:#4caf50;">✓ Libre</span>';
+      statusDiv.setAttribute('data-available', 'true');
+    } else {
+      statusDiv.innerHTML = '<span style="color:#f44336;">✗ Occupé par : ' + result.message + '</span>';
+      statusDiv.setAttribute('data-available', 'false');
+      document.getElementById('btn-save-newwine').disabled = true;
+    }
+  }).catch(function(err) { afficherMessage('Erreur: ' + err); });
 }
 
 function saveNewWineImproved() {
@@ -227,98 +222,89 @@ function saveNewWineImproved() {
   btn.disabled = true;
   btn.textContent = 'RECHERCHE SAQ...';
 
-  google.script.run
-    .withSuccessHandler(function(codeSAQTrouve) {
-      if (!codeSAQTrouve) {
-        btn.disabled = false;
-        btn.textContent = 'GO';
+  appelBackend('chercherProduitSAQ_GRAPHQL_V1', { codebarre: codebarre }).then(function(codeSAQTrouve) {
+    if (!codeSAQTrouve) {
+      btn.disabled = false;
+      btn.textContent = 'GO';
 
-        let overlay = document.getElementById('confirmOverlay');
-        if (!overlay) {
-          overlay = document.createElement('div');
-          overlay.id = 'confirmOverlay';
-          overlay.className = 'confirm-overlay';
-          document.body.appendChild(overlay);
-        }
+      let overlay = document.getElementById('confirmOverlay');
+      if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'confirmOverlay';
+        overlay.className = 'confirm-overlay';
+        document.body.appendChild(overlay);
+      }
 
+      overlay.innerHTML =
+        '<div class="confirm-dialog">' +
+          '<button onclick="document.getElementById(\'confirmOverlay\').style.display=\'none\'" class="confirm-dialog-close">✕</button>' +
+          '<h3 class="color-primary mb-20 fs-14 text-uppercase">Vin non trouvé à la SAQ</h3>' +
+          '<p class="color-white mb-20 fs-14">Voulez-vous l\'ajouter quand même ?</p>' +
+          '<div class="confirm-dialog-buttons">' +
+            '<button id="confirmBtn" class="confirm-dialog-button confirm-dialog-button-primary">OUI</button>' +
+            '<button id="cancelBtn" class="confirm-dialog-button confirm-dialog-button-secondary">ANNULER</button>' +
+          '</div>' +
+        '</div>';
+
+      overlay.style.display = 'flex';
+
+      document.getElementById('cancelBtn').onclick = function() { overlay.style.display = 'none'; };
+      document.getElementById('confirmBtn').onclick = function() {
         overlay.innerHTML =
           '<div class="confirm-dialog">' +
-            '<button onclick="document.getElementById(\'confirmOverlay\').style.display=\'none\'" class="confirm-dialog-close">✕</button>' +
-            '<h3 class="color-primary mb-20 fs-14 text-uppercase">Vin non trouvé à la SAQ</h3>' +
-            '<p class="color-white mb-20 fs-14">Voulez-vous l\'ajouter quand même ?</p>' +
+            '<h3 class="color-primary mb-20 fs-14 text-uppercase">Nom du vin</h3>' +
+            '<div class="field-container" style="margin-bottom:20px;">' +
+              '<label>NOM DU VIN</label>' +
+              '<input type="text" id="confirm-nom-vin" placeholder="Ex: Château Margaux 2018" style="width:100%;padding:10px;background:rgba(255,255,255,0.1);border:1px solid rgba(230,161,0,0.3);color:#fff;">' +
+            '</div>' +
             '<div class="confirm-dialog-buttons">' +
-              '<button id="confirmBtn" class="confirm-dialog-button confirm-dialog-button-primary">OUI</button>' +
-              '<button id="cancelBtn" class="confirm-dialog-button confirm-dialog-button-secondary">ANNULER</button>' +
+              '<button id="confirmNomBtn" class="confirm-dialog-button confirm-dialog-button-primary">CONFIRMER</button>' +
+              '<button id="cancelNomBtn" class="confirm-dialog-button confirm-dialog-button-secondary">ANNULER</button>' +
             '</div>' +
           '</div>';
 
-        overlay.style.display = 'flex';
-
-        document.getElementById('cancelBtn').onclick = function() { overlay.style.display = 'none'; };
-        document.getElementById('confirmBtn').onclick = function() {
-          overlay.innerHTML =
-            '<div class="confirm-dialog">' +
-              '<h3 class="color-primary mb-20 fs-14 text-uppercase">Nom du vin</h3>' +
-              '<div class="field-container" style="margin-bottom:20px;">' +
-                '<label>NOM DU VIN</label>' +
-                '<input type="text" id="confirm-nom-vin" placeholder="Ex: Château Margaux 2018" style="width:100%;padding:10px;background:rgba(255,255,255,0.1);border:1px solid rgba(230,161,0,0.3);color:#fff;">' +
-              '</div>' +
-              '<div class="confirm-dialog-buttons">' +
-                '<button id="confirmNomBtn" class="confirm-dialog-button confirm-dialog-button-primary">CONFIRMER</button>' +
-                '<button id="cancelNomBtn" class="confirm-dialog-button confirm-dialog-button-secondary">ANNULER</button>' +
-              '</div>' +
-            '</div>';
-
-          document.getElementById('cancelNomBtn').onclick = function() { overlay.style.display = 'none'; };
-          document.getElementById('confirmNomBtn').onclick = function() {
-            const nomSaisi = document.getElementById('confirm-nom-vin').value.trim();
-            if (!nomSaisi) { afficherMessage('Entrez un nom pour continuer'); return; }
-            overlay.style.display = 'none';
-            btn.disabled = true;
-            btn.textContent = 'ENREGISTREMENT...';
-            google.script.run
-              .withSuccessHandler(function() {
-                afficherMessage('Vin ajouté !');
-                closeNewWinePopup();
-                chargerInventaire();
-                ouvrirFicheVin(codebarre);
-                btn.disabled = false;
-                btn.textContent = 'GO';
-              })
-              .withFailureHandler(function(err) {
-                afficherMessage('Erreur: ' + err);
-                btn.disabled = false;
-                btn.textContent = 'GO';
-              })
-              .ajouterVinAvecBouteilles(codebarre, '', '', window.bouteillesJSON, nomSaisi);
-          };
+        document.getElementById('cancelNomBtn').onclick = function() { overlay.style.display = 'none'; };
+        document.getElementById('confirmNomBtn').onclick = function() {
+          const nomSaisi = document.getElementById('confirm-nom-vin').value.trim();
+          if (!nomSaisi) { afficherMessage('Entrez un nom pour continuer'); return; }
+          overlay.style.display = 'none';
+          btn.disabled = true;
+          btn.textContent = 'ENREGISTREMENT...';
+          appelBackend('ajouterVinAvecBouteilles', { codebarre: codebarre, codeSAQ: '', note: '', bouteilles: window.bouteillesJSON, nom: nomSaisi }).then(function() {
+            afficherMessage('Vin ajouté !');
+            closeNewWinePopup();
+            chargerInventaire();
+            ouvrirFicheVin(codebarre);
+            btn.disabled = false;
+            btn.textContent = 'GO';
+          }).catch(function(err) {
+            afficherMessage('Erreur: ' + err);
+            btn.disabled = false;
+            btn.textContent = 'GO';
+          });
         };
-        return;
-      }
+      };
+      return;
+    }
 
-      btn.textContent = 'ENREGISTREMENT...';
-      google.script.run
-        .withSuccessHandler(function() {
-          afficherMessage('Vin ajouté avec données SAQ !');
-          closeNewWinePopup();
-          chargerInventaire();
-          ouvrirFicheVin(codebarre);
-          btn.disabled = false;
-          btn.textContent = 'GO';
-        })
-        .withFailureHandler(function(err) {
-          afficherMessage('Erreur: ' + err);
-          btn.disabled = false;
-          btn.textContent = 'GO';
-        })
-        .ajouterVinAvecBouteilles(codebarre, codeSAQTrouve, '', window.bouteillesJSON, '');
-    })
-    .withFailureHandler(function(err) {
-      afficherMessage('Erreur recherche SAQ: ' + err);
+    btn.textContent = 'ENREGISTREMENT...';
+    appelBackend('ajouterVinAvecBouteilles', { codebarre: codebarre, codeSAQ: codeSAQTrouve, note: '', bouteilles: window.bouteillesJSON, nom: '' }).then(function() {
+      afficherMessage('Vin ajouté avec données SAQ !');
+      closeNewWinePopup();
+      chargerInventaire();
+      ouvrirFicheVin(codebarre);
       btn.disabled = false;
       btn.textContent = 'GO';
-    })
-    .chercherProduitSAQ_GRAPHQL_V1(codebarre);
+    }).catch(function(err) {
+      afficherMessage('Erreur: ' + err);
+      btn.disabled = false;
+      btn.textContent = 'GO';
+    });
+  }).catch(function(err) {
+    afficherMessage('Erreur recherche SAQ: ' + err);
+    btn.disabled = false;
+    btn.textContent = 'GO';
+  });
 }
 
 function closeNewWinePopup() {
@@ -376,19 +362,16 @@ function saveCompleteScanned() {
   btn.disabled = true;
   btn.textContent = 'ENREGISTREMENT...';
 
-  google.script.run
-    .withSuccessHandler(function() {
-      afficherMessage('Vin ajouté à la cave !');
-      closeCompleteScannedPopup();
-      changeView('completer');
-      chargerListeACompleter();
-      btn.disabled = false;
-      btn.textContent = 'GO';
-    })
-    .withFailureHandler(function(err) {
-      afficherMessage('Erreur');
-      btn.disabled = false;
-      btn.textContent = 'GO';
-    })
-    .completeScannedWine(row, codesaq);
+  appelBackend('completeScannedWine', { row: row, codesaq: codesaq }).then(function() {
+    afficherMessage('Vin ajouté à la cave !');
+    closeCompleteScannedPopup();
+    changeView('completer');
+    chargerListeACompleter();
+    btn.disabled = false;
+    btn.textContent = 'GO';
+  }).catch(function(err) {
+    afficherMessage('Erreur');
+    btn.disabled = false;
+    btn.textContent = 'GO';
+  });
 }
