@@ -10,7 +10,7 @@ function chargerInventaire() {
   const div = document.getElementById("inventory-cards");
   if (!div) return;
   div.innerHTML = "<p class='text-center p-15 color-muted'>SYNCHRONISATION...</p>";
-  google.script.run.withSuccessHandler(inventaireCharge).getInventoryData();
+  appelBackend('getInventoryData').then(inventaireCharge).catch(function(err) { afficherMessage('Erreur: ' + err); });
 }
 
 function inventaireCharge(data) {
@@ -488,12 +488,10 @@ function afficherListeRacheter(data) {
 let ALL_HISTORIQUE = [];
 
 function chargerHistorique() {
-  google.script.run
-    .withSuccessHandler(function(data) {
-      ALL_HISTORIQUE = data || [];
-      afficherHistorique(ALL_HISTORIQUE);
-    })
-    .getHistorique();
+  appelBackend('getHistorique').then(function(data) {
+    ALL_HISTORIQUE = data || [];
+    afficherHistorique(ALL_HISTORIQUE);
+  }).catch(function(err) { afficherMessage('Erreur: ' + err); });
 }
 
 function filtrerHistoriqueParPlat() {
