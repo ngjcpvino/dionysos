@@ -108,7 +108,7 @@ body::after {
   transition: transform 0.3s ease;
 }
 
-#burger::before { content: "☰"; font-size: 40px; }
+#burger::before { content: "☰"; font-size: 38px; }
 
 #burger.open::before {
   content: "✕";
