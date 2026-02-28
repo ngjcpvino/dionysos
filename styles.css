@@ -358,6 +358,12 @@ body::after {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.filter-select-gros-centre {
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 300;
+}
+
 
 .filter-select option { font-size: 11px; background: #1a1a1a; color: #fff; }
 .filter-select::-webkit-scrollbar { display: none; }
