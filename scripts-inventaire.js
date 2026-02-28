@@ -41,17 +41,13 @@ function inventaireCharge(data) {
 }
 
 // ==================== STATS ACCUEIL ====================
-
 function mettreAJourStatsAccueil() {
   if (!ALL_DATA) return;
-
   const actives = ALL_DATA.filter(function(item) {
     const statut = item.Statut || "En stock";
     return statut !== "Bu" && statut !== "Sorti";
   });
-
   document.getElementById('total-bouteilles').textContent = actives.length + ' bouteille' + (actives.length > 1 ? 's' : '') + ' en inventaire';
-
   const cepageCounts = {};
   actives.forEach(function(item) {
     const cepages = item.Cepage || '';
@@ -62,10 +58,8 @@ function mettreAJourStatsAccueil() {
       });
     }
   });
-
   const totalCepages = Object.keys(cepageCounts).length;
   document.getElementById('cepages-count-text').textContent = totalCepages + ' cépage' + (totalCepages > 1 ? 's' : '');
-
   const sorted = Object.entries(cepageCounts).sort(function(a, b) { return b[1] - a[1]; });
   const divCep = document.getElementById('liste-cepages');
   divCep.innerHTML = '';
@@ -73,9 +67,8 @@ function mettreAJourStatsAccueil() {
   sorted.forEach(function(entry) {
     const cepage = entry[0];
     const count = entry[1];
-    divCep.innerHTML += '<div onclick="filtrerParCepage(\'' + cepage.replace(/'/g, "\\'") + '\')" class="card-cepage-item"><span>' + cepage + '</span>'<span class="card-cepage-count">' + count + ' bouteille' + (count > 1 ? 's' : '') + '</span></div>';';
+    divCep.innerHTML += '<div onclick="filtrerParCepage(\'' + cepage.replace(/'/g, "\\'") + '\')" class="card-cepage-item"><span>' + cepage + '</span><span class="card-cepage-count">' + count + ' bouteille' + (count > 1 ? 's' : '') + '</span></div>';
   });
-
   const appellationCounts = {};
   actives.forEach(function(item) {
     const appellation = item.Appellation || '';
@@ -83,10 +76,8 @@ function mettreAJourStatsAccueil() {
       appellationCounts[appellation] = (appellationCounts[appellation] || 0) + 1;
     }
   });
-
   const totalAppellations = Object.keys(appellationCounts).length;
   document.getElementById('appellations-count-text').textContent = totalAppellations + ' appellation' + (totalAppellations > 1 ? 's' : '');
-
   const sortedAppellations = Object.entries(appellationCounts).sort(function(a, b) { return b[1] - a[1]; });
   const divApp = document.getElementById('liste-appellations');
   divApp.innerHTML = '';
@@ -94,10 +85,9 @@ function mettreAJourStatsAccueil() {
   sortedAppellations.forEach(function(entry) {
     const appellation = entry[0];
     const count = entry[1];
-    divApp.innerHTML += '<div onclick="filtrerParAppellation(\'' + appellation.replace(/'/g, "\\'") + '\')" class="card-cepage-item"><span>' + appellation + '</span>'<span class="card-cepage-count">' + count + ' bouteille' + (count > 1 ? 's' : '') + '</span></div>';';
+    divApp.innerHTML += '<div onclick="filtrerParAppellation(\'' + appellation.replace(/'/g, "\\'") + '\')" class="card-cepage-item"><span>' + appellation + '</span><span class="card-cepage-count">' + count + ' bouteille' + (count > 1 ? 's' : '') + '</span></div>';
   });
 }
-
 function toggleCepagesAccueil() {
   const liste = document.getElementById('liste-cepages');
   const arrow = document.getElementById('cepages-accueil-arrow');
@@ -113,7 +103,6 @@ function toggleCepagesAccueil() {
     if (arrow) arrow.textContent = '▼';
   }
 }
-
 function toggleAppellationsAccueil() {
   const liste = document.getElementById('liste-appellations');
   const arrow = document.getElementById('appellations-accueil-arrow');
@@ -129,19 +118,16 @@ function toggleAppellationsAccueil() {
     if (arrow) arrow.textContent = '▼';
   }
 }
-
 function filtrerParAppellation(appellation) {
   FILTRE_APPELLATION_EN_ATTENTE = appellation;
   changeView('liste');
   closeMenu();
 }
-
 function filtrerParCepage(cepage) {
   FILTRE_CEPAGE_EN_ATTENTE = cepage;
   changeView('liste');
   closeMenu();
 }
-
 // ==================== RECHERCHE AVANCÉE ====================
 
 function chargerPageRecherche() {
