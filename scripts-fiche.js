@@ -150,8 +150,9 @@ function afficherFiche(result) {
     html += '<p class="fiche-empty">Aucune bouteille en inventaire</p>';
   } else {
     bottlesActives.forEach(function(b) {
-     b.meuble + ' - rangée ' + b.rangee + ' - espace ' + b.espace :
-     '<span class="bottle-to-arrange">À ranger</span>';
+    const loc = b.meuble && b.rangee && b.espace ?
+        b.meuble + ' - rangée ' + b.rangee + ' - espace ' + b.espace :
+        '<span class="bottle-to-arrange">À ranger</span>';
 
       html += '<div class="bottle-card">';
       html += '<div class="bottle-card-location">' + loc + '</div>';
