@@ -78,14 +78,16 @@ window.history.replaceState({ view: 'accueil' }, '', '#accueil');
 
 function toggleMenu() {
   document.getElementById("burger").classList.toggle("open");
-  document.getElementById("sideMenu").classList.toggle("open");
+  const menu = document.getElementById("sideMenu");
+  menu.classList.toggle("open");
+  document.getElementById("menuOverlay").style.display = menu.classList.contains("open") ? "block" : "none";
 }
 
 function closeMenu() {
   document.getElementById("sideMenu").classList.remove("open");
   document.getElementById("burger").classList.remove("open");
+  document.getElementById("menuOverlay").style.display = "none";
 }
-
 function refreshApp() {
   afficherMessage('Synchronisation...');
   chargerInventaire();
