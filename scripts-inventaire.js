@@ -312,7 +312,7 @@ function genererCardVin(item, options) {
     const accordColors = { 1: '#FF4B2B', 2: '#FF9000', 3: '#FFD200', 4: '#8BC34A', 5: '#2ECC71' };
     options.mets.forEach(function(met) {
       const borderColor = accordColors[met.note] || 'rgba(255,255,255,0.2)';
-      gauche += '<div class="historique-met-item" style="border-left:3px solid ' + borderColor + ';">';
+      gauche += '<div class="historique-met-item" style="border-left:1px solid ' + borderColor + ';">';
       gauche += '<span>' + (met.plat || '—') + '</span>';
       gauche += '<span class="historique-met-date">' + met.date + '</span>';
       gauche += '</div>';
