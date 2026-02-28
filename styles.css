@@ -944,7 +944,7 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
    ========================================= */
 .alert-box {
   background: rgba(230,161,0,0.15);
-  border-left: 2px solid var(--gold);
+  border-left: 1px solid var(--gold);
   padding: 15px;
   margin-bottom: 20px;
 }
@@ -974,7 +974,7 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
   padding: 25px;
   max-width: 400px;
   width: 100%;
-  border: 2px solid var(--gold);
+  border: 1px solid var(--gold);
   box-shadow: 0 20px 40px rgba(0,0,0,0.5);
   text-align: center;
   position: relative;
