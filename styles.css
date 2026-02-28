@@ -1405,6 +1405,15 @@ select option:hover { background-color: rgba(230,161,0,0.3) !important; color: v
 .racheter-margin { margin: 15px; }
 .form-succursale { display: none; margin-bottom: 10px; }
 
+.form-succursale-titre {
+  display: block;
+  text-align: center;
+  margin-bottom: 15px;
+  color: var(--gold);
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
 .succursale-inputs {
   display: grid;
   grid-template-columns: 1fr 1fr;
