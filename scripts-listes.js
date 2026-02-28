@@ -10,54 +10,45 @@ function chargerListeRacheter() {
   if (!div) return;
   div.innerHTML = "<p class='text-center p-15 color-muted'>Chargement...</p>";
 
-  google.script.run
-    .withSuccessHandler(function(data) {
-      ALL_DATA = data || [];
-      google.script.run
-        .withSuccessHandler(function(succursales) {
-          const select = document.getElementById('select-succursale');
-          if (select) {
-            select.innerHTML = '<option value="">Choisir une succursale...</option>';
-            succursales.forEach(function(s) {
-              select.innerHTML += '<option value="' + s.numero + '">' + s.nom + '</option>';
-            });
-          }
-        })
-        .getSuccursales();
-      chargerToutesSuccursales();
-      afficherListeRacheter(ALL_DATA);
-    })
-    .getInventoryData();
+  appelBackend('getInventoryData').then(function(data) {
+    ALL_DATA = data || [];
+    appelBackend('getSuccursales').then(function(succursales) {
+      const select = document.getElementById('select-succursale');
+      if (select) {
+        select.innerHTML = '<option value="">Choisir une succursale...</option>';
+        succursales.forEach(function(s) {
+          select.innerHTML += '<option value="' + s.numero + '">' + s.nom + '</option>';
+        });
+      }
+    }).catch(function(err) { afficherMessage('Erreur: ' + err); });
+    chargerToutesSuccursales();
+    afficherListeRacheter(ALL_DATA);
+  }).catch(function(err) { afficherMessage('Erreur: ' + err); });
 }
 
 function sauvegarderSuccursale() {
   const nom = document.getElementById('new-succursale-nom').value.trim();
   const numero = document.getElementById('new-succursale-numero').value.trim();
   if (!nom || !numero) { afficherMessage('Nom et numéro requis'); return; }
-  google.script.run
-    .withSuccessHandler(function() {
-      afficherMessage('Succursale ajoutée !');
-      document.getElementById('form-succursale').style.display = 'none';
-      document.getElementById('btn-ajouter-succursale').style.display = 'block';
-      document.getElementById('new-succursale-nom').value = '';
-      document.getElementById('new-succursale-numero').value = '';
-      chargerListeRacheter();
-    })
-    .withFailureHandler(function(err) { afficherMessage('Erreur: ' + err); })
-    .ajouterSuccursale(nom, numero);
+  appelBackend('ajouterSuccursale', { nom: nom, numero: numero }).then(function() {
+    afficherMessage('Succursale ajoutée !');
+    document.getElementById('form-succursale').style.display = 'none';
+    document.getElementById('btn-ajouter-succursale').style.display = 'block';
+    document.getElementById('new-succursale-nom').value = '';
+    document.getElementById('new-succursale-numero').value = '';
+    chargerListeRacheter();
+  }).catch(function(err) { afficherMessage('Erreur: ' + err); });
 }
 
 function chargerToutesSuccursales() {
-  google.script.run
-    .withSuccessHandler(function(succursales) {
-      const select = document.getElementById('select-toutes-succursales');
-      if (!select) return;
-      select.innerHTML = '<option value="">Choisir une succursale...</option>';
-      succursales.forEach(function(s) {
-        select.innerHTML += '<option value="' + s.numero + '" data-nom="' + s.ville + ' - ' + s.adresse + '">' + s.ville + ' — ' + s.adresse + '</option>';
-      });
-    })
-    .getToutesSuccursales();
+  appelBackend('getToutesSuccursales').then(function(succursales) {
+    const select = document.getElementById('select-toutes-succursales');
+    if (!select) return;
+    select.innerHTML = '<option value="">Choisir une succursale...</option>';
+    succursales.forEach(function(s) {
+      select.innerHTML += '<option value="' + s.numero + '" data-nom="' + s.ville + ' - ' + s.adresse + '">' + s.ville + ' — ' + s.adresse + '</option>';
+    });
+  }).catch(function(err) { afficherMessage('Erreur: ' + err); });
 }
 
 function remplirSuccursaleSelectionnee() {
@@ -87,19 +78,16 @@ function lancerVerificationGraphQL() {
     if (!codeSAQ) return;
     total++;
 
-    google.script.run
-      .withSuccessHandler(function(dispo) {
-        const badge = card.querySelector('.dispo-badge');
-        if (badge) {
-          badge.textContent = dispo.disponible ? (dispo.quantite ? dispo.quantite + ' btl' : '✓') : '✗';
-          badge.className = dispo.disponible ? 'dispo-badge dispo-badge-oui' : 'dispo-badge dispo-badge-non';
-        }
-        compteur++;
-        status.textContent = 'Vérification... : ' + compteur + '/' + total;
-        if (compteur === total) status.textContent = '✓ Vérification terminée !';
-      })
-      .withFailureHandler(function() { compteur++; })
-      .verifierDispoSAQ_GRAPHQL_V1(codeSAQ, succursale);
+    appelBackend('verifierDispoSAQ_GRAPHQL_V1', { codeSAQ: codeSAQ, succursale: succursale }).then(function(dispo) {
+      const badge = card.querySelector('.dispo-badge');
+      if (badge) {
+        badge.textContent = dispo.disponible ? (dispo.quantite ? dispo.quantite + ' btl' : '✓') : '✗';
+        badge.className = dispo.disponible ? 'dispo-badge dispo-badge-oui' : 'dispo-badge dispo-badge-non';
+      }
+      compteur++;
+      status.textContent = 'Vérification... : ' + compteur + '/' + total;
+      if (compteur === total) status.textContent = '✓ Vérification terminée !';
+    }).catch(function() { compteur++; });
   });
 
   if (total === 0) { afficherMessage('Aucun vin avec code SAQ'); }
@@ -111,21 +99,18 @@ function chargerListeARanger() {
   const div = document.getElementById("aranger-list");
   if (!div) return;
   div.innerHTML = "<p class='text-center p-15 color-muted'>Chargement...</p>";
-  google.script.run
-    .withSuccessHandler(function(data) {
-      ALL_DATA = data || [];
-      afficherListeARanger(ALL_DATA);
-    })
-    .getInventoryData();
+  appelBackend('getInventoryData').then(function(data) {
+    ALL_DATA = data || [];
+    afficherListeARanger(ALL_DATA);
+  }).catch(function(err) { afficherMessage('Erreur: ' + err); });
 }
 
 // ==================== LISTE À COMPLÉTER ====================
 
 function chargerListeACompleter() {
-  google.script.run
-    .withSuccessHandler(function(wines) { afficherListeACompleter(wines); })
-    .withFailureHandler(function(err) { afficherMessage('Erreur de chargement'); })
-    .getScannedWinesIncomplete();
+  appelBackend('getScannedWinesIncomplete').then(function(wines) {
+    afficherListeACompleter(wines);
+  }).catch(function(err) { afficherMessage('Erreur de chargement'); });
 }
 
 function afficherListeACompleter(data) {
@@ -152,13 +137,11 @@ function chargerEmplacements() {
   const div = document.getElementById("emplacements-table");
   if (!div) return;
   div.innerHTML = "<p class='text-center p-15 color-muted'>Chargement...</p>";
-  google.script.run
-    .withSuccessHandler(function(data) {
-      ALL_DATA = data || [];
-      remplirFiltresEmplacements();
-      afficherEmplacements(ALL_DATA);
-    })
-    .getInventoryData();
+  appelBackend('getInventoryData').then(function(data) {
+    ALL_DATA = data || [];
+    remplirFiltresEmplacements();
+    afficherEmplacements(ALL_DATA);
+  }).catch(function(err) { afficherMessage('Erreur: ' + err); });
 }
 
 function remplirFiltresEmplacements() {
@@ -418,17 +401,15 @@ function chargerPromotions() {
   if (!div) return;
   div.innerHTML = "<p class='text-center p-15 color-muted'>Chargement des promotions...</p>";
 
-  google.script.run
-    .withSuccessHandler(function(succursales) {
-      const select = document.getElementById('select-succursale-promo');
-      if (select) {
-        select.innerHTML = '<option value="">Choisir une succursale...</option>';
-        succursales.forEach(function(s) {
-          select.innerHTML += '<option value="' + s.numero + '">' + s.nom + '</option>';
-        });
-      }
-    })
-    .getSuccursales();
+  appelBackend('getSuccursales').then(function(succursales) {
+    const select = document.getElementById('select-succursale-promo');
+    if (select) {
+      select.innerHTML = '<option value="">Choisir une succursale...</option>';
+      succursales.forEach(function(s) {
+        select.innerHTML += '<option value="' + s.numero + '">' + s.nom + '</option>';
+      });
+    }
+  }).catch(function(err) { afficherMessage('Erreur: ' + err); });
 
   const codesSAQ = [];
   ALL_DATA.forEach(function(item) {
@@ -438,14 +419,12 @@ function chargerPromotions() {
     }
   });
 
-  google.script.run
-    .withSuccessHandler(function(promos) {
-      afficherPromotions(promos || []);
-      google.script.run
-        .withSuccessHandler(function(autresPromos) { afficherAutresPromotions(autresPromos || []); })
-        .getToutesPromotionsSAQ(codesSAQ);
-    })
-    .getPromotionsSAQ(codesSAQ);
+  appelBackend('getPromotionsSAQ', { codesSAQ: codesSAQ }).then(function(promos) {
+    afficherPromotions(promos || []);
+    appelBackend('getToutesPromotionsSAQ', { codesSAQ: codesSAQ }).then(function(autresPromos) {
+      afficherAutresPromotions(autresPromos || []);
+    }).catch(function(err) { afficherMessage('Erreur: ' + err); });
+  }).catch(function(err) { afficherMessage('Erreur: ' + err); });
 }
 
 function afficherPromotions(promos) {
@@ -488,19 +467,17 @@ function chargerDispoPromo(codeSAQ) {
   const divDispo = document.getElementById('dispo-promo-' + codeSAQ);
   if (!codeSuccursale || !divDispo) { if (divDispo) divDispo.innerHTML = ''; return; }
 
-  google.script.run
-    .withSuccessHandler(function(result) {
-      if (!divDispo) return;
-      if (result.disponible) {
-        const nomSuccursale = succursales.options[succursales.selectedIndex].text;
-        divDispo.innerHTML = '📍 ' + (result.quantite ? result.quantite + ' bouteilles disponibles à ' + nomSuccursale : 'Disponible à ' + nomSuccursale);
-        divDispo.style.color = '#4caf50';
-      } else {
-        divDispo.innerHTML = '📍 Non disponible à ' + succursales.options[succursales.selectedIndex].text;
-        divDispo.style.color = '#f44336';
-      }
-    })
-    .verifierDispoSAQ_GRAPHQL_V1(codeSAQ, codeSuccursale);
+  appelBackend('verifierDispoSAQ_GRAPHQL_V1', { codeSAQ: codeSAQ, succursale: codeSuccursale }).then(function(result) {
+    if (!divDispo) return;
+    if (result.disponible) {
+      const nomSuccursale = succursales.options[succursales.selectedIndex].text;
+      divDispo.innerHTML = '📍 ' + (result.quantite ? result.quantite + ' bouteilles disponibles à ' + nomSuccursale : 'Disponible à ' + nomSuccursale);
+      divDispo.style.color = '#4caf50';
+    } else {
+      divDispo.innerHTML = '📍 Non disponible à ' + succursales.options[succursales.selectedIndex].text;
+      divDispo.style.color = '#f44336';
+    }
+  }).catch(function(err) { afficherMessage('Erreur: ' + err); });
 }
 
 function rafraichirDispoPromos() {
@@ -518,34 +495,30 @@ function voirSuccursalesPromo(codeSAQ) {
 
   navigator.geolocation.getCurrentPosition(
     function(position) {
-      google.script.run
-        .withSuccessHandler(function(succursales) {
-          if (!succursales || succursales.length === 0) { div.innerHTML = '📍 Aucune succursale disponible'; return; }
-          let html = '';
-          succursales.slice(0, 5).forEach(function(s) {
-            html += '<div style="padding:3px 0;font-size:11px;border-bottom:1px solid rgba(255,255,255,0.05);">';
-            html += '<span style="color:var(--white-70);">' + s.nom + '</span>';
-            html += ' <span style="color:var(--gold);">' + s.quantite + ' btl</span>';
-            html += '</div>';
-          });
-          div.innerHTML = html;
-        })
-        .getSuccursalesDisponibles(codeSAQ, position.coords.latitude, position.coords.longitude);
+      appelBackend('getSuccursalesDisponibles', { codeSAQ: codeSAQ, lat: position.coords.latitude, lng: position.coords.longitude }).then(function(succursales) {
+        if (!succursales || succursales.length === 0) { div.innerHTML = '📍 Aucune succursale disponible'; return; }
+        let html = '';
+        succursales.slice(0, 5).forEach(function(s) {
+          html += '<div style="padding:3px 0;font-size:11px;border-bottom:1px solid rgba(255,255,255,0.05);">';
+          html += '<span style="color:var(--white-70);">' + s.nom + '</span>';
+          html += ' <span style="color:var(--gold);">' + s.quantite + ' btl</span>';
+          html += '</div>';
+        });
+        div.innerHTML = html;
+      }).catch(function() { div.innerHTML = '📍 Erreur'; });
     },
     function() {
-      google.script.run
-        .withSuccessHandler(function(succursales) {
-          if (!succursales || succursales.length === 0) { div.innerHTML = '📍 Aucune succursale disponible'; return; }
-          let html = '';
-          succursales.slice(0, 5).forEach(function(s) {
-            html += '<div style="padding:3px 0;font-size:11px;border-bottom:1px solid rgba(255,255,255,0.05);">';
-            html += '<span style="color:var(--white-70);">' + s.nom + '</span>';
-            html += ' <span style="color:var(--gold);">' + s.quantite + ' btl</span>';
-            html += '</div>';
-          });
-          div.innerHTML = html;
-        })
-        .getSuccursalesDisponibles(codeSAQ);
+      appelBackend('getSuccursalesDisponibles', { codeSAQ: codeSAQ }).then(function(succursales) {
+        if (!succursales || succursales.length === 0) { div.innerHTML = '📍 Aucune succursale disponible'; return; }
+        let html = '';
+        succursales.slice(0, 5).forEach(function(s) {
+          html += '<div style="padding:3px 0;font-size:11px;border-bottom:1px solid rgba(255,255,255,0.05);">';
+          html += '<span style="color:var(--white-70);">' + s.nom + '</span>';
+          html += ' <span style="color:var(--gold);">' + s.quantite + ' btl</span>';
+          html += '</div>';
+        });
+        div.innerHTML = html;
+      }).catch(function() { div.innerHTML = '📍 Erreur'; });
     }
   );
 }
