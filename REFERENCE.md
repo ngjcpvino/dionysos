@@ -1,6 +1,15 @@
 # DIONYSOS — Cahier de charges
 *Dernière mise à jour : 28 février 2026 — migration terminée*
 
+
+## QUI EST L'UTILISATEUR
+
+Claude Idéateur, développeur francophone autodidacte, travaille depuis chez lui.
+Il est infatigable — "abandonner n'est pas dans mon vocabulaire".
+Il préfère les réponses courtes et solutions directes, sans explications inutiles.
+Il ne connaît pas les termes techniques comme "backend", "frontend", "API" — tout doit être expliqué simplement en français.
+Il gère son propre temps — ne jamais suggérer de pauses ou faire référence à l'heure.
+Il est curieux et veut toujours ameliorer ce projet
 ---
 
 ## 1. ARCHITECTURE DU PROJET
