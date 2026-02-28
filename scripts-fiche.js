@@ -11,32 +11,27 @@ function ouvrirFicheVin(codebarre) {
   document.getElementById('fiche-nom').textContent = 'Chargement...';
   document.getElementById('fiche-content').innerHTML = 'Récupération des données...';
 
-  google.script.run
-    .withSuccessHandler(function(result) {
-      if (!result) {
-        fermerFiche();
-        afficherMessage('Vin introuvable ou données pas encore disponibles');
-        return;
-      }
-      afficherFiche(result);
-    })
-    .withFailureHandler(function(err) {
+  appelBackend('getWineBottles', { codebarre: codebarre }).then(function(result) {
+    if (!result) {
       fermerFiche();
-      afficherMessage('Erreur: ' + err);
-    })
-    .getWineBottles(codebarre);
+      afficherMessage('Vin introuvable ou données pas encore disponibles');
+      return;
+    }
+    afficherFiche(result);
+  }).catch(function(err) {
+    fermerFiche();
+    afficherMessage('Erreur: ' + err);
+  });
 }
 
 function ouvrirFicheVinParCodeSAQ(codeSAQ) {
-  google.script.run
-    .withSuccessHandler(function(codebarre) {
-      if (codebarre) {
-        ouvrirFicheVin(codebarre);
-      } else {
-        afficherMessage('Vin introuvable dans la cave');
-      }
-    })
-    .getCodeBarresFromCodeSAQ(codeSAQ);
+  appelBackend('getCodeBarresFromCodeSAQ', { codeSAQ: codeSAQ }).then(function(codebarre) {
+    if (codebarre) {
+      ouvrirFicheVin(codebarre);
+    } else {
+      afficherMessage('Vin introuvable dans la cave');
+    }
+  }).catch(function(err) { afficherMessage('Erreur: ' + err); });
 }
 
 function decodeHTML(html) {
@@ -59,18 +54,15 @@ function afficherFiche(result) {
   }, 50);
 
   if (wine['Code SAQ'] && wine['Code-barres']) {
-    google.script.run
-      .withSuccessHandler(function(prixResult) {
-        if (prixResult && prixResult.updated) {
-          afficherMessage('Prix mis à jour : ' + prixResult.ancienPrix.toFixed(2) + '$ → ' + prixResult.nouveauPrix.toFixed(2) + '$');
-          const prixElements = document.querySelectorAll('.fiche-prix');
-          prixElements.forEach(function(el) {
-            el.textContent = prixResult.nouveauPrix.toFixed(2) + ' $';
-          });
-        }
-      })
-      .withFailureHandler(function(err) {})
-      .verifierEtMettreAJourPrixSAQ(wine['Code-barres'], wine['Code SAQ']);
+    appelBackend('verifierEtMettreAJourPrixSAQ', { codebarre: wine['Code-barres'], codeSAQ: wine['Code SAQ'] }).then(function(prixResult) {
+      if (prixResult && prixResult.updated) {
+        afficherMessage('Prix mis à jour : ' + prixResult.ancienPrix.toFixed(2) + '$ → ' + prixResult.nouveauPrix.toFixed(2) + '$');
+        const prixElements = document.querySelectorAll('.fiche-prix');
+        prixElements.forEach(function(el) {
+          el.textContent = prixResult.nouveauPrix.toFixed(2) + ' $';
+        });
+      }
+    }).catch(function(err) {});
   }
 
   const overlay = document.getElementById('ficheVinOverlay');
@@ -291,7 +283,7 @@ function mettreAJourAffichageAccords() {
   const display = document.getElementById('accords-display');
   display.textContent = selected.length > 0 ? selected.join(', ') : 'Aucun accord sélectionné';
   const accordsStr = selected.join(', ');
-  google.script.run.updateWineField(CURRENT_WINE_CODEBARRE, 'Accords', accordsStr);
+  appelBackend('updateWineField', { codebarre: CURRENT_WINE_CODEBARRE, field: 'Accords', value: accordsStr }).catch(function(err) { afficherMessage('Erreur: ' + err); });
 }
 
 document.addEventListener('click', function(e) {
@@ -316,7 +308,7 @@ function setAime(value) {
     ouiBtn.style.background = 'transparent';
     ouiBtn.style.borderColor = 'rgba(230,161,0,0.3)';
   }
-  google.script.run.updateWineField(CURRENT_WINE_CODEBARRE, 'Racheter', value);
+  appelBackend('updateWineField', { codebarre: CURRENT_WINE_CODEBARRE, field: 'Racheter', value: value }).catch(function(err) { afficherMessage('Erreur: ' + err); });
 }
 
 function togglePanier() {
@@ -325,7 +317,7 @@ function togglePanier() {
   const newValue = isActive ? '' : 'Oui';
   panierBtn.style.background = newValue === 'Oui' ? 'rgba(230,161,0,0.3)' : 'transparent';
   panierBtn.style.borderColor = newValue === 'Oui' ? 'var(--gold)' : 'rgba(230,161,0,0.3)';
-  google.script.run.updateWineField(CURRENT_WINE_CODEBARRE, 'Panier', newValue);
+  appelBackend('updateWineField', { codebarre: CURRENT_WINE_CODEBARRE, field: 'Panier', value: newValue }).catch(function(err) { afficherMessage('Erreur: ' + err); });
 }
 
 // ==================== ÉDITION FICHE ====================
@@ -479,16 +471,13 @@ function saveFiche() {
     divers: document.getElementById('edit-divers').value
   };
 
-  google.script.run
-    .withSuccessHandler(function() {
-      afficherMessage('Modifications sauvegardées !');
-      fermerEditFiche();
-      ouvrirFicheVin(cb);
-    })
-    .withFailureHandler(function(err) {
-      afficherMessage('Erreur: ' + err);
-    })
-    .saveWineEdits(updatedData);
+  appelBackend('saveWineEdits', updatedData).then(function() {
+    afficherMessage('Modifications sauvegardées !');
+    fermerEditFiche();
+    ouvrirFicheVin(cb);
+  }).catch(function(err) {
+    afficherMessage('Erreur: ' + err);
+  });
 }
 
 function confirmerSuppressionBouteille(row, bottle) {
@@ -496,15 +485,12 @@ function confirmerSuppressionBouteille(row, bottle) {
     'Supprimer la bouteille',
     'Supprimer cette bouteille ? Cette action est irréversible.',
     function() {
-      google.script.run
-        .withSuccessHandler(function() {
-          afficherMessage('Bouteille supprimée');
-          fermerEditFiche();
-          ouvrirFicheVin(CURRENT_WINE_CODEBARRE);
-          chargerInventaire();
-        })
-        .withFailureHandler(function(err) { afficherMessage('Erreur: ' + err); })
-        .supprimerBouteille(row, bottle);
+      appelBackend('supprimerBouteille', { row: row, bottle: bottle }).then(function() {
+        afficherMessage('Bouteille supprimée');
+        fermerEditFiche();
+        ouvrirFicheVin(CURRENT_WINE_CODEBARRE);
+        chargerInventaire();
+      }).catch(function(err) { afficherMessage('Erreur: ' + err); });
     }
   );
 }
@@ -556,17 +542,15 @@ function checkEmplacementAdd() {
   const statusDiv = document.getElementById('add-emplacement-status');
   if (!meuble || !rangee || !espace) { statusDiv.innerHTML = ''; statusDiv.setAttribute('data-available', 'true'); return; }
   statusDiv.innerHTML = 'Vérification...';
-  google.script.run
-    .withSuccessHandler(function(result) {
-      if (result.available) {
-        statusDiv.innerHTML = '<span style="color:#4caf50;">✓ Libre</span>';
-        statusDiv.setAttribute('data-available', 'true');
-      } else {
-        statusDiv.innerHTML = '<span style="color:#f44336;">✗ Occupé par : ' + result.message + '</span>';
-        statusDiv.setAttribute('data-available', 'false');
-      }
-    })
-    .checkLocationAvailable(meuble, rangee, espace);
+  appelBackend('checkLocationAvailable', { meuble: meuble, rangee: rangee, espace: espace }).then(function(result) {
+    if (result.available) {
+      statusDiv.innerHTML = '<span style="color:#4caf50;">✓ Libre</span>';
+      statusDiv.setAttribute('data-available', 'true');
+    } else {
+      statusDiv.innerHTML = '<span style="color:#f44336;">✗ Occupé par : ' + result.message + '</span>';
+      statusDiv.setAttribute('data-available', 'false');
+    }
+  }).catch(function(err) { afficherMessage('Erreur: ' + err); });
 }
 
 function confirmerAjoutBouteille() {
@@ -575,15 +559,12 @@ function confirmerAjoutBouteille() {
   const espace = document.getElementById('add-espace').value;
   const statusDiv = document.getElementById('add-emplacement-status');
   if (statusDiv && statusDiv.getAttribute('data-available') === 'false') { afficherMessage('Emplacement occupé'); return; }
-  google.script.run
-    .withSuccessHandler(function() {
-      afficherMessage('Bouteille ajoutée !');
-      annulerAjoutBouteille();
-      ouvrirFicheVin(CURRENT_WINE_CODEBARRE);
-      chargerInventaire();
-    })
-    .withFailureHandler(function(err) { afficherMessage('Erreur: ' + err); })
-    .addBottle({ codebarre: CURRENT_WINE_CODEBARRE, meuble: meuble, rangee: rangee, espace: espace });
+  appelBackend('addBottle', { codebarre: CURRENT_WINE_CODEBARRE, meuble: meuble, rangee: rangee, espace: espace }).then(function() {
+    afficherMessage('Bouteille ajoutée !');
+    annulerAjoutBouteille();
+    ouvrirFicheVin(CURRENT_WINE_CODEBARRE);
+    chargerInventaire();
+  }).catch(function(err) { afficherMessage('Erreur: ' + err); });
 }
 
 function deplacerBouteille(row, bottle) {
@@ -629,15 +610,12 @@ function selectAccordVerre(bottle, note) {
 function confirmDrink(row, bottle) {
   const plat = document.getElementById('drink-plat-' + bottle).value;
   const bonAccord = SELECTED_ACCORD[bottle] || '3';
-  google.script.run
-    .withSuccessHandler(function() {
-      cancelDrink(bottle);
-      delete SELECTED_ACCORD[bottle];
-      ouvrirFicheVin(CURRENT_WINE_CODEBARRE);
-      chargerInventaire();
-    })
-    .withFailureHandler(function(err) { afficherMessage('Erreur: ' + err); })
-    .actionBouteille(row, 'boire', { bottle: bottle, plat: plat, bonAccord: bonAccord });
+  appelBackend('actionBouteille', { row: row, action: 'boire', bottle: bottle, plat: plat, bonAccord: bonAccord }).then(function() {
+    cancelDrink(bottle);
+    delete SELECTED_ACCORD[bottle];
+    ouvrirFicheVin(CURRENT_WINE_CODEBARRE);
+    chargerInventaire();
+  }).catch(function(err) { afficherMessage('Erreur: ' + err); });
 }
 
 function updateRangeesMove(bottle) {
@@ -674,17 +652,15 @@ function checkEmplacementMove(bottle) {
   const statusDiv = document.getElementById('move-status-' + bottle);
   if (!meuble || !rangee || !espace) { statusDiv.innerHTML = ''; return; }
   statusDiv.innerHTML = 'Vérification...';
-  google.script.run
-    .withSuccessHandler(function(result) {
-      if (result.available) {
-        statusDiv.innerHTML = '<span style="color:#4caf50;">✓ Libre</span>';
-        statusDiv.setAttribute('data-available', 'true');
-      } else {
-        statusDiv.innerHTML = '<span style="color:#f44336;">✗ Occupé par : ' + result.message + '</span>';
-        statusDiv.setAttribute('data-available', 'false');
-      }
-    })
-    .checkLocationAvailable(meuble, rangee, espace);
+  appelBackend('checkLocationAvailable', { meuble: meuble, rangee: rangee, espace: espace }).then(function(result) {
+    if (result.available) {
+      statusDiv.innerHTML = '<span style="color:#4caf50;">✓ Libre</span>';
+      statusDiv.setAttribute('data-available', 'true');
+    } else {
+      statusDiv.innerHTML = '<span style="color:#f44336;">✗ Occupé par : ' + result.message + '</span>';
+      statusDiv.setAttribute('data-available', 'false');
+    }
+  }).catch(function(err) { afficherMessage('Erreur: ' + err); });
 }
 
 function confirmMove(row, bottle) {
@@ -692,16 +668,13 @@ function confirmMove(row, bottle) {
   const rangee = document.getElementById('move-rangee-' + bottle).value;
   const espace = document.getElementById('move-espace-' + bottle).value;
   if (!meuble || !rangee || !espace) { afficherMessage('Veuillez remplir tous les champs'); return; }
-  google.script.run
-    .withSuccessHandler(function() {
-      afficherMessage('Bouteille déplacée');
-      cancelMove(bottle);
-      ouvrirFicheVin(CURRENT_WINE_CODEBARRE);
-      chargerInventaire();
-      chargerListeARanger();
-    })
-    .withFailureHandler(function(err) { afficherMessage('Erreur lors du déplacement'); })
-    .actionBouteille(row, 'deplacer', { bottle: bottle, meuble: meuble, rangee: rangee, espace: espace });
+  appelBackend('actionBouteille', { row: row, action: 'deplacer', bottle: bottle, meuble: meuble, rangee: rangee, espace: espace }).then(function() {
+    afficherMessage('Bouteille déplacée');
+    cancelMove(bottle);
+    ouvrirFicheVin(CURRENT_WINE_CODEBARRE);
+    chargerInventaire();
+    chargerListeARanger();
+  }).catch(function(err) { afficherMessage('Erreur lors du déplacement'); });
 }
 
 function mettreARanger(row, bottle) {
@@ -709,15 +682,12 @@ function mettreARanger(row, bottle) {
     'Mettre à ranger',
     'Retirer cet emplacement pour cette bouteille ?',
     function() {
-      google.script.run
-        .withSuccessHandler(function() {
-          afficherMessage('Bouteille mise à ranger');
-          cancelMove(bottle);
-          ouvrirFicheVin(CURRENT_WINE_CODEBARRE);
-          chargerInventaire();
-        })
-        .withFailureHandler(function(err) { afficherMessage('Erreur: ' + err); })
-        .mettreBotteilleARanger(row, bottle);
+      appelBackend('mettreBotteilleARanger', { row: row, bottle: bottle }).then(function() {
+        afficherMessage('Bouteille mise à ranger');
+        cancelMove(bottle);
+        ouvrirFicheVin(CURRENT_WINE_CODEBARRE);
+        chargerInventaire();
+      }).catch(function(err) { afficherMessage('Erreur: ' + err); });
     }
   );
 }
@@ -740,17 +710,11 @@ function chercherSuccursales() {
   navigator.geolocation.getCurrentPosition(
     function(position) {
       div.innerHTML = '<p style="color:var(--white-70);font-size:13px;">Recherche en cours... ~30 secondes</p>';
-      google.script.run
-        .withSuccessHandler(afficherResultatsSuccursales)
-        .withFailureHandler(function(err) { div.innerHTML = '<p style="color:var(--error);">Erreur: ' + err + '</p>'; })
-        .getSuccursalesDisponibles(codeSAQ, position.coords.latitude, position.coords.longitude);
+      appelBackend('getSuccursalesDisponibles', { codeSAQ: codeSAQ, lat: position.coords.latitude, lng: position.coords.longitude }).then(afficherResultatsSuccursales).catch(function(err) { div.innerHTML = '<p style="color:var(--error);">Erreur: ' + err + '</p>'; });
     },
     function() {
       div.innerHTML = '<p style="color:var(--white-70);font-size:13px;">GPS non disponible, recherche depuis Lanoraie...</p>';
-      google.script.run
-        .withSuccessHandler(afficherResultatsSuccursales)
-        .withFailureHandler(function(err) { div.innerHTML = '<p style="color:var(--error);">Erreur: ' + err + '</p>'; })
-        .getSuccursalesDisponibles(codeSAQ);
+      appelBackend('getSuccursalesDisponibles', { codeSAQ: codeSAQ }).then(afficherResultatsSuccursales).catch(function(err) { div.innerHTML = '<p style="color:var(--error);">Erreur: ' + err + '</p>'; });
     }
   );
 }
@@ -810,10 +774,11 @@ function marquerBouteilleBue(row, bottle) {
     'Marquer comme bue',
     'Confirmer que cette bouteille a été bue ?',
     function() {
-      google.script.run
-        .withSuccessHandler(function() { afficherMessage('Santé !'); fermerFiche(); chargerInventaire(); })
-        .withFailureHandler(function(err) { afficherMessage('Erreur: ' + err); })
-        .actionBouteille(row, 'boire', { bottle: bottle });
+      appelBackend('actionBouteille', { row: row, action: 'boire', bottle: bottle }).then(function() {
+        afficherMessage('Santé !');
+        fermerFiche();
+        chargerInventaire();
+      }).catch(function(err) { afficherMessage('Erreur: ' + err); });
     }
   );
 }
