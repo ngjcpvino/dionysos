@@ -65,12 +65,8 @@ body::after {
               center center / cover no-repeat;
   background-size: cover;
   background-position: center;
-  will-change: transform;
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
   z-index: -2;
 }
-
 .view-section::before {
   content: "";
   position: fixed;
