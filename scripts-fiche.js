@@ -398,8 +398,7 @@ function toggleEditMode() {
   if (bottlesActives.length > 0) {
     html += '<h3 class="fiche-section-title" style="margin-top:20px;">SUPPRIMER UNE BOUTEILLE</h3>';
     bottlesActives.forEach(function(b) {
-      const loc = b.meuble && b.rangee && b.espace ? b.meuble.substring(0, 1) + '-' + b.rangee + '-' + b.espace : 'À ranger';
-      html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.08);">';
+      const loc = b.meuble && b.rangee && b.espace ? b.meuble + ' - rangée ' + b.rangee + ' - espace ' + b.espace : 'À ranger';  html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.08);">';
       html += '<span style="font-size:13px;font-weight:300;">' + loc + '</span>';
       html += '<button onclick="confirmerSuppressionBouteille(' + b.row + ',' + b.bottle + ')" style="background:rgba(244,67,54,0.2);border:1px solid #f44336;color:#f44336;padding:6px 12px;cursor:pointer;font-size:12px;">SUPPRIMER</button>';
       html += '</div>';
