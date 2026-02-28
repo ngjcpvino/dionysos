@@ -73,7 +73,7 @@ function mettreAJourStatsAccueil() {
   sorted.forEach(function(entry) {
     const cepage = entry[0];
     const count = entry[1];
-    divCep.innerHTML += '<div onclick="filtrerParCepage(\'' + cepage.replace(/'/g, "\\'") + '\')" class="card-cepage-item"><span>' + cepage + '</span><span class="card-cepage-count">' + count + '</span></div>';
+    divCep.innerHTML += '<div onclick="filtrerParCepage(\'' + cepage.replace(/'/g, "\\'") + '\')" class="card-cepage-item"><span>' + cepage + '</span>'<span class="card-cepage-count">' + count + ' bouteille' + (count > 1 ? 's' : '') + '</span></div>';';
   });
 
   const appellationCounts = {};
@@ -94,7 +94,7 @@ function mettreAJourStatsAccueil() {
   sortedAppellations.forEach(function(entry) {
     const appellation = entry[0];
     const count = entry[1];
-    divApp.innerHTML += '<div onclick="filtrerParAppellation(\'' + appellation.replace(/'/g, "\\'") + '\')" class="card-cepage-item"><span>' + appellation + '</span><span class="card-cepage-count">' + count + '</span></div>';
+    divApp.innerHTML += '<div onclick="filtrerParAppellation(\'' + appellation.replace(/'/g, "\\'") + '\')" class="card-cepage-item"><span>' + appellation + '</span>'<span class="card-cepage-count">' + count + ' bouteille' + (count > 1 ? 's' : '') + '</span></div>';';
   });
 }
 
