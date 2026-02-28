@@ -1,11 +1,11 @@
 # DIONYSOS — Cahier de charges
-*Dernière mise à jour : 27 février 2026*
+*Dernière mise à jour : 28 février 2026*
 
 ---
 
 ## 1. ARCHITECTURE DU PROJET
 
-### Ancienne architecture (Apps Script)
+### Ancienne architecture (Apps Script) — ABANDONNÉE
 | Fichier | Rôle |
 |---|---|
 | Code.gs | Backend — toutes les fonctions serveur |
@@ -17,11 +17,18 @@
 ### Nouvelle architecture (GitHub Pages) — EN COURS
 | Fichier | Rôle |
 |---|---|
-| index.html | Structure HTML (GitHub Pages) |
+| index.html | Structure HTML |
 | styles.css | CSS centralisé — aucun style inline |
-| scripts-config.js | Constantes et fonction appelBackend() |
-| scripts.js | JavaScript frontend |
+| scripts-config.js | Constantes + fonction appelBackend() |
+| scripts-init.js | Variables globales, navigation, menu |
+| scripts-inventaire.js | Inventaire, filtres, stats accueil, historique |
+| scripts-fiche.js | Fiche vin, édition, bouteilles, succursales, utils |
+| scripts-scanner.js | Scanner Quagga, saisie manuelle, popup nouveau vin |
+| scripts-listes.js | Racheter, emplacements, promotions, à compléter |
 | Code.gs | Backend API (Apps Script — inchangé) |
+
+### Ordre de chargement dans index.html
+scripts-config.js → scripts-init.js → scripts-inventaire.js → scripts-fiche.js → scripts-scanner.js → scripts-listes.js
 
 ### Configuration
 | Paramètre | Valeur |
@@ -36,19 +43,34 @@
 
 ---
 
-## 2. RÈGLES ABSOLUES
+## 2. RÈGLES ABSOLUES DU PROJET
 
-- Zéro style en dur — tout passe par des classes CSS dans `styles.css`
+- Zéro style en dur — tout passe par des classes CSS dans styles.css
 - Zéro style inline dans le HTML ou le JS
 - Toujours vérifier si une classe CSS existe avant d'en créer une nouvelle
-- Une seule fonction pour générer les cartes de vin : `genererCardVin(item, options)`
+- Une seule fonction pour générer les cartes de vin : genererCardVin(item, options)
 - Ne jamais créer une deuxième fonction qui fait la même chose qu'une existante
 - Procéder une étape à la fois et attendre un OK avant de passer à la suivante
 - Toujours vérifier l'impact d'un changement sur toutes les pages
+- Avant tout travail de code, lire ce fichier REFERENCE et s'y conformer
 
 ---
 
-## 3. GOOGLE SHEETS — BASE DE DONNÉES
+## 3. PONT ENTRE GITHUB PAGES ET APPS SCRIPT
+
+Tous les appels au backend passent par appelBackend(action, data) définie dans scripts-config.js.
+
+ANCIEN (Apps Script uniquement) :
+  google.script.run.withSuccessHandler(fn).getInventoryData();
+
+NOUVEAU (GitHub Pages) :
+  appelBackend('getInventoryData').then(fn).catch(err => afficherMessage(err));
+
+A FAIRE : Remplacer tous les google.script.run dans les 5 fichiers scripts par des appels appelBackend().
+
+---
+
+## 4. GOOGLE SHEETS — BASE DE DONNÉES
 
 | Onglet | Contenu |
 |---|---|
@@ -59,24 +81,24 @@
 
 ---
 
-## 4. VARIABLES CSS IMPORTANTES
+## 5. VARIABLES CSS IMPORTANTES
 
 | Variable | Valeur |
 |---|---|
-| `--gold` | #c9813c |
-| `--gold-hover` | #C98D4F |
-| `--bg-card` | rgba(0,0,0,0.50) |
-| `--bg-overlay` | rgba(0,0,0,0.85) |
-| `--bg-panel` | rgba(20,20,20,0.95) |
-| `--error` | #f44336 |
-| `--success` | #4caf50 |
-| `--warning` | #ffc107 |
-| `--white-50` | rgba(255,255,255,0.6) |
-| `--white-70` | rgba(255,255,255,0.9) |
+| --gold | #c9813c |
+| --gold-hover | #C98D4F |
+| --bg-card | rgba(0,0,0,0.50) |
+| --bg-overlay | rgba(0,0,0,0.85) |
+| --bg-panel | rgba(20,20,20,0.95) |
+| --error | #f44336 |
+| --success | #4caf50 |
+| --warning | #ffc107 |
+| --white-50 | rgba(255,255,255,0.6) |
+| --white-70 | rgba(255,255,255,0.9) |
 
 ---
 
-## 5. PAGES DE L'APPLICATION
+## 6. PAGES DE L'APPLICATION
 
 | ID de vue | Description |
 |---|---|
@@ -92,82 +114,72 @@
 
 ---
 
-## 6. FONCTIONS BACKEND — Code.gs
+## 7. FONCTIONS BACKEND — Code.gs
 
-Toutes accessibles via `doPost()` avec `appelBackend(action, data)`.
+Toutes accessibles via doPost() avec appelBackend(action, data).
 
 | Fonction | Rôle |
 |---|---|
-| `getInventoryData()` | Retourne toutes les bouteilles de la cave |
-| `getWineBottles(codebarre)` | Retourne les infos d'un vin + ses bouteilles |
-| `addBottle(formData)` | Ajoute une bouteille |
-| `actionBouteille(row, action, detail)` | Boire ou déplacer une bouteille |
-| `saveWineEdits(data)` | Sauvegarde les modifications d'une fiche vin |
-| `updateWineField(codebarre, field, value)` | Met à jour un champ spécifique |
-| `supprimerBouteille(row, bottle)` | Supprime une bouteille |
-| `mettreBotteilleARanger(row, bottle)` | Met une bouteille en statut À ranger |
-| `ajouterVinAvecBouteilles(...)` | Ajoute un nouveau vin avec scraping SAQ |
-| `checkWineExists(code)` | Vérifie si un vin existe par code-barres |
-| `verifierDispoSAQ_GRAPHQL_V1(codeSAQ, succursale)` | Vérifie dispo via GraphQL Adobe |
-| `getPromotionsSAQ(listeCodesSAQ)` | Retourne les promos SAQ pour mes vins |
-| `getToutesPromotionsSAQ(mesCodesSAQ)` | Retourne toutes les promos SAQ |
-| `getSuccursalesDisponibles(codeSAQ, lat, lng)` | Succursales où un vin est dispo |
-| `getSuccursales()` | Retourne les succursales préférées |
-| `getToutesSuccursales()` | Retourne les 401 succursales SAQ |
-| `ajouterSuccursale(nom, numero)` | Ajoute une succursale aux préférées |
-| `getCodeBarresFromCodeSAQ(codeSAQ)` | Retourne le code-barres pour un code SAQ |
-| `getHistorique()` | Retourne l'historique des vins bus |
-| `getConfig()` | Retourne la configuration (meubles, pays, cépages) |
-| `verifierEtMettreAJourPrixSAQ(cb, codeSAQ)` | Vérifie et met à jour le prix SAQ |
+| getInventoryData() | Retourne toutes les bouteilles de la cave |
+| getWineBottles(codebarre) | Retourne les infos d'un vin + ses bouteilles |
+| addBottle(formData) | Ajoute une bouteille |
+| actionBouteille(row, action, detail) | Boire ou déplacer une bouteille |
+| saveWineEdits(data) | Sauvegarde les modifications d'une fiche vin |
+| updateWineField(codebarre, field, value) | Met à jour un champ spécifique |
+| supprimerBouteille(row, bottle) | Supprime une bouteille |
+| mettreBotteilleARanger(row, bottle) | Met une bouteille en statut À ranger |
+| ajouterVinAvecBouteilles(...) | Ajoute un nouveau vin avec scraping SAQ |
+| checkWineExists(code) | Vérifie si un vin existe par code-barres |
+| verifierDispoSAQ_GRAPHQL_V1(codeSAQ, succursale) | Vérifie dispo via GraphQL Adobe |
+| getPromotionsSAQ(listeCodesSAQ) | Retourne les promos SAQ pour mes vins |
+| getToutesPromotionsSAQ(mesCodesSAQ) | Retourne toutes les promos SAQ |
+| getSuccursalesDisponibles(codeSAQ, lat, lng) | Succursales où un vin est dispo |
+| getSuccursales() | Retourne les succursales préférées |
+| getToutesSuccursales() | Retourne les 401 succursales SAQ |
+| ajouterSuccursale(nom, numero) | Ajoute une succursale aux préférées |
+| getCodeBarresFromCodeSAQ(codeSAQ) | Retourne le code-barres pour un code SAQ |
+| getHistorique() | Retourne l'historique des vins bus |
+| getConfig() | Retourne la configuration (meubles, pays, cépages) |
+| verifierEtMettreAJourPrixSAQ(cb, codeSAQ) | Vérifie et met à jour le prix SAQ |
+| getScannedWinesIncomplete() | Retourne les vins scannés sans code SAQ |
+| completeScannedWine(row, codeSAQ) | Complète un vin scanné avec son code SAQ |
 
 ---
 
-## 7. API UTILISÉES
+## 8. API UTILISÉES
 
 ### GraphQL Adobe/SAQ
-- URL : `https://catalog-service.adobe.io/graphql`
-- Clé API : `7a7d7422bd784f2481a047e03a73feaf`
+- URL : https://catalog-service.adobe.io/graphql
+- Clé API : 7a7d7422bd784f2481a047e03a73feaf
 - Usage : Recherche produits, vérification dispo, promotions
 
 ### Store Locator SAQ
-- URL : `https://www.saq.com/fr/store/locator/ajaxlist/context/product/id/{idInterne}`
+- URL : https://www.saq.com/fr/store/locator/ajaxlist/context/product/id/{idInterne}
 - Usage : Succursales disponibles pour un vin, liste complète
 
 ### Scraping SAQ
-- URL : `https://www.saq.com/fr/{codeSAQ}`
+- URL : https://www.saq.com/fr/{codeSAQ}
 - Usage : Récupérer toutes les infos d'un vin
 
 ---
 
-## 8. PROBLÈMES CONNUS
+## 9. ÉTAT DE LA MIGRATION — 28 FÉVRIER 2026
 
-### Scanner caméra — RÉSOLU par migration GitHub Pages
-- Cause : Chrome bloquait l'accès caméra dans les iframes Google Apps Script
-- Solution : GitHub Pages = HTTPS natif = accès caméra autorisé
-
-### Styles en dur — EN COURS DE NETTOYAGE
-- Le HTML et JS d'Apps Script contenaient des styles inline accumulés
-- La migration GitHub Pages est l'occasion de tout centraliser dans `styles.css`
-- Règle : une classe de base pour les éléments similaires, modificateur pour les différences
-
----
-
-## 9. ÉTAT DE LA MIGRATION — 27 FÉVRIER 2026
-
-### Complété ✅
+### Complété
 - Repo GitHub créé : github.com/ngjcpvino/dionysos
 - GitHub Pages activé : https://ngjcpvino.github.io/dionysos/
 - Google Cloud configuré : URL GitHub ajoutée aux origines OAuth2
-- `doPost()` ajouté dans Code.gs — backend testé et fonctionnel
-- Fichiers de base créés : index.html, styles.css, scripts-config.js, scripts.js
-- Structure HTML de base (header, nav, main) en place et visible
+- doPost() ajouté dans Code.gs — backend testé et fonctionnel
+- styles.css créé et uploadé (1200+ lignes, 24 sections)
+- index.html créé avec toute la structure HTML
+- scripts-config.js créé avec appelBackend()
+- JavaScript divisé en 5 modules : scripts-init, scripts-inventaire, scripts-fiche, scripts-scanner, scripts-listes
+- Navigation fonctionnelle sur GitHub Pages
 
-### Prochaines étapes 🔜
-- Transférer et nettoyer `styles.css` depuis Styles.html
-- Transférer et nettoyer `scripts.js` depuis scripts-clean.html
-- Ajouter les vues une par une (accueil en premier)
-- Tester le scanner caméra sur GitHub Pages
-- Implémenter OAuth2 pour l'écriture
+### Prochaine étape prioritaire
+- Uploader scripts-config.js sur GitHub (résout le 404)
+- Remplacer tous les google.script.run dans les 5 fichiers JS par appelBackend()
+- C'est la seule chose qui manque pour que l'app soit pleinement fonctionnelle
 
 ---
 
@@ -193,7 +205,7 @@ Toutes accessibles via `doPost()` avec `appelBackend(action, data)`.
 - À RANGER
 - PROMOTIONS SAQ
 - OUVRIR SAQ
-- 🔄 RAFRAÎCHIR
+- RAFRAÎCHIR
 
 ---
 
