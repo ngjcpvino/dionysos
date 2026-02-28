@@ -1301,7 +1301,7 @@ select option:hover { background-color: rgba(230,161,0,0.3) !important; color: v
    ========================================= */
 .accueil-cave-btn { cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 0; padding: 20px 0; }
 .accueil-cave-label { font-size: 15px; font-weight: 300; letter-spacing: 3px; text-transform: uppercase; color: var(--white); padding-bottom: 10px; }
-.accueil-separator { width: 60%; height: 1px; background: rgba(255,255,255,0.3); margin: 5px 0; }
+.accueil-separator { width: 60%; height: 1px; background: rgba(255,255,255,0.3); margin: 5px auto; }
 .accueil-total-text { font-size: 14px; font-weight: 300; letter-spacing: 2px; color: var(--white-70); padding-top: 10px; }
 
 
@@ -1313,7 +1313,6 @@ select option:hover { background-color: rgba(230,161,0,0.3) !important; color: v
   align-items: center;
   padding: 18px 15px;
   cursor: pointer;
-  border-bottom: 1px solid var(--white-15);
   font-size: 14px;
   font-weight: 300;
   letter-spacing: 2px;
