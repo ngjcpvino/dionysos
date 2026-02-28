@@ -440,7 +440,7 @@ body::after {
 .wine-cepage { color: var(--white-50); font-size: 11px; text-transform: uppercase; font-weight: 300; letter-spacing: 0.5px; }
 .wine-count { font-size: 11px; color: var(--gold); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; white-space: nowrap; }
 .wine-emplacement { font-size: 11px; color: var(--white-60); text-align: right; white-space: nowrap; }
-.wine-emplacement-ranger { font-size: 11px; color: var(--warning); text-align: right; white-space: nowrap; }
+.wine-emplacement-ranger { font-size: 11px; color: var(--white-60); text-align: right; white-space: nowrap; }
 
 /* =========================================
    8. FORMULAIRES UNIFIÉS
