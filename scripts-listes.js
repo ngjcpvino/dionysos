@@ -15,7 +15,7 @@ function chargerListeRacheter() {
     appelBackend('getSuccursales').then(function(succursales) {
       const select = document.getElementById('select-succursale');
       if (select) {
-        select.innerHTML = '<option value="">Choisir une succursale...</option>';
+        select.innerHTML = '<option value="">Choisir une succursale</option>';
         succursales.forEach(function(s) {
           select.innerHTML += '<option value="' + s.numero + '">' + s.nom + '</option>';
         });
@@ -44,7 +44,7 @@ function chargerToutesSuccursales() {
   appelBackend('getToutesSuccursales').then(function(succursales) {
     const select = document.getElementById('select-toutes-succursales');
     if (!select) return;
-    select.innerHTML = '<option value="">Choisir une succursale...</option>';
+    select.innerHTML = '<option value="">Succursales disponibles</option>';
     succursales.forEach(function(s) {
       select.innerHTML += '<option value="' + s.numero + '" data-nom="' + s.ville + ' - ' + s.adresse + '">' + s.ville + ' — ' + s.adresse + '</option>';
     });
@@ -407,7 +407,7 @@ function chargerPromotions() {
   appelBackend('getSuccursales').then(function(succursales) {
     const select = document.getElementById('select-succursale-promo');
     if (select) {
-      select.innerHTML = '<option value="">Choisir une succursale...</option>';
+      select.innerHTML = '<option value="">Choisir une succursale</option>';
       succursales.forEach(function(s) {
         select.innerHTML += '<option value="' + s.numero + '">' + s.nom + '</option>';
       });
@@ -454,7 +454,7 @@ function afficherPromotions(promos) {
       '<div style="background:var(--bg-card);padding:10px;">' +
         '<div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;line-height:1.3;cursor:pointer;" onclick="event.stopPropagation();ouvrirFicheVinParCodeSAQ(\'' + codeSAQ + '\')">' + promo.nom + '</div>' +
         '<div style="margin-bottom:6px;">' + prixHTML + '</div>' +
-        '<div id="dispo-promo-' + codeSAQ + '" style="font-size:11px;color:var(--white-50);margin-bottom:6px;">📍 Choisir une succursale...</div>' +
+        '<div id="dispo-promo-' + codeSAQ + '" style="font-size:11px;color:var(--white-50);margin-bottom:6px;">📍 Choisir une succursale</div>' +
         '<button onclick="event.stopPropagation();voirSuccursalesPromo(\'' + codeSAQ + '\')" style="background:transparent;border:1px solid rgba(201,129,60,0.3);color:var(--white-50);padding:4px 8px;font-size:10px;cursor:pointer;text-transform:uppercase;letter-spacing:0.5px;width:100%;">Toutes les succursales</button>' +
       '</div>';
 
