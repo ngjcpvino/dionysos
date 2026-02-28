@@ -208,7 +208,6 @@ function reinitialiserFiltresEmplacements() {
   document.getElementById('filter-espace-emp').value = "";
   afficherEmplacements(ALL_DATA);
 }
-
 function afficherEmplacements(data) {
   const div = document.getElementById("emplacements-table");
   if (!div) return;
@@ -240,7 +239,7 @@ function afficherEmplacements(data) {
 
     if (multiples.length > 0) {
       let html = '<div class="bloc-niveau-1 mb-20">';
-      html += '<div onclick="basculerVinsMultiples()" class="collapsible-header">';
+      html += '<div onclick="basculerVinsMultiples()" class="accueil-section-item">';
       html += '<span>' + multiples.length + ' vin' + (multiples.length > 1 ? 's' : '') + ' en double ou plus</span>';
       html += '<span id="multiples-arrow">▼</span></div>';
       html += '<div id="vins-multiples-details" class="collapsible-content" style="display:none;">';
@@ -297,28 +296,6 @@ function afficherEmplacements(data) {
 
     const manquants = Object.keys(cepagesAutres).filter(function(c) { return !cepagesCellier.has(c); });
 
-    if (manquants.length > 0) {
-      let html = '<div class="bloc-niveau-1 mb-20">';
-      html += '<div onclick="basculerCepagesManquants()" class="collapsible-header">';
-      html += '<span>' + manquants.length + ' cépage' + (manquants.length > 1 ? 's' : '') + ' manquant' + (manquants.length > 1 ? 's' : '') + ' au ' + meuble + '</span>';
-      html += '<span id="cepages-arrow">▼</span></div>';
-      html += '<div id="cepages-manquants-details" class="collapsible-content" style="display:none;">';
-      manquants.sort().forEach(function(cepage) {
-        const vins = cepagesAutres[cepage];
-        html += '<div style="padding:10px 15px;border-bottom:1px solid rgba(255,255,255,0.08);">';
-        html += '<div style="display:flex;justify-content:space-between;margin-bottom:4px;">';
-        html += '<span class="fs-13 fw-300">' + cepage + '</span>';
-        html += '<span class="color-muted fs-11">' + vins.length + ' bouteille' + (vins.length > 1 ? 's' : '') + '</span>';
-        html += '</div>';
-        vins.forEach(function(vin) {
-          html += '<div onclick="ouvrirFicheVin(\'' + vin.codebarre + '\')" class="fs-12 color-muted" style="padding:2px 0 2px 10px;cursor:pointer;">• ' + vin.nom + '</div>';
-        });
-        html += '</div>';
-      });
-      html += '</div></div>';
-      div.innerHTML += html;
-    }
-
     // Doublons cépages au Cellier
     const cepagesCellierGroupe = {};
     filtered.forEach(function(item) {
@@ -332,28 +309,54 @@ function afficherEmplacements(data) {
     const doublons = Object.entries(cepagesCellierGroupe).filter(function(entry) { return entry[1].length >= 2; })
       .sort(function(a, b) { return b[1].length - a[1].length; });
 
-    if (doublons.length > 0) {
+    if (manquants.length > 0 || doublons.length > 0) {
       let html = '<div class="bloc-niveau-1 mb-20">';
-      html += '<div onclick="basculerDoublonsCepages()" class="collapsible-header">';
-      html += '<span>' + doublons.length + ' cépage' + (doublons.length > 1 ? 's' : '') + ' en double au ' + meuble + '</span>';
-      html += '<span id="doublons-arrow">▼</span></div>';
-      html += '<div id="doublons-cepages-details" class="collapsible-content" style="display:none;">';
-      doublons.forEach(function(entry) {
-        const cepage = entry[0];
-        const vins = entry[1];
-        html += '<div style="padding:10px 15px;border-bottom:1px solid rgba(255,255,255,0.08);">';
-        html += '<div style="display:flex;justify-content:space-between;margin-bottom:6px;">';
-        html += '<span class="fs-13 fw-300">' + cepage + '</span>';
-        html += '<span class="color-muted fs-11">' + vins.length + ' bouteilles</span>';
-        html += '</div>';
-        vins.forEach(function(vin) {
-          const cb = (vin["Code-barres"] || "").toString().trim();
-          const emp = vin.Meuble.substring(0, 1).toUpperCase() + '-' + vin.Rangee + '-' + vin.Espace;
-          html += '<div onclick="ouvrirFicheVin(\'' + cb + '\')" class="fs-12 color-muted" style="padding:2px 0 2px 10px;cursor:pointer;">• ' + vin.Nom + ' <span class="color-muted">(' + emp + ')</span></div>';
+
+      if (manquants.length > 0) {
+        html += '<div onclick="basculerCepagesManquants()" class="accueil-section-item">';
+        html += '<span>' + manquants.length + ' cépage' + (manquants.length > 1 ? 's' : '') + ' manquant' + (manquants.length > 1 ? 's' : '') + ' au ' + meuble + '</span>';
+        html += '<span id="cepages-arrow">▼</span></div>';
+        html += '<div id="cepages-manquants-details" class="collapsible-content" style="display:none;">';
+        manquants.sort().forEach(function(cepage) {
+          const vins = cepagesAutres[cepage];
+          html += '<div style="padding:10px 15px;border-bottom:1px solid rgba(255,255,255,0.08);">';
+          html += '<div style="display:flex;justify-content:space-between;margin-bottom:4px;">';
+          html += '<span class="fs-13 fw-300">' + cepage + '</span>';
+          html += '<span class="color-muted fs-11">' + vins.length + ' bouteille' + (vins.length > 1 ? 's' : '') + '</span>';
+          html += '</div>';
+          vins.forEach(function(vin) {
+            html += '<div onclick="ouvrirFicheVin(\'' + vin.codebarre + '\')" class="fs-12 color-muted" style="padding:2px 0 2px 10px;cursor:pointer;">• ' + vin.nom + '</div>';
+          });
+          html += '</div>';
         });
         html += '</div>';
-      });
-      html += '</div></div>';
+      }
+
+      if (doublons.length > 0) {
+        if (manquants.length > 0) html += '<div class="accueil-separator"></div>';
+        html += '<div onclick="basculerDoublonsCepages()" class="accueil-section-item">';
+        html += '<span>' + doublons.length + ' cépage' + (doublons.length > 1 ? 's' : '') + ' en double au ' + meuble + '</span>';
+        html += '<span id="doublons-arrow">▼</span></div>';
+        html += '<div id="doublons-cepages-details" class="collapsible-content" style="display:none;">';
+        doublons.forEach(function(entry) {
+          const cepage = entry[0];
+          const vins = entry[1];
+          html += '<div style="padding:10px 15px;border-bottom:1px solid rgba(255,255,255,0.08);">';
+          html += '<div style="display:flex;justify-content:space-between;margin-bottom:6px;">';
+          html += '<span class="fs-13 fw-300">' + cepage + '</span>';
+          html += '<span class="color-muted fs-11">' + vins.length + ' bouteilles</span>';
+          html += '</div>';
+          vins.forEach(function(vin) {
+            const cb = (vin["Code-barres"] || "").toString().trim();
+            const emp = vin.Meuble.substring(0, 1).toUpperCase() + '-' + vin.Rangee + '-' + vin.Espace;
+            html += '<div onclick="ouvrirFicheVin(\'' + cb + '\')" class="fs-12 color-muted" style="padding:2px 0 2px 10px;cursor:pointer;">• ' + vin.Nom + ' <span class="color-muted">(' + emp + ')</span></div>';
+          });
+          html += '</div>';
+        });
+        html += '</div>';
+      }
+
+      html += '</div>';
       div.innerHTML += html;
     }
   }
