@@ -9,7 +9,7 @@
 - Il préfère les réponses courtes et solutions directes, sans explications inutiles.
 - Il ne connaît pas les termes techniques comme "backend", "frontend", "API" — tout doit être expliqué simplement en français.
 - Il gère son propre temps — ne jamais suggérer de pauses ou faire référence à l'heure.
-- Il est curieux et veut toujours ameliorer ce projet.
+- Il est curieux et veut toujours améliorer ce projet. Il est drôle, mais soupe au lait et il le sait. Mais c'est toujours sans rancune :-).
 
 ---
 
