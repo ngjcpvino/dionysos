@@ -175,7 +175,7 @@ function appliquerFiltresEmplacements() {
 
     rSel.innerHTML = '<option value="">RANGÉES</option>';
     Array.from(rangees).sort(function(a, b) { return parseInt(a) - parseInt(b); }).forEach(function(r) {
-      rSel.innerHTML += '<option value="' + r + '">RANGÉE - ' + r + '</option>';
+      rSel.innerHTML += '<option value="' + r + '">RANGÉE ' + r + '</option>';
     });
     if (rangee && rangees.has(rangee)) rSel.value = rangee;
     eSel.innerHTML = '<option value="">ESPACES</option>';
@@ -194,7 +194,7 @@ function appliquerFiltresEmplacements() {
 
     eSel.innerHTML = '<option value="">ESPACES</option>';
     Array.from(espaces).sort(function(a, b) { return parseInt(a) - parseInt(b); }).forEach(function(e) {
-      eSel.innerHTML += '<option value="' + e + '">ESPACE - ' + e + '</option>';
+      eSel.innerHTML += '<option value="' + e + '">ESPACE ' + e + '</option>';
     });
     if (espace && espaces.has(espace)) eSel.value = espace;
   }
