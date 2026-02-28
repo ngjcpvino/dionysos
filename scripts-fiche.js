@@ -151,8 +151,7 @@ function afficherFiche(result) {
   } else {
     bottlesActives.forEach(function(b) {
      b.meuble + ' - rangée ' + b.rangee + ' - espace ' + b.espace :
-        b.meuble.substring(0, 1) + '-' + b.rangee + '-' + b.espace :
-        '<span class="bottle-to-arrange">À ranger</span>';
+     '<span class="bottle-to-arrange">À ranger</span>';
 
       html += '<div class="bottle-card">';
       html += '<div class="bottle-card-location">' + loc + '</div>';
