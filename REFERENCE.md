@@ -34,7 +34,7 @@ scripts-config.js → scripts-init.js → scripts-inventaire.js → scripts-fich
 | Paramètre | Valeur |
 |---|---|
 | URL GitHub Pages | https://ngjcpvino.github.io/dionysos/ |
-| URL Apps Script | https://script.google.com/macros/s/AKfycbyYw3vVGtKPgAOxOHrxt9deUchZDiMv0SHFTU08CkgLBFIG_8-qasvVpuTsKxl3RkonGQ/exec |
+| URL Apps Script |https://script.google.com/macros/s/AKfycbxRh6eOQDUy3hXoNNKF6n6gUxhppKB452UqZuPB1mZAC_rzb1jZ5LbPsBuZDH521uq1eA/exec |
 | Spreadsheet ID | 1Y4OCwcb2XBTPDTl_KDUGHgEiXgwqqXHmWSw6XQVSe3g |
 | Clé API lecture | AIzaSyBuennUE5SMN1YkV_38JObgGYj6_aAmTSc |
 | Client ID OAuth2 | 363308093275-13fdbai89mli8bmf8i34ck9nqe5b1eb0.apps.googleusercontent.com |
