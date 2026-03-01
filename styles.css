@@ -134,14 +134,13 @@ body::after {
   justify-content: center;
 }
 
-#btn-nav img {
+.btn-nav img {
   width: 45px; height: 45px;
   filter: brightness(0) invert(1);
   opacity: 0.99;
   transition: opacity 0.2s;
 }
-
-#btn-nav:hover img { opacity: 1; }
+.btn-nav:hover img { opacity: 1; }
 
 /* =========================================
    3. MENU LATÉRAL
