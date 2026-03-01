@@ -90,7 +90,7 @@ body::after {
   width: 100%;
   height: auto;
   padding-top: 20px;
-  padding-bottom: 10px;
+  padding-bottom: 12px;
   z-index: 1000;
   background: transparent;
   text-align: center;
@@ -111,12 +111,12 @@ body::after {
   transition: transform 0.3s ease;
 }
 
-#burger::before { content: "☰"; font-size: 38px; }
+#burger::before { content: "☰"; font-size: 40px; }
 
 #burger.open::before {
   content: "✕";
   color: var(--white);
-  font-size: 45px;
+  font-size: 40px;
   position: absolute;
   left: 0;
 }
@@ -200,7 +200,7 @@ body::after {
   width: 100%;
   margin: 0 auto 20px auto;
   padding: 5px 10px;
-  padding-top: 45px;
+  padding-top: 47px;
   color: var(--white);
   position: relative;
   z-index: 1;
