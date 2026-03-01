@@ -88,6 +88,8 @@ body::after {
 #topNav {
   position: relative;
   width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
   height: auto;
   padding-top: 20px;
   padding-bottom: 25px;
