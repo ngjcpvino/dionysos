@@ -36,6 +36,7 @@ html, body {
   --success: #4caf50;
   --info: #2196f3;
   --warning: #ffc107;
+  --gold-20: rgba(201,129,60,0.2);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -1334,12 +1335,12 @@ select option:hover { background-color: rgba(230,161,0,0.3) !important; color: v
 .accueil-section-item:last-of-type { border-bottom: none; }
 
 .card-cepage-item {
-  padding: 12px 20px;
-  border-bottom: 1px solid rgba(201,129,60,0.2);
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--gold-20);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 300;
   letter-spacing: 1.5px;
   text-transform: uppercase;
