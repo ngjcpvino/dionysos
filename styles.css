@@ -90,7 +90,7 @@ body::after {
   width: 100%;
   height: auto;
   padding-top: 20px;
-  padding-bottom: 12px;
+  padding-bottom: 25px;
   z-index: 1000;
   background: transparent;
   text-align: center;
