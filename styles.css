@@ -38,7 +38,25 @@ html, body {
   --info: #2196f3;
   --warning: #ffc107;
   --menu-width: 280px;
-  --menu-shadow: rgba(0,0,0,0.5);
+  --shadow-sm: rgba(0,0,0,0.3);
+  --shadow-md: rgba(0,0,0,0.5);
+  --shadow-lg: rgba(0,0,0,0.7);
+  --fs-xl: 20px;
+  --fs-lg: 18px;
+  --fs-md: 16px;
+  --fs-base: 14px;
+  --fs-sm: 13px;
+  --fs-xs: 11px;
+  --space-xs: 5px;
+  --space-s: 10px;
+  --space-m: 15px;
+  --space-l: 20px;
+  --space-xl: 25px;
+  --taille-tactile: 44px;
+  --ls-tight: 1px;
+  --ls-normal: 1.5px;
+  --ls-wide: 2px;
+  --ls-wider: 3px;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -157,7 +175,7 @@ body::after {
   transition: left 0.3s ease-out;
   padding-top: 60px;
 }
-.side-menu.open { left: 0; box-shadow: 4px 0 20px var(--menu-shadow); }
+.side-menu.open { left: 0; box-shadow: 4px 0 20px var(--shadow-md); }
 .side-menu a {
   display: block;
   padding: 20px 25px;
