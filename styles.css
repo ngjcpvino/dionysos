@@ -16,6 +16,7 @@ html, body {
   --gold: #c9813c;
   --gold-2: #ffd036;
   --gold-hover: #C98D4F;
+  --gold-20: rgba(201,129,60,0.2);
   --black: #000;
   --white: #fff;
   --white-70: rgba(255,255,255,0.9);
@@ -36,7 +37,8 @@ html, body {
   --success: #4caf50;
   --info: #2196f3;
   --warning: #ffc107;
-  --gold-20: rgba(201,129,60,0.2);
+  --menu-width: 280px;
+  --menu-shadow: rgba(0,0,0,0.5);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -146,20 +148,18 @@ body::after {
    ========================================= */
 .side-menu {
   position: fixed;
-  top: 0; left: -280px;
-  width: 280px; height: 100%;
+  top: 0; left: calc(-1 * var(--menu-width));
+  width: var(--menu-width); height: 100%;
   background: var(--bg-overlay);
   backdrop-filter: blur(8px);
   z-index: 2000;
   transition: left 0.3s ease-out;
   padding-top: 60px;
 }
-
-.side-menu.open { left: 0; box-shadow: 4px 0 20px rgba(0,0,0,0.5); }
-
+.side-menu.open { left: 0; box-shadow: 4px 0 20px var(--menu-shadow); }
 .side-menu a {
   display: block;
-  padding: 15px 25px;
+  padding: 20px 25px;
   color: var(--white);
   text-decoration: none;
   transition: color 0.2s;
