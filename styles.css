@@ -116,7 +116,7 @@ body::after {
 #burger.open::before {
   content: "✕";
   color: var(--white);
-  font-size: 40px;
+  font-size: 45px;
   position: absolute;
   left: 0;
 }
@@ -125,7 +125,7 @@ body::after {
 
 #searchBtn {
   position: absolute;
-  top: 10px; right: -5px;
+  top: 8px; right: -5px;
   padding: 10px 25px;
   cursor: pointer;
   z-index: 5001;
@@ -135,7 +135,7 @@ body::after {
 }
 
 #searchBtn img {
-  width: 42px; height: 42px;
+  width: 45px; height: 45px;
   filter: brightness(0) invert(1);
   opacity: 0.99;
   transition: opacity 0.2s;
