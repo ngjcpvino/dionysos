@@ -433,33 +433,29 @@ function chargerPromotions() {
 function afficherPromotions(promos) {
   const div = document.getElementById('promotions-list');
   if (!div) return;
-div.innerHTML = '<p class="promo-vide">' + promos.length + ' vin' + (promos.length > 1 ? 's' : '') + ' en promotion cette semaine</p>';
-div.innerHTML += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 15px;">';
-
+  div.innerHTML = '<p class="promo-vide">' + promos.length + ' vin' + (promos.length > 1 ? 's' : '') + ' en promotion cette semaine</p>';
+  div.innerHTML += '<div class="promo-grid">';
   promos.forEach(function(promo) {
     const codeSAQ = promo.codeSAQ;
     let prixHTML = '';
     if (promo.rabais > 0) {
-      prixHTML = '<span style="text-decoration:line-through;color:var(--white-50);font-size:11px;">' + promo.prixRegulier.toFixed(2) + '$</span> ';
-      prixHTML += '<span style="color:var(--gold);font-size:13px;font-weight:600;">' + promo.prixFinal.toFixed(2) + '$</span>';
+      prixHTML = '<span class="promo-prix-regulier">' + promo.prixRegulier.toFixed(2) + '$</span> ';
+      prixHTML += '<span class="promo-prix-final">' + promo.prixFinal.toFixed(2) + '$</span>';
     } else {
-      prixHTML = '<span style="color:var(--white);font-size:13px;">' + promo.prixFinal.toFixed(2) + '$</span>';
+      prixHTML = '<span class="promo-prix-final">' + promo.prixFinal.toFixed(2) + '$</span>';
     }
     if (promo.pointsBonis > 0) {
-      prixHTML += ' <span style="color:var(--gold);font-size:11px;">' + promo.pointsBonis + ' pts</span>';
+      prixHTML += ' <span class="promo-card-pts">' + promo.pointsBonis + ' pts</span>';
     }
-
     div.innerHTML +=
-      '<div style="background:var(--bg-card);padding:10px;">' +
-        '<div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;line-height:1.3;cursor:pointer;" onclick="event.stopPropagation();ouvrirFicheVinParCodeSAQ(\'' + codeSAQ + '\')">' + promo.nom + '</div>' +
-        '<div style="margin-bottom:6px;">' + prixHTML + '</div>' +
-        '<div id="dispo-promo-' + codeSAQ + '" style="font-size:11px;color:var(--white-50);margin-bottom:6px;">📍 Choisir une succursale</div>' +
-        '<button onclick="event.stopPropagation();voirSuccursalesPromo(\'' + codeSAQ + '\')" style="background:transparent;border:1px solid rgba(201,129,60,0.3);color:var(--white-50);padding:4px 8px;font-size:10px;cursor:pointer;text-transform:uppercase;letter-spacing:0.5px;width:100%;">Toutes les succursales</button>' +
+      '<div class="promo-card">' +
+        '<div class="promo-card-nom" onclick="event.stopPropagation();ouvrirFicheVinParCodeSAQ(\'' + codeSAQ + '\')">' + promo.nom + '</div>' +
+        '<div class="promo-card-prix">' + prixHTML + '</div>' +
+        '<div id="dispo-promo-' + codeSAQ + '" class="promo-dispo">📍 Choisir une succursale</div>' +
+        '<button onclick="event.stopPropagation();voirSuccursalesPromo(\'' + codeSAQ + '\')" class="promo-btn-succursales">Toutes les succursales</button>' +
       '</div>';
-
     chargerDispoPromo(codeSAQ);
   });
-
   div.innerHTML += '</div>';
 }
 
@@ -474,13 +470,23 @@ function chargerDispoPromo(codeSAQ) {
     if (result.disponible) {
       const nomSuccursale = succursales.options[succursales.selectedIndex].text;
       divDispo.innerHTML = '📍 ' + (result.quantite ? result.quantite + ' bouteilles disponibles à ' + nomSuccursale : 'Disponible à ' + nomSuccursale);
-      divDispo.style.color = '#4caf50';
+      divDispo.classList.remove('promo-dispo-non');
+      divDispo.classList.add('promo-dispo-ok');
     } else {
       divDispo.innerHTML = '📍 Non disponible à ' + succursales.options[succursales.selectedIndex].text;
-      divDispo.style.color = '#f44336';
+      divDispo.classList.remove('promo-dispo-ok');
+      divDispo.classList.add('promo-dispo-non');
     }
   }).catch(function(err) { afficherMessage('Erreur: ' + err); });
 }
+
+
+
+
+
+
+
+
 
 function rafraichirDispoPromos() {
   const cards = document.querySelectorAll('[id^="dispo-promo-"]');
@@ -495,35 +501,33 @@ function voirSuccursalesPromo(codeSAQ) {
   if (!div) return;
   div.innerHTML = '📍 Recherche en cours...';
 
+  function afficherSuccursales(succursales) {
+    if (!succursales || succursales.length === 0) { div.innerHTML = '📍 Aucune succursale disponible'; return; }
+    let html = '';
+    succursales.slice(0, 5).forEach(function(s) {
+      html += '<div class="promo-succursale-item">' +
+        '<span class="color-muted">' + s.nom + '</span>' +
+        ' <span class="color-primary">' + s.quantite + ' btl</span>' +
+        '</div>';
+    });
+    div.innerHTML = html;
+  }
+
   navigator.geolocation.getCurrentPosition(
     function(position) {
-      appelBackend('getSuccursalesDisponibles', { codeSAQ: codeSAQ, lat: position.coords.latitude, lng: position.coords.longitude }).then(function(succursales) {
-        if (!succursales || succursales.length === 0) { div.innerHTML = '📍 Aucune succursale disponible'; return; }
-        let html = '';
-        succursales.slice(0, 5).forEach(function(s) {
-          html += '<div style="padding:3px 0;font-size:11px;border-bottom:1px solid rgba(255,255,255,0.05);">';
-          html += '<span style="color:var(--white-70);">' + s.nom + '</span>';
-          html += ' <span style="color:var(--gold);">' + s.quantite + ' btl</span>';
-          html += '</div>';
-        });
-        div.innerHTML = html;
-      }).catch(function() { div.innerHTML = '📍 Erreur'; });
+      appelBackend('getSuccursalesDisponibles', { codeSAQ: codeSAQ, lat: position.coords.latitude, lng: position.coords.longitude })
+        .then(afficherSuccursales)
+        .catch(function() { div.innerHTML = '📍 Erreur'; });
     },
     function() {
-      appelBackend('getSuccursalesDisponibles', { codeSAQ: codeSAQ }).then(function(succursales) {
-        if (!succursales || succursales.length === 0) { div.innerHTML = '📍 Aucune succursale disponible'; return; }
-        let html = '';
-        succursales.slice(0, 5).forEach(function(s) {
-          html += '<div style="padding:3px 0;font-size:11px;border-bottom:1px solid rgba(255,255,255,0.05);">';
-          html += '<span style="color:var(--white-70);">' + s.nom + '</span>';
-          html += ' <span style="color:var(--gold);">' + s.quantite + ' btl</span>';
-          html += '</div>';
-        });
-        div.innerHTML = html;
-      }).catch(function() { div.innerHTML = '📍 Erreur'; });
+      appelBackend('getSuccursalesDisponibles', { codeSAQ: codeSAQ })
+        .then(afficherSuccursales)
+        .catch(function() { div.innerHTML = '📍 Erreur'; });
     }
   );
 }
+
+
 
 function afficherAutresPromotions(promos) {
   const div = document.getElementById('promotions-list');
