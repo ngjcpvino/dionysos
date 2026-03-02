@@ -17,6 +17,11 @@ html, body {
   --gold-2: #ffd036;
   --gold-hover: #C98D4F;
   --gold-20: rgba(201,129,60,0.2);
+  --gold-30: rgba(201,129,60,0.3);
+  --gold-40: rgba(201,129,60,0.4);
+  --gold-50: rgba(201,129,60,0.5);
+  --gold-60: rgba(201,129,60,0.6);
+  --gold-70: rgba(201,129,60,0.7);
   --black: #000;
   --white: #fff;
   --white-70: rgba(255,255,255,0.9);
@@ -58,7 +63,10 @@ html, body {
   --ls-normal: 1.5px;
   --ls-wide: 2px;
   --ls-wider: 3px;
-}
+  --fw-light: 300;
+  --fw-normal: 400;
+  --fw-bold: 600;
+ }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -1471,3 +1479,57 @@ select option:hover { background-color: rgba(230,161,0,0.3) !important; color: v
   color: var(--white-70);
   text-align: center;
 }
+
+/* =========================================
+   PROMOTIONS
+   ========================================= */
+.promo-item {
+  padding: var(--space-m) 0;
+  border-bottom: 1px solid var(--white-10);
+  cursor: pointer;
+}
+
+.promo-item:last-child { border-bottom: none; }
+
+.promo-nom {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  margin-bottom: var(--space-xs);
+}
+
+.promo-prix-regulier {
+  text-decoration: line-through;
+  color: var(--white-50);
+  font-size: var(--fs-xs);
+}
+
+.promo-prix-final {
+  color: var(--gold);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-bold);
+}
+
+.promo-rabais {
+  color: var(--success);
+  font-size: var(--fs-xs);
+}
+
+.promo-couleur {
+  color: var(--white-50);
+  font-size: var(--fs-xs);
+}
+
+.promo-filtres {
+  display: flex;
+  gap: var(--space-s);
+  margin-bottom: var(--space-m);
+}
+
+.promo-vide {
+  color: var(--white-50);
+  font-size: var(--fs-sm);
+  text-align: center;
+  padding: var(--space-m);
+}
+
