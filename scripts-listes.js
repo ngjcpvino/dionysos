@@ -535,10 +535,10 @@ function afficherAutresPromotions(promos) {
   html += '<span id="autres-promos-arrow">▼</span></div>';
   html += '<div id="autres-promos-details" class="collapsible-content" style="display:none;">';
   html += '<div class="promo-filtres">';
-  html += '<select id="filtre-couleur-promo" onchange="filtrerAutresPromos()" class="filter-select" style="border:1px solid var(--gold-30);">';
+  html += '<select id="filtre-couleur-promo" onchange="filtrerAutresPromos()" class="filter-select filter-select-bordered">';
   html += '<option value="">Toutes couleurs</option><option value="Rouge">Rouge</option><option value="Blanc">Blanc</option><option value="Rosé">Rosé</option>';
   html += '</select>';
-  html += '<select id="filtre-prix-promo" onchange="filtrerAutresPromos()" class="filter-select" style="border:1px solid var(--gold-30);">';
+  html += '<select id="filtre-prix-promo" onchange="filtrerAutresPromos()" class="filter-select filter-select-bordered">';
   html += '<option value="">Tous prix</option><option value="15">Moins de 15$</option><option value="25">15$ à 25$</option><option value="99">25$+</option>';
   html += '</select>';
   html += '</div>';
