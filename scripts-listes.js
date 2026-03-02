@@ -529,25 +529,26 @@ function voirSuccursalesPromo(codeSAQ) {
 function afficherAutresPromotions(promos) {
   const div = document.getElementById('promotions-list');
   if (!div || promos.length === 0) return;
-
-  let html = '<div style="margin-top:20px;background:rgba(0,0,0,0.4);padding:15px;">';
-  html += '<div onclick="basculerAutresPromos()" class="collapsible-header">DÉCOUVRIR D\'AUTRES VINS EN PROMOTION (' + promos.length + ')<span id="autres-promos-arrow">▼</span></div>';
-  html += '<div id="autres-promos-details" style="display:none;margin-top:10px;">';
-  html += '<div style="display:flex;gap:10px;margin-bottom:15px;">';
-  html += '<select id="filtre-couleur-promo" onchange="filtrerAutresPromos()" class="filter-select" style="flex:1;border:1px solid rgba(201,129,60,0.3);">';
+  let html = '<div class="bloc-niveau-1 mt-20">';
+  html += '<div onclick="basculerAutresPromos()" class="accueil-section-item">';
+  html += '<span>DÉCOUVRIR D\'AUTRES VINS EN PROMOTION (' + promos.length + ')</span>';
+  html += '<span id="autres-promos-arrow">▼</span></div>';
+  html += '<div id="autres-promos-details" class="collapsible-content" style="display:none;">';
+  html += '<div class="promo-filtres">';
+  html += '<select id="filtre-couleur-promo" onchange="filtrerAutresPromos()" class="filter-select" style="border:1px solid var(--gold-30);">';
   html += '<option value="">Toutes couleurs</option><option value="Rouge">Rouge</option><option value="Blanc">Blanc</option><option value="Rosé">Rosé</option>';
   html += '</select>';
-  html += '<select id="filtre-prix-promo" onchange="filtrerAutresPromos()" class="filter-select" style="flex:1;border:1px solid rgba(201,129,60,0.3);">';
+  html += '<select id="filtre-prix-promo" onchange="filtrerAutresPromos()" class="filter-select" style="border:1px solid var(--gold-30);">';
   html += '<option value="">Tous prix</option><option value="15">Moins de 15$</option><option value="25">15$ à 25$</option><option value="99">25$+</option>';
   html += '</select>';
   html += '</div>';
   html += '<div id="autres-promos-liste"></div>';
   html += '</div></div>';
-
   div.innerHTML += html;
   window.AUTRES_PROMOS = promos;
   filtrerAutresPromos();
 }
+
 
 function basculerAutresPromos() {
   const details = document.getElementById('autres-promos-details');
@@ -561,28 +562,25 @@ function filtrerAutresPromos() {
   const prix = document.getElementById('filtre-prix-promo').value;
   const liste = document.getElementById('autres-promos-liste');
   if (!liste) return;
-
   let filtered = window.AUTRES_PROMOS || [];
   if (couleur) filtered = filtered.filter(function(p) { return p.couleur === couleur; });
   if (prix === '15') filtered = filtered.filter(function(p) { return p.prixFinal < 15; });
   if (prix === '25') filtered = filtered.filter(function(p) { return p.prixFinal >= 15 && p.prixFinal <= 25; });
   if (prix === '99') filtered = filtered.filter(function(p) { return p.prixFinal > 25; });
-
   liste.innerHTML = '';
   filtered.forEach(function(promo) {
     liste.innerHTML +=
-      '<div style="padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.08);cursor:pointer;" onclick="window.open(\'https://www.saq.com/fr/' + promo.codeSAQ + '\', \'_blank\')">' +
-        '<div style="font-size:13px;font-weight:600;text-transform:uppercase;margin-bottom:5px;">' + promo.nom + '</div>' +
+      '<div class="promo-item" onclick="window.open(\'https://www.saq.com/fr/' + promo.codeSAQ + '\', \'_blank\')">' +
+        '<div class="promo-nom">' + promo.nom + '</div>' +
         '<div>' +
-          '<span style="text-decoration:line-through;color:var(--white-50);font-size:12px;">' + promo.prixRegulier.toFixed(2) + '$</span> ' +
-          '<span style="color:var(--gold);font-size:14px;font-weight:600;">' + promo.prixFinal.toFixed(2) + '$</span> ' +
-          '<span style="color:#4caf50;font-size:11px;">(-' + promo.rabais.toFixed(2) + '$)</span>' +
-          (promo.couleur ? ' <span style="color:var(--white-50);font-size:11px;">• ' + promo.couleur + '</span>' : '') +
+          '<span class="promo-prix-regulier">' + promo.prixRegulier.toFixed(2) + '$</span> ' +
+          '<span class="promo-prix-final">' + promo.prixFinal.toFixed(2) + '$</span> ' +
+          '<span class="promo-rabais">(-' + promo.rabais.toFixed(2) + '$)</span>' +
+          (promo.couleur ? '<span class="promo-couleur"> • ' + promo.couleur + '</span>' : '') +
         '</div>' +
       '</div>';
   });
-
   if (filtered.length === 0) {
-    liste.innerHTML = '<p style="color:var(--white-50);font-size:13px;text-align:center;padding:15px;">Aucun résultat</p>';
+    liste.innerHTML = '<p class="promo-vide">Aucun résultat</p>';
   }
 }
