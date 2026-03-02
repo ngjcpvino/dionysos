@@ -1537,4 +1537,55 @@ select option:hover { background-color: rgba(230,161,0,0.3) !important; color: v
   text-align: center;
   padding: var(--space-m);
 }
+.promo-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-s);
+  padding: 0 var(--space-m);
+}
 
+.promo-card {
+  background: var(--bg-card);
+  padding: var(--space-s);
+}
+
+.promo-card-nom {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+  line-height: 1.3;
+  cursor: pointer;
+}
+
+.promo-card-prix { margin-bottom: var(--space-s); }
+
+.promo-card-pts { color: var(--gold); font-size: var(--fs-xs); }
+
+.promo-dispo {
+  font-size: var(--fs-xs);
+  color: var(--white-50);
+  margin-bottom: var(--space-s);
+}
+
+.promo-dispo-ok { color: var(--success); }
+.promo-dispo-non { color: var(--error); }
+
+.promo-btn-succursales {
+  background: transparent;
+  border: 1px solid var(--gold-30);
+  color: var(--white-50);
+  padding: 4px var(--space-s);
+  font-size: var(--fs-xs);
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  width: 100%;
+}
+
+.promo-succursale-item {
+  padding: 3px 0;
+  font-size: var(--fs-xs);
+  border-bottom: 1px solid var(--white-05);
+}
