@@ -1492,7 +1492,14 @@ select option:hover { background-color: rgba(230,161,0,0.3) !important; color: v
   padding: var(--space-m) 0;
   border-bottom: 1px solid var(--white-10);
   cursor: pointer;
+  border-left: 4px solid var(--white-15);
+  padding-left: var(--space-s);
 }
+
+.promo-item.rouge  { border-left-color: #8B0000; }
+.promo-item.blanc  { border-left-color: #f7f6da; }
+.promo-item.rose   { border-left-color: #FFC0CB; }
+.promo-item.bulles { border-left-color: #00ced1; }
 
 .promo-item:last-child { border-bottom: none; }
 
