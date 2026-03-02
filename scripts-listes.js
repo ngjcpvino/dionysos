@@ -433,9 +433,8 @@ function chargerPromotions() {
 function afficherPromotions(promos) {
   const div = document.getElementById('promotions-list');
   if (!div) return;
-
-  div.innerHTML = '<p style="font-size:12px;color:var(--white-50);text-align:center;margin-bottom:15px;">' + promos.length + ' vin' + (promos.length > 1 ? 's' : '') + ' en promotion cette semaine</p>';
-  div.innerHTML += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 15px;">';
+div.innerHTML = '<p class="promo-vide">' + promos.length + ' vin' + (promos.length > 1 ? 's' : '') + ' en promotion cette semaine</p>';
+div.innerHTML += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 15px;">';
 
   promos.forEach(function(promo) {
     const codeSAQ = promo.codeSAQ;
