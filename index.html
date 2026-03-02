@@ -119,17 +119,15 @@
     <div id="racheter-list" class="mt-20"></div>
   </section>
 
-  <section id="view-promotions" class="view-section">
+ <section id="view-promotions" class="view-section">
     <div class="page-header">
       <h1 class="page-title">PROMOTIONS SAQ</h1>
       <button onclick="changeView('accueil')" class="btn-close-form">&#x2715;</button>
     </div>
-    <div class="filter-container">
-      <div class="filter-row">
-        <select id="select-succursale-promo" onchange="rafraichirDispoPromos()" class="filter-select-gros">
-        <option value="">Succursales disponibles</option>
-        </select>
-      </div>
+    <div class="bloc-niveau-1">
+      <select id="select-succursale-promo" onchange="rafraichirDispoPromos()" class="filter-select-gros filter-select-gros-centre">
+        <option value="">Choisir une succursale</option>
+      </select>
     </div>
     <div id="promotions-list" class="mt-20"></div>
   </section>
