@@ -394,6 +394,11 @@ body::after {
   font-weight: 300;
 }
 
+.filter-select-bordered {
+  border: 1px solid var(--gold-30);
+}
+
+
 .filter-select option { font-size: var(--fs-xs); background: #1a1a1a; color: #fff; }
 .filter-select::-webkit-scrollbar { display: none; }
 
