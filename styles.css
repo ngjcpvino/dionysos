@@ -1492,7 +1492,7 @@ select option:hover { background-color: rgba(230,161,0,0.3) !important; color: v
   padding: var(--space-m) 0;
   border-bottom: 1px solid var(--white-10);
   cursor: pointer;
-  border-left: 4px solid var(--white-15);
+  border-left: 1px solid var(--white-15);
   padding-left: var(--space-s);
 }
 
