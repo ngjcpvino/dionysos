@@ -527,22 +527,21 @@ function voirSuccursalesPromo(codeSAQ) {
   );
 }
 
-
-
 function afficherAutresPromotions(promos) {
-  const div = document.getElementById('promotions-list');
+  const div = document.getElementById('autres-promos-container');
   if (!div || promos.length === 0) return;
-  let html = '<div class="bloc-niveau-1 mt-20">';
-  html += '<div onclick="basculerAutresPromos()" class="accueil-section-item">';
+  let html = '<div onclick="basculerAutresPromos()" class="accueil-section-item">';
   html += '<span>DÉCOUVRIR D\'AUTRES VINS EN PROMOTION (' + promos.length + ')</span>';
   html += '<span id="autres-promos-arrow">▼</span></div>';
   html += '<div id="autres-promos-details" class="collapsible-content" style="display:none;">';
   html += '<div id="autres-promos-liste"></div>';
-  html += '</div></div>';
-  div.innerHTML += html;
+  html += '</div>';
+  div.innerHTML = html;
   window.AUTRES_PROMOS = promos;
   filtrerAutresPromos();
 }
+
+
 
 function basculerAutresPromos() {
   const details = document.getElementById('autres-promos-details');
