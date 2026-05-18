@@ -387,13 +387,15 @@ function afficherCartes(data) {
     return;
   }
 
+  const htmlParts = [];
   sorted.forEach(function(group) {
     if (!group.hasCodeBarre) {
-      div.innerHTML += genererCardVin(group.wine, { avertissement: true, clickable: false });
+      htmlParts.push(genererCardVin(group.wine, { avertissement: true, clickable: false }));
     } else {
-      div.innerHTML += genererCardVin(group.wine, { count: group.count, emplacements: group.emplacements });
+      htmlParts.push(genererCardVin(group.wine, { count: group.count, emplacements: group.emplacements }));
     }
   });
+  div.innerHTML = htmlParts.join('');
 }
 
 // ==================== LISTE À RANGER ====================
@@ -426,10 +428,11 @@ function afficherListeARanger(data) {
     return valA !== valB ? valA - valB : (a.wine.Nom || '').localeCompare(b.wine.Nom || '');
   });
 
-  div.innerHTML = "";
+  const htmlParts = [];
   sorted.forEach(function(group) {
-    div.innerHTML += genererCardVin(group.wine, { count: group.count });
+    htmlParts.push(genererCardVin(group.wine, { count: group.count }));
   });
+  div.innerHTML = htmlParts.join('');
 }
 
 // ==================== LISTE D'ACHAT ====================
@@ -463,10 +466,11 @@ function afficherListeRacheter(data) {
     return valA !== valB ? valA - valB : a.wine.Nom.localeCompare(b.wine.Nom);
   });
 
-  div.innerHTML = "";
+  const htmlParts = [];
   sorted.forEach(function(group) {
-    div.innerHTML += genererCardVin(group.wine, { badge: '...', count: group.count > 0 ? group.count : undefined });
+    htmlParts.push(genererCardVin(group.wine, { badge: '...', count: group.count > 0 ? group.count : undefined }));
   });
+  div.innerHTML = htmlParts.join('');
 }
 
 // ==================== HISTORIQUE ====================
@@ -512,9 +516,10 @@ function afficherHistorique(data) {
     grouped[cb].mets.push({ plat: item.plat || '', date: item.date || '', note: parseInt(item.bonAccord) || 0 });
   });
 
-  div.innerHTML = "";
+  const htmlParts = [];
   Object.values(grouped).forEach(function(vin) {
     const fakeItem = { Nom: vin.nom, Couleur: vin.couleur, 'Code-barres': vin.codebarre };
-    div.innerHTML += genererCardVin(fakeItem, { mets: vin.mets });
+    htmlParts.push(genererCardVin(fakeItem, { mets: vin.mets }));
   });
+  div.innerHTML = htmlParts.join('');
 }

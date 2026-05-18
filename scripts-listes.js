@@ -35,6 +35,7 @@ function chargerListeRacheter() {
   }).catch(function(err) { afficherMessage('Erreur: ' + err); });
 }
 
+
 function sauvegarderSuccursale() {
   const nom = document.getElementById('new-succursale-nom').value.trim();
   const numero = document.getElementById('new-succursale-numero').value.trim();
@@ -388,10 +389,12 @@ function afficherEmplacements(data) {
     return (parseInt(a.Espace) || 0) - (parseInt(b.Espace) || 0);
   });
 
+  const htmlParts = [];
   filtered.forEach(function(item) {
     const emp = item.Meuble.substring(0, 1).toUpperCase() + '-' + item.Rangee + '-' + item.Espace;
-    div.innerHTML += genererCardVin(item, { emplacements: [emp] });
+    htmlParts.push(genererCardVin(item, { emplacements: [emp] }));
   });
+  div.innerHTML += htmlParts.join('');
 }
 
 function basculerCepagesManquants() {
