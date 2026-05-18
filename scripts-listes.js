@@ -580,10 +580,14 @@ function filtrerAutresPromos() {
   const liste = document.getElementById('autres-promos-liste');
   if (!liste) return;
   const filtered = window.AUTRES_PROMOS || [];
-  liste.innerHTML = '';
+  if (filtered.length === 0) {
+    liste.innerHTML = '<p class="promo-vide">Aucun résultat</p>';
+    return;
+  }
+  const htmlParts = [];
   filtered.forEach(function(promo) {
     const couleurClass = promo.couleur === 'Rouge' ? 'rouge' : promo.couleur === 'Blanc' ? 'blanc' : promo.couleur === 'Rosé' ? 'rose' : promo.couleur === 'Effervescent' ? 'bulles' : '';
-    liste.innerHTML +=
+    htmlParts.push(
       '<div class="promo-item ' + couleurClass + '" onclick="window.open(\'https://www.saq.com/fr/' + promo.codeSAQ + '\', \'_blank\')">' +
         '<div class="promo-nom">' + promo.nom + '</div>' +
         (promo.pays ? '<div class="promo-couleur">' + promo.pays + (promo.cepage ? ' • ' + promo.cepage : '') + '</div>' : '') +
@@ -593,9 +597,8 @@ function filtrerAutresPromos() {
           '<span class="promo-rabais">(-' + promo.rabais.toFixed(2) + '$)</span>' +
           (promo.pointsBonis > 0 ? ' <span class="promo-card-pts">' + promo.pointsBonis + ' pts</span>' : '') +
         '</div>' +
-      '</div>';
+      '</div>'
+    );
   });
-  if (filtered.length === 0) {
-    liste.innerHTML = '<p class="promo-vide">Aucun résultat</p>';
-  }
+  liste.innerHTML = htmlParts.join('');
 }
