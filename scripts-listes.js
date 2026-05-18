@@ -98,6 +98,10 @@ function lancerVerificationGraphQL() {
 function chargerListeARanger() {
   const div = document.getElementById("aranger-list");
   if (!div) return;
+  if (ALL_DATA && ALL_DATA.length > 0) {
+    afficherListeARanger(ALL_DATA);
+    return;
+  }
   div.innerHTML = "<p class='text-center p-15 color-muted'>Chargement...</p>";
   appelBackend('getInventoryData').then(function(data) {
     ALL_DATA = data || [];
