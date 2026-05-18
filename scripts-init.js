@@ -49,9 +49,28 @@ function changeView(viewName) {
   titleNav.textContent = titresVues[viewName] || '';
 
   if (viewName === 'liste') {
-    chargerInventaire();
-    if (!FILTRE_CEPAGE_EN_ATTENTE && !RESULTATS_RECHERCHE_EN_ATTENTE) {
-      reinitialiserFiltres();
+    if (ALL_DATA && ALL_DATA.length > 0) {
+      afficherCartes(ALL_DATA);
+      remplirFiltres(ALL_DATA);
+      if (FILTRE_CEPAGE_EN_ATTENTE) {
+        document.getElementById('filter-cepage').value = FILTRE_CEPAGE_EN_ATTENTE;
+        FILTRE_CEPAGE_EN_ATTENTE = null;
+        appliquerFiltres();
+      } else if (FILTRE_APPELLATION_EN_ATTENTE) {
+        document.getElementById('filter-appellation').value = FILTRE_APPELLATION_EN_ATTENTE;
+        FILTRE_APPELLATION_EN_ATTENTE = null;
+        appliquerFiltres();
+      } else if (RESULTATS_RECHERCHE_EN_ATTENTE) {
+        afficherCartes(RESULTATS_RECHERCHE_EN_ATTENTE);
+        RESULTATS_RECHERCHE_EN_ATTENTE = null;
+      } else {
+        reinitialiserFiltres();
+      }
+    } else {
+      chargerInventaire();
+      if (!FILTRE_CEPAGE_EN_ATTENTE && !RESULTATS_RECHERCHE_EN_ATTENTE) {
+        reinitialiserFiltres();
+      }
     }
   }
   if (viewName === 'racheter') chargerListeRacheter();
