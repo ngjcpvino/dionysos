@@ -140,6 +140,11 @@ function afficherListeACompleter(data) {
 function chargerEmplacements() {
   const div = document.getElementById("emplacements-table");
   if (!div) return;
+  if (ALL_DATA && ALL_DATA.length > 0) {
+    remplirFiltresEmplacements();
+    afficherEmplacements(ALL_DATA);
+    return;
+  }
   div.innerHTML = "<p class='text-center p-15 color-muted'>Chargement...</p>";
   appelBackend('getInventoryData').then(function(data) {
     ALL_DATA = data || [];
