@@ -8,10 +8,8 @@
 function chargerListeRacheter() {
   const div = document.getElementById("racheter-list");
   if (!div) return;
-  div.innerHTML = "<p class='text-center p-15 color-muted'>Chargement...</p>";
 
-  appelBackend('getInventoryData').then(function(data) {
-    ALL_DATA = data || [];
+  function chargerSuccursalesEtAfficher() {
     appelBackend('getSuccursales').then(function(succursales) {
       const select = document.getElementById('select-succursale');
       if (select) {
@@ -23,6 +21,17 @@ function chargerListeRacheter() {
     }).catch(function(err) { afficherMessage('Erreur: ' + err); });
     chargerToutesSuccursales();
     afficherListeRacheter(ALL_DATA);
+  }
+
+  if (ALL_DATA && ALL_DATA.length > 0) {
+    chargerSuccursalesEtAfficher();
+    return;
+  }
+
+  div.innerHTML = "<p class='text-center p-15 color-muted'>Chargement...</p>";
+  appelBackend('getInventoryData').then(function(data) {
+    ALL_DATA = data || [];
+    chargerSuccursalesEtAfficher();
   }).catch(function(err) { afficherMessage('Erreur: ' + err); });
 }
 
