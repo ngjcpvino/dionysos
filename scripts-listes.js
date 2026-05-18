@@ -454,8 +454,9 @@ function chargerPromotions() {
 function afficherPromotions(promos) {
   const div = document.getElementById('promotions-list');
   if (!div) return;
-  div.innerHTML = '<p class="promo-vide">' + promos.length + ' vin' + (promos.length > 1 ? 's' : '') + ' en promotion cette semaine</p>';
-  div.innerHTML += '<div class="promo-grid">';
+  const htmlParts = [];
+  htmlParts.push('<p class="promo-vide">' + promos.length + ' vin' + (promos.length > 1 ? 's' : '') + ' en promotion cette semaine</p>');
+  htmlParts.push('<div class="promo-grid">');
   promos.forEach(function(promo) {
     const codeSAQ = promo.codeSAQ;
     let prixHTML = '';
@@ -468,16 +469,20 @@ function afficherPromotions(promos) {
     if (promo.pointsBonis > 0) {
       prixHTML += ' <span class="promo-card-pts">' + promo.pointsBonis + ' pts</span>';
     }
-    div.innerHTML +=
+    htmlParts.push(
       '<div class="promo-card">' +
         '<div class="promo-card-nom" onclick="event.stopPropagation();ouvrirFicheVinParCodeSAQ(\'' + codeSAQ + '\')">' + promo.nom + '</div>' +
         '<div class="promo-card-prix">' + prixHTML + '</div>' +
         '<div id="dispo-promo-' + codeSAQ + '" class="promo-dispo">📍 Choisir une succursale</div>' +
         '<button onclick="event.stopPropagation();voirSuccursalesPromo(\'' + codeSAQ + '\')" class="promo-btn-succursales">Toutes les succursales</button>' +
-      '</div>';
-    chargerDispoPromo(codeSAQ);
+      '</div>'
+    );
   });
-  div.innerHTML += '</div>';
+  htmlParts.push('</div>');
+  div.innerHTML = htmlParts.join('');
+  promos.forEach(function(promo) {
+    chargerDispoPromo(promo.codeSAQ);
+  });
 }
 
 function chargerDispoPromo(codeSAQ) {
