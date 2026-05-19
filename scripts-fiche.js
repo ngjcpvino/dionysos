@@ -722,7 +722,7 @@ function chercherSuccursales() {
   navigator.geolocation.getCurrentPosition(
     function(position) {
       div.innerHTML = '<p style="color:var(--white-70);font-size:13px;">Recherche en cours... ~30 secondes</p>';
-      appelBackend('getSuccursalesDisponibles', { codeSAQ: codeSAQ, lat: position.coords.latitude, lng: position.coords.longitude }).then(afficherResultatsSuccursales).catch(function(err) { div.innerHTML = '<p style="color:var(--error);">Erreur: ' + err + '</p>'; });
+      appelBackend('getSuccursalesDisponibles', { codeSAQ: codeSAQ, lat: position.coords.latitude, lng: position.coords.longitude }, { spinner: 'Recherche succursales...' }).then(afficherResultatsSuccursales).catch(function(err) { div.innerHTML = '<p style="color:var(--error);">Erreur: ' + err + '</p>'; });
     },
     function() {
       div.innerHTML = '<p style="color:var(--white-70);font-size:13px;">GPS non disponible, recherche depuis Lanoraie...</p>';
