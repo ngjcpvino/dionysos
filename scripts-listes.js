@@ -40,7 +40,7 @@ function sauvegarderSuccursale() {
   const nom = document.getElementById('new-succursale-nom').value.trim();
   const numero = document.getElementById('new-succursale-numero').value.trim();
   if (!nom || !numero) { afficherMessage('Nom et numéro requis'); return; }
-  appelBackend('ajouterSuccursale', { nom: nom, numero: numero }).then(function() {
+  appelBackend('ajouterSuccursale', { nom: nom, numero: numero }, { spinner: 'Ajout succursale...' }).then(function() {
     afficherMessage('Succursale ajoutée !');
     document.getElementById('form-succursale').style.display = 'none';
     document.getElementById('btn-ajouter-succursale').style.display = 'block';
