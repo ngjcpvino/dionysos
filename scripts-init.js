@@ -16,8 +16,13 @@ let CURRENT_WINE_BOTTLES = [];
 // ==================== INITIALISATION ====================
 
 window.onload = function() {
-  appelBackend('getConfig').then(initConfig).catch(function(err) { afficherMessage('Erreur: ' + err); });
-  chargerInventaire();
+  appelBackend('getConfig', {}, { spinner: 'Décantation...' }).then(function(cfg) {
+    initConfig(cfg);
+    chargerInventaire();
+  }).catch(function(err) {
+    afficherMessage('Erreur: ' + err);
+    chargerInventaire();
+  });
 };
 
 function initConfig(cfg) {
