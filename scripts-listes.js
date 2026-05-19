@@ -47,13 +47,17 @@ function remplirFiltresRacheter(aRacheter) {
   const currentPays = pSel.value;
   const currentCepage = cepSel.value;
 
+  const forCouleur = aRacheter;
+  const forPays = currentCouleur ? aRacheter.filter(function(g) { return g.wine.Couleur === currentCouleur; }) : aRacheter;
+  const forCepage = forPays.filter(function(g) { return !currentPays || g.wine.Pays === currentPays; });
+
   const setCouleur = new Set();
   const setPays = new Set();
   const setCepage = new Set();
 
-  aRacheter.forEach(function(g) {
-    if (g.wine.Couleur) setCouleur.add(g.wine.Couleur);
-    if (g.wine.Pays) setPays.add(g.wine.Pays);
+  forCouleur.forEach(function(g) { if (g.wine.Couleur) setCouleur.add(g.wine.Couleur); });
+  forPays.forEach(function(g) { if (g.wine.Pays) setPays.add(g.wine.Pays); });
+  forCepage.forEach(function(g) {
     if (g.wine.Cepage) g.wine.Cepage.split(',').forEach(function(c) { setCepage.add(c.trim()); });
   });
 
