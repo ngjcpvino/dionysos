@@ -17,6 +17,7 @@ function chargerListeRacheter() {
         succursales.forEach(function(s) {
           select.innerHTML += '<option value="' + s.numero + '">' + s.nom + '</option>';
         });
+        select.innerHTML += '<option value="__ADD_NEW__">+ Ajouter une succursale</option>';
       }
     }).catch(function(err) { afficherMessage('Erreur: ' + err); });
     chargerToutesSuccursales();
@@ -91,7 +92,6 @@ function sauvegarderSuccursale() {
   appelBackend('ajouterSuccursale', { nom: nom, numero: numero }, { spinner: 'Ajout succursale...' }).then(function() {
     afficherMessage('Succursale ajoutée !');
     document.getElementById('form-succursale').style.display = 'none';
-    document.getElementById('btn-ajouter-succursale').style.display = 'block';
     document.getElementById('new-succursale-nom').value = '';
     document.getElementById('new-succursale-numero').value = '';
     chargerListeRacheter();
@@ -119,6 +119,10 @@ function remplirSuccursaleSelectionnee() {
 
 function lancerVerificationGraphQL() {
   const succursale = document.getElementById('select-succursale').value;
+  if (succursale === '__ADD_NEW__') {
+    document.getElementById('form-succursale').style.display = 'block';
+    return;
+  }
   if (!succursale) { afficherMessage('Choisissez une succursale'); return; }
 
   const div = document.getElementById('racheter-list');
