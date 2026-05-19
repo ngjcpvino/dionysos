@@ -253,10 +253,10 @@ function afficherFiche(result) {
         const bgColor = isSelected ? 'rgba(230,161,0,0.2)' : 'transparent';
         menu.innerHTML += '<div onclick="toggleAccord(this)" data-accord="' + accord + '" style="padding:8px;margin:2px 0;cursor:pointer;background:' + bgColor + ';border:1px solid rgba(230,161,0,0.3);" data-selected="' + isSelected + '">' + accord + '</div>';
       });
-      mettreAJourAffichageAccords();
+      mettreAJourAffichageAccords(true);
     }
     const aimeValue = wine.Racheter || 'Oui';
-    setAime(aimeValue);
+    setAime(aimeValue, true);
     const panierValue = wine.Panier || '';
     const panierBtn = document.getElementById('panier-toggle');
     if (panierBtn) {
@@ -286,14 +286,14 @@ function toggleAccord(element) {
   mettreAJourAffichageAccords();
 }
 
-function mettreAJourAffichageAccords() {
+function mettreAJourAffichageAccords(skipSave) {
   const menu = document.getElementById('accords-menu');
   const items = menu.querySelectorAll('[data-selected="true"]');
   const selected = Array.from(items).map(function(item) { return item.textContent; });
   const display = document.getElementById('accords-display');
   display.textContent = selected.length > 0 ? selected.join(', ') : 'Aucun accord sélectionné';
   const accordsStr = selected.join(', ');
-  appelBackend('updateWineField', { codebarre: CURRENT_WINE_CODEBARRE, field: 'Accords', value: accordsStr }, { spinner: 'Sauvegarde...' }).catch(function(err) { afficherMessage('Erreur: ' + err); });
+  if (!skipSave) appelBackend('updateWineField', { codebarre: CURRENT_WINE_CODEBARRE, field: 'Accords', value: accordsStr }, { spinner: 'Sauvegarde...' }).catch(function(err) { afficherMessage('Erreur: ' + err); });
 }
 
 document.addEventListener('click', function(e) {
@@ -318,7 +318,7 @@ function setAime(value) {
     ouiBtn.style.background = 'transparent';
     ouiBtn.style.borderColor = 'rgba(230,161,0,0.3)';
   }
-  appelBackend('updateWineField', { codebarre: CURRENT_WINE_CODEBARRE, field: 'Racheter', value: value }, { spinner: 'Sauvegarde...' }).catch(function(err) { afficherMessage('Erreur: ' + err); });
+  if (!skipSave) appelBackend('updateWineField', { codebarre: CURRENT_WINE_CODEBARRE, field: 'Racheter', value: value }, { spinner: 'Sauvegarde...' }).catch(function(err) { afficherMessage('Erreur: ' + err); });
 }
 
 function togglePanier() {
