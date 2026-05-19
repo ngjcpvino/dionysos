@@ -37,6 +37,49 @@ function chargerListeRacheter() {
 }
 
 
+function remplirFiltresRacheter(aRacheter) {
+  const cSel = document.getElementById("filter-couleur-rach");
+  const pSel = document.getElementById("filter-pays-rach");
+  const cepSel = document.getElementById("filter-cepage-rach");
+  if (!cSel) return;
+
+  const currentCouleur = cSel.value;
+  const currentPays = pSel.value;
+  const currentCepage = cepSel.value;
+
+  const setCouleur = new Set();
+  const setPays = new Set();
+  const setCepage = new Set();
+
+  aRacheter.forEach(function(g) {
+    if (g.wine.Couleur) setCouleur.add(g.wine.Couleur);
+    if (g.wine.Pays) setPays.add(g.wine.Pays);
+    if (g.wine.Cepage) g.wine.Cepage.split(',').forEach(function(c) { setCepage.add(c.trim()); });
+  });
+
+  const fill = function(el, set, label, currentValue) {
+    el.innerHTML = '<option value="">' + label + '</option>';
+    Array.from(set).sort().forEach(function(v) {
+      el.innerHTML += '<option value="' + v + '" ' + (v === currentValue ? 'selected' : '') + '>' + v.toUpperCase() + '</option>';
+    });
+  };
+
+  fill(cSel, setCouleur, "COULEURS", currentCouleur);
+  fill(pSel, setPays, "PAYS", currentPays);
+  fill(cepSel, setCepage, "CÉPAGES", currentCepage);
+}
+
+function appliquerFiltresRacheter() {
+  afficherListeRacheter(ALL_DATA);
+}
+
+function reinitialiserFiltresRacheter() {
+  document.getElementById("filter-couleur-rach").value = '';
+  document.getElementById("filter-pays-rach").value = '';
+  document.getElementById("filter-cepage-rach").value = '';
+  afficherListeRacheter(ALL_DATA);
+}
+
 function sauvegarderSuccursale() {
   const nom = document.getElementById('new-succursale-nom').value.trim();
   const numero = document.getElementById('new-succursale-numero').value.trim();

@@ -115,6 +115,14 @@
   <button onclick="document.getElementById('form-succursale').style.display='none';document.getElementById('btn-ajouter-succursale').style.display='flex';" class="btn-secondary" style="flex:1;height:36px;font-size:12px;padding:0 10px;">ANNULER</button>
 </div>
     </div></div>
+    <div class="filter-container">
+      <div class="filter-row">
+        <select id="filter-couleur-rach" onchange="appliquerFiltresRacheter()" class="filter-select"></select>
+        <select id="filter-pays-rach" onchange="appliquerFiltresRacheter()" class="filter-select"></select>
+        <select id="filter-cepage-rach" onchange="appliquerFiltresRacheter()" class="filter-select"></select>
+        <div onclick="reinitialiserFiltresRacheter()" class="filter-reset">&#x2715;</div>
+      </div>
+    </div>
     <div id="dispo-status" class="dispo-status-bar"></div>
     <div id="racheter-list" class="mt-20"></div>
   </section>
