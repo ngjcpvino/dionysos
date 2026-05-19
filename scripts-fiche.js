@@ -50,20 +50,31 @@ function afficherFiche(result) {
 
   setTimeout(function() {
     const prixHeader = document.getElementById('fiche-prix-header');
-    if (prixHeader && wine.Prix) prixHeader.textContent = parseFloat(wine.Prix).toFixed(2) + ' $';
+    if (prixHeader && wine.Prix) {
+      prixHeader.textContent = parseFloat(wine.Prix).toFixed(2) + ' $';
+      if (wine['Code SAQ'] && wine['Code-barres']) {
+        prixHeader.style.cursor = 'pointer';
+        prixHeader.title = 'Cliquer pour vérifier le prix SAQ';
+        prixHeader.onclick = function() {
+          afficherMessage('Vérification du prix SAQ...');
+          appelBackend('verifierEtMettreAJourPrixSAQ', { codebarre: wine['Code-barres'], codeSAQ: wine['Code SAQ'] }).then(function(prixResult) {
+            if (prixResult && prixResult.updated) {
+              afficherMessage('Prix mis à jour : ' + prixResult.ancienPrix.toFixed(2) + '$ → ' + prixResult.nouveauPrix.toFixed(2) + '$');
+              prixHeader.textContent = prixResult.nouveauPrix.toFixed(2) + ' $';
+              const prixElements = document.querySelectorAll('.fiche-prix');
+              prixElements.forEach(function(el) {
+                el.textContent = prixResult.nouveauPrix.toFixed(2) + ' $';
+              });
+            } else {
+              afficherMessage('Prix à jour');
+            }
+          }).catch(function(err) { afficherMessage('Erreur vérification prix'); });
+        };
+      }
+    }
   }, 50);
 
-  if (wine['Code SAQ'] && wine['Code-barres']) {
-    appelBackend('verifierEtMettreAJourPrixSAQ', { codebarre: wine['Code-barres'], codeSAQ: wine['Code SAQ'] }).then(function(prixResult) {
-      if (prixResult && prixResult.updated) {
-        afficherMessage('Prix mis à jour : ' + prixResult.ancienPrix.toFixed(2) + '$ → ' + prixResult.nouveauPrix.toFixed(2) + '$');
-        const prixElements = document.querySelectorAll('.fiche-prix');
-        prixElements.forEach(function(el) {
-          el.textContent = prixResult.nouveauPrix.toFixed(2) + ' $';
-        });
-      }
-    }).catch(function(err) {});
-  }
+  
 
   const overlay = document.getElementById('ficheVinOverlay');
   const windowInner = document.getElementById('fichevin-window-inner');
@@ -396,11 +407,11 @@ function toggleEditMode() {
 
   const bottlesActives = (CURRENT_WINE_BOTTLES || []).filter(function(b) { return b.statut !== 'Bu' && b.statut !== 'Sorti'; });
   if (bottlesActives.length > 0) {
-    html += '<h3 class="fiche-section-title" style="margin-top:20px;"SUPPRIMER UNE BOUTEILLE</h3>';
+    html += '<h3 class="fiche-section-title" style="margin-top:20px;">SUPPRIMER UNE BOUTEILLE</h3>';
     bottlesActives.forEach(function(b) {
       const loc = b.meuble && b.rangee && b.espace ? b.meuble + ' - rangée ' + b.rangee + ' - espace ' + b.espace : 'À ranger';  html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.08);">';
       html += '<span style="font-size:13px;font-weight:300;">' + loc + '</span>';
-      html += '<button onclick="confirmerSuppressionBouteille(' + b.row + ',' + b.bottle + ')" style="background:rgba(244,67,54,0.2);border:1px solid #f44336;color:#f44336;padding:6px 12px;cursor:pointer;font-size:12px;"SUPPRIMER</button>';
+      html += '<button onclick="confirmerSuppressionBouteille(' + b.row + ',' + b.bottle + ')" style="background:rgba(244,67,54,0.2);border:1px solid #f44336;color:#f44336;padding:6px 12px;cursor:pointer;font-size:12px;">SUPPRIMER</button>';
       html += '</div>';
     });
   }
@@ -763,7 +774,7 @@ function afficherConfirmation(title, message, onConfirm, onCancel, labelConfirm)
     overlay.className = 'confirm-overlay';
     document.body.appendChild(overlay);
   }
-  overlay.innerHTML = '<div class="confirm-dialog"><button onclick="document.getElementById(\'confirmOverlay\').style.display=\'none\'" class="confirm-dialog-close">✕</button><h3 class="color-primary mb-20 fs-14 text-uppercase">' + title + '</h3><p class="color-white mb-20 fs-14">' + message + '</p><div class="confirm-dialog-buttons"><button id="confirmBtn" class="confirm-dialog-button confirm-dialog-button-primary">>' + (labelConfirm || 'OUI, SANTÉ !') + '</button><button id="cancelBtn" class="confirm-dialog-button confirm-dialog-button-secondary">ANNULER</button></div></div>';
+  overlay.innerHTML = '<div class="confirm-dialog"><button onclick="document.getElementById(\'confirmOverlay\').style.display=\'none\'" class="confirm-dialog-close">✕</button><h3 class="color-primary mb-20 fs-14 text-uppercase">' + title + '</h3><p class="color-white mb-20 fs-14">' + message + '</p><div class="confirm-dialog-buttons"><button id="confirmBtn" class="confirm-dialog-button confirm-dialog-button-primary">' + (labelConfirm || 'OUI, SANTÉ !') + '</button><button id="cancelBtn" class="confirm-dialog-button confirm-dialog-button-secondary">ANNULER</button></div></div>';
   overlay.style.display = 'flex';
   document.getElementById('confirmBtn').onclick = function() { overlay.style.display = 'none'; if (onConfirm) onConfirm(); };
   document.getElementById('cancelBtn').onclick = function() { overlay.style.display = 'none'; if (onCancel) onCancel(); };
