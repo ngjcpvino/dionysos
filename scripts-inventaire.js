@@ -10,7 +10,7 @@ function chargerInventaire() {
   const div = document.getElementById("inventory-cards");
   if (!div) return;
   div.innerHTML = "<p class='text-center p-15 color-muted'>SYNCHRONISATION...</p>";
-  appelBackend('getInventoryData').then(inventaireCharge).catch(function(err) { afficherMessage('Erreur: ' + err); });
+  appelBackend('getInventoryData', {}, { spinner: 'Décantation...' }).then(inventaireCharge).catch(function(err) { afficherMessage('Erreur: ' + err); });
 }
 
 function inventaireCharge(data) {
@@ -480,7 +480,7 @@ function afficherListeRacheter(data) {
 let ALL_HISTORIQUE = [];
 
 function chargerHistorique() {
-  appelBackend('getHistorique').then(function(data) {
+  appelBackend('getHistorique', {}, { spinner: 'Décantation...' }).then(function(data) {
     ALL_HISTORIQUE = data || [];
     afficherHistorique(ALL_HISTORIQUE);
   }).catch(function(err) { afficherMessage('Erreur: ' + err); });
