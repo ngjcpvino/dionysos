@@ -11,7 +11,7 @@ function ouvrirFicheVin(codebarre) {
   document.getElementById('fiche-nom').textContent = 'Chargement...';
   document.getElementById('fiche-content').innerHTML = 'Récupération des données...';
 
-  appelBackend('getWineBottles', { codebarre: codebarre }, { spinner: 'Décantation...' }).then(function(result) {
+  appelBackend('getWineBottles', { codebarre: codebarre }, { spinner: '...' }).then(function(result) {
     if (!result) {
       fermerFiche();
       afficherMessage('Vin introuvable ou données pas encore disponibles');
@@ -25,7 +25,7 @@ function ouvrirFicheVin(codebarre) {
 }
 
 function ouvrirFicheVinParCodeSAQ(codeSAQ) {
-  appelBackend('getCodeBarresFromCodeSAQ', { codeSAQ: codeSAQ }, { spinner: 'Décantation...' }).then(function(codebarre) {
+  appelBackend('getCodeBarresFromCodeSAQ', { codeSAQ: codeSAQ }, { spinner: '...' }).then(function(codebarre) {
     if (codebarre) {
       ouvrirFicheVin(codebarre);
     } else {
