@@ -184,6 +184,7 @@ function checkEmplacementDispo(bottleNum) {
     if (result.available) {
       statusDiv.innerHTML = '<span style="color:#4caf50;">✓ Libre</span>';
       statusDiv.setAttribute('data-available', 'true');
+      document.getElementById('btn-save-newwine').disabled = false;
     } else {
       statusDiv.innerHTML = '<span style="color:#f44336;">✗ Occupé par : ' + result.message + '</span>';
       statusDiv.setAttribute('data-available', 'false');

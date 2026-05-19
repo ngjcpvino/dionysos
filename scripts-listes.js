@@ -302,15 +302,15 @@ function afficherEmplacements(data) {
       if (statut === "Bu" || statut === "Sorti" || !item.Meuble) return;
       const cepagesStr = item.Cepage || '';
       if (!cepagesStr) return;
-      const cepagesList = cepagesStr.split(',').map(function(c) { return c.trim(); }).filter(Boolean);
-      cepagesList.forEach(function(cepage) {
+      const cepage = cepagesStr.split(',')[0].trim();
+      if (cepage) {
         if (item.Meuble === meuble) {
           cepagesCellier.add(cepage);
         } else {
           if (!cepagesAutres[cepage]) cepagesAutres[cepage] = [];
           cepagesAutres[cepage].push({ nom: item.Nom, codebarre: item["Code-barres"] });
         }
-      });
+      }
     });
 
     const manquants = Object.keys(cepagesAutres).filter(function(c) { return !cepagesCellier.has(c); });
@@ -390,7 +390,13 @@ function afficherEmplacements(data) {
   });
 
   const htmlParts = [];
+  let lastGroup = null;
   filtered.forEach(function(item) {
+    const groupKey = item.Meuble + '-' + item.Rangee;
+    if (groupKey !== lastGroup) {
+      htmlParts.push('<div style="display:flex;align-items:center;gap:10px;margin:15px 0 10px 0;"><div style="flex:1;height:1px;background:rgba(230,161,0,0.3);"></div><span style="color:var(--gold);font-size:11px;letter-spacing:1px;">RANGÉE ' + item.Rangee + '</span></div>');
+      lastGroup = groupKey;
+    }
     const emp = item.Meuble.substring(0, 1).toUpperCase() + '-' + item.Rangee + '-' + item.Espace;
     htmlParts.push(genererCardVin(item, { emplacements: [emp] }));
   });
