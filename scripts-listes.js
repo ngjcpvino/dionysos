@@ -29,6 +29,7 @@ function chargerListeRacheter() {
   }
 
   div.innerHTML = "<p class='text-center p-15 color-muted'>Chargement...</p>";
+  
   appelBackend('getInventoryData', {}, { spinner: 'Décantation...' }).then(function(data) {
     ALL_DATA = data || [];
     chargerSuccursalesEtAfficher();
