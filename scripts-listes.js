@@ -30,7 +30,7 @@ function chargerListeRacheter() {
 
   div.innerHTML = "<p class='text-center p-15 color-muted'>Chargement...</p>";
   
-  appelBackend('getInventoryData', {}, { spinner: 'Décantation...' }).then(function(data) {
+  appelBackend('getInventoryData', {}, { spinner: '...' }).then(function(data) {
     ALL_DATA = data || [];
     chargerSuccursalesEtAfficher();
   }).catch(function(err) { afficherMessage('Erreur: ' + err); });
@@ -161,7 +161,7 @@ function chargerListeARanger() {
     return;
   }
   div.innerHTML = "<p class='text-center p-15 color-muted'>Chargement...</p>";
-  appelBackend('getInventoryData', {}, { spinner: 'Décantation...' }).then(function(data) {
+  appelBackend('getInventoryData', {}, { spinner: '...' }).then(function(data) {
     ALL_DATA = data || [];
     afficherListeARanger(ALL_DATA);
   }).catch(function(err) { afficherMessage('Erreur: ' + err); });
@@ -204,7 +204,7 @@ function chargerEmplacements() {
     return;
   }
   div.innerHTML = "<p class='text-center p-15 color-muted'>Chargement...</p>";
-  appelBackend('getInventoryData', {}, { spinner: 'Décantation...' }).then(function(data) {
+  appelBackend('getInventoryData', {}, { spinner: '...' }).then(function(data) {
     ALL_DATA = data || [];
     remplirFiltresEmplacements();
     afficherEmplacements(ALL_DATA);
