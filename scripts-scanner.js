@@ -223,7 +223,7 @@ function saveNewWineImproved() {
   btn.disabled = true;
   btn.textContent = 'RECHERCHE SAQ...';
 
-  appelBackend('chercherProduitSAQ_GRAPHQL_V1', { codebarre: codebarre }).then(function(codeSAQTrouve) {
+  appelBackend('chercherProduitSAQ_GRAPHQL_V1', { codebarre: codebarre }, { spinner: 'Recherche SAQ...' }).then(function(codeSAQTrouve) {
     if (!codeSAQTrouve) {
       btn.disabled = false;
       btn.textContent = 'GO';
@@ -289,7 +289,7 @@ function saveNewWineImproved() {
     }
 
     btn.textContent = 'ENREGISTREMENT...';
-    appelBackend('ajouterVinAvecBouteilles', { codebarre: codebarre, codeSAQ: codeSAQTrouve, note: '', bouteilles: window.bouteillesJSON, nom: '' }).then(function() {
+    appelBackend('ajouterVinAvecBouteilles', { codebarre: codebarre, codeSAQ: '', note: '', bouteilles: window.bouteillesJSON, nom: nomSaisi }, { spinner: 'Enregistrement...' }).then(function() {
       afficherMessage('Vin ajouté avec données SAQ !');
       closeNewWinePopup();
       chargerInventaire();
