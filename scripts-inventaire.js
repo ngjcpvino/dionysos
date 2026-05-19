@@ -456,12 +456,25 @@ function afficherListeRacheter(data) {
     return (g.wine.Racheter === "Oui" && g.count === 0) || g.wine.Panier === "Oui";
   });
 
-  if (aRacheter.length === 0) {
+  remplirFiltresRacheter(aRacheter);
+
+  const couleur = document.getElementById("filter-couleur-rach") ? document.getElementById("filter-couleur-rach").value : '';
+  const pays = document.getElementById("filter-pays-rach") ? document.getElementById("filter-pays-rach").value : '';
+  const cepage = document.getElementById("filter-cepage-rach") ? document.getElementById("filter-cepage-rach").value : '';
+
+  const filtered = aRacheter.filter(function(g) {
+    const wine = g.wine;
+    return (!couleur || wine.Couleur === couleur) &&
+           (!pays || wine.Pays === pays) &&
+           (!cepage || (wine.Cepage && wine.Cepage.split(',').map(function(c){return c.trim();}).includes(cepage)));
+  });
+
+  if (filtered.length === 0) {
     div.innerHTML = "<p class='text-center p-15 color-muted'>Aucun vin à racheter</p>";
     return;
   }
 
-  const sorted = aRacheter.sort(function(a, b) {
+  const sorted = filtered.sort(function(a, b) {
     const ordre = { "rouge": 1, "blanc": 2, "rose": 3, "bulles": 4 };
     const valA = ordre[(a.wine.Couleur || "").toLowerCase()] || 99;
     const valB = ordre[(b.wine.Couleur || "").toLowerCase()] || 99;
