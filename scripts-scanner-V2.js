@@ -41,11 +41,45 @@ function startScannerV2() {
     const code = result.codeResult.code;
     if (!code) return;
     if (!/^\d{8,13}$/.test(code)) return;
-
     if (!scanConfirmationsV2[code]) scanConfirmationsV2[code] = 0;
     scanConfirmationsV2[code]++;
-
     const feedback = document.querySelector('.scanner-help');
     if (feedback) {
       feedback.textContent = 'Code détecté: ' + code + ' (' + scanConfirmationsV2[code] + '/' + SCAN_THRESHOLD_V2 + ')';
-      feedback.style.col
+      feedback.style.color = '#ffc107';
+    }
+    if (scanConfirmationsV2[code] >= SCAN_THRESHOLD_V2) {
+      stopScannerV2();
+      traiterResultatScanV2(code);
+    }
+  });
+}
+
+function stopScannerV2() {
+  isScanningV2 = false;
+  if (typeof Quagga !== 'undefined' && Quagga.stop) {
+    try { Quagga.stop(); } catch (e) {}
+  }
+  document.getElementById('scannerContainer').style.display = 'none';
+  const feedback = document.querySelector('.scanner-help');
+  if (feedback) {
+    feedback.textContent = 'Alignez le code-barres avec la ligne';
+    feedback.style.color = 'white';
+  }
+}
+
+function traiterResultatScanV2(code) {
+  console.log('[V2] Code scanné:', code);
+  appelBackend('checkWineExists', { codebarre: code }, { spinner: 'Vérification...' }).then(function(result) {
+    if (result.exists) {
+      console.log('[V2] Vin EXISTE:', result);
+      alert('V2 — Vin EXISTE\nCode: ' + code + '\nNom: ' + (result.wine ? result.wine.nom : '?') + '\nBouteilles actives: ' + result.count);
+    } else {
+      console.log('[V2] Vin N\'EXISTE PAS');
+      alert('V2 — Vin N\'EXISTE PAS\nCode: ' + code);
+    }
+  }).catch(function(err) {
+    console.error('[V2] Erreur:', err);
+    afficherMessage('Erreur de vérification');
+  });
+}
