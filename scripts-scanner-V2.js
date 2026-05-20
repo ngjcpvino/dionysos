@@ -73,7 +73,7 @@ function traiterResultatScanV2(code) {
   appelBackend('checkWineExists', { codebarre: code }, { spinner: 'Vérification...' }).then(function(result) {
     if (result.exists) {
       console.log('[V2] Vin EXISTE:', result);
-      alert('V2 — Vin EXISTE\nCode: ' + code + '\nNom: ' + (result.wine ? result.wine.nom : '?') + '\nBouteilles actives: ' + result.count);
+      ouvrirMenuActionV2(code, result);
     } else {
       console.log('[V2] Vin N\'EXISTE PAS');
       alert('V2 — Vin N\'EXISTE PAS\nCode: ' + code);
@@ -83,3 +83,63 @@ function traiterResultatScanV2(code) {
     afficherMessage('Erreur de vérification');
   });
 }
+
+let menuActionV2Context = null;
+
+function ouvrirMenuActionV2(code, wineResult) {
+  menuActionV2Context = { code: code, wineResult: wineResult };
+  const nom = (wineResult && wineResult.wine && wineResult.wine.nom) ? wineResult.wine.nom : 'Vin inconnu';
+  document.getElementById('menuActionV2-nom').textContent = nom;
+  document.getElementById('menuActionV2-codebarre').textContent = code;
+  document.getElementById('menuActionV2Overlay').style.display = 'flex';
+}
+
+function fermerMenuActionV2() {
+  document.getElementById('menuActionV2Overlay').style.display = 'none';
+  menuActionV2Context = null;
+}
+
+function menuV2Click(action) {
+  console.log('[V2] Action choisie:', action, '— context:', menuActionV2Context);
+  alert('V2 — Action: ' + action + '\n(à coder à la prochaine étape)');
+}
+
+// Injection CSS pour les modales V2
+(function() {
+  const style = document.createElement('style');
+  style.textContent =
+    '.modal-v2-fullscreen {' +
+      'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9999;' +
+      'display:flex;align-items:center;justify-content:center;' +
+      'background:rgba(0,0,0,0.30);' +
+    '}' +
+    '.modal-v2-content {' +
+      'width:100%;height:100%;padding:40px 20px;' +
+      'display:flex;flex-direction:column;align-items:center;justify-content:center;' +
+      'box-sizing:border-box;' +
+    '}' +
+    '.modal-v2-title {' +
+      'color:#e6a100;font-size:18px;text-transform:uppercase;letter-spacing:2px;' +
+      'margin:0 0 30px 0;font-weight:300;' +
+    '}' +
+    '.modal-v2-winename {' +
+      'color:#fff;font-size:20px;text-align:center;margin-bottom:8px;' +
+    '}' +
+    '.modal-v2-codebarre {' +
+      'color:rgba(255,255,255,0.5);font-size:13px;margin-bottom:40px;letter-spacing:1px;' +
+    '}' +
+    '.menu-v2-grid {' +
+      'display:grid;grid-template-columns:repeat(3, 90px);grid-gap:20px;' +
+    '}' +
+    '.menu-v2-circle {' +
+      'width:90px;height:90px;border-radius:50%;' +
+      'border:1px solid #e6a100;background:rgba(0,0,0,0.50);' +
+      'display:flex;align-items:center;justify-content:center;' +
+      'font-size:32px;cursor:pointer;user-select:none;' +
+      '-webkit-tap-highlight-color:transparent;' +
+    '}' +
+    '.menu-v2-circle:active {' +
+      'background:rgba(230,161,0,0.20);' +
+    '}';
+  document.head.appendChild(style);
+})();
