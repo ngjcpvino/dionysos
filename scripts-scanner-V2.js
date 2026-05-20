@@ -111,7 +111,7 @@ function menuV2Click(action) {
     '.modal-v2-fullscreen {' +
       'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9999;' +
       'display:flex;align-items:center;justify-content:center;' +
-      'background:rgba(0,0,0,0.30);' +
+      'background:linear-gradient(rgba(0,0,0,0.40), rgba(0,0,0,0.40)), url("https://images.unsplash.com/photo-1738544475560-0683270451bd?q=80&w=1470&auto=format&fit=crop") center center / cover no-repeat;' +
     '}' +
     '.modal-v2-content {' +
       'width:100%;height:100%;padding:40px 20px;' +
