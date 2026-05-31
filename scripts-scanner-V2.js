@@ -36,6 +36,7 @@ function startScannerV2() {
     Quagga.start();
   });
 
+  Quagga.offDetected();
   Quagga.onDetected(function(result) {
     if (!isScanningV2) return;
     const code = result.codeResult.code;
