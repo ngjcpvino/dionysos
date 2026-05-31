@@ -229,7 +229,7 @@ if (codebarre && !/^\d{8,13}$/.test(codebarre)) { afficherMessage('Code-barres i
 
   const codeSAQManuel = document.getElementById('newwine-codesaq-manuel').value.trim();
 const recherchePromise = codeSAQManuel
-  ? appelBackend('chercherProduitSAQ_GRAPHQL_V1', { codesaq: codeSAQManuel }, { spinner: 'Recherche SAQ...' })
+  ? appelBackend('chercherProduitSAQ_GRAPHQL_V1', { codesaq: codeSAQManuel, codebarre: codebarre || '0000000000000' }, { spinner: 'Recherche SAQ...' })
   : appelBackend('chercherProduitSAQ_GRAPHQL_V1', { codebarre: codebarre }, { spinner: 'Recherche SAQ...' });
 recherchePromise.then(function(codeSAQTrouve) {
     if (!codeSAQTrouve) {
