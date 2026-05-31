@@ -296,7 +296,7 @@ recherchePromise.then(function(codeSAQTrouve) {
     }
 
     btn.textContent = 'ENREGISTREMENT...';
-    appelBackend('ajouterVinAvecBouteilles', { codebarre: codebarre, codeSAQ: codeSAQManuel, note: '', bouteilles: window.bouteillesJSON, nom: nomSaisi }, { spinner: 'Enregistrement...' }).then(function() {
+    appelBackend('ajouterVinAvecBouteilles', { codebarre: codebarre, codeSAQ: codeSAQManuel, note: '', bouteilles: window.bouteillesJSON }, { spinner: 'Enregistrement...' }).then(function() {
       afficherMessage('Vin ajouté avec données SAQ !');
       closeNewWinePopup();
       chargerInventaire();
