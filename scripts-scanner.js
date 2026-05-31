@@ -102,7 +102,6 @@ function showNewWinePopup(codebarre) {
   document.getElementById('newwine-note').value = '';
 document.getElementById('newwine-codesaq-manuel').value = '';
   document.getElementById('newwine-quantite').value = '1';
-  document.getElementById('newwine-codesaq-manuel').value = '';
 
   updateEmplacementsFields(1);
 
@@ -229,7 +228,7 @@ if (codebarre && !/^\d{8,13}$/.test(codebarre)) { afficherMessage('Code-barres i
 
   const codeSAQManuel = document.getElementById('newwine-codesaq-manuel').value.trim();
 const recherchePromise = codeSAQManuel
-  ? appelBackend('chercherProduitSAQ_GRAPHQL_V1', { codesaq: codeSAQManuel, codebarre: codebarre || '0000000000000' }, { spinner: 'Recherche SAQ...' })
+  ? Promise.resolve(codeSAQManuel)
   : appelBackend('chercherProduitSAQ_GRAPHQL_V1', { codebarre: codebarre }, { spinner: 'Recherche SAQ...' });
 recherchePromise.then(function(codeSAQTrouve) {
     if (!codeSAQTrouve) {
@@ -283,7 +282,7 @@ recherchePromise.then(function(codeSAQTrouve) {
             afficherMessage('Vin ajouté !');
             closeNewWinePopup();
             chargerInventaire();
-            ouvrirFicheVin(codebarre);
+            ouvrirFicheVin(codebarre || codeSAQManuel);
             btn.disabled = false;
             btn.textContent = 'GO';
           }).catch(function(err) {
@@ -297,11 +296,11 @@ recherchePromise.then(function(codeSAQTrouve) {
     }
 
     btn.textContent = 'ENREGISTREMENT...';
-    appelBackend('ajouterVinAvecBouteilles', { codebarre: codebarre, codeSAQ: codeSAQManuel, note: '', bouteilles: window.bouteillesJSON }, { spinner: 'Enregistrement...' }).then(function() {
+    appelBackend('ajouterVinAvecBouteilles', { codebarre: codebarre, codeSAQ: codeSAQTrouve, note: '', bouteilles: window.bouteillesJSON }, { spinner: 'Enregistrement...' }).then(function() {
       afficherMessage('Vin ajouté avec données SAQ !');
       closeNewWinePopup();
       chargerInventaire();
-      ouvrirFicheVin(codebarre);
+      ouvrirFicheVin(codebarre || codeSAQManuel);
       btn.disabled = false;
       btn.textContent = 'GO';
     }).catch(function(err) {
