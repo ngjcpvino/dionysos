@@ -200,8 +200,8 @@ function saveNewWineImproved() {
   const quantite = parseInt(document.getElementById('newwine-quantite').value);
 
   const codeSAQManuelCheck = document.getElementById('newwine-codesaq-manuel').value.trim();
-if (!codebarre && !codeSAQManuelCheck) { afficherMessage('Code-barres ou code SAQ requis'); return; }
-if (codebarre && !/^\d{8,13}$/.test(codebarre)) { afficherMessage('Code-barres invalide (8 à 13 chiffres)'); return; }
+if (!codebarre) { afficherMessage('Code-barres requis — scannez la bouteille d\'abord'); return; }
+if (!/^\d{8,13}$/.test(codebarre)) { afficherMessage('Code-barres invalide (8 à 13 chiffres)'); return; }
 
   for (let i = 1; i <= quantite; i++) {
     const statusDiv = document.getElementById('emplacement-status-' + i);
