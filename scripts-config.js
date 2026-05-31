@@ -45,7 +45,7 @@ function _afficherSpinner(texte) {
         content: ''; position: absolute;
         bottom: 0; left: 0; right: 0;
         background: linear-gradient(to top, #4a0e1a, #8b1a2b);
-        animation: remplir-verre 3.5s ease-in-out infinite;
+        animation: remplir-verre 5s ease-in-out infinite;
       }
       .spinner-pied { width: 2px; height: 18px; background: #e6a100; }
       .spinner-base { width: 42px; height: 2px; background: #e6a100; }
@@ -55,9 +55,10 @@ function _afficherSpinner(texte) {
         font-weight: 300;
       }
       @keyframes remplir-verre {
-        0% { height: 10%; }
-        50% { height: 75%; }
-        100% { height: 10%; }
+        0% { height: 0%; }
+        40% { height: 100%; }
+        55% { height: 100%; }
+        100% { height: 0%; }
       }
     `;
     document.head.appendChild(style);
