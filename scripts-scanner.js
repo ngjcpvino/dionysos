@@ -100,7 +100,9 @@ function showNewWinePopup(codebarre) {
   codebarre = codebarre || '';
   document.getElementById('newwine-codebarre').value = codebarre;
   document.getElementById('newwine-note').value = '';
+document.getElementById('newwine-codesaq-manuel').value = '';
   document.getElementById('newwine-quantite').value = '1';
+  document.getElementById('newwine-codesaq-manuel').value = '';
 
   updateEmplacementsFields(1);
 
@@ -224,7 +226,11 @@ function saveNewWineImproved() {
   btn.disabled = true;
   btn.textContent = 'RECHERCHE SAQ...';
 
-  appelBackend('chercherProduitSAQ_GRAPHQL_V1', { codebarre: codebarre }, { spinner: 'Recherche SAQ...' }).then(function(codeSAQTrouve) {
+  const codeSAQManuel = document.getElementById('newwine-codesaq-manuel').value.trim();
+const recherchePromise = codeSAQManuel
+  ? appelBackend('chercherProduitSAQ_GRAPHQL_V1', { codesaq: codeSAQManuel }, { spinner: 'Recherche SAQ...' })
+  : appelBackend('chercherProduitSAQ_GRAPHQL_V1', { codebarre: codebarre }, { spinner: 'Recherche SAQ...' });
+recherchePromise.then(function(codeSAQTrouve) {
     if (!codeSAQTrouve) {
       btn.disabled = false;
       btn.textContent = 'GO';
@@ -290,7 +296,7 @@ function saveNewWineImproved() {
     }
 
     btn.textContent = 'ENREGISTREMENT...';
-    appelBackend('ajouterVinAvecBouteilles', { codebarre: codebarre, codeSAQ: '', note: '', bouteilles: window.bouteillesJSON, nom: nomSaisi }, { spinner: 'Enregistrement...' }).then(function() {
+    appelBackend('ajouterVinAvecBouteilles', { codebarre: codebarre, codeSAQ: codeSAQManuel, note: '', bouteilles: window.bouteillesJSON, nom: nomSaisi }, { spinner: 'Enregistrement...' }).then(function() {
       afficherMessage('Vin ajouté avec données SAQ !');
       closeNewWinePopup();
       chargerInventaire();
