@@ -12,6 +12,7 @@ let RESULTATS_RECHERCHE_EN_ATTENTE = null;
 let FILTRE_APPELLATION_EN_ATTENTE = null;
 let CURRENT_WINE_DATA = null;
 let CURRENT_WINE_BOTTLES = [];
+let FICHE_V2_PROVENANCE = null;
 
 // ==================== INITIALISATION ====================
 
