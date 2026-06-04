@@ -41,6 +41,12 @@ html, body {
   --vin-rose: #FFC0CB;
   --vin-bulles: #00ced1;
 
+  /* ===== DÉGRADÉS DE VIN (remplissage du spinner) ===== */
+  --degrade-vin-rouge: linear-gradient(to top, #4a0000, #8B0000);
+  --degrade-vin-blanc: linear-gradient(to top, #c9c79a, #f7f6da);
+  --degrade-vin-rose: linear-gradient(to top, #d98a98, #FFC0CB);
+  --degrade-vin-bulles: linear-gradient(to top, #007a7d, #00ced1);
+
   --black: #000;
   --white: #fff;
   --white-70: rgba(255,255,255,0.9);
@@ -1128,6 +1134,51 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
 }
 
 .toast.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+
+/* =========================================
+   SPINNER — verre de vin
+   ========================================= */
+#spinner-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.75);
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 20px;
+  z-index: 99999;
+}
+.spinner-verre-wrap { display: flex; flex-direction: column; align-items: center; }
+.spinner-verre {
+  width: 60px; height: 75px;
+  border: var(--largeur-bordure-moyenne) solid var(--gold); border-top: none;
+  border-radius: 0 0 30px 30px;
+  position: relative; overflow: hidden;
+  background: rgba(255,255,255,0.05);
+}
+.spinner-verre::before {
+  content: ''; position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: var(--degrade-vin-rouge);
+  animation: remplir-verre 5s ease-in-out infinite, couleur-vin 20s step-end infinite;
+}
+.spinner-pied { width: 2px; height: 18px; background: var(--gold); }
+.spinner-base { width: 42px; height: 2px; background: var(--gold); }
+.spinner-texte {
+  color: var(--gold); font-size: var(--fs-sm);
+  letter-spacing: var(--ls-wide); text-transform: uppercase;
+  font-weight: 300;
+}
+@keyframes remplir-verre {
+  0% { height: 0%; }
+  40% { height: 100%; }
+  55% { height: 100%; }
+  100% { height: 0%; }
+}
+@keyframes couleur-vin {
+  0%   { background: var(--degrade-vin-rouge); }
+  25%  { background: var(--degrade-vin-blanc); }
+  50%  { background: var(--degrade-vin-rose); }
+  75%  { background: var(--degrade-vin-bulles); }
+  100% { background: var(--degrade-vin-rouge); }
+}
 
 /* =========================================
    18. SCANNER
