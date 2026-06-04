@@ -102,45 +102,12 @@ function fermerMenuActionV2() {
 
 function menuV2Click(action) {
   console.log('[V2] Action choisie:', action, '— context:', menuActionV2Context);
+  if (action === 'visualiser') {
+    const code = menuActionV2Context ? menuActionV2Context.code : CURRENT_WINE_CODEBARRE;
+    document.getElementById('menuActionV2Overlay').style.display = 'none';
+    ouvrirFicheV2(code, 'menuScan');
+    return;
+  }
   alert('V2 — Action: ' + action + '\n(à coder à la prochaine étape)');
 }
 
-// Injection CSS pour les modales V2
-(function() {
-  const style = document.createElement('style');
-  style.textContent =
-    '.modal-v2-fullscreen {' +
-      'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9999;' +
-      'display:flex;align-items:center;justify-content:center;' +
-      'background:linear-gradient(rgba(0,0,0,0.40), rgba(0,0,0,0.40)), url("https://images.unsplash.com/photo-1738544475560-0683270451bd?q=80&w=1470&auto=format&fit=crop") center center / cover no-repeat;' +
-    '}' +
-    '.modal-v2-content {' +
-      'width:100%;height:100%;padding:40px 20px;' +
-      'display:flex;flex-direction:column;align-items:center;justify-content:center;' +
-      'box-sizing:border-box;' +
-    '}' +
-    '.modal-v2-title {' +
-      'color:#e6a100;font-size:18px;text-transform:uppercase;letter-spacing:2px;' +
-      'margin:0 0 30px 0;font-weight:300;' +
-    '}' +
-    '.modal-v2-winename {' +
-      'color:#fff;font-size:20px;text-align:center;margin-bottom:8px;' +
-    '}' +
-    '.modal-v2-codebarre {' +
-      'color:rgba(255,255,255,0.5);font-size:13px;margin-bottom:40px;letter-spacing:1px;' +
-    '}' +
-    '.menu-v2-grid {' +
-      'display:grid;grid-template-columns:repeat(3, 90px);grid-gap:20px;' +
-    '}' +
-    '.menu-v2-circle {' +
-      'width:90px;height:90px;border-radius:50%;' +
-      'border:1px solid #e6a100;background:rgba(0,0,0,0.50);' +
-      'display:flex;align-items:center;justify-content:center;' +
-      'font-size:32px;cursor:pointer;user-select:none;' +
-      '-webkit-tap-highlight-color:transparent;' +
-    '}' +
-    '.menu-v2-circle:active {' +
-      'background:rgba(230,161,0,0.20);' +
-    '}';
-  document.head.appendChild(style);
-})();

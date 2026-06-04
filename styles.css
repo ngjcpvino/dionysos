@@ -68,6 +68,8 @@ html, body {
   --info: #2196f3;
   --warning: #ffc107;
   --menu-width: 280px;
+  --image-fond: url("https://images.unsplash.com/photo-1738544475560-0683270451bd?q=80&w=1470&auto=format&fit=crop");
+  --voile-standard: rgba(0,0,0,0.40);
   --shadow-sm: rgba(0,0,0,0.3);
   --shadow-md: rgba(0,0,0,0.5);
   --shadow-lg: rgba(0,0,0,0.7);
@@ -115,8 +117,8 @@ body::after {
   position: fixed;
   top: 0; left: 0;
   width: 100%; height: 100%;
-  background: linear-gradient(rgba(0,0,0,0.04), rgba(0,0,0,0.4)),
-              url("https://images.unsplash.com/photo-1738544475560-0683270451bd?q=80&w=1470&auto=format&fit=crop")
+  background: linear-gradient(var(--voile-standard), var(--voile-standard)),
+              var(--image-fond)
               center center / cover no-repeat;
   background-size: cover;
   background-position: center;
@@ -127,7 +129,7 @@ body::after {
   position: fixed;
   top: 0; left: 0;
   width: 100%; height: 100%;
-  background: linear-gradient(rgba(0,0,0,0.40), rgba(0,0,0,0.40));
+  background: linear-gradient(var(--voile-standard), var(--voile-standard));
   z-index: -1;
   pointer-events: none;
 }
@@ -1181,6 +1183,119 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
 }
 
 /* =========================================
+   MODALES V2 — plein écran « nouvelle page »
+   ========================================= */
+.modal-v2-fullscreen {
+  position: fixed; top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(var(--voile-standard), var(--voile-standard)),
+              var(--image-fond) center center / cover no-repeat;
+}
+
+.modal-v2-content {
+  width: 100%; height: 100%;
+  padding: 40px var(--space-l);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  box-sizing: border-box;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.modal-v2-content::-webkit-scrollbar { display: none; }
+
+.modal-v2-title {
+  color: var(--gold);
+  font-size: var(--fs-lg);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-wide);
+  margin: 0 0 30px 0;
+  font-weight: 300;
+}
+
+.modal-v2-winename {
+  color: var(--white);
+  font-size: var(--fs-xl);
+  text-align: center;
+  margin-bottom: var(--space-s);
+}
+
+.modal-v2-codebarre {
+  color: var(--white-50);
+  font-size: var(--fs-sm);
+  margin-bottom: 40px;
+  letter-spacing: var(--ls-tight);
+}
+
+.menu-v2-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 90px);
+  grid-gap: var(--space-l);
+}
+
+.menu-v2-circle {
+  width: 90px; height: 90px;
+  border-radius: 50%;
+  border: var(--largeur-bordure-fine) solid var(--couleur-bordure-or);
+  background: var(--bg-card);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.menu-v2-circle:active {
+  background: var(--gold-20);
+}
+
+/* ===== Éléments génériques de modale V2 (réutilisables partout) ===== */
+.modale-haut {
+  justify-content: flex-start;
+  padding-top: 60px;
+  position: relative;
+}
+
+.modale-fermer {
+  position: absolute;
+  top: var(--space-l); right: var(--space-l);
+  width: 40px; height: 40px;
+  background: none;
+  border: none;
+  color: var(--white);
+  font-size: var(--fs-xl);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.modale-fermer:active { color: var(--gold); }
+
+.modale-titre {
+  color: var(--white);
+  font-size: var(--fs-xl);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-tight);
+  text-align: center;
+  margin: 0 0 var(--space-s) 0;
+}
+
+.modale-sous-titre {
+  color: var(--white-60);
+  font-size: var(--fs-sm);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-tight);
+  text-align: center;
+  margin-bottom: var(--space-xl);
+}
+
+.modale-corps {
+  width: 100%;
+  max-width: 600px;
+  color: var(--white);
+}
+
+/* =========================================
    18. SCANNER
    ========================================= */
 .scanner-container {
@@ -1324,8 +1439,8 @@ select::-webkit-scrollbar-thumb { background: var(--gold); }
 
 @media (min-width: 1280px) {
   body::after {
-    background: linear-gradient(rgba(255,255,255,0.15), rgba(255,255,255,0.15)),
-                url("https://images.unsplash.com/photo-1738544475560-0683270451bd?q=80&w=1470&auto=format&fit=crop")
+    background: linear-gradient(var(--voile-standard), var(--voile-standard)),
+                var(--image-fond)
                 center center / cover no-repeat !important;
   }
 }
