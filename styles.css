@@ -1258,7 +1258,7 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
   position: relative;
 }
 
-.modale-fermer {
+.btn-fermer {
   position: absolute;
   top: var(--space-l); right: var(--space-l);
   width: 40px; height: 40px;
@@ -1269,9 +1269,9 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
-.modale-fermer:active { color: var(--gold); }
+.btn-fermer:active { color: var(--gold); }
 
-.modale-titre {
+.titre-1 {
   color: var(--white);
   font-size: var(--fs-xl);
   text-transform: uppercase;
@@ -1280,7 +1280,23 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
   margin: 0 0 var(--space-s) 0;
 }
 
-.modale-sous-titre {
+.titre-2 {
+  color: var(--gold);
+  font-size: var(--fs-lg);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-tight);
+  margin: var(--space-l) 0 var(--space-s) 0;
+}
+
+.titre-3 {
+  color: var(--gold-70);
+  font-size: var(--fs-sm);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-wide);
+  margin: var(--space-m) 0 var(--space-xs) 0;
+}
+
+.texte-secondaire {
   color: var(--white-60);
   font-size: var(--fs-sm);
   text-transform: uppercase;
@@ -1289,10 +1305,33 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
   margin-bottom: var(--space-xl);
 }
 
-.modale-corps {
+..contenu {
   width: 100%;
   max-width: 600px;
   color: var(--white);
+}
+
+.ligne-info {
+  color: var(--white);
+  font-size: var(--fs-base);
+  margin-bottom: var(--space-s);
+  line-height: 1.4;
+}
+.ligne-info .libelle {
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-tight);
+  font-size: var(--fs-sm);
+}
+.texte {
+  color: var(--white);
+  font-size: var(--fs-base);
+  line-height: 1.5;
+  margin-bottom: var(--space-s);
+}
+
+.section {
+  margin-bottom: var(--space-xl);
 }
 
 /* =========================================
