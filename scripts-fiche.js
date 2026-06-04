@@ -8,10 +8,10 @@
 function ouvrirFicheVin(codebarre) {
   CURRENT_WINE_CODEBARRE = codebarre;
   document.getElementById('ficheVinOverlay').style.display = 'block';
-  document.getElementById('fiche-nom').textContent = 'Chargement...';
-  document.getElementById('fiche-content').innerHTML = 'Récupération des données...';
+  document.getElementById('fiche-nom').textContent = 'Chargement';
+  document.getElementById('fiche-content').innerHTML = 'Récupération des données';
 
-  appelBackend('getWineBottles', { codebarre: codebarre }, { spinner: '...' }).then(function(result) {
+  appelBackend('getWineBottles', { codebarre: codebarre }, { spinner: '' }).then(function(result) {
     if (!result) {
       fermerFiche();
       afficherMessage('Vin introuvable ou données pas encore disponibles');
@@ -25,7 +25,7 @@ function ouvrirFicheVin(codebarre) {
 }
 
 function ouvrirFicheVinParCodeSAQ(codeSAQ) {
-  appelBackend('getCodeBarresFromCodeSAQ', { codeSAQ: codeSAQ }, { spinner: '...' }).then(function(codebarre) {
+  appelBackend('getCodeBarresFromCodeSAQ', { codeSAQ: codeSAQ }, { spinner: '' }).then(function(codebarre) {
     if (codebarre) {
       ouvrirFicheVin(codebarre);
     } else {
@@ -56,7 +56,7 @@ function afficherFiche(result) {
         prixHeader.style.cursor = 'pointer';
         prixHeader.title = 'Cliquer pour vérifier le prix SAQ';
         prixHeader.onclick = function() {
-          appelBackend('verifierEtMettreAJourPrixSAQ', { codebarre: wine['Code-barres'], codeSAQ: wine['Code SAQ'] }, { spinner: 'Vérification prix SAQ...' }).then(function(prixResult) {
+          appelBackend('verifierEtMettreAJourPrixSAQ', { codebarre: wine['Code-barres'], codeSAQ: wine['Code SAQ'] }, { spinner: 'Vérification prix SAQ' }).then(function(prixResult) {
             if (prixResult && prixResult.updated) {
               afficherMessage('Prix mis à jour : ' + prixResult.ancienPrix.toFixed(2) + '$ → ' + prixResult.nouveauPrix.toFixed(2) + '$');
               prixHeader.textContent = prixResult.nouveauPrix.toFixed(2) + ' $';
@@ -293,7 +293,7 @@ function mettreAJourAffichageAccords(skipSave) {
   const display = document.getElementById('accords-display');
   display.textContent = selected.length > 0 ? selected.join(', ') : 'Aucun accord sélectionné';
   const accordsStr = selected.join(', ');
-  if (!skipSave) appelBackend('updateWineField', { codebarre: CURRENT_WINE_CODEBARRE, field: 'Accords', value: accordsStr }, { spinner: 'Sauvegarde...' }).catch(function(err) { afficherMessage('Erreur: ' + err); });
+  if (!skipSave) appelBackend('updateWineField', { codebarre: CURRENT_WINE_CODEBARRE, field: 'Accords', value: accordsStr }, { spinner: 'Sauvegarde' }).catch(function(err) { afficherMessage('Erreur: ' + err); });
 }
 
 document.addEventListener('click', function(e) {
@@ -318,7 +318,7 @@ function setAime(value) {
     ouiBtn.style.background = 'transparent';
     ouiBtn.style.borderColor = 'rgba(230,161,0,0.3)';
   }
-  if (!skipSave) appelBackend('updateWineField', { codebarre: CURRENT_WINE_CODEBARRE, field: 'Racheter', value: value }, { spinner: 'Sauvegarde...' }).catch(function(err) { afficherMessage('Erreur: ' + err); });
+  if (!skipSave) appelBackend('updateWineField', { codebarre: CURRENT_WINE_CODEBARRE, field: 'Racheter', value: value }, { spinner: 'Sauvegarde' }).catch(function(err) { afficherMessage('Erreur: ' + err); });
 }
 
 function togglePanier() {
@@ -327,7 +327,7 @@ function togglePanier() {
   const newValue = isActive ? '' : 'Oui';
   panierBtn.style.background = newValue === 'Oui' ? 'rgba(230,161,0,0.3)' : 'transparent';
   panierBtn.style.borderColor = newValue === 'Oui' ? 'var(--gold)' : 'rgba(230,161,0,0.3)';
-  appelBackend('updateWineField', { codebarre: CURRENT_WINE_CODEBARRE, field: 'Panier', value: newValue }, { spinner: 'Sauvegarde...' }).catch(function(err) { afficherMessage('Erreur: ' + err); });
+  appelBackend('updateWineField', { codebarre: CURRENT_WINE_CODEBARRE, field: 'Panier', value: newValue }, { spinner: 'Sauvegarde' }).catch(function(err) { afficherMessage('Erreur: ' + err); });
 }
 
 // ==================== ÉDITION FICHE ====================
@@ -480,7 +480,7 @@ function saveFiche() {
     divers: document.getElementById('edit-divers').value
   };
 
-  appelBackend('saveWineEdits', updatedData, { spinner: 'Sauvegarde...' }).then(function() {
+  appelBackend('saveWineEdits', updatedData, { spinner: 'Sauvegarde' }).then(function() {
     afficherMessage('Modifications sauvegardées !');
     fermerEditFiche();
     ouvrirFicheVin(cb);
@@ -494,7 +494,7 @@ afficherConfirmation(
     'Supprimer la bouteille',
     'Supprimer cette bouteille ? Cette action est irréversible.',
     function() {
-      appelBackend('supprimerBouteille', { row: row, bottle: bottle }, { spinner: 'Suppression...' }).then(function() {
+      appelBackend('supprimerBouteille', { row: row, bottle: bottle }, { spinner: 'Suppression' }).then(function() {
         afficherMessage('Bouteille supprimée');
         fermerEditFiche();
         ouvrirFicheVin(CURRENT_WINE_CODEBARRE);
@@ -552,7 +552,7 @@ function checkEmplacementAdd() {
   const espace = document.getElementById('add-espace').value;
   const statusDiv = document.getElementById('add-emplacement-status');
   if (!meuble || !rangee || !espace) { statusDiv.innerHTML = ''; statusDiv.setAttribute('data-available', 'true'); return; }
-  statusDiv.innerHTML = 'Vérification...';
+  statusDiv.innerHTML = 'Vérification';
   appelBackend('checkLocationAvailable', { meuble: meuble, rangee: rangee, espace: espace }).then(function(result) {
     if (result.available) {
       statusDiv.innerHTML = '<span style="color:#4caf50;">✓ Libre</span>';
@@ -570,7 +570,7 @@ function confirmerAjoutBouteille() {
   const espace = document.getElementById('add-espace').value;
   const statusDiv = document.getElementById('add-emplacement-status');
   if (statusDiv && statusDiv.getAttribute('data-available') === 'false') { afficherMessage('Emplacement occupé'); return; }
-  appelBackend('addBottle', { codebarre: CURRENT_WINE_CODEBARRE, meuble: meuble, rangee: rangee, espace: espace }, { spinner: 'Mise en cave...' }).then(function() {
+  appelBackend('addBottle', { codebarre: CURRENT_WINE_CODEBARRE, meuble: meuble, rangee: rangee, espace: espace }, { spinner: 'Mise en cave' }).then(function() {
     afficherMessage('Bouteille ajoutée !');
     annulerAjoutBouteille();
     ouvrirFicheVin(CURRENT_WINE_CODEBARRE);
@@ -621,7 +621,7 @@ function selectAccordVerre(bottle, note) {
 function confirmDrink(row, bottle) {
   const plat = document.getElementById('drink-plat-' + bottle).value;
   const bonAccord = SELECTED_ACCORD[bottle] || '3';
-  appelBackend('actionBouteille', { row: row, action: 'boire', bottle: bottle, plat: plat, bonAccord: bonAccord }, { spinner: 'Service en cours...' }).then(function() {
+  appelBackend('actionBouteille', { row: row, action: 'boire', bottle: bottle, plat: plat, bonAccord: bonAccord }, { spinner: 'Service en cours' }).then(function() {
     cancelDrink(bottle);
     delete SELECTED_ACCORD[bottle];
     ouvrirFicheVin(CURRENT_WINE_CODEBARRE);
@@ -662,7 +662,7 @@ function checkEmplacementMove(bottle) {
   const espace = document.getElementById('move-espace-' + bottle).value;
   const statusDiv = document.getElementById('move-status-' + bottle);
   if (!meuble || !rangee || !espace) { statusDiv.innerHTML = ''; return; }
-  statusDiv.innerHTML = 'Vérification...';
+  statusDiv.innerHTML = 'Vérification';
   appelBackend('checkLocationAvailable', { meuble: meuble, rangee: rangee, espace: espace }).then(function(result) {
     if (result.available) {
       statusDiv.innerHTML = '<span style="color:#4caf50;">✓ Libre</span>';
@@ -679,7 +679,7 @@ function confirmMove(row, bottle) {
   const rangee = document.getElementById('move-rangee-' + bottle).value;
   const espace = document.getElementById('move-espace-' + bottle).value;
   if (!meuble || !rangee || !espace) { afficherMessage('Veuillez remplir tous les champs'); return; }
-  appelBackend('actionBouteille', { row: row, action: 'deplacer', bottle: bottle, meuble: meuble, rangee: rangee, espace: espace }, { spinner: 'Déplacement...' }).then(function() {
+  appelBackend('actionBouteille', { row: row, action: 'deplacer', bottle: bottle, meuble: meuble, rangee: rangee, espace: espace }, { spinner: 'Déplacement' }).then(function() {
     afficherMessage('Bouteille déplacée');
     cancelMove(bottle);
     ouvrirFicheVin(CURRENT_WINE_CODEBARRE);
@@ -693,7 +693,7 @@ function mettreARanger(row, bottle) {
     'Mettre à ranger',
     'Retirer cet emplacement pour cette bouteille ?',
     function() {
-      appelBackend('mettreBotteilleARanger', { row: row, bottle: bottle }, { spinner: 'Mise à ranger...' }).then(function() {
+      appelBackend('mettreBotteilleARanger', { row: row, bottle: bottle }, { spinner: 'Mise à ranger' }).then(function() {
         afficherMessage('Bouteille mise à ranger');
         cancelMove(bottle);
         ouvrirFicheVin(CURRENT_WINE_CODEBARRE);
@@ -716,16 +716,16 @@ function fermerFiche() {
 function chercherSuccursales() {
   const codeSAQ = CURRENT_WINE_DATA['Code SAQ'];
   const div = document.getElementById('succursales-result');
-  div.innerHTML = '<p style="color:var(--white-70);font-size:13px;">Localisation en cours...</p>';
+  div.innerHTML = '<p style="color:var(--white-70);font-size:13px;">Localisation en cours</p>';
 
   navigator.geolocation.getCurrentPosition(
     function(position) {
-      div.innerHTML = '<p style="color:var(--white-70);font-size:13px;">Recherche en cours... ~30 secondes</p>';
-      appelBackend('getSuccursalesDisponibles', { codeSAQ: codeSAQ, lat: position.coords.latitude, lng: position.coords.longitude }, { spinner: 'Recherche succursales...' }).then(afficherResultatsSuccursales).catch(function(err) { div.innerHTML = '<p style="color:var(--error);">Erreur: ' + err + '</p>'; });
+      div.innerHTML = '<p style="color:var(--white-70);font-size:13px;">Recherche en cours ~30 secondes</p>';
+      appelBackend('getSuccursalesDisponibles', { codeSAQ: codeSAQ, lat: position.coords.latitude, lng: position.coords.longitude }, { spinner: 'Recherche succursales' }).then(afficherResultatsSuccursales).catch(function(err) { div.innerHTML = '<p style="color:var(--error);">Erreur: ' + err + '</p>'; });
     },
     function() {
-      div.innerHTML = '<p style="color:var(--white-70);font-size:13px;">GPS non disponible, recherche depuis Lanoraie...</p>';
-      appelBackend('getSuccursalesDisponibles', { codeSAQ: codeSAQ }, { spinner: 'Recherche succursales...' }).then(afficherResultatsSuccursales).catch(function(err) { div.innerHTML = '<p style="color:var(--error);">Erreur: ' + err + '</p>'; });
+      div.innerHTML = '<p style="color:var(--white-70);font-size:13px;">GPS non disponible, recherche depuis Lanoraie</p>';
+      appelBackend('getSuccursalesDisponibles', { codeSAQ: codeSAQ }, { spinner: 'Recherche succursales' }).then(afficherResultatsSuccursales).catch(function(err) { div.innerHTML = '<p style="color:var(--error);">Erreur: ' + err + '</p>'; });
     }
   );
 }

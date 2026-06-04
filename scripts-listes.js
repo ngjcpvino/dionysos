@@ -29,9 +29,9 @@ function chargerListeRacheter() {
     return;
   }
 
-  div.innerHTML = "<p class='text-center p-15 color-muted'>Chargement...</p>";
+  div.innerHTML = "<p class='text-center p-15 color-muted'>Chargement</p>";
   
-  appelBackend('getInventoryData', {}, { spinner: '...' }).then(function(data) {
+  appelBackend('getInventoryData', {}, { spinner: '' }).then(function(data) {
     ALL_DATA = data || [];
     chargerSuccursalesEtAfficher();
   }).catch(function(err) { afficherMessage('Erreur: ' + err); });
@@ -89,7 +89,7 @@ function sauvegarderSuccursale() {
   const nom = document.getElementById('new-succursale-nom').value.trim();
   const numero = document.getElementById('new-succursale-numero').value.trim();
   if (!nom || !numero) { afficherMessage('Nom et numéro requis'); return; }
-  appelBackend('ajouterSuccursale', { nom: nom, numero: numero }, { spinner: 'Ajout succursale...' }).then(function() {
+  appelBackend('ajouterSuccursale', { nom: nom, numero: numero }, { spinner: 'Ajout succursale' }).then(function() {
     afficherMessage('Succursale ajoutée !');
     document.getElementById('form-succursale').style.display = 'none';
     document.getElementById('new-succursale-nom').value = '';
@@ -130,7 +130,7 @@ function lancerVerificationGraphQL() {
   const cards = div.querySelectorAll('.wine-card');
 
   status.style.display = 'block';
-  status.textContent = 'Vérification en cours...';
+  status.textContent = 'Vérification en cours';
 
   let total = 0;
   let compteur = 0;
@@ -147,7 +147,7 @@ function lancerVerificationGraphQL() {
         badge.className = dispo.disponible ? 'dispo-badge dispo-badge-oui' : 'dispo-badge dispo-badge-non';
       }
       compteur++;
-      status.textContent = 'Vérification... : ' + compteur + '/' + total;
+      status.textContent = 'Vérification : ' + compteur + '/' + total;
       if (compteur === total) status.textContent = '✓ Vérification terminée !';
     }).catch(function() { compteur++; });
   });
@@ -164,8 +164,8 @@ function chargerListeARanger() {
     afficherListeARanger(ALL_DATA);
     return;
   }
-  div.innerHTML = "<p class='text-center p-15 color-muted'>Chargement...</p>";
-  appelBackend('getInventoryData', {}, { spinner: '...' }).then(function(data) {
+  div.innerHTML = "<p class='text-center p-15 color-muted'>Chargement</p>";
+  appelBackend('getInventoryData', {}, { spinner: '' }).then(function(data) {
     ALL_DATA = data || [];
     afficherListeARanger(ALL_DATA);
   }).catch(function(err) { afficherMessage('Erreur: ' + err); });
@@ -207,8 +207,8 @@ function chargerEmplacements() {
     afficherEmplacements(ALL_DATA);
     return;
   }
-  div.innerHTML = "<p class='text-center p-15 color-muted'>Chargement...</p>";
-  appelBackend('getInventoryData', {}, { spinner: '...' }).then(function(data) {
+  div.innerHTML = "<p class='text-center p-15 color-muted'>Chargement</p>";
+  appelBackend('getInventoryData', {}, { spinner: '' }).then(function(data) {
     ALL_DATA = data || [];
     remplirFiltresEmplacements();
     afficherEmplacements(ALL_DATA);
@@ -481,7 +481,7 @@ function basculerDoublonsCepages() {
 function chargerPromotions() {
   const div = document.getElementById('promotions-list');
   if (!div) return;
-  div.innerHTML = "<p class='text-center p-15 color-muted'>Chargement des promotions...</p>";
+  div.innerHTML = "<p class='text-center p-15 color-muted'>Chargement des promotions</p>";
 
   appelBackend('getSuccursales').then(function(succursales) {
     const select = document.getElementById('select-succursale-promo');
@@ -583,7 +583,7 @@ function rafraichirDispoPromos() {
 function voirSuccursalesPromo(codeSAQ) {
   const div = document.getElementById('dispo-promo-' + codeSAQ);
   if (!div) return;
-  div.innerHTML = '📍 Recherche en cours...';
+  div.innerHTML = '📍 Recherche en cours';
 
   function afficherSuccursales(succursales) {
     if (!succursales || succursales.length === 0) { div.innerHTML = '📍 Aucune succursale disponible'; return; }
