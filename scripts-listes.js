@@ -644,7 +644,7 @@ function filtrerAutresPromos() {
   }
   const htmlParts = [];
   filtered.forEach(function(promo) {
-    const couleurClass = promo.couleur === 'Rouge' ? 'rouge' : promo.couleur === 'Blanc' ? 'blanc' : promo.couleur === 'Rosé' ? 'rose' : promo.couleur === 'Effervescent' ? 'bulles' : '';
+    const couleurClass = promo.couleur === 'Rouge' ? 'vin-rouge' : promo.couleur === 'Blanc' ? 'vin-blanc' : promo.couleur === 'Rosé' ? 'vin-rose' : promo.couleur === 'Effervescent' ? 'vin-bulles' : '';
     htmlParts.push(
       '<div class="promo-item ' + couleurClass + '" onclick="window.open(\'https://www.saq.com/fr/' + promo.codeSAQ + '\', \'_blank\')">' +
         '<div class="promo-nom">' + promo.nom + '</div>' +

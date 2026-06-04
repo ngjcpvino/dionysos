@@ -22,6 +22,25 @@ html, body {
   --gold-50: rgba(201,129,60,0.5);
   --gold-60: rgba(201,129,60,0.6);
   --gold-70: rgba(201,129,60,0.7);
+
+  /* ===== BORDURES — largeurs ===== */
+  --largeur-bordure-fine: 1px;
+  --largeur-bordure-moyenne: 2px;
+  --largeur-bordure-epaisse: 4px;
+
+  /* ===== BORDURES — couleurs ===== */
+  --couleur-bordure-or: var(--gold);
+  --couleur-bordure-claire: var(--white-15);
+  --couleur-bordure-tres-claire: var(--white-10);
+  --couleur-bordure-subtile: var(--white-05);
+  --couleur-bordure-pale: var(--white-70);
+
+  /* ===== COULEURS DE VIN (bordure gauche des cartes) ===== */
+  --vin-rouge: #8B0000;
+  --vin-blanc: #f7f6da;
+  --vin-rose: #FFC0CB;
+  --vin-bulles: #00ced1;
+
   --black: #000;
   --white: #fff;
   --white-70: rgba(255,255,255,0.9);
@@ -289,7 +308,7 @@ body::after {
   justify-content: space-between;
   align-items: center;
   padding-bottom: var(--space-m);
-  border-bottom: 1px solid var(--gold);
+  border-bottom: var(--largeur-bordure-fine) solid var(--couleur-bordure-or);
   margin-bottom: var(--space-l);
 }
 
@@ -303,7 +322,7 @@ body::after {
 }
 
 .bloc-niveau-2 {
-  border: 1px solid rgba(201,129,60,0.3);
+  border: var(--largeur-bordure-fine) solid var(--couleur-bordure-or);
   padding: 18px var(--space-l);
   margin-bottom: var(--space-s);
   font-size: var(--fs-md);
@@ -315,7 +334,7 @@ body::after {
 }
 
 .inutile-bloc-niveau-3 {
-  border: 1px solid var(--gold-20);
+  border: var(--largeur-bordure-fine) solid var(--gold-20);
   padding: var(--space-m) 16px;
   font-size: var(--fs-base);
   font-weight: 300;
@@ -393,7 +412,7 @@ body::after {
 }
 
 .filter-select-bordered {
-  border: 1px solid var(--gold-30);
+  border: var(--largeur-bordure-fine) solid var(--couleur-bordure-or);
 }
 
 
@@ -414,8 +433,8 @@ body::after {
 .filter-input::placeholder { color: var(--white-50); }
 
 .filter-separator {
-  height: 1px;
-  background: rgba(201,129,60,0.3);
+  height: var(--largeur-bordure-fine);
+  background: var(--couleur-bordure-or);
 }
 
 .filter-reset {
@@ -428,7 +447,7 @@ body::after {
   font-weight: 300;
   font-size: var(--fs-md);
   cursor: pointer;
-  border-left: 1px solid rgba(201,129,60,0.3);
+  border-left: var(--largeur-bordure-fine) solid rgba(201,129,60,0.3);
   transition: color 0.2s;
 }
 
@@ -442,7 +461,7 @@ body::after {
   background: var(--bg-card);
   padding: var(--space-m) var(--space-m);
   margin-bottom: var(--space-s);
-  border-left: 4px solid var(--gold);
+ border-left: var(--largeur-bordure-epaisse) solid var(--couleur-bordure-or);
   cursor: pointer;
   display: flex;
   justify-content: space-between;
@@ -451,10 +470,11 @@ body::after {
   gap: var(--space-m);
 }
 
-.wine-card.rouge  { border-left: 2px solid #8B0000; }
-.wine-card.blanc  { border-left: 2px solid #f7f6da; }
-.wine-card.rose   { border-left: 2px solid #FFC0CB; }
-.wine-card.bulles { border-left: 2px solid #00ced1; }
+/* Couleur de vin — un seul endroit pour tous les composants (carte, fiche, promo) */
+.vin-rouge  { border-left: var(--largeur-bordure-moyenne) solid var(--vin-rouge); }
+.vin-blanc  { border-left: var(--largeur-bordure-moyenne) solid var(--vin-blanc); }
+.vin-rose   { border-left: var(--largeur-bordure-moyenne) solid var(--vin-rose); }
+.vin-bulles { border-left: var(--largeur-bordure-moyenne) solid var(--vin-bulles); }
 
 .wine-card-left {
   flex: 1;
@@ -501,7 +521,7 @@ label {
 input, select, textarea {
   width: 100%;
   height: 50px;
-  border: 1px solid var(--white-15);
+  border: var(--largeur-bordure-fine) solid var(--couleur-bordure-claire);
   padding: 0 var(--space-m);
   font-size: var(--fs-md);
   background: var(--shadow-md);
@@ -528,7 +548,7 @@ select option { background-color: #1e1e1e; color: var(--white); padding: var(--s
   font-size: var(--fs-lg);
   font-weight: 400;
   color: var(--white-70);
-  border-bottom: 2px solid var(--gold);
+  border-bottom: var(--largeur-bordure-moyenne) solid var(--couleur-bordure-or);
   padding-bottom: var(--space-s);
   text-align: center;
   text-transform: uppercase;
@@ -541,7 +561,7 @@ select option { background-color: #1e1e1e; color: var(--white); padding: var(--s
 .multi-select-container {
   position: relative;
   background: var(--shadow-md);
-  border: 1px solid var(--white-15);
+  border: var(--largeur-bordure-fine) solid var(--couleur-bordure-claire);
   cursor: pointer;
   height: 50px;
 }
@@ -564,7 +584,7 @@ select option { background-color: #1e1e1e; color: var(--white); padding: var(--s
   max-height: 200px;
   overflow-y: auto;
   background: #1e1e1e;
-  border: 1px solid var(--gold);
+  border: var(--largeur-bordure-fine) solid var(--couleur-bordure-or);
   z-index: 1000;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
@@ -577,7 +597,7 @@ select option { background-color: #1e1e1e; color: var(--white); padding: var(--s
   padding: var(--space-s) var(--space-m);
   display: flex;
   align-items: center;
-  border-bottom: 1px solid var(--white-05);
+  border-bottom: var(--largeur-bordure-fine) solid var(--couleur-bordure-subtile);
 }
 
 .checkbox-item input[type="checkbox"] {
@@ -622,7 +642,7 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
   height: 50px;
   background: var(--white-10);
   color: var(--white);
-  border: 2px solid rgba(255,255,255,0.3);
+  border: var(--largeur-bordure-moyenne) solid rgba(255,255,255,0.3);
   font-weight: 400;
   letter-spacing: var(--ls-wide);
   text-transform: uppercase;
@@ -706,7 +726,7 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
   -webkit-backdrop-filter: blur(10px);
   padding: 0;
   border: none;
-  border-left: 2px solid var(--gold);
+  border-left: var(--largeur-bordure-moyenne) solid var(--couleur-bordure-or);
   color: var(--white);
   box-shadow: 0 20px 60px var(--shadow-md);
   margin: 60px auto 40px;
@@ -717,17 +737,14 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
 
 .fichevin-window.active { transform: translateY(0); opacity: 1; }
 
-.fichevin-window.rouge  { border-left-color: #8B0000; }
-.fichevin-window.blanc  { border-left-color: #f7f6da; }
-.fichevin-window.rose   { border-left-color: #FFC0CB; }
-.fichevin-window.bulles { border-left-color: #00ced1; }
+
 
 .fichevin-header {
   display: flex;
   justify-content: space-between;
   align-items: stretch;
   padding: var(--space-xl) var(--space-xl) var(--space-l);
-  border-bottom: 1px solid var(--white-70);
+  border-bottom: var(--largeur-bordure-fine) solid var(--couleur-bordure-pale);
 }
 
 .fv-title {
@@ -795,7 +812,7 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
 .fiche-section {
   margin-bottom: var(--space-xl);
   padding-bottom: var(--space-l);
-  border-bottom: 1px solid var(--white-70);
+  border-bottom: var(--largeur-bordure-fine) solid var(--couleur-bordure-pale);
 }
 
 .fiche-section:last-child { border-bottom: none; margin-bottom: 0; }
@@ -826,7 +843,7 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
 .fiche-table-cell {
   padding: 6px var(--space-s);
   background: var(--white-03);
-  border: 1px solid var(--white-10);
+  border: var(--largeur-bordure-fine) solid var(--couleur-bordure-tres-claire);
   text-align: center;
   flex: 0 0 auto;
 }
@@ -838,7 +855,7 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
   background: rgba(217,122,0,0.05);
   padding: var(--space-l) 0;
   margin: 0;
-  border-bottom: 1px solid var(--white-70);
+  border-bottom: var(--largeur-bordure-fine) solid var(--couleur-bordure-pale);
   margin-bottom: var(--space-xl);
 }
 
@@ -865,7 +882,7 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
   align-items: center;
   background: rgba(0,0,0,0.4);
   padding: var(--space-m);
-  border: 1px solid var(--gold);
+  border: var(--largeur-bordure-fine) solid var(--couleur-bordure-or);
   margin-bottom: var(--space-s);
   gap: var(--space-m);
   box-sizing: border-box;
@@ -938,7 +955,7 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
   table-layout: fixed;
 }
 
-.data-table thead tr { border-bottom: 1px solid var(--gold); text-align: left; }
+.data-table thead tr { border-bottom: var(--largeur-bordure-fine) solid var(--couleur-bordure-or); text-align: left; }
 
 .data-table th {
   padding: var(--space-m) var(--space-s);
@@ -952,7 +969,7 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
 .data-table td {
   padding: var(--space-m) var(--space-s);
   font-size: clamp(11px, 2.5vw, 13px);
-  border-bottom: 1px solid var(--white-10);
+  border-bottom: var(--largeur-bordure-fine) solid var(--couleur-bordure-tres-claire);
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -980,7 +997,7 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
    ========================================= */
 .alert-box {
   background: rgba(230,161,0,0.15);
-  border-left: 1px solid var(--gold);
+  border-left: var(--largeur-bordure-fine) solid var(--couleur-bordure-or);
   padding: var(--space-m);
   margin-bottom: var(--space-l);
 }
@@ -1010,7 +1027,7 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
   padding: var(--space-xl);
   max-width: 400px;
   width: 100%;
-  border: 1px solid var(--gold);
+  border: var(--largeur-bordure-fine) solid var(--couleur-bordure-or);
   box-shadow: 0 20px 40px var(--shadow-md);
   text-align: center;
   position: relative;
@@ -1037,7 +1054,7 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
 
 .confirm-dialog-button-primary { background: var(--gold); color: var(--black); }
 .confirm-dialog-button-primary:hover { background: var(--gold-hover); }
-.confirm-dialog-button-secondary { background: var(--white-10); color: var(--white); border: 1px solid rgba(255,255,255,0.3); }
+.confirm-dialog-button-secondary { background: var(--white-10); color: var(--white); border: var(--largeur-bordure-fine) solid rgba(255,255,255,0.3); }
 .confirm-dialog-button-secondary:hover { background: var(--white-15); }
 
 .confirm-dialog-close {
@@ -1060,7 +1077,7 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
   width: 100%;
   height: var(--taille-tactile);
   background: var(--white-10);
-  border: 1px solid rgba(255,255,255,0.3);
+  border: var(--largeur-bordure-fine) solid rgba(255,255,255,0.3);
   color: var(--white);
   padding: 0 var(--space-s);
   margin-bottom: var(--space-l);
@@ -1097,7 +1114,7 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
   background: rgba(0,0,0,0.92);
   color: var(--white);
   padding: var(--space-l) var(--space-xl);
-  border: 1px solid var(--gold);
+  border: var(--largeur-bordure-fine) solid var(--gold);
   font-weight: 500;
   letter-spacing: var(--ls-tight);
   text-transform: uppercase;
@@ -1298,7 +1315,7 @@ select::-webkit-scrollbar-thumb { background: var(--gold); }
   width: 100%;
   max-width: 680px;
   background: rgba(0,0,0,0.95);
-  border-left: 2px solid var(--gold);
+  border-left: var(--largeur-bordure-moyenne) solid var(--couleur-bordure-or);
   color: var(--white);
   margin: 60px auto 40px;
 }
@@ -1310,7 +1327,7 @@ select::-webkit-scrollbar-thumb { background: var(--gold); }
   justify-content: space-between;
   align-items: center;
   padding: var(--space-l);
-  border-bottom: 1px solid var(--gold);
+  border-bottom: var(--largeur-bordure-fine) solid var(--gold);
   flex-shrink: 0;
 }
 
@@ -1330,7 +1347,7 @@ select::-webkit-scrollbar-thumb { background: var(--gold); }
   padding: var(--space-l);
   display: flex;
   gap: var(--space-s);
-  border-top: 1px solid var(--white-10);
+  border-top: 1px solid var(--couleur-bordure-tres-claire);
   flex-shrink: 0;
 }
 
@@ -1366,7 +1383,7 @@ select option:hover { background-color: rgba(230,161,0,0.3) !important; color: v
 
 .card-cepage-item {
   padding: var(--space-l) var(--space-l);
-  border-bottom: 1px solid var(--gold-20);
+  border-bottom: var(--largeur-bordure-fine) solid var(--gold-20);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1420,7 +1437,7 @@ select option:hover { background-color: rgba(230,161,0,0.3) !important; color: v
   font-weight: 300;
   letter-spacing: var(--ls-tight);
   color: var(--white);
-  border-bottom: 1px solid var(--white-15);
+  border-bottom: var(--largeur-bordure-fine) solid var(--couleur-bordure-claire);
 }
 
 .collapsible-content { padding-top: var(--space-xs); }
@@ -1431,7 +1448,7 @@ select option:hover { background-color: rgba(230,161,0,0.3) !important; color: v
   align-items: center;
   padding: var(--space-s) var(--space-xs);
   cursor: pointer;
-  border-bottom: 1px solid var(--white-10);
+  border-bottom: var(--largeur-bordure-fine) solid var(--couleur-bordure-tres-claire);
 }
 
 .collapsible-item:last-child { border-bottom: none; }
@@ -1462,7 +1479,7 @@ select option:hover { background-color: rgba(230,161,0,0.3) !important; color: v
 
 .btn-ajouter-succursale {
   height: var(--taille-tactile);
-  border: 1px solid rgba(201,129,60,0.4);
+  border: var(--largeur-bordure-fine) solid var(--couleur-bordure-or);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1487,16 +1504,13 @@ select option:hover { background-color: rgba(230,161,0,0.3) !important; color: v
    ========================================= */
 .promo-item {
   padding: var(--space-m) 0;
-  border-bottom: 1px solid var(--white-10);
+  border-bottom: var(--largeur-bordure-fine) solid var(--couleur-bordure-tres-claire);
   cursor: pointer;
-  border-left: 1px solid var(--white-15);
+  border-left: var(--largeur-bordure-fine) solid var(--couleur-bordure-claire);
   padding-left: var(--space-s);
 }
 
-.promo-item.rouge  { border-left-color: #8B0000; }
-.promo-item.blanc  { border-left-color: #f7f6da; }
-.promo-item.rose   { border-left-color: #FFC0CB; }
-.promo-item.bulles { border-left-color: #00ced1; }
+
 
 .promo-item:last-child { border-bottom: none; }
 
@@ -1578,7 +1592,7 @@ select option:hover { background-color: rgba(230,161,0,0.3) !important; color: v
 
 .promo-btn-succursales {
   background: transparent;
-  border: 1px solid var(--gold-30);
+  border: var(--largeur-bordure-fine) solid var(--couleur-bordure-or);
   color: var(--white-50);
   padding: 4px var(--space-s);
   font-size: var(--fs-xs);
@@ -1591,5 +1605,5 @@ select option:hover { background-color: rgba(230,161,0,0.3) !important; color: v
 .promo-succursale-item {
   padding: 3px 0;
   font-size: var(--fs-xs);
-  border-bottom: 1px solid var(--white-05);
+  border-bottom: var(--largeur-bordure-fine) solid var(--couleur-bordure-subtile);
 }

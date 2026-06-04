@@ -87,12 +87,12 @@ function afficherFiche(result) {
     nomElement.textContent = decodeHTML(wine.Nom || 'Vin sans nom');
   }
 
-  windowInner.classList.remove('rouge', 'blanc', 'rose', 'bulles');
+  windowInner.classList.remove('vin-rouge', 'vin-blanc', 'vin-rose', 'vin-bulles');
   const couleur = (wine.Couleur || '').toLowerCase();
-  if (couleur.includes('rouge')) windowInner.classList.add('rouge');
-  else if (couleur.includes('blanc')) windowInner.classList.add('blanc');
-  else if (couleur.includes('rosé') || couleur.includes('rose')) windowInner.classList.add('rose');
-  else if (couleur.includes('bulle') || couleur.includes('mousseux')) windowInner.classList.add('bulles');
+  if (couleur.includes('rouge')) windowInner.classList.add('vin-rouge');
+  else if (couleur.includes('blanc')) windowInner.classList.add('vin-blanc');
+  else if (couleur.includes('rosé') || couleur.includes('rose')) windowInner.classList.add('vin-rose');
+  else if (couleur.includes('bulle') || couleur.includes('mousseux')) windowInner.classList.add('vin-bulles');
 
   let origineHTML = '<div style="display:flex;justify-content:space-between;align-items:flex-end;">';
   origineHTML += '<div class="fiche-origine-texts">';

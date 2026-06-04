@@ -296,10 +296,10 @@ function genererCardVin(item, options) {
   const cepage = item.Cepage || '';
 
   const couleur = (item.Couleur || '').toLowerCase();
-  const cClass = couleur.includes('rouge') ? 'rouge' :
-                 couleur.includes('blanc') ? 'blanc' :
-                 couleur.includes('rose') || couleur.includes('rosé') ? 'rose' :
-                 couleur.includes('bulle') || couleur.includes('mousseux') ? 'bulles' : 'rouge';
+  const cClass = couleur.includes('rouge') ? 'vin-rouge' :
+                 couleur.includes('blanc') ? 'vin-blanc' :
+                 couleur.includes('rose') || couleur.includes('rosé') ? 'vin-rose' :
+                 couleur.includes('bulle') || couleur.includes('mousseux') ? 'vin-bulles' : 'vin-rouge';
 
   const clickable = options.clickable !== false && cb;
   const onclick = clickable ? 'onclick="ouvrirFicheVin(\'' + cb + '\')"' : '';
@@ -314,7 +314,7 @@ function genererCardVin(item, options) {
     const accordColors = { 1: '#FF4B2B', 2: '#FF9000', 3: '#FFD200', 4: '#8BC34A', 5: '#2ECC71' };
     options.mets.forEach(function(met) {
       const borderColor = accordColors[met.note] || 'rgba(255,255,255,0.2)';
-      gauche += '<div class="historique-met-item" style="border-left:1px solid ' + borderColor + ';">';
+      gauche += '<div class="historique-met-item" style="border-left:var(--largeur-bordure-moyenne) solid ' + borderColor + ';">';
       gauche += '<span>' + (met.plat || '—') + '</span>';
       gauche += '<span class="historique-met-date">' + met.date + '</span>';
       gauche += '</div>';
