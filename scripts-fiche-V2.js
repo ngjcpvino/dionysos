@@ -25,23 +25,23 @@ function ouvrirFicheV2(codebarre, provenance) {
 }
 
 function afficherFicheV2(result) {
-  const wine = result.wine;
+  var wine = result.wine;
   CURRENT_WINE_DATA = wine;
   CURRENT_WINE_BOTTLES = result.bottles || [];
 
   document.getElementById('ficheV2-nom').textContent = decodeHTML(wine.Nom || 'Vin sans nom');
 
-  vlet origine = [];
+  var origine = [];
   if (wine.Pays) origine.push(decodeHTML(wine.Pays));
   if (wine.Region) origine.push(decodeHTML(wine.Region));
   if (wine.Appellation) origine.push(decodeHTML(wine.Appellation));
   document.getElementById('ficheV2-origine').textContent = origine.join(' • ');
 
-  const bottlesActives = CURRENT_WINE_BOTTLES.filter(function(b) {
+  var bottlesActives = CURRENT_WINE_BOTTLES.filter(function(b) {
     return b.statut !== 'Bu' && b.statut !== 'Sorti';
   });
 
-  let emplacements = [];
+  var emplacements = [];
   bottlesActives.forEach(function(b) {
     if (b.meuble && b.rangee && b.espace) {
       emplacements.push(b.meuble.substring(0, 1).toUpperCase() + '-' + b.rangee + '-' + b.espace);
@@ -50,7 +50,7 @@ function afficherFicheV2(result) {
     }
   });
 
-  let corps = '';
+  var corps = '';
   corps += '<div class="wine-count">' + bottlesActives.length + ' UNITÉ' + (bottlesActives.length > 1 ? 'S' : '') + '</div>';
   emplacements.forEach(function(e) {
     corps += '<div class="wine-emplacement">' + e + '</div>';
