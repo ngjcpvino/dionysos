@@ -71,7 +71,7 @@ function stopScannerV2() {
 
 function traiterResultatScanV2(code) {
   console.log('[V2] Code scanné:', code);
-  appelBackend('checkWineExists', { codebarre: code }, { spinner: 'Vérification...' }).then(function(result) {
+  appelBackend('checkWineExists', { codebarre: code }, { spinner: 'Vérification' }).then(function(result) {
     if (result.exists) {
       console.log('[V2] Vin EXISTE:', result);
       ouvrirMenuActionV2(code, result);

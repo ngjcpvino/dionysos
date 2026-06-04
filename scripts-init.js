@@ -113,7 +113,7 @@ function closeMenu() {
   document.getElementById("menuOverlay").style.display = "none";
 }
 function refreshApp() {
-  afficherMessage('Synchronisation...');
+  afficherMessage('Synchronisation');
   chargerInventaire();
 
   const activeView = document.querySelector('.view-section.active');
