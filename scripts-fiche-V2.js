@@ -26,8 +26,9 @@ function ouvrirFicheV2(codebarre, provenance) {
 
 function afficherFicheV2(result) {
   var wine = result.wine;
+  var bottles = result.bottles || [];
   CURRENT_WINE_DATA = wine;
-  CURRENT_WINE_BOTTLES = result.bottles || [];
+  CURRENT_WINE_BOTTLES = bottles;
 
   document.getElementById('ficheV2-nom').textContent = decodeHTML(wine.Nom || 'Vin sans nom');
 
@@ -37,26 +38,59 @@ function afficherFicheV2(result) {
   if (wine.Appellation) origine.push(decodeHTML(wine.Appellation));
   document.getElementById('ficheV2-origine').textContent = origine.join(' • ');
 
-  var bottlesActives = CURRENT_WINE_BOTTLES.filter(function(b) {
-    return b.statut !== 'Bu' && b.statut !== 'Sorti';
-  });
+  var html = '';
 
-  var emplacements = [];
-  bottlesActives.forEach(function(b) {
-    if (b.meuble && b.rangee && b.espace) {
-      emplacements.push(b.meuble.substring(0, 1).toUpperCase() + '-' + b.rangee + '-' + b.espace);
-    } else {
-      emplacements.push('À ranger');
-    }
-  });
+  // === DÉGUSTATION ===
+  html += '<div class="fiche-section">';
+  html += '<h3 class="fiche-section-title">DÉGUSTATION</h3>';
+  if (wine.Prix) html += '<div class="fiche-field"><span class="fiche-label">Prix:</span> ' + parseFloat(wine.Prix).toFixed(2) + ' $</div>';
+  if (wine['Cépage']) html += '<div class="fiche-field"><span class="fiche-label">Cépages:</span> ' + decodeHTML(wine['Cépage']) + '</div>';
+  if (wine['Pastille gout']) html += '<div class="fiche-field"><span class="fiche-label">Pastille:</span> ' + decodeHTML(wine['Pastille gout']) + '</div>';
+  if (wine['Arômes']) html += '<div class="fiche-field"><span class="fiche-label">Arômes:</span> ' + decodeHTML(wine['Arômes']) + '</div>';
 
-  var corps = '';
-  corps += '<div class="wine-count">' + bottlesActives.length + ' UNITÉ' + (bottlesActives.length > 1 ? 'S' : '') + '</div>';
-  emplacements.forEach(function(e) {
-    corps += '<div class="wine-emplacement">' + e + '</div>';
+  html += '<div class="fiche-table">';
+  var tableFields = [
+    ['Acidité', wine['Acidité']], ['Sucrosité', wine['Sucrosité']], ['Corps', wine.Corps],
+    ['Bouche', wine.Bouche], ['Sucre', wine.Sucre], ['Alcool', wine.Alcool], ['Température', wine.Temperature]
+  ];
+  tableFields.forEach(function(f) {
+    if (f[1]) html += '<div class="fiche-table-cell"><span class="fiche-label">' + f[0] + ':</span> ' + decodeHTML(f[1].toString()) + '</div>';
   });
+  html += '</div>';
 
-  document.getElementById('ficheV2-corps').innerHTML = corps;
+  if (wine['Particularité']) html += '<div class="fiche-field"><span class="fiche-label">Particularité:</span> ' + decodeHTML(wine['Particularité']) + '</div>';
+  if (wine.Designation) html += '<div class="fiche-field"><span class="fiche-label">Désignation:</span> ' + decodeHTML(wine.Designation) + '</div>';
+  if (wine.Classification) html += '<div class="fiche-field"><span class="fiche-label">Classification:</span> ' + decodeHTML(wine.Classification) + '</div>';
+  if (wine.Producteur) html += '<div class="fiche-field"><span class="fiche-label">Producteur:</span> ' + decodeHTML(wine.Producteur) + '</div>';
+  if (wine.Description) html += '<div class="fiche-field"><span class="fiche-label">Description:</span> ' + decodeHTML(wine.Description) + '</div>';
+  html += '</div>';
+
+  // === NOTES ===
+  html += '<div class="fiche-section">';
+  html += '<h3 class="fiche-section-title">NOTES</h3>';
+  if (wine.Accords) html += '<div class="fiche-field"><span class="fiche-label">Accords:</span> ' + decodeHTML(wine.Accords) + '</div>';
+  if (wine.Racheter) html += '<div class="fiche-field"><span class="fiche-label">Aimé:</span> ' + decodeHTML(wine.Racheter) + '</div>';
+  if (wine.Recettes) html += '<div class="fiche-field"><span class="fiche-label">Recettes:</span> ' + decodeHTML(wine.Recettes) + '</div>';
+  if (wine['Notes temporaires']) html += '<div class="fiche-field"><span class="fiche-label">Notes:</span> ' + decodeHTML(wine['Notes temporaires']) + '</div>';
+  if (wine.Divers) html += '<div class="fiche-field"><span class="fiche-label">Divers:</span> ' + decodeHTML(wine.Divers) + '</div>';
+  html += '</div>';
+
+  // === INVENTAIRE (lecture seule) ===
+  var bottlesActives = bottles.filter(function(b) { return b.statut !== 'Bu' && b.statut !== 'Sorti'; });
+  html += '<div class="fiche-section fiche-section-inventaire">';
+  if (bottlesActives.length === 0) {
+    html += '<p class="fiche-empty">Aucune bouteille en inventaire</p>';
+  } else {
+    bottlesActives.forEach(function(b) {
+      var loc = (b.meuble && b.rangee && b.espace) ?
+        decodeHTML(b.meuble) + ' - rangée ' + b.rangee + ' - espace ' + b.espace :
+        'À ranger';
+      html += '<div class="bottle-card"><div class="bottle-card-location">' + loc + '</div></div>';
+    });
+  }
+  html += '</div>';
+
+  document.getElementById('ficheV2-corps').innerHTML = html;
 }
 
 function fermerFicheV2() {
