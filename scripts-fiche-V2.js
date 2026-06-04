@@ -30,7 +30,12 @@ function afficherFicheV2(result) {
   CURRENT_WINE_DATA = wine;
   CURRENT_WINE_BOTTLES = bottles;
 
-  document.getElementById('ficheV2-nom').textContent = decodeHTML(wine.Nom || 'Vin sans nom');
+  var nomEl = document.getElementById('ficheV2-nom');
+  if (wine['Code SAQ']) {
+    nomEl.innerHTML = '<a href="https://www.saq.com/fr/' + wine['Code SAQ'] + '" target="_blank" class="lien-titre">' + decodeHTML(wine.Nom || 'Vin sans nom') + '</a>';
+  } else {
+    nomEl.textContent = decodeHTML(wine.Nom || 'Vin sans nom');
+  }
 
   var origine = [];
   if (wine.Pays) origine.push(decodeHTML(wine.Pays));
@@ -52,19 +57,35 @@ function afficherFicheV2(result) {
   html += ligne('Cépages', wine['Cépage']);
   html += ligne('Pastille', wine['Pastille gout']);
   html += ligne('Arômes', wine['Arômes']);
-  html += ligne('Acidité', wine['Acidité']);
-  html += ligne('Sucrosité', wine['Sucrosité']);
-  html += ligne('Corps', wine.Corps);
-  html += ligne('Bouche', wine.Bouche);
-  html += ligne('Sucre', wine.Sucre);
-  html += ligne('Alcool', wine.Alcool);
-  html += ligne('Température', wine.Temperature);
+
+  function carte(libelle, valeur) {
+    if (!valeur) return '';
+    return '<div class="carte-info"><span class="libelle">' + libelle + '</span><span class="valeur">' + decodeHTML(valeur.toString()) + '</span></div>';
+  }
+  var cartes = '';
+  cartes += carte('Acidité', wine['Acidité']);
+  cartes += carte('Sucrosité', wine['Sucrosité']);
+  cartes += carte('Corps', wine.Corps);
+  cartes += carte('Bouche', wine.Bouche);
+  cartes += carte('Sucre', wine.Sucre);
+  cartes += carte('Alcool', wine.Alcool);
+  cartes += carte('Température', wine.Temperature);
+  if (cartes) html += '<div class="grille-cartes">' + cartes + '</div>';
+
   html += ligne('Particularité', wine['Particularité']);
   html += ligne('Désignation', wine.Designation);
   html += ligne('Classification', wine.Classification);
-  html += ligne('Producteur', wine.Producteur);
   if (wine.Description) html += '<div class="texte">' + decodeHTML(wine.Description) + '</div>';
   html += '</div>';
+
+  // === PRODUCTION ===
+  if (wine.Producteur || wine['Agent promo']) {
+    html += '<div class="section">';
+    html += '<h3 class="titre-2">Production</h3>';
+    html += ligne('Producteur', wine.Producteur);
+    html += ligne('Agent', wine['Agent promo']);
+    html += '</div>';
+  }
 
   // === NOTES ===
   html += '<div class="section">';
@@ -85,12 +106,16 @@ function afficherFicheV2(result) {
   } else {
     bottlesActives.forEach(function(b) {
       var loc = (b.meuble && b.rangee && b.espace) ?
-        decodeHTML(b.meuble) + ' - rangée ' + b.rangee + ' - espace ' + b.espace :
+        b.meuble.substring(0, 1).toUpperCase() + '-' + b.rangee + '-' + b.espace :
         'À ranger';
       html += '<div class="ligne-info">' + loc + '</div>';
     });
   }
-  html += '</div>';
+ html += '</div>';
+
+  if (wine['Code SAQ']) {
+    html += '<button class="btn-primary btn-pleine-largeur" onclick="trouverCeVinV2()">OÙ TROUVER CE VIN</button>';
+  }
 
   document.getElementById('ficheV2-corps').innerHTML = html;
 }
@@ -101,4 +126,8 @@ function fermerFicheV2() {
     ouvrirMenuActionV2(menuActionV2Context.code, menuActionV2Context.wineResult);
   }
   FICHE_V2_PROVENANCE = null;
+}
+
+function trouverCeVinV2() {
+  afficherMessage('En rénovation');
 }
