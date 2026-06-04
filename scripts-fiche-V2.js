@@ -53,7 +53,7 @@ function afficherFicheV2(result) {
   // === DÉGUSTATION ===
   html += '<div class="section">';
   html += '<h3 class="titre-2">Dégustation</h3>';
-  if (wine.Prix) html += '<div class="ligne-info"><span class="libelle">Prix : </span>' + parseFloat(wine.Prix).toFixed(2) + ' $</div>';
+
   html += ligne('Cépages', wine['Cépage']);
   html += ligne('Pastille', wine['Pastille gout']);
   html += ligne('Arômes', wine['Arômes']);
@@ -76,6 +76,7 @@ function afficherFicheV2(result) {
   html += ligne('Désignation', wine.Designation);
   html += ligne('Classification', wine.Classification);
   if (wine.Description) html += '<div class="texte">' + decodeHTML(wine.Description) + '</div>';
+    if (wine.Prix) html += '<div class="ligne-info"><span class="libelle">Prix : </span>' + parseFloat(wine.Prix).toFixed(2) + ' $</div>';
   html += '</div>';
 
   // === PRODUCTION ===
