@@ -24,7 +24,7 @@ html, body {
   --gold-70: rgba(201,129,60,0.7);
 
   /* ===== BORDURES — largeurs ===== */
-  --largeur-bordure-fine: 1px;
+  --largeur-bordure-fine: 1.2px;
   --largeur-bordure-moyenne: 2px;
   --largeur-bordure-epaisse: 4px;
 
