@@ -68,7 +68,7 @@ html, body {
   --info: #2196f3;
   --warning: #ffc107;
   --menu-width: 280px;
-  --image-fond: url("https://images.unsplash.com/photo-1738544475560-0683270451bd?q=80&w=1470&auto=format&fit=crop");
+--image-fond: url("https://res.cloudinary.com/dym93w23h/image/upload/v1780614859/fond_k08qtb.jpg");
   --voile-standard: rgba(0,0,0,0.50);
   --shadow-sm: rgba(0,0,0,0.3);
   --shadow-md: rgba(0,0,0,0.5);
