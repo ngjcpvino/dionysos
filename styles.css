@@ -1281,6 +1281,12 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
   text-align: center;
   margin: 0 0 var(--space-s) 0;
 }
+.lien-titre,
+.lien-titre:link,
+.lien-titre:visited {
+  color: var(--white);
+  text-decoration: none;
+}
 
 .titre-2 {
   color: var(--gold);
