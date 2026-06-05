@@ -1416,6 +1416,7 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
   align-items: center;
   gap: var(--space-s);
   margin-bottom: var(--space-s);
+  font-size: var(--fs-base);
 }
 .btn-bascule {
   width: var(--taille-tactile);
@@ -1489,14 +1490,13 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
 .roundel-barre {
   position: relative;
   z-index: 1;
-  width: 100%;
-  background: var(--bg-card);
+  background: var(--black);
   color: var(--white);
   text-align: center;
   text-transform: uppercase;
   letter-spacing: var(--ls-wide);
-  font-size: var(--fs-base);
-  padding: var(--space-s) 0;
+  font-size: var(--fs-sm);
+  padding: var(--space-xs) var(--space-xl);
 }
 
 /* =========================================
