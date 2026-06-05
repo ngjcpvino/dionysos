@@ -69,13 +69,14 @@ function afficherFicheV2(result) {
   // === INFORMATION ===
   html += '<div class="section">';
   html += '<h3 class="titre-2">Information</h3>';
-  if (wine.Prix) html += '<div class="ligne-info"><span class="libelle">Prix : </span>' + parseFloat(wine.Prix).toFixed(2) + ' $</div>';
+ 
   html += ligne('Cépages', wine['Cépage']);
   html += ligne('Pastille', wine['Pastille gout']);
   html += ligne('Classification', wine.Classification);
   html += ligne('Désignation', wine.Designation);
   html += ligne('Particularité', wine['Particularité']);
   if (wine.Description) html += '<div class="texte">' + decodeHTML(wine.Description) + '</div>';
+   if (wine.Prix) html += '<div class="ligne-info"><span class="libelle">Prix : </span>' + parseFloat(wine.Prix).toFixed(2) + ' $</div>';
   html += '</div>';
 
   // === DÉGUSTATION ===
@@ -115,10 +116,10 @@ function afficherFicheV2(result) {
   html += '<div id="ficheV2-accords-menu" class="menu-liste">' + itemsAccords + '</div>';
 
   var aime = wine.Racheter || 'Oui';
-  html += '<div class="controle"><span class="libelle">Aimé</span>' +
+  html += '<div class="controle"><span class="libelle">À racheter</span>' +
           '<div id="ficheV2-aime-oui" class="btn-bascule' + (aime === 'Oui' ? ' actif' : '') + '" onclick="setAimeV2(\'Oui\')">✓</div>' +
           '<div id="ficheV2-aime-non" class="btn-bascule' + (aime === 'Non' ? ' actif' : '') + '" onclick="setAimeV2(\'Non\')">✗</div>' +
-          '<span class="libelle">Panier</span>' +
+          '<span class="libelle">Garder en sur-inventaire</span>' +
           '<div id="ficheV2-panier" class="btn-bascule' + (wine.Panier === 'Oui' ? ' actif' : '') + '" onclick="togglePanierV2()">🛒</div></div>';
 
   html += '<div id="ficheV2-plats"></div>';
