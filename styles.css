@@ -32,7 +32,7 @@ html, body {
   --largeur-bordure-6: 6px;
   --largeur-bordure-7: 7px;
   --largeur-bordure-8: 8px;
-  --largeur-bordure-8: 10px;
+  --largeur-bordure-10: 10px;
 
   /* ===== BORDURES — couleurs ===== */
   --couleur-bordure-or: var(--gold);
