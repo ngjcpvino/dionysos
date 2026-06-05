@@ -91,6 +91,7 @@ html, body {
   --fs-md: 16px;
   --fs-base: 14px;
   --fs-sm: 13px;
+  --fs-12: 12px;
   --fs-xs: 11px;
   --space-xs: 5px;
   --space-s: 10px;
@@ -1476,7 +1477,7 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 70px;
+  height: 75px;
   margin: var(--space-l) 0;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -1486,10 +1487,10 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: 70px;
-  height: 70px;
+  width: 75px;
+  height: 75px;
   border-radius: 50%;
-  border: var(--largeur-bordure-7) solid var(--gold);
+  border: var(--largeur-bordure-8) solid var(--gold);
   box-sizing: border-box;
 }
 .roundel-barre {
@@ -1500,7 +1501,7 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
   text-align: center;
   text-transform: uppercase;
   letter-spacing: var(--ls-wide);
-  font-size: var(--fs-sm);
+  font-size: var(--fs-12);
   padding: var(--space-xs) var(--space-xl);
 }
 
