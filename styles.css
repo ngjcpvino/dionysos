@@ -484,6 +484,16 @@ body::after {
 .vin-rose   { border-left: var(--largeur-bordure-moyenne) solid var(--vin-rose); }
 .vin-bulles { border-left: var(--largeur-bordure-moyenne) solid var(--vin-bulles); }
 
+.photo {
+  text-align: center;
+  margin: var(--space-l) 0;
+}
+.photo img {
+  max-height: 200px;
+  width: auto;
+  max-width: 100%;
+}
+
 .wine-card-left {
   flex: 1;
   display: flex;
