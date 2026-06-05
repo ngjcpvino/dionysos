@@ -117,8 +117,8 @@ function afficherFicheV2(result) {
   var aime = wine.Racheter || 'Oui';
   html += '<div class="controle"><span class="libelle">Aimé</span>' +
           '<div id="ficheV2-aime-oui" class="btn-bascule' + (aime === 'Oui' ? ' actif' : '') + '" onclick="setAimeV2(\'Oui\')">✓</div>' +
-          '<div id="ficheV2-aime-non" class="btn-bascule' + (aime === 'Non' ? ' actif' : '') + '" onclick="setAimeV2(\'Non\')">✗</div></div>';
-  html += '<div class="controle"><span class="libelle">Panier</span>' +
+          '<div id="ficheV2-aime-non" class="btn-bascule' + (aime === 'Non' ? ' actif' : '') + '" onclick="setAimeV2(\'Non\')">✗</div>' +
+          '<span class="libelle">Panier</span>' +
           '<div id="ficheV2-panier" class="btn-bascule' + (wine.Panier === 'Oui' ? ' actif' : '') + '" onclick="togglePanierV2()">🛒</div></div>';
 
   html += '<div id="ficheV2-plats"></div>';
