@@ -47,6 +47,13 @@ html, body {
   --degrade-vin-rose: linear-gradient(to top, #d98a98, #FFC0CB);
   --degrade-vin-bulles: linear-gradient(to top, #007a7d, #00ced1);
 
+  /* ===== COULEURS D'APPRÉCIATION (note 1 à 5) ===== */
+  --note-1: #FF4B2B;
+  --note-2: #FF9000;
+  --note-3: #FFD200;
+  --note-4: #8BC34A;
+  --note-5: #2ECC71;
+
   --black: #000;
   --white: #fff;
   --white-70: rgba(255,255,255,0.9);
@@ -1382,6 +1389,27 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
   color: var(--white);
   font-size: var(--fs-base);
 }
+
+.carte-large {
+  width: 100%;
+  padding: var(--space-s) var(--space-m);
+  background: var(--bg-card);
+  border-bottom: var(--largeur-bordure-epaisse) solid var(--couleur-bordure-tres-claire);
+  margin-bottom: var(--space-s);
+  color: var(--white);
+  font-size: var(--fs-base);
+}
+.carte-large .date {
+  display: block;
+  color: var(--white-60);
+  font-size: var(--fs-xs);
+  margin-top: var(--space-xs);
+}
+.note-1 { border-bottom-color: var(--note-1); }
+.note-2 { border-bottom-color: var(--note-2); }
+.note-3 { border-bottom-color: var(--note-3); }
+.note-4 { border-bottom-color: var(--note-4); }
+.note-5 { border-bottom-color: var(--note-5); }
 
 /* =========================================
    18. SCANNER

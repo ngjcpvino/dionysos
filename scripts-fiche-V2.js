@@ -107,6 +107,7 @@ function afficherFicheV2(result) {
   html += '<h3 class="titre-2">Notes</h3>';
   html += ligne('Accords', wine.Accords);
   html += ligne('Aimé', wine.Racheter);
+  html += ligne('Panier', wine.Panier);
   html += '<div id="ficheV2-plats"></div>';
   html += ligne('Recettes', wine.Recettes);
   html += ligne('Notes', wine['Notes temporaires']);
@@ -121,17 +122,27 @@ function afficherFicheV2(result) {
     html += '<div class="texte-secondaire">Aucune bouteille en inventaire</div>';
   } else {
     var emplacements = bottlesActives.map(function(b) {
-      var loc = (b.meuble && b.rangee && b.espace) ?
-        b.meuble.substring(0, 1).toUpperCase() + '-' + b.rangee + '-' + b.espace :
-        'À ranger';
-      return '<div class="carte-info"><span class="valeur">' + loc + '</span></div>';
-    }).join('');
-    html += '<div class="grille-cartes">' + emplacements + '</div>';
+      var range = !!(b.meuble && b.rangee && b.espace);
+      return {
+        range: range,
+        texte: range ? b.meuble + '-' + b.rangee + '-' + b.espace : 'À ranger',
+        meuble: b.meuble || '',
+        rangee: parseInt(b.rangee) || 0,
+        espace: parseInt(b.espace) || 0
+      };
+    });
+    emplacements.sort(function(a, b) {
+      if (a.range !== b.range) return a.range ? -1 : 1;
+      if (a.meuble !== b.meuble) return a.meuble.localeCompare(b.meuble);
+      if (a.rangee !== b.rangee) return a.rangee - b.rangee;
+      return a.espace - b.espace;
+    });
+    html += '<div class="ligne-info">' + emplacements.map(function(e) { return e.texte; }).join(' · ') + '</div>';
   }
   html += '</div>';
 
   if (wine['Photo URL']) {
-    html += '<div class="photo"><img src="' + wine['Photo URL'] + '" alt="" loading="lazy" onerror="this.style.display=\'none\'"></div>';
+    html += '<div class="photo"><img src="' + wine['Photo URL'] + '" alt="" loading="lazy" onclick="window.open(\'' + wine['Photo URL'] + '\', \'_blank\')" onerror="this.style.display=\'none\'"></div>';
   }
 
   if (wine['Code SAQ']) {
@@ -154,10 +165,10 @@ function chargerPlatsV2(codebarre) {
     if (mets.length === 0) { conteneur.innerHTML = ''; return; }
     var cartes = mets.map(function(m) {
       var note = parseInt(m.bonAccord) || 0;
-      var verres = note > 0 ? '🍷'.repeat(note) : '';
-      return '<div class="carte-info"><span class="libelle">' + (m.date || '') + '</span><span class="valeur">' + (m.plat || '—') + (verres ? '<br>' + verres : '') + '</span></div>';
+      var classeNote = (note >= 1 && note <= 5) ? ' note-' + note : '';
+      return '<div class="carte-large' + classeNote + '">' + (m.plat || '—') + '<span class="date">' + (m.date || '') + '</span></div>';
     }).join('');
-    conteneur.innerHTML = '<div class="grille-cartes">' + cartes + '</div>';
+    conteneur.innerHTML = cartes;
   }
 
   if (ALL_HISTORIQUE && ALL_HISTORIQUE.length > 0) {
