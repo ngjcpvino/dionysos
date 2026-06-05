@@ -27,6 +27,7 @@ html, body {
   --largeur-bordure-fine: 1.2px;
   --largeur-bordure-moyenne: 2px;
   --largeur-bordure-epaisse: 4px;
+  --largeur-bordure-trepaisse: 5px;
 
   /* ===== BORDURES — couleurs ===== */
   --couleur-bordure-or: var(--gold);
@@ -1484,7 +1485,7 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
   width: 70px;
   height: 70px;
   border-radius: 50%;
-  border: var(--largeur-bordure-epaisse) solid var(--gold);
+  border: var(--largeur-bordure-trepaisse) solid var(--gold);
   box-sizing: border-box;
 }
 .roundel-barre {
