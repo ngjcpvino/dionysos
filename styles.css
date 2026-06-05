@@ -1394,7 +1394,7 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
   width: 100%;
   padding: var(--space-s) var(--space-m);
   background: var(--bg-card);
-  border-bottom: var(--largeur-bordure-moyenne) solid var(--couleur-bordure-tres-claire);
+  border-bottom: var(--largeur-bordure-fine) solid var(--couleur-bordure-tres-claire);
   margin-bottom: var(--space-s);
   color: var(--white);
   font-size: var(--fs-base);
@@ -1420,10 +1420,10 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
 .btn-bascule {
   width: var(--taille-tactile);
   height: var(--taille-tactile);
-  border: var(--largeur-bordure-fine) solid var(--couleur-bordure-or);
-  background: transparent;
+  border: var(--largeur-bordure-fine) solid var(--couleur-bordure-tres-claire);
+  background: var(--bg-card);
   color: var(--white);
-  font-size: var(--fs-lg);
+  font-size: var(--fs-base);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1439,13 +1439,14 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
   flex: 1;
   padding: var(--space-s) var(--space-m);
   background: var(--bg-card);
-  border: var(--largeur-bordure-fine) solid var(--couleur-bordure-or);
+  border: var(--largeur-bordure-fine) solid var(--couleur-bordure-tres-claire);
   color: var(--white);
+  font-size: var(--fs-base);
   cursor: pointer;
 }
 .menu-liste {
   display: none;
-  border: var(--largeur-bordure-fine) solid var(--couleur-bordure-or);
+  border: var(--largeur-bordure-fine) solid var(--couleur-bordure-tres-claire);
   background: var(--bg-card);
   max-height: 250px;
   overflow-y: auto;
@@ -1455,6 +1456,7 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
 .accord-item {
   padding: var(--space-s) var(--space-m);
   cursor: pointer;
+  font-size: var(--fs-base);
   border-bottom: var(--largeur-bordure-fine) solid var(--couleur-bordure-tres-claire);
 }
 .accord-item.actif { background: var(--gold-30); }
