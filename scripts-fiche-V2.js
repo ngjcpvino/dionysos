@@ -160,6 +160,7 @@ function afficherFicheV2(result) {
 
   if (wine['Code SAQ']) {
     html += '<button class="btn-primary btn-pleine-largeur" onclick="trouverCeVinV2()">OÙ TROUVER CE VIN</button>';
+    html += '<div id="ficheV2-succursales"></div>';
   }
 
   document.getElementById('ficheV2-corps').innerHTML = html;
@@ -239,5 +240,27 @@ function fermerFicheV2() {
 }
 
 function trouverCeVinV2() {
-  afficherMessage('En rénovation');
+  var codeSAQ = CURRENT_WINE_DATA ? CURRENT_WINE_DATA['Code SAQ'] : '';
+  var div = document.getElementById('ficheV2-succursales');
+  if (!codeSAQ || !div) return;
+  div.innerHTML = '<div class="texte-secondaire">Localisation en cours…</div>';
+
+  function chercher(lat, lng) {
+    appelBackend('getSuccursalesDisponibles', { codeSAQ: codeSAQ, lat: lat, lng: lng }, { spinner: 'Recherche succursales' }).then(function(succursales) {
+      var dispo = (succursales || []).filter(function(s) { return s.quantite > 0; });
+      if (dispo.length === 0) { div.innerHTML = '<div class="texte-secondaire">Aucune succursale avec stock</div>'; return; }
+      div.innerHTML = dispo.slice(0, 10).map(function(s) {
+        return '<div class="ligne-info"><span class="libelle">' + s.nom + '</span> · ' + s.ville + ' · ' + s.quantite + ' btl</div>';
+      }).join('');
+    }).catch(function(err) { div.innerHTML = '<div class="texte-secondaire">Erreur : ' + err + '</div>'; });
+  }
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      function(pos) { chercher(pos.coords.latitude, pos.coords.longitude); },
+      function() { chercher(null, null); }
+    );
+  } else {
+    chercher(null, null);
+  }
 }
