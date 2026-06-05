@@ -160,7 +160,7 @@ function afficherFicheV2(result) {
   }
 
   if (wine['Code SAQ']) {
-    html += '<button class="btn-primary btn-pleine-largeur" onclick="trouverCeVinV2()">OÙ TROUVER CE VIN</button>';
+    html += '<div class="roundel" onclick="trouverCeVinV2()"><span class="roundel-anneau"></span><span class="roundel-barre">OÙ TROUVER CE VIN</span></div>';
     html += '<div id="ficheV2-succursales"></div>';
   }
 
