@@ -1465,6 +1465,40 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
 }
 .accord-item.actif { background: var(--gold-30); }
 
+.roundel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 70px;
+  margin: var(--space-l) 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.roundel-anneau {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: var(--largeur-bordure-epaisse) solid var(--gold);
+  box-sizing: border-box;
+}
+.roundel-barre {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  background: var(--bg-card);
+  color: var(--white);
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: var(--ls-wide);
+  font-size: var(--fs-base);
+  padding: var(--space-s) 0;
+}
+
 /* =========================================
    18. SCANNER
    ========================================= */
