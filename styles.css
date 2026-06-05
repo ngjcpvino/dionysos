@@ -1428,7 +1428,7 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
 .btn-bascule {
   width: var(--taille-tactile);
   height: var(--taille-tactile);
-  border: var(--largeur-bordure-1) solid var(--couleur-bordure-tres-claire);
+  border: var(--largeur-bordure-1) solid var(--gold);
   background: var(--bg-card);
   color: var(--white);
   font-size: var(--fs-base);
