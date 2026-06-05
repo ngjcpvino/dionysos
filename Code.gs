@@ -1788,6 +1788,15 @@ function chercherProduitSAQ_GRAPHQL_V1(codeBarres) {
     
     if (data.data?.productSearch?.items?.length > 0) {
       const sku = data.data.productSearch.items[0].product.sku;
+      // Vérifier que le produit trouvé correspond bien au code-barres scanné (via Code CUP)
+      const verif = testScrapingSAQ(sku);
+      if (verif.success && verif.data && verif.data.codeCUP) {
+        const cupTrouve = verif.data.codeCUP.toString().replace(/\D/g, '').replace(/^0+/, '');
+        const cupCherche = codeBarres.toString().replace(/\D/g, '').replace(/^0+/, '');
+        if (cupCherche && cupTrouve && cupTrouve !== cupCherche) {
+          return null;
+        }
+      }
       return sku;
     }
     
@@ -2388,55 +2397,15 @@ function TEST_PROMOTIONS_SIMPLE() {
 
 function verifierEtMettreAJourPrixSAQ(codebarre, codeSAQ) {
   try {
-    // 1. Récupérer prix actuel SAQ
-    const url = 'https://catalog-service.adobe.io/graphql';
-    
-    const query = {
-      query: `
-        query productSearch($phrase: String!) {
-          productSearch(phrase: $phrase, page_size: 1) {
-            items {
-              product {
-                sku
-                price_range {
-                  minimum_price {
-                    regular_price {
-                      value
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      `,
-      variables: {
-        phrase: codeSAQ.toString()
-      }
-    };
-    
-    const options = {
-      method: 'post',
-      contentType: 'application/json',
-      headers: {
-        'x-api-key': '7a7d7422bd784f2481a047e03a73feaf',
-        'magento-environment-id': '2ce24571-9db9-4786-84a9-5f129257ccbb',
-        'magento-store-view-code': 'fr',
-        'magento-website-code': 'base',
-        'magento-store-code': 'main_website_store'
-      },
-      payload: JSON.stringify(query),
-      muteHttpExceptions: true
-    };
-    
-    const response = UrlFetchApp.fetch(url, options);
-    const data = JSON.parse(response.getContentText());
-    
-    if (!data.data?.productSearch?.items?.[0]) {
-      return { updated: false, message: 'Produit non trouvé sur SAQ' };
+   // 1. Récupérer le prix via la page produit (URL directe = bon produit garanti)
+    const scrap = testScrapingSAQ(codeSAQ);
+    if (!scrap.success || !scrap.data || !scrap.data.prix) {
+      return { updated: false, message: 'Prix SAQ introuvable' };
     }
-    
-    const prixSAQ = data.data.productSearch.items[0].product.price_range.minimum_price.regular_price.value;
+    const prixSAQ = parseFloat(scrap.data.prix);
+    if (isNaN(prixSAQ) || prixSAQ <= 0) {
+      return { updated: false, message: 'Prix SAQ invalide' };
+    }
     
     // 2. Lire prix actuel dans Sheet
     const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
