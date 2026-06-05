@@ -1394,7 +1394,7 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
   width: 100%;
   padding: var(--space-s) var(--space-m);
   background: var(--bg-card);
-  border-bottom: var(--largeur-bordure-epaisse) solid var(--couleur-bordure-tres-claire);
+  border-bottom: var(--largeur-bordure-moyenne) solid var(--couleur-bordure-tres-claire);
   margin-bottom: var(--space-s);
   color: var(--white);
   font-size: var(--fs-base);
@@ -1410,6 +1410,54 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
 .note-3 { border-bottom-color: var(--note-3); }
 .note-4 { border-bottom-color: var(--note-4); }
 .note-5 { border-bottom-color: var(--note-5); }
+
+.controle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
+  margin-bottom: var(--space-s);
+}
+.btn-bascule {
+  width: var(--taille-tactile);
+  height: var(--taille-tactile);
+  border: var(--largeur-bordure-fine) solid var(--couleur-bordure-or);
+  background: transparent;
+  color: var(--white);
+  font-size: var(--fs-lg);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-bascule.actif {
+  background: var(--gold-30);
+  border-color: var(--gold);
+}
+
+.champ-cliquable {
+  flex: 1;
+  padding: var(--space-s) var(--space-m);
+  background: var(--bg-card);
+  border: var(--largeur-bordure-fine) solid var(--couleur-bordure-or);
+  color: var(--white);
+  cursor: pointer;
+}
+.menu-liste {
+  display: none;
+  border: var(--largeur-bordure-fine) solid var(--couleur-bordure-or);
+  background: var(--bg-card);
+  max-height: 250px;
+  overflow-y: auto;
+  margin-bottom: var(--space-s);
+}
+.menu-liste.ouvert { display: block; }
+.accord-item {
+  padding: var(--space-s) var(--space-m);
+  cursor: pointer;
+  border-bottom: var(--largeur-bordure-fine) solid var(--couleur-bordure-tres-claire);
+}
+.accord-item.actif { background: var(--gold-30); }
 
 /* =========================================
    18. SCANNER
