@@ -116,10 +116,10 @@ function afficherFicheV2(result) {
   html += '<div id="ficheV2-accords-menu" class="menu-liste">' + itemsAccords + '</div>';
 
   var aime = wine.Racheter || 'Oui';
-  html += '<div class="controle"><span class="libelle">À racheter</span>' +
+  html += '<div class="controle"><span class="libelle">Racheter ?</span>' +
           '<div id="ficheV2-aime-oui" class="btn-bascule' + (aime === 'Oui' ? ' actif' : '') + '" onclick="setAimeV2(\'Oui\')">✓</div>' +
           '<div id="ficheV2-aime-non" class="btn-bascule' + (aime === 'Non' ? ' actif' : '') + '" onclick="setAimeV2(\'Non\')">✗</div>' +
-          '<span class="libelle">Garder en sur-inventaire</span>' +
+          '<span class="libelle">Sur-inventaire?</span>' +
           '<div id="ficheV2-panier" class="btn-bascule' + (wine.Panier === 'Oui' ? ' actif' : '') + '" onclick="togglePanierV2()">🛒</div></div>';
 
   html += '<div id="ficheV2-plats"></div>';
@@ -251,7 +251,8 @@ function trouverCeVinV2() {
       var dispo = (succursales || []).filter(function(s) { return s.quantite > 0; });
       if (dispo.length === 0) { div.innerHTML = '<div class="texte-secondaire">Aucune succursale avec stock</div>'; return; }
       div.innerHTML = dispo.slice(0, 10).map(function(s) {
-        return '<div class="ligne-info"><span class="libelle">' + s.nom + '</span> · ' + s.ville + ' · ' + s.quantite + ' btl</div>';
+        var sousInfo = [s.adresse, s.ville].filter(Boolean).join(', ');
+        return '<div class="carte-large">' + s.nom + ' · ' + s.quantite + ' btl<span class="date">' + sousInfo + '</span></div>';
       }).join('');
     }).catch(function(err) { div.innerHTML = '<div class="texte-secondaire">Erreur : ' + err + '</div>'; });
   }

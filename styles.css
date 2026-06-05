@@ -661,7 +661,7 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
   transition: background 0.2s ease;
 }
 
-.btn-primary:hover:not(:disabled) { background: var(--gold-hover); }
+
 .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .btn-secondary {
@@ -669,7 +669,7 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
   height: 50px;
   background: var(--white-10);
   color: var(--white);
-  border: var(--largeur-bordure-moyenne) solid rgba(255,255,255,0.3);
+  border: none;
   font-weight: 400;
   letter-spacing: var(--ls-wide);
   text-transform: uppercase;
@@ -1365,8 +1365,8 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
 }
 
 .grille-cartes {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
   gap: var(--space-s);
 }
 .carte-info {
@@ -1428,6 +1428,7 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 50%;
   -webkit-tap-highlight-color: transparent;
 }
 .btn-bascule.actif {
