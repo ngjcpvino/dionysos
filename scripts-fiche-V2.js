@@ -120,7 +120,7 @@ function afficherFicheV2(result) {
           '<div id="ficheV2-aime-oui" class="btn-bascule' + (aime === 'Oui' ? ' actif' : '') + '" onclick="setAimeV2(\'Oui\')">✓</div>' +
           '<div id="ficheV2-aime-non" class="btn-bascule' + (aime === 'Non' ? ' actif' : '') + '" onclick="setAimeV2(\'Non\')">✗</div>' +
           '<span class="libelle">Sur-inventaire?</span>' +
-          '<div id="ficheV2-panier" class="btn-bascule' + (wine.Panier === 'Oui' ? ' actif' : '') + '" onclick="togglePanierV2()">🛒</div></div>';
+          '<div id="ficheV2-panier" class="btn-bascule' + (wine.Panier === 'Oui' ? ' actif' : '') + '" onclick="togglePanierV2()">' + (wine.Panier === 'Oui' ? '✓' : '') + '</div></div>';
 
   html += '<div id="ficheV2-plats"></div>';
   html += ligne('Recettes', wine.Recettes);
@@ -196,6 +196,7 @@ function togglePanierV2() {
   var actif = btn.classList.contains('actif');
   var newValue = actif ? '' : 'Oui';
   btn.classList.toggle('actif', !actif);
+  btn.textContent = newValue === 'Oui' ? '✓' : '';
   appelBackend('updateWineField', { codebarre: CURRENT_WINE_CODEBARRE, field: 'Panier', value: newValue }, { spinner: 'Sauvegarde' }).catch(function(err) { afficherMessage('Erreur: ' + err); });
 }
 

@@ -1452,7 +1452,10 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
   max-height: 250px;
   overflow-y: auto;
   margin-bottom: var(--space-s);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
+.menu-liste::-webkit-scrollbar { display: none; }
 .menu-liste.ouvert { display: block; }
 .accord-item {
   padding: var(--space-s) var(--space-m);
