@@ -105,9 +105,22 @@ function afficherFicheV2(result) {
   // === NOTES ===
   html += '<div class="section">';
   html += '<h3 class="titre-2">Notes</h3>';
-  html += ligne('Accords', wine.Accords);
-  html += ligne('Aimé', wine.Racheter);
-  html += ligne('Panier', wine.Panier);
+  var accordsActuels = (wine.Accords || '').split(',').map(function(a) { return a.trim(); }).filter(Boolean);
+  var itemsAccords = (CONFIG && CONFIG.accords ? CONFIG.accords : []).map(function(acc) {
+    var sel = accordsActuels.indexOf(acc) !== -1;
+    return '<div class="accord-item' + (sel ? ' actif' : '') + '" onclick="toggleAccordV2(this)" data-accord="' + acc + '">' + acc + '</div>';
+  }).join('');
+  html += '<div class="controle"><span class="libelle">Accords</span>' +
+          '<div id="ficheV2-accords-display" class="champ-cliquable" onclick="basculerMenuAccordsV2()">' + (accordsActuels.length ? accordsActuels.join(', ') : 'Aucun') + '</div></div>';
+  html += '<div id="ficheV2-accords-menu" class="menu-liste">' + itemsAccords + '</div>';
+
+  var aime = wine.Racheter || 'Oui';
+  html += '<div class="controle"><span class="libelle">Aimé</span>' +
+          '<div id="ficheV2-aime-oui" class="btn-bascule' + (aime === 'Oui' ? ' actif' : '') + '" onclick="setAimeV2(\'Oui\')">✓</div>' +
+          '<div id="ficheV2-aime-non" class="btn-bascule' + (aime === 'Non' ? ' actif' : '') + '" onclick="setAimeV2(\'Non\')">✗</div></div>';
+  html += '<div class="controle"><span class="libelle">Panier</span>' +
+          '<div id="ficheV2-panier" class="btn-bascule' + (wine.Panier === 'Oui' ? ' actif' : '') + '" onclick="togglePanierV2()">🛒</div></div>';
+
   html += '<div id="ficheV2-plats"></div>';
   html += ligne('Recettes', wine.Recettes);
   html += ligne('Notes', wine['Notes temporaires']);
@@ -153,6 +166,37 @@ function afficherFicheV2(result) {
   chargerPlatsV2(CURRENT_WINE_CODEBARRE);
 }
 
+function basculerMenuAccordsV2() {
+  var menu = document.getElementById('ficheV2-accords-menu');
+  if (menu) menu.classList.toggle('ouvert');
+}
+
+function toggleAccordV2(element) {
+  element.classList.toggle('actif');
+  var menu = document.getElementById('ficheV2-accords-menu');
+  var selectionnes = Array.prototype.map.call(menu.querySelectorAll('.accord-item.actif'), function(el) { return el.getAttribute('data-accord'); });
+  var display = document.getElementById('ficheV2-accords-display');
+  if (display) display.textContent = selectionnes.length ? selectionnes.join(', ') : 'Aucun';
+  appelBackend('updateWineField', { codebarre: CURRENT_WINE_CODEBARRE, field: 'Accords', value: selectionnes.join(', ') }, { spinner: 'Sauvegarde' }).catch(function(err) { afficherMessage('Erreur: ' + err); });
+}
+
+function setAimeV2(value) {
+  var oui = document.getElementById('ficheV2-aime-oui');
+  var non = document.getElementById('ficheV2-aime-non');
+  if (oui) oui.classList.toggle('actif', value === 'Oui');
+  if (non) non.classList.toggle('actif', value === 'Non');
+  appelBackend('updateWineField', { codebarre: CURRENT_WINE_CODEBARRE, field: 'Racheter', value: value }, { spinner: 'Sauvegarde' }).catch(function(err) { afficherMessage('Erreur: ' + err); });
+}
+
+function togglePanierV2() {
+  var btn = document.getElementById('ficheV2-panier');
+  if (!btn) return;
+  var actif = btn.classList.contains('actif');
+  var newValue = actif ? '' : 'Oui';
+  btn.classList.toggle('actif', !actif);
+  appelBackend('updateWineField', { codebarre: CURRENT_WINE_CODEBARRE, field: 'Panier', value: newValue }, { spinner: 'Sauvegarde' }).catch(function(err) { afficherMessage('Erreur: ' + err); });
+}
+
 function chargerPlatsV2(codebarre) {
   var conteneur = document.getElementById('ficheV2-plats');
   if (!conteneur) return;
@@ -163,6 +207,9 @@ function chargerPlatsV2(codebarre) {
       return (h.codebarre || '').toString().trim() === cb;
     });
     if (mets.length === 0) { conteneur.innerHTML = ''; return; }
+    mets.sort(function(a, b) {
+      return (parseInt(b.bonAccord) || 0) - (parseInt(a.bonAccord) || 0);
+    });
     var cartes = mets.map(function(m) {
       var note = parseInt(m.bonAccord) || 0;
       var classeNote = (note >= 1 && note <= 5) ? ' note-' + note : '';
