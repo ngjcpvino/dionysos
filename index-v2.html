@@ -85,6 +85,39 @@
   </div>
 </div>
 
+<!-- ====================== ARRIVÉE V2 ====================== -->
+<div id="arriveeV2Container" class="modal-v2-fullscreen" style="display:none;">
+  <div class="modal-v2-content modale-haut">
+    <button class="btn-fermer" onclick="fermerArriveeV2()">✕</button>
+    <h2 class="titre-1">Faites un choix</h2>
+    <div id="arriveeV2-nom" class="modal-v2-winename"></div>
+    <div id="arriveeV2-codebarre" class="modal-v2-codebarre"></div>
+
+    <div class="roundel" onclick="basculerListeArrivee('meuble')">
+      <span class="roundel-anneau"></span>
+      <span class="roundel-barre" id="arriveeV2-meuble-barre">Meuble</span>
+    </div>
+    <div id="arriveeV2-meuble-menu" class="menu-liste"></div>
+
+    <div class="roundel" onclick="basculerListeArrivee('rangee')">
+      <span class="roundel-anneau"></span>
+      <span class="roundel-barre" id="arriveeV2-rangee-barre">Rangée</span>
+    </div>
+    <div id="arriveeV2-rangee-menu" class="menu-liste"></div>
+
+    <div class="roundel" onclick="basculerListeArrivee('espace')">
+      <span class="roundel-anneau"></span>
+      <span class="roundel-barre" id="arriveeV2-espace-barre">Espace</span>
+    </div>
+    <div id="arriveeV2-espace-menu" class="menu-liste"></div>
+
+    <div class="roundel" onclick="arriveeARangerV2()">
+      <span class="roundel-anneau"></span>
+      <span class="roundel-barre">À ranger</span>
+    </div>
+  </div>
+</div>
+
 <!-- ====================== FICHE V2 ====================== -->
 <div id="ficheV2Overlay" class="modal-v2-fullscreen" style="display:none;">
   <div class="modal-v2-content modale-haut">
