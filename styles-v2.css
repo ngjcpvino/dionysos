@@ -531,7 +531,7 @@ body::after {
   margin-bottom: var(--space-s);
   font-size: var(--fs-base);
 }
-.bouton-bascule {
+.btn-bascule {
   width: var(--taille-tactile);
   height: var(--taille-tactile);
   border: var(--largeur-bordure-1) solid var(--gold);
@@ -546,7 +546,7 @@ body::after {
   -webkit-tap-highlight-color: transparent;
   aspect-ratio: 1 / 1;
 }
-.bouton-bascule.actif {
+.btn-bascule.actif {
   background: var(--gold-30);
   border-color: var(--gold);
 }
