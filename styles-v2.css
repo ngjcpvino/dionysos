@@ -99,6 +99,7 @@ html, body {
   --fs-sm: 13px;
   --fs-12: 12px;
   --fs-xs: 11px;
+  --space-3: 3px;
   --space-xs: 5px;
   --space-s: 10px;
   --space-m: 15px;
@@ -569,8 +570,8 @@ body::after {
   text-align: center;
   text-transform: uppercase;
   letter-spacing: var(--ls-wide);
-  font-size: var(--fs-12);
-  padding: var(--space-xs) var(--space-xl);
+  font-size: var(--fs-xs);
+  padding: var(--space-3) var(--space-xl);
 }
 
 /* =========================================
