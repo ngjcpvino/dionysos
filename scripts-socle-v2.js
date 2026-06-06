@@ -18,7 +18,7 @@ let CURRENT_WINE_CODEBARRE = null;
 let CURRENT_WINE_DATA = null;
 let CURRENT_WINE_BOTTLES = [];
 let FICHE_V2_PROVENANCE = null;
-
+ 
 // ==================== INITIALISATION ====================
 window.onload = function() {
   appelBackend('getConfig', {}, { spinner: ' ' }).then(function(cfg) {
