@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <link rel="stylesheet" href="styles-v2.css">
+</head>
+<body>
+
+<!-- ====================== ACCUEIL V2 (minimal) ====================== -->
+<main id="accueilV2">
+  <h1 class="titre-1">DIONYSOS</h1>
+  <div class="texte-secondaire">VIA VINOSTO</div>
+  <div class="roundel" onclick="startScanFromHomeV2()">
+    <span class="roundel-anneau"></span>
+    <span class="roundel-barre">Scanner</span>
+  </div>
+</main>
+
+<!-- ====================== SCAN V2 ====================== -->
+<div id="scannerV2Container" class="modal-v2-fullscreen" style="display:none;">
+  <div class="modal-v2-content modale-haut">
+    <button class="btn-fermer" onclick="stopScannerV2()">✕</button>
+    <h2 class="titre-1">Scanner un vin</h2>
+    <div id="scanV2-box" class="scan-v2-box">
+      <div id="interactiveV2"></div>
+      <div class="scan-v2-viseur"></div>
+    </div>
+    <p id="scanV2-feedback" class="texte-secondaire">Alignez le code-barres dans le cadre</p>
+    <div class="roundel" onclick="rescannerV2()">
+      <span class="roundel-anneau"></span>
+      <span class="roundel-barre">Rescanner</span>
+    </div>
+    <div class="roundel" onclick="entreeManuelleV2()">
+      <span class="roundel-anneau"></span>
+      <span class="roundel-barre">Entrée manuelle</span>
+    </div>
+  </div>
+</div>
+
+<!-- ====================== MENU D'ACTION V2 ====================== -->
+<div id="menuActionV2Overlay" class="modal-v2-fullscreen" style="display:none;">
+  <div class="modal-v2-content">
+    <h2 class="modal-v2-title">Faites un choix</h2>
+    <div id="menuActionV2-nom" class="modal-v2-winename"></div>
+    <div id="menuActionV2-codebarre" class="modal-v2-codebarre"></div>
+    <div class="menu-v2-grid">
+      <div class="menu-v2-circle" onclick="menuV2Click('visualiser')">👁</div>
+      <div class="menu-v2-circle" onclick="menuV2Click('arrivee')">➕</div>
+      <div class="menu-v2-circle" onclick="menuV2Click('deplacer')">↔</div>
+      <div class="menu-v2-circle" onclick="menuV2Click('boire')">🍷</div>
+      <div class="menu-v2-circle" onclick="menuV2Click('donner')">🎁</div>
+      <div class="menu-v2-circle" onclick="fermerMenuActionV2()">✕</div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================== FICHE V2 ====================== -->
+<div id="ficheV2Overlay" class="modal-v2-fullscreen" style="display:none;">
+  <div class="modal-v2-content modale-haut">
+    <button class="btn-fermer" onclick="fermerFicheV2()">✕</button>
+    <h2 id="ficheV2-nom" class="titre-1"></h2>
+    <div id="ficheV2-origine" class="texte-secondaire"></div>
+    <div id="ficheV2-corps" class="contenu"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+<script src="scripts-socle-v2.js"></script>
+<script src="scripts-scanner-V2.js"></script>
+<script src="scripts-fiche-V2.js"></script>
+
+</body>
+</html>
