@@ -91,9 +91,6 @@ html, body {
   --shadow-sm: rgba(0,0,0,0.3);
   --shadow-md: rgba(0,0,0,0.5);
   --shadow-lg: rgba(0,0,0,0.7);
-  
-  
-  
   --fs-burger: 40px;
   --fs-xl: 20px;
   --fs-lg: 18px;
@@ -102,12 +99,10 @@ html, body {
   --fs-sm: 13px;
   --fs-12: 12px;
   --fs-xs: 11px;
-  
-  
-  --espace-3: 3px;
-  --espace-5: 5px;
-  --espace-10: 10px;
-  --espace-15: 15px;
+  --space-3: 3px;
+  --space-xs: 5px;
+  --space-s: 10px;
+  --space-m: 15px;
   --space-l: 20px;
   --space-xl: 25px;
   --taille-tactile: 44px;
@@ -116,13 +111,10 @@ html, body {
   --ls-wide: 2px;
   --ls-wider: 3px;
   --ls-9: 9px;
-  
   --police-titre: "Montserrat", sans-serif;
-  
   --fw-light: 300;
   --fw-normal: 400;
   --fw-bold: 600;
-  --police-700: 700;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -166,39 +158,26 @@ body::after {
 /* =========================================
    TOAST (afficherMessage)
    ========================================= */
-.toast { 
-  position: fixed; 
-  top: 50%; 
-  left: 50%; 
-  transform: translate(-50%, -50%) scale(0.8); 
-  background: rgba(0,0,0,0.92); 
-  color: var(--white); 
-  border: var(--largeur-bordure-1) solid var(--white-05); 
-  font-weight: 300; 
-  letter-spacing: var(--ls-tight); 
-  text-transform: uppercase; 
-  z-index: 99999; 
-  text-align: center; 
-  font-size: clamp(13px, 3vw, 15px); 
-  border-radius: 50%; 
-  opacity: 0; 
-  pointer-events: none; 
-  transition: opacity 0.3s ease, transform 0.3s ease; 
-  max-width: 90%; 
-
-  aspect-ratio: 1 / 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-xl);
-  white-space: normal;
-  word-break: break-word;
+.toast {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  background: rgba(0,0,0,0.92);
+  color: var(--white);
+  padding: var(--space-l) var(--space-xl);
+  border: var(--largeur-bordure-1) solid var(--white-05);
+  font-weight: 300;
+  letter-spacing: var(--ls-tight);
+  text-transform: uppercase;
+  z-index: 99999;
+  text-align: center;
+  font-size: clamp(13px, 3vw, 15px);
+   border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  max-width: 90%;
 }
-
-.toast * {
-  width: 100%;
-}
-
 .toast.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 
 /* =========================================
@@ -246,7 +225,7 @@ body::after {
   font-size: clamp(36px, 8vw, 45px);
   letter-spacing: var(--ls-wider);
   color: var(--gold);
-  font-weight: var(--police-700);
+  font-weight: 700;
   text-align: center;
   margin: 0 auto;
   padding: var(--space-l) var(--space-xl) var(--space-s) var(--space-xl);
@@ -544,7 +523,6 @@ body::after {
   justify-content: center;
   border-radius: 50%;
   -webkit-tap-highlight-color: transparent;
-  aspect-ratio: 1 / 1;
 }
 .btn-bascule.actif {
   background: var(--gold-30);
