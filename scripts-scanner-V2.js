@@ -12,7 +12,7 @@ function startScanFromHomeV2() {
 }
 
 function startScannerV2() {
-  const container = document.getElementById('scannerContainer');
+  const container = document.getElementById('scannerV2Container');
   container.style.display = 'flex';
   isScanningV2 = true;
   scanConfirmationsV2 = {};
@@ -21,7 +21,7 @@ function startScannerV2() {
     numOfWorkers: 0,
     inputStream: {
       name: "Live",
-      target: document.getElementById('interactive'),
+      target: document.getElementById('interactiveV2'),
       type: "LiveStream",
       constraints: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } }
     },
@@ -29,8 +29,8 @@ function startScannerV2() {
     decoder: { readers: ["ean_reader", "code_128_reader", "upc_reader"] }
   }, function(err) {
     if (err) {
-      afficherMessage('Erreur caméra. Vérifiez les autorisations.');
-      stopScannerV2();
+      const feedback = document.getElementById('scanV2-feedback');
+      if (feedback) { feedback.textContent = 'Caméra indisponible — utilisez l\'entrée manuelle'; }
       return;
     }
     Quagga.start();
@@ -44,10 +44,9 @@ function startScannerV2() {
     if (!/^\d{8,13}$/.test(code)) return;
     if (!scanConfirmationsV2[code]) scanConfirmationsV2[code] = 0;
     scanConfirmationsV2[code]++;
-    const feedback = document.querySelector('.scanner-help');
+    const feedback = document.getElementById('scanV2-feedback');
     if (feedback) {
-      feedback.textContent = 'Code détecté: ' + code + ' (' + scanConfirmationsV2[code] + '/' + SCAN_THRESHOLD_V2 + ')';
-      feedback.style.color = '#ffc107';
+      feedback.textContent = 'Code détecté : ' + code + ' (' + scanConfirmationsV2[code] + '/' + SCAN_THRESHOLD_V2 + ')';
     }
     if (scanConfirmationsV2[code] >= SCAN_THRESHOLD_V2) {
       stopScannerV2();
@@ -61,12 +60,28 @@ function stopScannerV2() {
   if (typeof Quagga !== 'undefined' && Quagga.stop) {
     try { Quagga.stop(); } catch (e) {}
   }
-  document.getElementById('scannerContainer').style.display = 'none';
-  const feedback = document.querySelector('.scanner-help');
+  document.getElementById('scannerV2Container').style.display = 'none';
+  const feedback = document.getElementById('scanV2-feedback');
   if (feedback) {
-    feedback.textContent = 'Alignez le code-barres avec la ligne';
-    feedback.style.color = 'white';
+    feedback.textContent = 'Alignez le code-barres dans le cadre';
   }
+}
+
+function rescannerV2() {
+  scanConfirmationsV2 = {};
+  const feedback = document.getElementById('scanV2-feedback');
+  if (feedback) { feedback.textContent = 'Alignez le code-barres dans le cadre'; }
+  if (!isScanningV2) { startScannerV2(); }
+}
+
+function entreeManuelleV2() {
+  const code = (prompt('Entrez le code-barres (minimum 8 chiffres) :') || '').replace(/\D/g, '').trim();
+  if (!code || code.length < 8) {
+    if (code) { afficherMessage('Code-barres invalide — minimum 8 chiffres'); }
+    return;
+  }
+  stopScannerV2();
+  traiterResultatScanV2(code);
 }
 
 function traiterResultatScanV2(code) {

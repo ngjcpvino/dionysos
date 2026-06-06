@@ -1578,6 +1578,33 @@ button { font-family: 'Segoe UI', Roboto, sans-serif; }
 .scanner-controls { width: 100%; text-align: center; padding: var(--space-l); margin-bottom: auto; z-index: 10001; }
 .scanner-help { color: var(--white); font-size: clamp(11px, 2.5vw, 12px); margin-bottom: var(--space-m); text-transform: uppercase; }
 
+.scan-v2-box {
+  position: relative;
+  width: 100%;
+  height: 280px;
+  background: var(--black);
+  overflow: hidden;
+  margin: var(--space-l) 0;
+  border: var(--largeur-bordure-1) solid var(--couleur-bordure-or);
+}
+#interactiveV2 { position: relative; width: 100%; height: 100%; }
+#interactiveV2 video,
+#interactiveV2 canvas {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+.scan-v2-viseur {
+  position: absolute;
+  top: 20%; left: 10%;
+  width: 80%; height: 2px;
+  background: var(--gold);
+  box-shadow: 0 0 8px var(--gold);
+  animation: scan 2s infinite linear;
+  z-index: 10;
+}
+
 /* =========================================
    19. MESSAGES DE FEEDBACK
    ========================================= */

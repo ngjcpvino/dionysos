@@ -1,0 +1,573 @@
+/* ============================================================
+   STYLES-V2.CSS — site V2 autonome
+   Socle (variables, fond) + composants V2 uniquement.
+   Aucun style V1 (header, menu, cartes, filtres, boutons V1).
+   Les pages V2 non encore bâties créeront leurs propres classes.
+============================================================ */
+
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+  position: relative;
+  scrollbar-gutter: stable;
+}
+
+* { max-width: 100%; }
+
+/* =========================================
+   VARIABLES & RESET
+   ========================================= */
+:root {
+  --gold: #c9813c;
+  --gold-2: #ffd036;
+  --gold-hover: #C98D4F;
+  --gold-20: rgba(201,129,60,0.2);
+  --gold-30: rgba(201,129,60,0.3);
+  --gold-40: rgba(201,129,60,0.4);
+  --gold-50: rgba(201,129,60,0.5);
+  --gold-60: rgba(201,129,60,0.6);
+  --gold-70: rgba(201,129,60,0.7);
+
+  /* ===== BORDURES — largeurs ===== */
+  --largeur-bordure-1: 1px;
+  --largeur-bordure-2: 2px;
+  --largeur-bordure-3: 3px;
+  --largeur-bordure-4: 4px;
+  --largeur-bordure-5: 5px;
+  --largeur-bordure-6: 6px;
+  --largeur-bordure-7: 7px;
+  --largeur-bordure-8: 8px;
+  --largeur-bordure-10: 10px;
+
+  /* ===== BORDURES — couleurs ===== */
+  --couleur-bordure-or: var(--gold);
+  --couleur-bordure-claire: var(--white-15);
+  --couleur-bordure-tres-claire: var(--white-10);
+  --couleur-bordure-subtile: var(--white-05);
+  --couleur-bordure-pale: var(--white-70);
+
+  /* ===== COULEURS DE VIN (bordure gauche des cartes) ===== */
+  --vin-rouge: #8B0000;
+  --vin-blanc: #f7f6da;
+  --vin-rose: #FFC0CB;
+  --vin-bulles: #00ced1;
+
+  /* ===== DÉGRADÉS DE VIN (remplissage du spinner) ===== */
+  --degrade-vin-rouge: linear-gradient(to top, #4a0000, #8B0000);
+  --degrade-vin-blanc: linear-gradient(to top, #c9c79a, #f7f6da);
+  --degrade-vin-rose: linear-gradient(to top, #d98a98, #FFC0CB);
+  --degrade-vin-bulles: linear-gradient(to top, #007a7d, #00ced1);
+
+  /* ===== COULEURS D'APPRÉCIATION (note 1 à 5) ===== */
+  --note-1: #FF4B2B;
+  --note-2: #FF9000;
+  --note-3: #FFD200;
+  --note-4: #8BC34A;
+  --note-5: #2ECC71;
+
+  --black: #000;
+  --white: #fff;
+  --white-70: rgba(255,255,255,0.9);
+  --white-60: rgba(255,255,255,0.7);
+  --white-50: rgba(255,255,255,0.6);
+  --white-15: rgba(255,255,255,0.15);
+  --white-10: rgba(255,255,255,0.1);
+  --white-05: rgba(255,255,255,0.05);
+  --white-03: rgba(255,255,255,0.03);
+  --bg-overlay: rgba(0,0,0,0.85);
+  --bg-card: rgba(0,0,0,0.50);
+  --bg-panel: rgba(20,20,20,0.95);
+  --bg-panel-light: rgba(20,20,20,0.70);
+  --red: #c0392b;
+  --green: #27ae60;
+  --orange: #e67e22;
+  --error: #f44336;
+  --success: #4caf50;
+  --info: #2196f3;
+  --warning: #ffc107;
+  --menu-width: 280px;
+  --image-fond: url("https://res.cloudinary.com/dym93w23h/image/upload/v1780614859/fond_k08qtb.jpg");
+  --voile-standard: rgba(0,0,0,0.50);
+  --shadow-sm: rgba(0,0,0,0.3);
+  --shadow-md: rgba(0,0,0,0.5);
+  --shadow-lg: rgba(0,0,0,0.7);
+  --fs-burger: 40px;
+  --fs-xl: 20px;
+  --fs-lg: 18px;
+  --fs-md: 16px;
+  --fs-base: 14px;
+  --fs-sm: 13px;
+  --fs-12: 12px;
+  --fs-xs: 11px;
+  --space-xs: 5px;
+  --space-s: 10px;
+  --space-m: 15px;
+  --space-l: 20px;
+  --space-xl: 25px;
+  --taille-tactile: 44px;
+  --ls-tight: 1px;
+  --ls-normal: 1.5px;
+  --ls-wide: 2px;
+  --ls-wider: 3px;
+  --fw-light: 300;
+  --fw-normal: 400;
+  --fw-bold: 600;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* =========================================
+   FOND PHOTO & BASE
+   ========================================= */
+body {
+  position: relative;
+  z-index: 0;
+  margin: 0;
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  color: var(--white);
+  background-color: var(--black);
+  overflow-x: hidden;
+  overflow-y: scroll;
+  max-width: 100vw;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: linear-gradient(var(--voile-standard), var(--voile-standard)),
+              var(--image-fond)
+              center center / cover no-repeat;
+  background-size: cover;
+  background-position: center;
+  z-index: -2;
+}
+
+@media (min-width: 1280px) {
+  body::after {
+    background: linear-gradient(var(--voile-standard), var(--voile-standard)),
+                var(--image-fond)
+                center center / cover no-repeat !important;
+  }
+}
+
+/* =========================================
+   TOAST (afficherMessage)
+   ========================================= */
+.toast {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  background: rgba(0,0,0,0.92);
+  color: var(--white);
+  padding: var(--space-l) var(--space-xl);
+  border: var(--largeur-bordure-1) solid var(--gold);
+  font-weight: 500;
+  letter-spacing: var(--ls-tight);
+  text-transform: uppercase;
+  z-index: 99999;
+  text-align: center;
+  font-size: clamp(13px, 3vw, 15px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  max-width: 90%;
+}
+.toast.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+
+/* =========================================
+   SPINNER — verre de vin (appelBackend)
+   ========================================= */
+#spinner-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.75);
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 20px;
+  z-index: 99999;
+}
+.spinner-verre-wrap { display: flex; flex-direction: column; align-items: center; }
+.spinner-verre {
+  width: 60px; height: 75px;
+  border: var(--largeur-bordure-2) solid var(--gold); border-top: none;
+  border-radius: 0 0 30px 30px;
+  position: relative; overflow: hidden;
+  background: rgba(255,255,255,0.05);
+}
+.spinner-verre::before {
+  content: ''; position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: var(--degrade-vin-rouge);
+  animation: remplir-verre 5s ease-in-out infinite, couleur-vin 20s step-end infinite;
+}
+.spinner-pied { width: 2px; height: 18px; background: var(--gold); }
+.spinner-base { width: 42px; height: 2px; background: var(--gold); }
+.spinner-texte {
+  color: var(--gold); font-size: var(--fs-sm);
+  letter-spacing: var(--ls-wide); text-transform: uppercase;
+  font-weight: 300;
+}
+@keyframes remplir-verre {
+  0% { height: 0%; }
+  40% { height: 100%; }
+  55% { height: 100%; }
+  100% { height: 0%; }
+}
+@keyframes couleur-vin {
+  0%   { background: var(--degrade-vin-rouge); }
+  25%  { background: var(--degrade-vin-blanc); }
+  50%  { background: var(--degrade-vin-rose); }
+  75%  { background: var(--degrade-vin-bulles); }
+  100% { background: var(--degrade-vin-rouge); }
+}
+
+/* =========================================
+   MODALES V2 — plein écran « nouvelle page »
+   ========================================= */
+.modal-v2-fullscreen {
+  position: fixed; top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(var(--voile-standard), var(--voile-standard)),
+              var(--image-fond) center center / cover no-repeat;
+}
+
+.modal-v2-content {
+  width: 100%; height: 100%;
+  padding: 40px var(--space-l);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  box-sizing: border-box;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.modal-v2-content::-webkit-scrollbar { display: none; }
+
+.modal-v2-title {
+  color: var(--gold);
+  font-size: var(--fs-lg);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-wide);
+  margin: 0 0 30px 0;
+  font-weight: 300;
+}
+
+.modal-v2-winename {
+  color: var(--white);
+  font-size: var(--fs-xl);
+  text-align: center;
+  margin-bottom: var(--space-s);
+}
+
+.modal-v2-codebarre {
+  color: var(--white-50);
+  font-size: var(--fs-sm);
+  margin-bottom: 40px;
+  letter-spacing: var(--ls-tight);
+}
+
+.menu-v2-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 90px);
+  grid-gap: var(--space-l);
+}
+
+.menu-v2-circle {
+  width: 90px; height: 90px;
+  border-radius: 50%;
+  border: var(--largeur-bordure-1) solid var(--couleur-bordure-or);
+  background: var(--bg-card);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.menu-v2-circle:active { background: var(--gold-20); }
+
+/* ===== Éléments génériques de modale V2 ===== */
+.modale-haut {
+  justify-content: flex-start;
+  padding-top: 60px;
+  position: relative;
+}
+
+.btn-fermer {
+  position: absolute;
+  top: var(--space-l); right: var(--space-l);
+  width: 40px; height: 40px;
+  background: none;
+  border: none;
+  color: var(--white);
+  font-size: var(--fs-xl);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-fermer:active { color: var(--gold); }
+
+.titre-1 {
+  color: var(--white);
+  font-size: var(--fs-xl);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-tight);
+  text-align: center;
+  margin: 0 0 var(--space-s) 0;
+}
+.lien-titre,
+.lien-titre:link,
+.lien-titre:visited {
+  color: var(--white);
+  text-decoration: none;
+}
+
+.titre-2 {
+  color: var(--gold);
+  font-size: var(--fs-base);
+  font-weight: 400;
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  margin: var(--space-l) 0 var(--space-s) 0;
+}
+
+.titre-3 {
+  color: var(--gold-70);
+  font-size: var(--fs-sm);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-wide);
+  margin: var(--space-m) 0 var(--space-xs) 0;
+}
+
+.texte-secondaire {
+  color: var(--white-60);
+  font-size: var(--fs-sm);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-tight);
+  text-align: center;
+  margin-bottom: var(--space-xl);
+}
+
+.contenu {
+  width: 100%;
+  max-width: 600px;
+  color: var(--white);
+}
+
+.ligne-info {
+  color: var(--white);
+  font-size: var(--fs-base);
+  font-weight: 400;
+  margin-bottom: var(--space-s);
+  line-height: 1.4;
+}
+.ligne-info .libelle {
+  color: var(--white);
+  font-weight: 400;
+}
+.texte {
+  color: var(--white);
+  font-size: var(--fs-base);
+  line-height: 1.5;
+  margin-bottom: var(--space-s);
+}
+
+.section {
+  margin-bottom: var(--space-l);
+  padding-bottom: var(--space-l);
+  border-bottom: var(--largeur-bordure-1) solid var(--couleur-bordure-tres-claire);
+}
+.section:last-child { border-bottom: none; }
+
+/* ===== Couleur de vin (bordure gauche du panneau fiche) ===== */
+.vin-rouge  { border-left: var(--largeur-bordure-2) solid var(--vin-rouge); }
+.vin-blanc  { border-left: var(--largeur-bordure-2) solid var(--vin-blanc); }
+.vin-rose   { border-left: var(--largeur-bordure-2) solid var(--vin-rose); }
+.vin-bulles { border-left: var(--largeur-bordure-2) solid var(--vin-bulles); }
+
+.photo { text-align: center; margin: var(--space-l) 0; }
+.photo img { max-height: 200px; width: auto; max-width: 100%; }
+
+.grille-cartes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: var(--space-s);
+}
+.carte-info {
+  flex: 1 1 auto;
+  min-width: 90px;
+  padding: var(--space-s) var(--space-m);
+  background: var(--bg-card);
+  border: var(--largeur-bordure-1) solid var(--couleur-bordure-tres-claire);
+  text-align: center;
+}
+.carte-info .libelle {
+  display: block;
+  color: var(--white-60);
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-tight);
+  margin-bottom: var(--space-xs);
+}
+.carte-info .valeur {
+  color: var(--white);
+  font-size: var(--fs-base);
+}
+
+.carte-large {
+  width: 100%;
+  padding: var(--space-s) var(--space-m);
+  background: var(--bg-card);
+  border-bottom: var(--largeur-bordure-1) solid var(--couleur-bordure-tres-claire);
+  margin-bottom: var(--space-s);
+  color: var(--white);
+  font-size: var(--fs-base);
+}
+.carte-large .date {
+  display: block;
+  color: var(--white-60);
+  font-size: var(--fs-xs);
+  margin-top: var(--space-xs);
+}
+.note-1 { border-bottom-color: var(--note-1); }
+.note-2 { border-bottom-color: var(--note-2); }
+.note-3 { border-bottom-color: var(--note-3); }
+.note-4 { border-bottom-color: var(--note-4); }
+.note-5 { border-bottom-color: var(--note-5); }
+
+.controle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
+  margin-bottom: var(--space-s);
+  font-size: var(--fs-base);
+}
+.btn-bascule {
+  width: var(--taille-tactile);
+  height: var(--taille-tactile);
+  border: var(--largeur-bordure-1) solid var(--gold);
+  background: var(--bg-card);
+  color: var(--white);
+  font-size: var(--fs-base);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-bascule.actif {
+  background: var(--gold-30);
+  border-color: var(--gold);
+}
+
+.champ-cliquable {
+  flex: 1;
+  padding: var(--space-s) var(--space-m);
+  background: var(--bg-card);
+  border: var(--largeur-bordure-1) solid var(--couleur-bordure-tres-claire);
+  color: var(--white);
+  font-size: var(--fs-base);
+  cursor: pointer;
+}
+.menu-liste {
+  display: none;
+  border: var(--largeur-bordure-1) solid var(--couleur-bordure-tres-claire);
+  background: var(--bg-card);
+  max-height: 250px;
+  overflow-y: auto;
+  margin-bottom: var(--space-s);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.menu-liste::-webkit-scrollbar { display: none; }
+.menu-liste.ouvert { display: block; }
+.accord-item {
+  padding: var(--space-s) var(--space-m);
+  cursor: pointer;
+  font-size: var(--fs-base);
+  border-bottom: var(--largeur-bordure-1) solid var(--couleur-bordure-tres-claire);
+}
+.accord-item.actif { background: var(--gold-30); }
+
+/* ===== ROUNDEL — bouton standard V2 (futur .bouton-londres) ===== */
+.roundel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 80px;
+  margin: var(--space-l) 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.roundel-anneau {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: var(--largeur-bordure-10) solid var(--gold);
+  box-sizing: border-box;
+}
+.roundel-barre {
+  position: relative;
+  z-index: 1;
+  background: var(--black);
+  color: var(--white);
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: var(--ls-wide);
+  font-size: var(--fs-12);
+  padding: var(--space-xs) var(--space-xl);
+}
+
+/* =========================================
+   SCAN V2
+   ========================================= */
+.scan-v2-box {
+  position: relative;
+  width: 100%;
+  height: 280px;
+  background: var(--black);
+  overflow: hidden;
+  margin: var(--space-l) 0;
+  border: var(--largeur-bordure-1) solid var(--couleur-bordure-or);
+}
+#interactiveV2 { position: relative; width: 100%; height: 100%; }
+#interactiveV2 video,
+#interactiveV2 canvas {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+.scan-v2-viseur {
+  position: absolute;
+  top: 20%; left: 10%;
+  width: 80%; height: 2px;
+  background: var(--gold);
+  box-shadow: 0 0 8px var(--gold);
+  animation: scan 2s infinite linear;
+  z-index: 10;
+}
+@keyframes scan {
+  0%, 100% { top: 20%; }
+  50% { top: 80%; }
+}
+
+/* =========================================
+   UTILITAIRES
+   ========================================= */
+.mt-10 { margin-top: var(--space-s); }
+.mt-20 { margin-top: var(--space-l); }
+.mt-40 { margin-top: 40px; }
+.mb-20 { margin-bottom: var(--space-l); }
+.text-center    { text-align: center; }
+.text-uppercase { text-transform: uppercase; }
+.color-primary  { color: var(--gold); }
+.color-white    { color: var(--white); }
+.color-muted    { color: var(--white-60); }
+.color-error    { color: var(--error); }
