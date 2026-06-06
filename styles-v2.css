@@ -177,6 +177,39 @@ body::after {
 .toast.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 
 /* =========================================
+   HEADER V2 & BOUTON NAVIGATION
+   ========================================= */
+#topNavV2 {
+  position: relative;
+  width: 100%;
+  height: 60px;
+  z-index: 1000;
+}
+
+.bouton-navigation {
+  position: absolute;
+  top: var(--space-s);
+  left: var(--space-s);
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1001;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bouton-navigation img {
+  width: 45px;
+  height: 45px;
+  filter: brightness(0) invert(1);
+  opacity: 0.99;
+  transition: opacity 0.2s;
+}
+.bouton-navigation:active img { opacity: 0.6; }
+
+/* =========================================
    SPINNER — verre de vin (appelBackend)
    ========================================= */
 #spinner-overlay {
