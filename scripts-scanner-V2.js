@@ -75,29 +75,48 @@ function rescannerV2() {
 }
 
 function entreeManuelleV2() {
-  const code = (prompt('Entrez le code-barres (minimum 8 chiffres) :') || '').replace(/\D/g, '').trim();
+  stopScannerV2();
+  var champ = document.getElementById('saisieManuelleV2-champ');
+  if (champ) champ.value = '';
+  document.getElementById('saisieManuelleV2Container').style.display = 'flex';
+  if (champ) champ.focus();
+}
+
+function validerSaisieManuelleV2() {
+  var champ = document.getElementById('saisieManuelleV2-champ');
+  var code = (champ ? champ.value : '').replace(/\D/g, '').trim();
   if (!code || code.length < 8) {
-    if (code) { afficherMessage('Code-barres invalide — minimum 8 chiffres'); }
+    afficherMessage('Code-barres invalide — minimum 8 chiffres');
     return;
   }
-  stopScannerV2();
+  document.getElementById('saisieManuelleV2Container').style.display = 'none';
   traiterResultatScanV2(code);
 }
 
+function fermerSaisieManuelleV2() {
+  document.getElementById('saisieManuelleV2Container').style.display = 'none';
+}
+
 function traiterResultatScanV2(code) {
-  console.log('[V2] Code scanné:', code);
   appelBackend('checkWineExists', { codebarre: code }, { spinner: 'Vérification' }).then(function(result) {
     if (result.exists) {
-      console.log('[V2] Vin EXISTE:', result);
       ouvrirMenuActionV2(code, result);
     } else {
-      console.log('[V2] Vin N\'EXISTE PAS');
-      alert('V2 — Vin N\'EXISTE PAS\nCode: ' + code);
+      ouvrirVinInconnuV2(code);
     }
   }).catch(function(err) {
-    console.error('[V2] Erreur:', err);
     afficherMessage('Erreur de vérification');
   });
+}
+
+function ouvrirVinInconnuV2(code) {
+  var cb = document.getElementById('vinInconnuV2-codebarre');
+  if (cb) cb.textContent = code;
+  document.getElementById('vinInconnuV2Container').style.display = 'flex';
+}
+
+function fermerVinInconnuV2() {
+  document.getElementById('vinInconnuV2Container').style.display = 'none';
 }
 
 let menuActionV2Context = null;

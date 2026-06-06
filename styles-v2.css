@@ -503,6 +503,22 @@ body::after {
   font-size: var(--fs-base);
   cursor: pointer;
 }
+
+.champ-saisie {
+  width: 100%;
+  max-width: 400px;
+  height: 50px;
+  padding: 0 var(--space-m);
+  background: var(--bg-card);
+  border: var(--largeur-bordure-1) solid var(--couleur-bordure-or);
+  color: var(--white);
+  font-size: var(--fs-md);
+  text-align: center;
+  letter-spacing: var(--ls-tight);
+  outline: none;
+}
+.champ-saisie::placeholder { color: var(--white-50); }
+.champ-saisie:focus { background: rgba(0,0,0,0.7); }
 .menu-liste {
   display: none;
   border: var(--largeur-bordure-1) solid var(--couleur-bordure-tres-claire);
