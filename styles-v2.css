@@ -165,13 +165,14 @@ body::after {
   background: rgba(0,0,0,0.92);
   color: var(--white);
   padding: var(--space-l) var(--space-xl);
-  border: var(--largeur-bordure-1) solid var(--gold);
-  font-weight: 500;
+  border: var(--largeur-bordure-1) solid var(--white-05);
+  font-weight: 300;
   letter-spacing: var(--ls-tight);
   text-transform: uppercase;
   z-index: 99999;
   text-align: center;
   font-size: clamp(13px, 3vw, 15px);
+   border-radius: 50%;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease, transform 0.3s ease;
