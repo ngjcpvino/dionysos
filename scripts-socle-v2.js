@@ -23,6 +23,9 @@ let FICHE_V2_PROVENANCE = null;
 window.onload = function() {
   appelBackend('getConfig', {}, { spinner: ' ' }).then(function(cfg) {
     CONFIG = cfg;
+    return appelBackend('getInventoryData', {});
+  }).then(function(data) {
+    ALL_DATA = data || [];
   }).catch(function(err) {
     afficherMessage('Erreur de chargement : ' + err);
   });

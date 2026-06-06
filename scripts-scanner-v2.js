@@ -151,6 +151,32 @@ function menuV2Click(action) {
 
 var arriveeV2Choix = { meuble: '', rangee: '', espace: '' };
 
+// Espaces occupés d'une rangée donnée (inventaire en mémoire, statut actif)
+function espacesOccupesArrivee(meuble, rangee) {
+  var occupes = [];
+  (ALL_DATA || []).forEach(function(item) {
+    var statut = item.Statut || 'En stock';
+    if (statut === 'Bu' || statut === 'Sorti') return;
+    if (String(item.Meuble) === String(meuble) && String(item.Rangee) === String(rangee) && item.Espace) {
+      occupes.push(String(item.Espace));
+    }
+  });
+  return occupes;
+}
+
+// Une rangée a-t-elle au moins une place libre ?
+function rangeeALibre(meuble, rangee) {
+  var tous = (CONFIG.meubles[meuble] && CONFIG.meubles[meuble][rangee]) ? CONFIG.meubles[meuble][rangee] : [];
+  var occ = espacesOccupesArrivee(meuble, rangee);
+  return tous.some(function(e) { return occ.indexOf(String(e)) === -1; });
+}
+
+// Un meuble a-t-il au moins une place libre ?
+function meubleALibre(meuble) {
+  var rangees = CONFIG.meubles[meuble] ? Object.keys(CONFIG.meubles[meuble]) : [];
+  return rangees.some(function(r) { return rangeeALibre(meuble, r); });
+}
+
 function ouvrirArriveeV2() {
   if (!menuActionV2Context) return;
   arriveeV2Choix = { meuble: '', rangee: '', espace: '' };
@@ -165,6 +191,7 @@ function ouvrirArriveeV2() {
 
   var menuMeuble = document.getElementById('arriveeV2-meuble-menu');
   var meubles = (CONFIG && CONFIG.meubles) ? Object.keys(CONFIG.meubles) : [];
+  meubles = meubles.filter(function(m) { return meubleALibre(m); });
   menuMeuble.innerHTML = meubles.map(function(m) {
     return '<div class="accord-item" onclick="choisirMeubleArrivee(\'' + m + '\')">' + m + '</div>';
   }).join('');
@@ -205,6 +232,7 @@ function choisirMeubleArrivee(meuble) {
   document.getElementById('arriveeV2-espace-barre').textContent = 'Espace';
 
   var rangees = (CONFIG.meubles[meuble]) ? Object.keys(CONFIG.meubles[meuble]) : [];
+  rangees = rangees.filter(function(r) { return rangeeALibre(meuble, r); });
   document.getElementById('arriveeV2-rangee-menu').innerHTML = rangees.map(function(r) {
     return '<div class="accord-item" onclick="choisirRangeeArrivee(\'' + r + '\')">' + r + '</div>';
   }).join('');
@@ -220,6 +248,8 @@ function choisirRangeeArrivee(rangee) {
 
   var meuble = arriveeV2Choix.meuble;
   var espaces = (CONFIG.meubles[meuble] && CONFIG.meubles[meuble][rangee]) ? CONFIG.meubles[meuble][rangee] : [];
+  var occ = espacesOccupesArrivee(meuble, rangee);
+  espaces = espaces.filter(function(e) { return occ.indexOf(String(e)) === -1; });
   document.getElementById('arriveeV2-espace-menu').innerHTML = espaces.map(function(e) {
     return '<div class="accord-item" onclick="choisirEspaceArrivee(\'' + e + '\')">' + e + '</div>';
   }).join('');
@@ -233,8 +263,20 @@ function choisirEspaceArrivee(espace) {
   var c = arriveeV2Choix;
   appelBackend('checkLocationAvailable', { meuble: c.meuble, rangee: c.rangee, espace: c.espace }, { spinner: 'Vérification' }).then(function(result) {
     if (!result.available) {
-      afficherMessage('Emplacement occupé par : ' + result.message);
-      return;
+      afficherMessage('Occupé par : ' + result.message);
+      return appelBackend('getInventoryData', {}).then(function(data) {
+        if (data) ALL_DATA = data;
+        arriveeV2Choix.espace = '';
+        document.getElementById('arriveeV2-espace-barre').textContent = 'Espace';
+        var occ = espacesOccupesArrivee(c.meuble, c.rangee);
+        var espaces = (CONFIG.meubles[c.meuble] && CONFIG.meubles[c.meuble][c.rangee]) ? CONFIG.meubles[c.meuble][c.rangee] : [];
+        espaces = espaces.filter(function(e) { return occ.indexOf(String(e)) === -1; });
+        var menu = document.getElementById('arriveeV2-espace-menu');
+        menu.innerHTML = espaces.map(function(e) {
+          return '<div class="accord-item" onclick="choisirEspaceArrivee(\'' + e + '\')">' + e + '</div>';
+        }).join('');
+        menu.classList.add('ouvert');
+      });
     }
     ajouterBouteilleArrivee(c.meuble, c.rangee, c.espace);
   }).catch(function(err) {
@@ -252,6 +294,9 @@ function ajouterBouteilleArrivee(meuble, rangee, espace) {
   appelBackend('addBottle', { codebarre: code, meuble: meuble, rangee: rangee, espace: espace }, { spinner: 'Mise en cave' }).then(function() {
     afficherMessage('Bouteille ajoutée !');
     document.getElementById('arriveeV2Container').style.display = 'none';
+    return appelBackend('getInventoryData', {});
+  }).then(function(data) {
+    if (data) ALL_DATA = data;
   }).catch(function(err) {
     afficherMessage('Erreur : ' + err);
   });
