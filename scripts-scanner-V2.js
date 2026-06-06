@@ -10,7 +10,7 @@ const SCAN_THRESHOLD_V2 = 3;
 function startScanFromHomeV2() {
   startScannerV2();
 }
-
+ 
 function startScannerV2() {
   const container = document.getElementById('scannerV2Container');
   container.style.display = 'flex';

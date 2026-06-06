@@ -23,7 +23,7 @@ function ouvrirFicheV2(codebarre, provenance) {
     afficherMessage('Erreur: ' + err);
   });
 }
-
+ 
 function afficherFicheV2(result) {
   var wine = result.wine;
   var bottles = result.bottles || [];
