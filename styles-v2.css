@@ -110,6 +110,8 @@ html, body {
   --ls-normal: 1.5px;
   --ls-wide: 2px;
   --ls-wider: 3px;
+  --ls-9: 9px;
+  --police-titre: "Montserrat", sans-serif;
   --fw-light: 300;
   --fw-normal: 400;
   --fw-bold: 600;
@@ -183,20 +185,21 @@ body::after {
 #topNavV2 {
   position: relative;
   width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
   height: 60px;
   z-index: 1000;
 }
 
 .bouton-navigation {
-  position: absolute;
-  top: var(--space-s);
-  left: var(--space-s);
   width: 50px;
   height: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  color: var(--white);
+  font-size: var(--fs-burger);
   z-index: 1001;
   -webkit-tap-highlight-color: transparent;
 }
@@ -209,6 +212,36 @@ body::after {
   transition: opacity 0.2s;
 }
 .bouton-navigation:active img { opacity: 0.6; }
+
+/* ===== Position générique (parent en position:relative) ===== */
+.gauche { position: absolute; top: var(--space-s); left: var(--space-s); }
+.centre { position: absolute; top: var(--space-s); left: 50%; transform: translateX(-50%); }
+.droite { position: absolute; top: var(--space-s); right: var(--space-s); }
+
+/* ===== Titres accueil ===== */
+#accueilV2-titre {
+  font-family: var(--police-titre);
+  font-size: clamp(36px, 8vw, 45px);
+  letter-spacing: var(--ls-wider);
+  color: var(--gold);
+  font-weight: 700;
+  text-align: center;
+  margin: 0 auto;
+  padding: var(--space-l) var(--space-xl) var(--space-s) var(--space-xl);
+  display: block;
+  max-width: 700px;
+}
+#accueilV2-soustitre {
+  font-family: var(--police-titre);
+  font-size: clamp(18px, 4vw, 23px);
+  color: var(--white);
+  letter-spacing: var(--ls-9);
+  text-align: center;
+  padding: 0 var(--space-xl) var(--space-l) var(--space-xl);
+  display: block;
+  max-width: 700px;
+  margin: 0 auto;
+}
 
 /* =========================================
    SPINNER — verre de vin (appelBackend)
