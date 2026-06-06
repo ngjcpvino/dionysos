@@ -74,3 +74,10 @@ function afficherMessage(m) {
     setTimeout(function() { t.style.display = 'none'; }, 400);
   }, 3000);
 }
+
+// ==================== UTILITAIRES ====================
+function decodeHTML(html) {
+  const txt = document.createElement('textarea');
+  txt.innerHTML = html;
+  return txt.value;
+}
