@@ -23,6 +23,20 @@
   <p id="accueilV2-soustitre">VIA VINOSTO</p>
 </main>
 
+<!-- ====================== MENU BURGER V2 ====================== -->
+<div id="burgerV2-voile" class="panneau-voile" onclick="toggleMenuV2()"></div>
+<div id="burgerV2" class="panneau-droite">
+  <div class="item-liste" onclick="burgerV2Click('accueil')">ACCUEIL</div>
+  <div class="item-liste" onclick="burgerV2Click('cave')">CAVE À VIN</div>
+  <div class="item-liste" onclick="burgerV2Click('emplacements')">EMPLACEMENTS</div>
+  <div class="item-liste" onclick="burgerV2Click('historique')">HISTORIQUE</div>
+  <div class="item-liste" onclick="burgerV2Click('racheter')">LISTE D'ACHAT</div>
+  <div class="item-liste" onclick="burgerV2Click('recherche')">RECHERCHE</div>
+  <div class="item-liste" onclick="burgerV2Click('aranger')">À RANGER</div>
+  <div class="item-liste" onclick="burgerV2Click('promotions')">PROMOTIONS SAQ</div>
+  <div class="item-liste" onclick="burgerV2Click('refresh')">🔄 RAFRAÎCHIR</div>
+</div>
+
 <!-- ====================== SCAN V2 ====================== -->
 <div id="scannerV2Container" class="modal-v2-fullscreen" style="display:none;">
   <div class="modal-v2-content modale-haut">
@@ -164,14 +178,105 @@
   </div>
 </div>
 
+<!-- ====================== <!-- ====================== CAVE À VIN V2 ====================== -->
+<div id="caveV2Container" class="modal-v2-fullscreen" style="display:none;">
+  <div class="modal-v2-content modale-haut">
+    <div class="cercle gauche" onclick="ouvrirFiltresCaveV2()">🔍</div>
+    <h2 class="titre-1">Les vins de Bacchus</h2>
+    <div class="btn-fermer" onclick="fermerCaveV2()">✕</div>
+    <div id="caveV2-compte" class="texte-secondaire"></div>
+    <div id="caveV2-cartes" class="contenu"></div>
+  </div>
+  <div id="caveV2-filtres-voile" class="panneau-voile" onclick="fermerFiltresCaveV2()"></div>
+  <div id="caveV2-filtres" class="panneau-gauche">
+    <div class="titre-3">Filtrer</div>
+    <select id="caveV2-f-couleur" class="champ-saisie" onchange="appliquerFiltresCaveV2()"></select>
+    <select id="caveV2-f-cepage" class="champ-saisie" onchange="appliquerFiltresCaveV2()"></select>
+    <select id="caveV2-f-pays" class="champ-saisie" onchange="appliquerFiltresCaveV2()"></select>
+    <select id="caveV2-f-appellation" class="champ-saisie" onchange="appliquerFiltresCaveV2()"></select>
+    <select id="caveV2-f-accords" class="champ-saisie" onchange="appliquerFiltresCaveV2()"></select>
+    <div class="panneau-separateur"></div>
+    <input type="text" id="caveV2-f-nom" class="champ-saisie" placeholder="Rechercher par nom" oninput="appliquerFiltresCaveV2()">
+    <div class="roundel" onclick="reinitialiserFiltresCaveV2()">
+      <span class="roundel-anneau"></span>
+      <span class="roundel-barre">Réinitialiser</span>
+    </div>
+  </div>
+</div>
+
+<!-- ====================== BOIRE V2 ====================== --> ====================== -->
+<div id="boireV2Container" class="modal-v2-fullscreen" style="display:none;">
+  <div class="modal-v2-content modale-haut">
+    <button class="btn-fermer" onclick="fermerBoireV2()">✕</button>
+    <h2 class="titre-1">Boire</h2>
+    <div id="boireV2-nom" class="modal-v2-winename"></div>
+    <div id="boireV2-codebarre" class="modal-v2-codebarre"></div>
+
+    <div id="boireV2-choix-bouteille" style="display:none; width:100%; max-width:600px;">
+      <div class="texte-secondaire">Quelle bouteille ?</div>
+      <div id="boireV2-bouteille-menu"></div>
+    </div>
+
+    <div id="boireV2-form" style="display:none; width:100%; max-width:400px;">
+      <input type="text" id="boireV2-plat" class="champ-saisie" placeholder="Plat (facultatif)" oninput="boireV2PlatChange()">
+      <div id="boireV2-verres" class="boire-verres"></div>
+      <div class="roundel" onclick="basculerMenuAccordsBoireV2()">
+        <span class="roundel-anneau"></span>
+        <span class="roundel-barre">Accords</span>
+      </div>
+      <div id="boireV2-accords-menu" class="menu-liste"></div>
+      <div class="roundel" onclick="confirmerBoireV2()">
+        <span class="roundel-anneau"></span>
+        <span class="roundel-barre">Confirmer</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================== DONNER V2 ====================== -->
+<div id="donnerV2Container" class="modal-v2-fullscreen" style="display:none;">
+  <div class="modal-v2-content modale-haut">
+    <button class="btn-fermer" onclick="fermerDonnerV2()">✕</button>
+    <h2 class="titre-1">Donner</h2>
+    <div id="donnerV2-nom" class="modal-v2-winename"></div>
+    <div id="donnerV2-codebarre" class="modal-v2-codebarre"></div>
+
+    <div id="donnerV2-choix-bouteille" style="display:none; width:100%; max-width:600px;">
+      <div class="texte-secondaire">Quelle bouteille ?</div>
+      <div id="donnerV2-bouteille-menu"></div>
+    </div>
+
+    <div id="donnerV2-form" style="display:none; width:100%; max-width:400px;">
+      <div class="roundel" onclick="confirmerDonnerV2()">
+        <span class="roundel-anneau"></span>
+        <span class="roundel-barre">Confirmer</span>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ====================== FICHE V2 ====================== -->
 <div id="ficheV2Overlay" class="modal-v2-fullscreen" style="display:none;">
   <div class="modal-v2-content modale-haut">
     <button class="btn-fermer" onclick="fermerFicheV2()">✕</button>
+    <div class="cercle gauche" onclick="ouvrirEditFicheV2()">✎</div>
     <h2 id="ficheV2-nom" class="titre-1"></h2>
     <div id="ficheV2-origine" class="texte-secondaire"></div>
     <div id="ficheV2-corps" class="contenu"></div>
   </div> 
+</div>
+
+<!-- ====================== ÉDITION FICHE V2 ====================== -->
+<div id="editFicheV2Overlay" class="modal-v2-fullscreen" style="display:none;">
+  <div class="modal-v2-content modale-haut">
+    <button class="btn-fermer" onclick="fermerEditFicheV2()">✕</button>
+    <h2 class="titre-1">Modifier</h2>
+    <div id="editFicheV2-corps" class="contenu"></div>
+    <div class="roundel" onclick="sauverEditFicheV2()">
+      <span class="roundel-anneau"></span>
+      <span class="roundel-barre">Enregistrer</span>
+    </div>
+  </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>

@@ -244,6 +244,8 @@ function fermerFicheV2() {
   if (panneauV2) panneauV2.classList.remove('vin-rouge', 'vin-blanc', 'vin-rose', 'vin-bulles');
   if (FICHE_V2_PROVENANCE === 'menuScan' && menuActionV2Context) {
     ouvrirMenuActionV2(menuActionV2Context.code, menuActionV2Context.wineResult);
+  } else if (FICHE_V2_PROVENANCE === 'cave') {
+    document.getElementById('caveV2Container').style.display = 'flex';
   }
   FICHE_V2_PROVENANCE = null;
 }
@@ -274,4 +276,62 @@ function trouverCeVinV2() {
   } else {
     chercher(null, null);
   }
+}
+
+// ==================== ÉDITION FICHE V2 ====================
+var EDIT_FICHE_V2_CHAMPS = [
+  ['Nom', 'nom', 'Nom'],
+  ['Code SAQ', 'codesaq', 'Code SAQ'],
+  ['Couleur', 'couleur', 'Couleur'],
+  ['Prix', 'prix', 'Prix'],
+  ['Pays', 'pays', 'Pays'],
+  ['Région', 'region', 'Region'],
+  ['Appellation', 'appellation', 'Appellation'],
+  ['Cépages', 'cepage', 'Cepage'],
+  ['Désignation', 'designation', 'Designation'],
+  ['Classification', 'classification', 'Classification'],
+  ['Particularité', 'particularite', 'Particularité'],
+  ['Producteur', 'producteur', 'Producteur'],
+  ['Agent promo', 'agent', 'Agent promo'],
+  ['Arômes', 'aromes', 'Arômes'],
+  ['Acidité', 'acidite', 'Acidité'],
+  ['Sucrosité', 'sucrosite', 'Sucrosité'],
+  ['Corps', 'corps', 'Corps'],
+  ['Bouche', 'bouche', 'Bouche'],
+  ['Sucre', 'sucre', 'Sucre'],
+  ['Alcool', 'alcool', 'Alcool'],
+  ['Température', 'temperature', 'Temperature'],
+  ['Pastille', 'pastille', 'Pastille gout'],
+  ['Description', 'description', 'Description'],
+  ['Recettes', 'recettes', 'Recettes'],
+  ['Notes', 'notestemp', 'Notes temporaires'],
+  ['Divers', 'divers', 'Divers']
+];
+
+function ouvrirEditFicheV2() {
+  var wine = CURRENT_WINE_DATA;
+  if (!wine) return;
+  var html = EDIT_FICHE_V2_CHAMPS.map(function(c) {
+    var valeur = decodeHTML((wine[c[2]] || '').toString()).replace(/"/g, '&quot;');
+    return '<div class="titre-3">' + c[0] + '</div><input type="text" id="editV2-' + c[1] + '" class="champ-saisie" value="' + valeur + '">';
+  }).join('');
+  document.getElementById('editFicheV2-corps').innerHTML = html;
+  document.getElementById('editFicheV2Overlay').style.display = 'flex';
+}
+
+function fermerEditFicheV2() {
+  document.getElementById('editFicheV2Overlay').style.display = 'none';
+}
+
+function sauverEditFicheV2() {
+  var data = { codebarre: CURRENT_WINE_CODEBARRE, aime: (CURRENT_WINE_DATA && CURRENT_WINE_DATA.Racheter) || 'Oui' };
+  EDIT_FICHE_V2_CHAMPS.forEach(function(c) {
+    var el = document.getElementById('editV2-' + c[1]);
+    data[c[1]] = el ? el.value : '';
+  });
+  appelBackend('saveWineEdits', data, { spinner: 'Sauvegarde' }).then(function() {
+    document.getElementById('editFicheV2Overlay').style.display = 'none';
+    afficherMessage('Modifications enregistrées');
+    ouvrirFicheV2(CURRENT_WINE_CODEBARRE, FICHE_V2_PROVENANCE);
+  }).catch(function(err) { afficherMessage('Erreur: ' + err); });
 }

@@ -209,7 +209,7 @@ function fermerMenuActionV2() {
 }
 
 function retourAccueilV2() {
-  ['scannerV2Container', 'saisieManuelleV2Container', 'vinInconnuV2Container', 'menuActionV2Overlay', 'arriveeV2Container', 'deplacerV2Container', 'ficheV2Overlay'].forEach(function(id) {
+  ['scannerV2Container', 'saisieManuelleV2Container', 'vinInconnuV2Container', 'menuActionV2Overlay', 'arriveeV2Container', 'deplacerV2Container', 'boireV2Container', 'donnerV2Container', 'caveV2Container', 'editFicheV2Overlay', 'ficheV2Overlay'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.style.display = 'none';
   });
@@ -239,7 +239,16 @@ function menuV2Click(action) {
     afficherMessage('Aucune bouteille en stock');
     return;
   }
-  alert('V2 — Action: ' + action + '\n(à coder à la prochaine étape)');
+  if (action === 'boire') {
+    document.getElementById('menuActionV2Overlay').style.display = 'none';
+    ouvrirBoireV2();
+    return;
+  }
+  if (action === 'donner') {
+    document.getElementById('menuActionV2Overlay').style.display = 'none';
+    ouvrirDonnerV2();
+    return;
+  }
 }
 
 var arriveeV2Choix = { meuble: '', rangee: '', espace: '' };
@@ -558,6 +567,356 @@ function fermerDeplacerV2() {
   if (menuActionV2Context) {
     ouvrirMenuActionV2(menuActionV2Context.code, menuActionV2Context.wineResult);
   }
+}
+
+// ==================== BOIRE / DONNER V2 (commun) ====================
+var actionV2Choix = { row: 0, bottle: 0, note: 0 };
+
+function bottlesActivesV2() {
+  var r = menuActionV2Context && menuActionV2Context.wineResult;
+  var bottles = (r && r.bottles) ? r.bottles : [];
+  return bottles.filter(function(b) { return b.statut !== 'Bu' && b.statut !== 'Sorti'; });
+}
+
+function empBouteilleV2(b) {
+  return (b.meuble && b.rangee && b.espace) ? (b.meuble + '-' + b.rangee + '-' + b.espace) : 'À ranger';
+}
+
+function rendreEnteteActionV2(prefixe) {
+  var r = menuActionV2Context.wineResult;
+  var nom = (r && r.wine && r.wine.nom) ? r.wine.nom : 'Vin';
+  document.getElementById(prefixe + 'V2-nom').textContent = decodeHTML(nom);
+  document.getElementById(prefixe + 'V2-codebarre').textContent = menuActionV2Context.code;
+}
+
+// ---------- BOIRE ----------
+function ouvrirBoireV2() {
+  if (!menuActionV2Context) return;
+  appelBackend('getInventoryData', {}, { spinner: ' ' }).then(function(data) {
+    if (data) ALL_DATA = data;
+    return appelBackend('checkWineExists', { codebarre: menuActionV2Context.code });
+  }).then(function(result) {
+    if (result) menuActionV2Context.wineResult = result;
+    construireBoireV2();
+  }).catch(function() { retourAccueilV2(); });
+}
+
+function construireBoireV2() {
+  actionV2Choix = { row: menuActionV2Context.wineResult.row, bottle: 0, note: 0 };
+  rendreEnteteActionV2('boire');
+  document.getElementById('boireV2-plat').value = '';
+  document.getElementById('boireV2-accords-menu').classList.remove('ouvert');
+
+  var actives = bottlesActivesV2();
+  if (actives.length === 1) {
+    actionV2Choix.bottle = actives[0].bottle;
+    document.getElementById('boireV2-choix-bouteille').style.display = 'none';
+    document.getElementById('boireV2-form').style.display = 'block';
+    construireFormBoireV2();
+  } else {
+    document.getElementById('boireV2-bouteille-menu').innerHTML = actives.map(function(b) {
+      return '<div class="item-liste" onclick="choisirBouteilleBoireV2(' + b.bottle + ')">' + empBouteilleV2(b) + '</div>';
+    }).join('');
+    document.getElementById('boireV2-choix-bouteille').style.display = 'block';
+    document.getElementById('boireV2-form').style.display = 'none';
+  }
+  document.getElementById('boireV2Container').style.display = 'flex';
+}
+
+function choisirBouteilleBoireV2(bottle) {
+  actionV2Choix.bottle = bottle;
+  document.getElementById('boireV2-choix-bouteille').style.display = 'none';
+  document.getElementById('boireV2-form').style.display = 'block';
+  construireFormBoireV2();
+}
+
+function construireFormBoireV2() {
+  var v = document.getElementById('boireV2-verres');
+  v.classList.add('desactive');
+  v.innerHTML = '';
+  for (var i = 1; i <= 5; i++) {
+    v.innerHTML += '<span class="boire-verre" data-note="' + i + '" onclick="choisirNoteBoireV2(' + i + ')">🍷</span>';
+  }
+  var accordsActuels = (menuActionV2Context.wineResult.wine.accords || '').split(',').map(function(a) { return a.trim(); }).filter(Boolean);
+  document.getElementById('boireV2-accords-menu').innerHTML = (CONFIG && CONFIG.accords ? CONFIG.accords : []).map(function(acc) {
+    var sel = accordsActuels.indexOf(acc) !== -1;
+    return '<div class="item-liste' + (sel ? ' actif' : '') + '" onclick="this.classList.toggle(\'actif\')" data-accord="' + acc + '">' + acc + '</div>';
+  }).join('');
+}
+
+function boireV2PlatChange() {
+  var plat = document.getElementById('boireV2-plat').value.trim();
+  document.getElementById('boireV2-verres').classList.toggle('desactive', plat === '');
+}
+
+function choisirNoteBoireV2(note) {
+  if (document.getElementById('boireV2-plat').value.trim() === '') return;
+  actionV2Choix.note = note;
+  Array.prototype.forEach.call(document.querySelectorAll('#boireV2-verres .boire-verre'), function(el) {
+    el.classList.toggle('allume', parseInt(el.getAttribute('data-note')) <= note);
+  });
+}
+
+function basculerMenuAccordsBoireV2() {
+  document.getElementById('boireV2-accords-menu').classList.toggle('ouvert');
+}
+
+function confirmerBoireV2() {
+  var plat = document.getElementById('boireV2-plat').value.trim();
+  if (plat !== '' && actionV2Choix.note === 0) { afficherMessage('Choisissez une appréciation'); return; }
+  var accords = Array.prototype.map.call(document.querySelectorAll('#boireV2-accords-menu .item-liste.actif'), function(el) { return el.getAttribute('data-accord'); });
+  appelBackend('actionBouteille', { row: actionV2Choix.row, action: 'boire', bottle: actionV2Choix.bottle, plat: plat, bonAccord: actionV2Choix.note }, { spinner: 'Santé !' }).then(function() {
+    if (accords.length) {
+      return appelBackend('updateWineField', { codebarre: menuActionV2Context.code, field: 'Accords', value: accords.join(', ') });
+    }
+  }).then(function() {
+    return appelBackend('getInventoryData', {});
+  }).then(function(data) {
+    if (data) ALL_DATA = data;
+    return appelBackend('checkWineExists', { codebarre: menuActionV2Context.code });
+  }).then(function(result) {
+    if (result) menuActionV2Context.wineResult = result;
+    document.getElementById('boireV2Container').style.display = 'none';
+    menuActionV2Context = null;
+    afficherMessage('Santé !');
+  }).catch(function() { retourAccueilV2(); });
+}
+
+function fermerBoireV2() {
+  document.getElementById('boireV2Container').style.display = 'none';
+  var actives = bottlesActivesV2();
+  if (actives.length > 1 && document.getElementById('boireV2-form').style.display === 'block') {
+    document.getElementById('boireV2-form').style.display = 'none';
+    document.getElementById('boireV2-choix-bouteille').style.display = 'block';
+    document.getElementById('boireV2Container').style.display = 'flex';
+    return;
+  }
+  if (menuActionV2Context) ouvrirMenuActionV2(menuActionV2Context.code, menuActionV2Context.wineResult);
+}
+
+// ---------- DONNER ----------
+function ouvrirDonnerV2() {
+  if (!menuActionV2Context) return;
+  appelBackend('getInventoryData', {}, { spinner: ' ' }).then(function(data) {
+    if (data) ALL_DATA = data;
+    return appelBackend('checkWineExists', { codebarre: menuActionV2Context.code });
+  }).then(function(result) {
+    if (result) menuActionV2Context.wineResult = result;
+    construireDonnerV2();
+  }).catch(function() { retourAccueilV2(); });
+}
+
+function construireDonnerV2() {
+  actionV2Choix = { row: menuActionV2Context.wineResult.row, bottle: 0, note: 0 };
+  rendreEnteteActionV2('donner');
+
+  var actives = bottlesActivesV2();
+  if (actives.length === 1) {
+    actionV2Choix.bottle = actives[0].bottle;
+    document.getElementById('donnerV2-choix-bouteille').style.display = 'none';
+    document.getElementById('donnerV2-form').style.display = 'block';
+  } else {
+    document.getElementById('donnerV2-bouteille-menu').innerHTML = actives.map(function(b) {
+      return '<div class="item-liste" onclick="choisirBouteilleDonnerV2(' + b.bottle + ')">' + empBouteilleV2(b) + '</div>';
+    }).join('');
+    document.getElementById('donnerV2-choix-bouteille').style.display = 'block';
+    document.getElementById('donnerV2-form').style.display = 'none';
+  }
+  document.getElementById('donnerV2Container').style.display = 'flex';
+}
+
+function choisirBouteilleDonnerV2(bottle) {
+  actionV2Choix.bottle = bottle;
+  document.getElementById('donnerV2-choix-bouteille').style.display = 'none';
+  document.getElementById('donnerV2-form').style.display = 'block';
+}
+
+function confirmerDonnerV2() {
+  appelBackend('actionBouteille', { row: actionV2Choix.row, action: 'donner', bottle: actionV2Choix.bottle }, { spinner: 'Don' }).then(function() {
+    return appelBackend('getInventoryData', {});
+  }).then(function(data) {
+    if (data) ALL_DATA = data;
+    return appelBackend('checkWineExists', { codebarre: menuActionV2Context.code });
+  }).then(function(result) {
+    if (result) menuActionV2Context.wineResult = result;
+    document.getElementById('donnerV2Container').style.display = 'none';
+    menuActionV2Context = null;
+    afficherMessage('Bouteille donnée');
+  }).catch(function() { retourAccueilV2(); });
+}
+
+function fermerDonnerV2() {
+  document.getElementById('donnerV2Container').style.display = 'none';
+  var actives = bottlesActivesV2();
+  if (actives.length > 1 && document.getElementById('donnerV2-form').style.display === 'block') {
+    document.getElementById('donnerV2-form').style.display = 'none';
+    document.getElementById('donnerV2-choix-bouteille').style.display = 'block';
+    document.getElementById('donnerV2Container').style.display = 'flex';
+    return;
+  }
+  if (menuActionV2Context) ouvrirMenuActionV2(menuActionV2Context.code, menuActionV2Context.wineResult);
+}
+
+// ==================== CAVE À VIN V2 ====================
+function ouvrirCaveV2() {
+  document.getElementById('caveV2Container').style.display = 'flex';
+  appelBackend('getInventoryData', {}, { spinner: ' ' }).then(function(data) {
+    ALL_DATA = data || [];
+    remplirFiltresCaveV2();
+    afficherCartesCaveV2(ALL_DATA);
+  }).catch(function() { retourAccueilV2(); });
+}
+
+function fermerCaveV2() {
+  fermerFiltresCaveV2();
+  document.getElementById('caveV2Container').style.display = 'none';
+}
+
+function couleurClasseV2(couleur) {
+  couleur = (couleur || '').toLowerCase();
+  if (couleur.indexOf('rouge') !== -1) return 'vin-rouge';
+  if (couleur.indexOf('blanc') !== -1) return 'vin-blanc';
+  if (couleur.indexOf('rose') !== -1 || couleur.indexOf('rosé') !== -1) return 'vin-rose';
+  if (couleur.indexOf('bulle') !== -1 || couleur.indexOf('mousseux') !== -1) return 'vin-bulles';
+  return 'vin-rouge';
+}
+
+function grouperVinsV2(data) {
+  var grouped = {};
+  data.forEach(function(item) {
+    var cb = (item['Code-barres'] || '').toString().trim().replace(/\s+/g, '');
+    var key = cb !== '' ? cb : 'SANS_CB_' + item.Nom;
+    if (!grouped[key]) grouped[key] = { wine: item, cb: cb, count: 0 };
+    var statut = item.Statut || 'En stock';
+    if (statut !== 'Bu' && statut !== 'Sorti') grouped[key].count++;
+  });
+  var ordre = { rouge: 1, blanc: 2, rose: 3, bulles: 4 };
+  return Object.values(grouped).sort(function(a, b) {
+    var va = ordre[(a.wine.Couleur || '').toLowerCase()] || 99;
+    var vb = ordre[(b.wine.Couleur || '').toLowerCase()] || 99;
+    return va !== vb ? va - vb : (a.wine.Nom || '').localeCompare(b.wine.Nom || '');
+  });
+}
+
+function afficherCartesCaveV2(data) {
+  var div = document.getElementById('caveV2-cartes');
+  var groups = grouperVinsV2(data);
+  document.getElementById('caveV2-compte').textContent = groups.length + ' vin' + (groups.length > 1 ? 's' : '');
+  if (groups.length === 0) { div.innerHTML = '<div class="texte-secondaire">Aucun vin</div>'; return; }
+  div.innerHTML = groups.map(function(g) {
+    var w = g.wine;
+    var nom = decodeHTML(w.Nom || '—');
+    var pays = w.Pays || '';
+    var region = w.Region || '';
+    var paysRegion = (pays && region) ? (pays + ' • ' + region) : (pays || region);
+    var cepage = w.Cepage || '';
+    var sous = [paysRegion, cepage].filter(Boolean).join('<br>');
+    var photo = w['Photo URL'] ? '<div class="carte-photo"><img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
+    var onclick = g.cb ? ' onclick="ouvrirFicheV2(\'' + g.cb + '\', \'cave\')"' : '';
+    return '<div class="carte ' + couleurClasseV2(w.Couleur) + '"' + onclick + '>' + photo +
+           '<div class="carte-centre"><span class="carte-titre">' + nom + '</span><span class="carte-sous">' + sous + '</span></div>' +
+           '<div class="carte-droite">' + g.count + ' btl</div></div>';
+  }).join('');
+}
+
+function ouvrirFiltresCaveV2() {
+  document.getElementById('caveV2-filtres-voile').classList.add('ouvert');
+  document.getElementById('caveV2-filtres').classList.add('ouvert');
+}
+function fermerFiltresCaveV2() {
+  document.getElementById('caveV2-filtres-voile').classList.remove('ouvert');
+  document.getElementById('caveV2-filtres').classList.remove('ouvert');
+}
+
+function remplirFiltresCaveV2() {
+  var c = document.getElementById('caveV2-f-couleur').value;
+  var cep = document.getElementById('caveV2-f-cepage').value;
+  var p = document.getElementById('caveV2-f-pays').value;
+  var app = document.getElementById('caveV2-f-appellation').value;
+  var a = document.getElementById('caveV2-f-accords').value;
+
+  var sets = { c: {}, cep: {}, p: {}, app: {}, a: {} };
+  (ALL_DATA || []).forEach(function(i) {
+    if (i.Couleur) sets.c[i.Couleur] = true;
+    if (i.Pays) sets.p[i.Pays] = true;
+    if (i.Appellation) sets.app[i.Appellation] = true;
+    (i.Cepage || '').split(',').map(function(x){return x.trim();}).filter(Boolean).forEach(function(x){ sets.cep[x] = true; });
+    (i.Accords || '').split(',').map(function(x){return x.trim();}).filter(Boolean).forEach(function(x){ sets.a[x] = true; });
+  });
+
+  function fill(id, obj, label, cur) {
+    var sel = document.getElementById(id);
+    var opts = Object.keys(obj).sort();
+    sel.innerHTML = '<option value="">' + label + '</option>' + opts.map(function(v) {
+      return '<option value="' + v + '"' + (v === cur ? ' selected' : '') + '>' + v + '</option>';
+    }).join('');
+  }
+  fill('caveV2-f-couleur', sets.c, 'COULEURS', c);
+  fill('caveV2-f-cepage', sets.cep, 'CÉPAGES', cep);
+  fill('caveV2-f-pays', sets.p, 'PAYS', p);
+  fill('caveV2-f-appellation', sets.app, 'APPELLATIONS', app);
+  fill('caveV2-f-accords', sets.a, 'ACCORDS', a);
+}
+
+function appliquerFiltresCaveV2() {
+  var c = document.getElementById('caveV2-f-couleur').value;
+  var cep = document.getElementById('caveV2-f-cepage').value;
+  var p = document.getElementById('caveV2-f-pays').value;
+  var app = document.getElementById('caveV2-f-appellation').value;
+  var a = document.getElementById('caveV2-f-accords').value;
+  var nom = document.getElementById('caveV2-f-nom').value.toLowerCase().trim();
+
+  var filtered = (ALL_DATA || []).filter(function(i) {
+    return (!c || i.Couleur === c) &&
+      (!cep || (i.Cepage && i.Cepage.indexOf(cep) !== -1)) &&
+      (!p || i.Pays === p) &&
+      (!app || i.Appellation === app) &&
+      (!a || (i.Accords && i.Accords.indexOf(a) !== -1)) &&
+      (!nom || (i.Nom || '').toLowerCase().indexOf(nom) !== -1);
+  });
+  afficherCartesCaveV2(filtered);
+  remplirFiltresCaveV2();
+}
+
+function reinitialiserFiltresCaveV2() {
+  ['caveV2-f-couleur','caveV2-f-cepage','caveV2-f-pays','caveV2-f-appellation','caveV2-f-accords'].forEach(function(id) {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('caveV2-f-nom').value = '';
+  remplirFiltresCaveV2();
+  afficherCartesCaveV2(ALL_DATA);
+  fermerFiltresCaveV2();
+}
+
+// ==================== MENU BURGER V2 ====================
+function toggleMenuV2() {
+  var ouvert = document.getElementById('burgerV2').classList.toggle('ouvert');
+  document.getElementById('burgerV2-voile').classList.toggle('ouvert', ouvert);
+}
+
+function fermerMenuBurgerV2() {
+  document.getElementById('burgerV2').classList.remove('ouvert');
+  document.getElementById('burgerV2-voile').classList.remove('ouvert');
+}
+
+function burgerV2Click(cible) {
+  fermerMenuBurgerV2();
+  if (cible === 'accueil') {
+    ['caveV2Container'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+    return;
+  }
+  if (cible === 'cave') { ouvrirCaveV2(); return; }
+  if (cible === 'refresh') {
+    appelBackend('getInventoryData', {}, { spinner: 'Synchronisation' }).then(function(data) {
+      ALL_DATA = data || [];
+      afficherMessage('✓ Synchronisé');
+    }).catch(function() { afficherMessage('Erreur de synchronisation'); });
+    return;
+  }
+  afficherMessage('À venir');
 }
 
 function ajouterBouteilleArrivee(meuble, rangee, espace) {
