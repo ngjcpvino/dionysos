@@ -63,8 +63,19 @@
   <div class="modal-v2-content modale-haut">
     <button class="btn-fermer" onclick="fermerVinInconnuV2()">✕</button>
     <h2 class="titre-1">Vin inconnu</h2>
-    <div class="texte-secondaire">Ce vin n'est pas dans la cave</div>
-    <div id="vinInconnuV2-codebarre" class="modal-v2-codebarre"></div>
+    <div class="texte-secondaire">Ce vin n'a pas été trouvé sur SAQ</div>
+    <div id="vinInconnuV2-saisie" style="width:100%; max-width:600px;">
+      <input type="text" id="vinInconnuV2-codebarre-champ" class="champ-saisie" placeholder="Code-barres" inputmode="numeric">
+      <input type="text" id="vinInconnuV2-nom" class="champ-saisie" placeholder="Nom du vin">
+      <div class="roundel" onclick="creerVinManuelV2()">
+        <span class="roundel-anneau"></span>
+        <span class="roundel-barre">Confirmer</span>
+      </div>
+      <div class="roundel" onclick="fermerVinInconnuV2()">
+        <span class="roundel-anneau"></span>
+        <span class="roundel-barre">Annuler</span>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -77,9 +88,9 @@
     <div class="menu-v2-grid">
       <div class="menu-v2-circle" onclick="menuV2Click('visualiser')">👁</div>
       <div class="menu-v2-circle" onclick="menuV2Click('arrivee')">➕</div>
-      <div class="menu-v2-circle" onclick="menuV2Click('deplacer')">↔</div>
-      <div class="menu-v2-circle" onclick="menuV2Click('boire')">🍷</div>
-      <div class="menu-v2-circle" onclick="menuV2Click('donner')">🎁</div>
+      <div class="menu-v2-circle" id="menuV2-deplacer" onclick="menuV2Click('deplacer')">↔</div>
+      <div class="menu-v2-circle" id="menuV2-boire" onclick="menuV2Click('boire')">🍷</div>
+      <div class="menu-v2-circle" id="menuV2-donner" onclick="menuV2Click('donner')">🎁</div>
       <div class="menu-v2-circle" onclick="fermerMenuActionV2()">✕</div>
     </div>
   </div>
@@ -114,6 +125,41 @@
     <div class="roundel" onclick="arriveeARangerV2()">
       <span class="roundel-anneau"></span>
       <span class="roundel-barre">À ranger</span>
+    </div>
+  </div>
+</div>
+
+<!-- ====================== DÉPLACER V2 ====================== -->
+<div id="deplacerV2Container" class="modal-v2-fullscreen" style="display:none;">
+  <div class="modal-v2-content modale-haut">
+    <button class="btn-fermer" onclick="fermerDeplacerV2()">✕</button>
+    <h2 class="titre-1">Déplacer</h2>
+    <div id="deplacerV2-nom" class="modal-v2-winename"></div>
+    <div id="deplacerV2-codebarre" class="modal-v2-codebarre"></div>
+
+    <div id="deplacerV2-choix-bouteille" style="display:none; width:100%; max-width:600px;">
+      <div class="texte-secondaire">Quelle bouteille déplacer ?</div>
+      <div id="deplacerV2-bouteille-menu"></div>
+    </div>
+
+    <div id="deplacerV2-destination" style="display:none; width:100%; max-width:600px;">
+      <div class="roundel" onclick="basculerListeDeplacer('meuble')">
+        <span class="roundel-anneau"></span>
+        <span class="roundel-barre" id="deplacerV2-meuble-barre">Meuble</span>
+      </div>
+      <div id="deplacerV2-meuble-menu" class="menu-liste"></div>
+
+      <div class="roundel" onclick="basculerListeDeplacer('rangee')">
+        <span class="roundel-anneau"></span>
+        <span class="roundel-barre" id="deplacerV2-rangee-barre">Rangée</span>
+      </div>
+      <div id="deplacerV2-rangee-menu" class="menu-liste"></div>
+
+      <div class="roundel" onclick="basculerListeDeplacer('espace')">
+        <span class="roundel-anneau"></span>
+        <span class="roundel-barre" id="deplacerV2-espace-barre">Espace</span>
+      </div>
+      <div id="deplacerV2-espace-menu" class="menu-liste"></div>
     </div>
   </div>
 </div>

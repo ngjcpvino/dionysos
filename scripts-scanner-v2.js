@@ -7,6 +7,21 @@ let isScanningV2 = false;
 let scanConfirmationsV2 = {};
 const SCAN_THRESHOLD_V2 = 3;
 
+// Valide le chiffre de contrôle GTIN (EAN-8, UPC-A, EAN-13). Calcul local.
+function gtinValide(code) {
+  if (!/^\d+$/.test(code)) return false;
+  if ([8, 12, 13].indexOf(code.length) === -1) return false;
+  var contrôle = parseInt(code.charAt(code.length - 1), 10);
+  var somme = 0;
+  var poids = 3;
+  for (var i = code.length - 2; i >= 0; i--) {
+    somme += parseInt(code.charAt(i), 10) * poids;
+    poids = (poids === 3) ? 1 : 3;
+  }
+  var attendu = (10 - (somme % 10)) % 10;
+  return attendu === contrôle;
+}
+
 function startScanFromHomeV2() {
   startScannerV2();
 }
@@ -41,7 +56,7 @@ function startScannerV2() {
     if (!isScanningV2) return;
     const code = result.codeResult.code;
     if (!code) return;
-    if (!/^\d{8,13}$/.test(code)) return;
+    if (!gtinValide(code)) return;
     if (!scanConfirmationsV2[code]) scanConfirmationsV2[code] = 0;
     scanConfirmationsV2[code]++;
     const feedback = document.getElementById('scanV2-feedback');
@@ -85,8 +100,8 @@ function entreeManuelleV2() {
 function validerSaisieManuelleV2() {
   var champ = document.getElementById('saisieManuelleV2-champ');
   var code = (champ ? champ.value : '').replace(/\D/g, '').trim();
-  if (!code || code.length < 8) {
-    afficherMessage('Code-barres invalide — minimum 8 chiffres');
+  if (!gtinValide(code)) {
+    afficherMessage('Code-barres invalide');
     return;
   }
   document.getElementById('saisieManuelleV2Container').style.display = 'none';
@@ -104,19 +119,70 @@ function traiterResultatScanV2(code) {
     } else {
       ouvrirVinInconnuV2(code);
     }
-  }).catch(function(err) {
-    afficherMessage('Erreur de vérification');
+  }).catch(function() {
+    retourAccueilV2();
   });
 }
 
+var vinInconnuV2Code = null;
+
 function ouvrirVinInconnuV2(code) {
-  var cb = document.getElementById('vinInconnuV2-codebarre');
-  if (cb) cb.textContent = code;
-  document.getElementById('vinInconnuV2Container').style.display = 'flex';
+  vinInconnuV2Code = code;
+  appelBackend('chercherProduitSAQ_GRAPHQL_V1', { codebarre: code }, { spinner: 'Un instant svp' }).then(function(codeSAQ) {
+    if (codeSAQ) {
+      creerVinSAQV2(code, codeSAQ);
+    } else {
+      document.getElementById('vinInconnuV2-codebarre-champ').value = code;
+      document.getElementById('vinInconnuV2-nom').value = '';
+      document.getElementById('vinInconnuV2Container').style.display = 'flex';
+    }
+  }).catch(function() {
+    document.getElementById('vinInconnuV2-codebarre-champ').value = code;
+    document.getElementById('vinInconnuV2-nom').value = '';
+    document.getElementById('vinInconnuV2Container').style.display = 'flex';
+  });
 }
 
 function fermerVinInconnuV2() {
   document.getElementById('vinInconnuV2Container').style.display = 'none';
+}
+
+function creerVinSAQV2(code, codeSAQ) {
+  appelBackend('ajouterVinAvecBouteilles', { codebarre: code, codeSAQ: codeSAQ, note: '', bouteilles: '[]', nom: '' }, { spinner: 'Un instant svp' }).then(function(res) {
+    if (res && res.success) {
+      enchainerMenuApresCreationV2(code);
+    } else {
+      retourAccueilV2();
+    }
+  }).catch(function() {
+    retourAccueilV2();
+  });
+}
+
+function enchainerMenuApresCreationV2(code) {
+  appelBackend('checkWineExists', { codebarre: code }, { spinner: '' }).then(function(result) {
+    document.getElementById('vinInconnuV2Container').style.display = 'none';
+    ouvrirMenuActionV2(code, result);
+  }).catch(function() {
+    retourAccueilV2();
+  });
+}
+
+function creerVinManuelV2() {
+  var nom = (document.getElementById('vinInconnuV2-nom').value || '').trim();
+  if (!nom) {
+    afficherMessage('Entrez un nom');
+    return;
+  }
+  appelBackend('ajouterVinAvecBouteilles', { codebarre: code, codeSAQ: '', note: '', bouteilles: '[]', nom: nom }, { spinner: 'Un instant svp' }).then(function(res) {
+    if (res && res.success) {
+      enchainerMenuApresCreationV2(code);
+    } else {
+      retourAccueilV2();
+    }
+  }).catch(function() {
+    retourAccueilV2();
+  });
 }
 
 let menuActionV2Context = null;
@@ -126,12 +192,28 @@ function ouvrirMenuActionV2(code, wineResult) {
   const nom = (wineResult && wineResult.wine && wineResult.wine.nom) ? wineResult.wine.nom : 'Vin inconnu';
   document.getElementById('menuActionV2-nom').textContent = nom;
   document.getElementById('menuActionV2-codebarre').textContent = code;
+
+  var nbActives = (wineResult && typeof wineResult.count === 'number') ? wineResult.count : 0;
+  ['menuV2-deplacer', 'menuV2-boire', 'menuV2-donner'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.toggle('desactive', nbActives === 0);
+  });
+
   document.getElementById('menuActionV2Overlay').style.display = 'flex';
 }
 
 function fermerMenuActionV2() {
   document.getElementById('menuActionV2Overlay').style.display = 'none';
   menuActionV2Context = null;
+}
+
+function retourAccueilV2() {
+  ['scannerV2Container', 'saisieManuelleV2Container', 'vinInconnuV2Container', 'menuActionV2Overlay', 'arriveeV2Container', 'deplacerV2Container', 'ficheV2Overlay'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+  menuActionV2Context = null;
+  afficherMessage('Un problème est survenu, veuillez recommencer');
 }
 
 function menuV2Click(action) {
@@ -144,6 +226,16 @@ function menuV2Click(action) {
   if (action === 'arrivee') {
     document.getElementById('menuActionV2Overlay').style.display = 'none';
     ouvrirArriveeV2();
+    return;
+  }
+  if (action === 'deplacer') {
+    document.getElementById('menuActionV2Overlay').style.display = 'none';
+    ouvrirDeplacerV2();
+    return;
+  }
+  var nbActives = (menuActionV2Context && menuActionV2Context.wineResult && typeof menuActionV2Context.wineResult.count === 'number') ? menuActionV2Context.wineResult.count : 0;
+  if (nbActives === 0 && (action === 'deplacer' || action === 'boire' || action === 'donner')) {
+    afficherMessage('Aucune bouteille en stock');
     return;
   }
   alert('V2 — Action: ' + action + '\n(à coder à la prochaine étape)');
@@ -195,6 +287,14 @@ function construireArriveeV2() {
   document.getElementById('arriveeV2-nom').textContent = nom;
   document.getElementById('arriveeV2-codebarre').textContent = menuActionV2Context.code;
 
+  var nbActives = (menuActionV2Context.wineResult && typeof menuActionV2Context.wineResult.count === 'number') ? menuActionV2Context.wineResult.count : 0;
+  if (nbActives >= 5) {
+    afficherMessage('Maximum atteint (5 bouteilles)');
+    document.getElementById('arriveeV2Container').style.display = 'none';
+    if (menuActionV2Context) ouvrirMenuActionV2(menuActionV2Context.code, menuActionV2Context.wineResult);
+    return;
+  }
+
   document.getElementById('arriveeV2-meuble-barre').textContent = 'Meuble';
   document.getElementById('arriveeV2-rangee-barre').textContent = 'Rangée';
   document.getElementById('arriveeV2-espace-barre').textContent = 'Espace';
@@ -202,6 +302,7 @@ function construireArriveeV2() {
   var menuMeuble = document.getElementById('arriveeV2-meuble-menu');
   var meubles = (CONFIG && CONFIG.meubles) ? Object.keys(CONFIG.meubles) : [];
   meubles = meubles.filter(function(m) { return meubleALibre(m); });
+  meubles.sort(function(a, b) { return a.localeCompare(b); });
   menuMeuble.innerHTML = meubles.map(function(m) {
     return '<div class="accord-item" onclick="choisirMeubleArrivee(\'' + m + '\')">' + m + '</div>';
   }).join('');
@@ -243,6 +344,7 @@ function choisirMeubleArrivee(meuble) {
 
   var rangees = (CONFIG.meubles[meuble]) ? Object.keys(CONFIG.meubles[meuble]) : [];
   rangees = rangees.filter(function(r) { return rangeeALibre(meuble, r); });
+  rangees.sort(function(a, b) { return parseInt(a) - parseInt(b); });
   document.getElementById('arriveeV2-rangee-menu').innerHTML = rangees.map(function(r) {
     return '<div class="accord-item" onclick="choisirRangeeArrivee(\'' + r + '\')">' + r + '</div>';
   }).join('');
@@ -260,6 +362,7 @@ function choisirRangeeArrivee(rangee) {
   var espaces = (CONFIG.meubles[meuble] && CONFIG.meubles[meuble][rangee]) ? CONFIG.meubles[meuble][rangee] : [];
   var occ = espacesOccupesArrivee(meuble, rangee);
   espaces = espaces.filter(function(e) { return occ.indexOf(String(e)) === -1; });
+  espaces.sort(function(a, b) { return parseInt(a) - parseInt(b); });
   document.getElementById('arriveeV2-espace-menu').innerHTML = espaces.map(function(e) {
     return '<div class="accord-item" onclick="choisirEspaceArrivee(\'' + e + '\')">' + e + '</div>';
   }).join('');
@@ -281,6 +384,7 @@ function choisirEspaceArrivee(espace) {
         var occ = espacesOccupesArrivee(c.meuble, c.rangee);
         var espaces = (CONFIG.meubles[c.meuble] && CONFIG.meubles[c.meuble][c.rangee]) ? CONFIG.meubles[c.meuble][c.rangee] : [];
         espaces = espaces.filter(function(e) { return occ.indexOf(String(e)) === -1; });
+        espaces.sort(function(a, b) { return parseInt(a) - parseInt(b); });
         var menu = document.getElementById('arriveeV2-espace-menu');
         menu.innerHTML = espaces.map(function(e) {
           return '<div class="accord-item" onclick="choisirEspaceArrivee(\'' + e + '\')">' + e + '</div>';
@@ -298,6 +402,163 @@ function arriveeARangerV2() {
   ajouterBouteilleArrivee('', '', '');
 }
 
+// ==================== DÉPLACER V2 ====================
+var deplacerV2Choix = { row: 0, bottle: 0, meuble: '', rangee: '', espace: '' };
+
+function ouvrirDeplacerV2() {
+  if (!menuActionV2Context) return;
+  appelBackend('getInventoryData', {}, { spinner: ' ' }).then(function(data) {
+    if (data) ALL_DATA = data;
+    construireDeplacerV2();
+  }).catch(function() {
+    construireDeplacerV2();
+  });
+}
+
+function construireDeplacerV2() {
+  if (!menuActionV2Context) return;
+  deplacerV2Choix = { row: 0, bottle: 0, meuble: '', rangee: '', espace: '' };
+
+  var nom = (menuActionV2Context.wineResult && menuActionV2Context.wineResult.wine && menuActionV2Context.wineResult.wine.nom) ? menuActionV2Context.wineResult.wine.nom : 'Vin';
+  document.getElementById('deplacerV2-nom').textContent = nom;
+  document.getElementById('deplacerV2-codebarre').textContent = menuActionV2Context.code;
+
+  document.getElementById('deplacerV2-meuble-barre').textContent = 'Meuble';
+  document.getElementById('deplacerV2-rangee-barre').textContent = 'Rangée';
+  document.getElementById('deplacerV2-espace-barre').textContent = 'Espace';
+  document.getElementById('deplacerV2-meuble-menu').innerHTML = '';
+  document.getElementById('deplacerV2-rangee-menu').innerHTML = '';
+  document.getElementById('deplacerV2-espace-menu').innerHTML = '';
+
+  var bottles = (menuActionV2Context.wineResult && menuActionV2Context.wineResult.bottles) ? menuActionV2Context.wineResult.bottles : [];
+
+  if (bottles.length === 1) {
+    deplacerV2Choix.row = bottles[0].row;
+    deplacerV2Choix.bottle = bottles[0].bottle;
+    document.getElementById('deplacerV2-choix-bouteille').style.display = 'none';
+    document.getElementById('deplacerV2-destination').style.display = 'block';
+    construireMeublesDeplacer();
+  } else {
+    var menu = document.getElementById('deplacerV2-bouteille-menu');
+    menu.innerHTML = bottles.map(function(b) {
+      var emp = (b.meuble && b.rangee && b.espace) ? (b.meuble + '-' + b.rangee + '-' + b.espace) : 'À ranger';
+      return '<div class="accord-item" onclick="choisirBouteilleDeplacer(' + b.row + ',' + b.bottle + ')">' + emp + '</div>';
+    }).join('');
+    document.getElementById('deplacerV2-choix-bouteille').style.display = 'block';
+    document.getElementById('deplacerV2-destination').style.display = 'none';
+  }
+
+  document.getElementById('deplacerV2Container').style.display = 'flex';
+}
+
+function choisirBouteilleDeplacer(row, bottle) {
+  deplacerV2Choix.row = row;
+  deplacerV2Choix.bottle = bottle;
+  document.getElementById('deplacerV2-choix-bouteille').style.display = 'none';
+  document.getElementById('deplacerV2-destination').style.display = 'block';
+  construireMeublesDeplacer();
+}
+
+function construireMeublesDeplacer() {
+  var meubles = (CONFIG && CONFIG.meubles) ? Object.keys(CONFIG.meubles) : [];
+  meubles = meubles.filter(function(m) { return meubleALibre(m); });
+  meubles.sort(function(a, b) { return a.localeCompare(b); });
+  document.getElementById('deplacerV2-meuble-menu').innerHTML = meubles.map(function(m) {
+    return '<div class="accord-item" onclick="choisirMeubleDeplacer(\'' + m + '\')">' + m + '</div>';
+  }).join('');
+}
+
+function basculerListeDeplacer(type) {
+  ['meuble', 'rangee', 'espace'].forEach(function(t) {
+    var menu = document.getElementById('deplacerV2-' + t + '-menu');
+    if (t === type) { menu.classList.toggle('ouvert'); }
+    else { menu.classList.remove('ouvert'); }
+  });
+}
+
+function choisirMeubleDeplacer(meuble) {
+  deplacerV2Choix.meuble = meuble;
+  deplacerV2Choix.rangee = '';
+  deplacerV2Choix.espace = '';
+  document.getElementById('deplacerV2-meuble-barre').textContent = meuble;
+  document.getElementById('deplacerV2-meuble-menu').classList.remove('ouvert');
+  document.getElementById('deplacerV2-rangee-barre').textContent = 'Rangée';
+  document.getElementById('deplacerV2-espace-barre').textContent = 'Espace';
+  document.getElementById('deplacerV2-espace-menu').innerHTML = '';
+
+  var rangees = (CONFIG.meubles[meuble]) ? Object.keys(CONFIG.meubles[meuble]) : [];
+  rangees = rangees.filter(function(r) { return rangeeALibre(meuble, r); });
+  rangees.sort(function(a, b) { return parseInt(a) - parseInt(b); });
+  document.getElementById('deplacerV2-rangee-menu').innerHTML = rangees.map(function(r) {
+    return '<div class="accord-item" onclick="choisirRangeeDeplacer(\'' + r + '\')">' + r + '</div>';
+  }).join('');
+}
+
+function choisirRangeeDeplacer(rangee) {
+  deplacerV2Choix.rangee = rangee;
+  deplacerV2Choix.espace = '';
+  document.getElementById('deplacerV2-rangee-barre').textContent = rangee;
+  document.getElementById('deplacerV2-rangee-menu').classList.remove('ouvert');
+  document.getElementById('deplacerV2-espace-barre').textContent = 'Espace';
+
+  var meuble = deplacerV2Choix.meuble;
+  var espaces = (CONFIG.meubles[meuble] && CONFIG.meubles[meuble][rangee]) ? CONFIG.meubles[meuble][rangee] : [];
+  var occ = espacesOccupesArrivee(meuble, rangee);
+  espaces = espaces.filter(function(e) { return occ.indexOf(String(e)) === -1; });
+  espaces.sort(function(a, b) { return parseInt(a) - parseInt(b); });
+  document.getElementById('deplacerV2-espace-menu').innerHTML = espaces.map(function(e) {
+    return '<div class="accord-item" onclick="choisirEspaceDeplacer(\'' + e + '\')">' + e + '</div>';
+  }).join('');
+}
+
+function choisirEspaceDeplacer(espace) {
+  deplacerV2Choix.espace = espace;
+  document.getElementById('deplacerV2-espace-barre').textContent = espace;
+  document.getElementById('deplacerV2-espace-menu').classList.remove('ouvert');
+
+  var c = deplacerV2Choix;
+  appelBackend('checkLocationAvailable', { meuble: c.meuble, rangee: c.rangee, espace: c.espace }, { spinner: 'Vérification' }).then(function(result) {
+    if (!result.available) {
+      afficherMessage('Occupé par : ' + result.message);
+      return appelBackend('getInventoryData', {}).then(function(data) {
+        if (data) ALL_DATA = data;
+        c.espace = '';
+        document.getElementById('deplacerV2-espace-barre').textContent = 'Espace';
+        var espaces = (CONFIG.meubles[c.meuble] && CONFIG.meubles[c.meuble][c.rangee]) ? CONFIG.meubles[c.meuble][c.rangee] : [];
+        var occ = espacesOccupesArrivee(c.meuble, c.rangee);
+        espaces = espaces.filter(function(e) { return occ.indexOf(String(e)) === -1; });
+        espaces.sort(function(a, b) { return parseInt(a) - parseInt(b); });
+        var menu = document.getElementById('deplacerV2-espace-menu');
+        menu.innerHTML = espaces.map(function(e) {
+          return '<div class="accord-item" onclick="choisirEspaceDeplacer(\'' + e + '\')">' + e + '</div>';
+        }).join('');
+        menu.classList.add('ouvert');
+      });
+    }
+  appelBackend('actionBouteille', { row: c.row, action: 'deplacer', bottle: c.bottle, meuble: c.meuble, rangee: c.rangee, espace: c.espace }, { spinner: 'Déplacement' }).then(function() {
+      afficherMessage('Bouteille déplacée');
+      return appelBackend('getInventoryData', {}).then(function(data) {
+        if (data) ALL_DATA = data;
+        return appelBackend('checkWineExists', { codebarre: menuActionV2Context.code }).then(function(result) {
+          if (result) menuActionV2Context.wineResult = result;
+          fermerDeplacerV2();
+        });
+      });
+    }).catch(function() {
+      retourAccueilV2();
+    });
+  }).catch(function() {
+    retourAccueilV2();
+  });
+}
+
+function fermerDeplacerV2() {
+  document.getElementById('deplacerV2Container').style.display = 'none';
+  if (menuActionV2Context) {
+    ouvrirMenuActionV2(menuActionV2Context.code, menuActionV2Context.wineResult);
+  }
+}
+
 function ajouterBouteilleArrivee(meuble, rangee, espace) {
   var code = menuActionV2Context ? menuActionV2Context.code : null;
   if (!code) { afficherMessage('Vin introuvable'); return; }
@@ -307,8 +568,11 @@ function ajouterBouteilleArrivee(meuble, rangee, espace) {
     return appelBackend('getInventoryData', {});
   }).then(function(data) {
     if (data) ALL_DATA = data;
-  }).catch(function(err) {
-    afficherMessage('Erreur : ' + err);
+    return appelBackend('checkWineExists', { codebarre: code });
+  }).then(function(result) {
+    if (result && menuActionV2Context) menuActionV2Context.wineResult = result;
+  }).catch(function() {
+    retourAccueilV2();
   });
 }
 

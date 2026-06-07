@@ -353,7 +353,14 @@ body::after {
   user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
-.menu-v2-circle:active { background: var(--gold-20); }
+.menu-v2-circle:active {
+  background: var(--gold-20);
+}
+.menu-v2-circle.desactive {
+  opacity: 0.3;
+  pointer-events: none;
+  cursor: default;
+}
 
 /* ===== Éléments génériques de modale V2 ===== */
 .modale-haut {
@@ -558,11 +565,7 @@ body::after {
   display: none;
   border: var(--largeur-bordure-1) solid var(--couleur-bordure-tres-claire);
   background: var(--bg-card);
-  max-height: 250px;
-  overflow-y: auto;
   margin-bottom: var(--space-s);
-  scrollbar-width: none;
-  -ms-overflow-style: none;
 }
 .menu-liste::-webkit-scrollbar { display: none; }
 .menu-liste.ouvert { display: block; }
@@ -598,9 +601,10 @@ body::after {
 }
 .roundel-barre {
   position: absolute;
-  left: 50%;
+  left: -20px;
+  right: -20px;
   top: 50%;
-  transform: translate(-50%, -50%);
+  transform: translateY(-50%);
   z-index: 1;
   background: var(--black);
   color: var(--white);
@@ -608,7 +612,7 @@ body::after {
   text-transform: uppercase;
   letter-spacing: var(--ls-wide);
   font-size: var(--fs-12);
-  padding: var(--space-xs) var(--space-l);
+  padding: var(--space-xs) 0;
   white-space: nowrap;
 }
 
