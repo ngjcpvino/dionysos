@@ -786,9 +786,16 @@ function grouperVinsV2(data) {
   data.forEach(function(item) {
     var cb = (item['Code-barres'] || '').toString().trim().replace(/\s+/g, '');
     var key = cb !== '' ? cb : 'SANS_CB_' + item.Nom;
-    if (!grouped[key]) grouped[key] = { wine: item, cb: cb, count: 0 };
+    if (!grouped[key]) grouped[key] = { wine: item, cb: cb, count: 0, emplacements: [] };
     var statut = item.Statut || 'En stock';
-    if (statut !== 'Bu' && statut !== 'Sorti') grouped[key].count++;
+    if (statut !== 'Bu' && statut !== 'Sorti') {
+      grouped[key].count++;
+      if (item.Meuble && item.Rangee && item.Espace) {
+        grouped[key].emplacements.push(item.Meuble.toString().substring(0, 1).toUpperCase() + '-' + item.Rangee + '-' + item.Espace);
+      } else {
+        grouped[key].emplacements.push('À ranger');
+      }
+    }
   });
   var ordre = { rouge: 1, blanc: 2, rose: 3, bulles: 4 };
   return Object.values(grouped).sort(function(a, b) {
@@ -815,7 +822,9 @@ function afficherCartesCaveV2(data) {
     var onclick = g.cb ? ' onclick="ouvrirFicheV2(\'' + g.cb + '\', \'cave\')"' : '';
     return '<div class="carte ' + couleurClasseV2(w.Couleur) + '"' + onclick + '>' + photo +
            '<div class="carte-centre"><span class="carte-titre">' + nom + '</span><span class="carte-sous">' + sous + '</span></div>' +
-           '<div class="carte-droite">' + g.count + ' btl</div></div>';
+           '<div class="carte-droite">' + g.count + ' btl' +
+           (g.emplacements && g.emplacements.length ? '<br>' + g.emplacements.join('<br>') : '') +
+           '</div></div>';
   }).join('');
 }
 

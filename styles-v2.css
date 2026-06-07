@@ -494,7 +494,7 @@ body::after {
   align-items: stretch;
   width: 100%;
   margin-bottom: var(--space-s);
-  background: var(--bg-card);
+  background: transparent;
   border-bottom: var(--largeur-bordure-3) solid transparent;
   color: var(--white);
   font-size: var(--fs-base);
@@ -513,6 +513,7 @@ body::after {
   width: 60px;
   height: 60px;
   object-fit: cover;
+  object-position: bottom;
   display: block;
 }
 .carte-centre {
@@ -544,10 +545,10 @@ body::after {
 .carte.note-3 { border-bottom-color: var(--note-3); }
 .carte.note-4 { border-bottom-color: var(--note-4); }
 .carte.note-5 { border-bottom-color: var(--note-5); }
-.carte.vin-rouge  { border-bottom-color: var(--vin-rouge); }
-.carte.vin-blanc  { border-bottom-color: var(--vin-blanc); }
-.carte.vin-rose   { border-bottom-color: var(--vin-rose); }
-.carte.vin-bulles { border-bottom-color: var(--vin-bulles); }
+.carte.vin-rouge  { border-bottom-color: var(--vin-rouge); border-left: none; }
+.carte.vin-blanc  { border-bottom-color: var(--vin-blanc); border-left: none; }
+.carte.vin-rose   { border-bottom-color: var(--vin-rose); border-left: none; }
+.carte.vin-bulles { border-bottom-color: var(--vin-bulles); border-left: none; }
 
 .controle {
   display: flex;
