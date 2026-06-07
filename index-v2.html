@@ -229,10 +229,7 @@
     <div id="boireV2-form" style="display:none; width:100%; max-width:400px;">
       <input type="text" id="boireV2-plat" class="champ-saisie" placeholder="Plat (facultatif)" oninput="boireV2PlatChange()">
       <div id="boireV2-verres" class="boire-verres"></div>
-      <div class="roundel" onclick="basculerMenuAccordsBoireV2()">
-        <span class="roundel-anneau"></span>
-        <span class="roundel-barre">Accords</span>
-      </div>
+      <div class="champ-cliquable" id="boireV2-accords-display" onclick="basculerMenuAccordsBoireV2()">Accords</div>
       <div id="boireV2-accords-menu" class="menu-liste"></div>
       <div class="roundel" onclick="confirmerBoireV2()">
         <span class="roundel-anneau"></span>
