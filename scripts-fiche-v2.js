@@ -35,10 +35,15 @@ function afficherFicheV2(result) {
                       couleur.includes('blanc') ? 'vin-blanc' :
                       couleur.includes('rose') || couleur.includes('rosé') ? 'vin-rose' :
                       couleur.includes('bulle') || couleur.includes('mousseux') ? 'vin-bulles' : 'vin-rouge';
+  var nbActives = bottles.filter(function(b) {
+    var s = (b.statut || '').toString();
+    return s !== 'Bu' && s !== 'Sorti';
+  }).length;
   var panneauV2 = document.querySelector('#ficheV2Overlay .modal-v2-content');
   if (panneauV2) {
     panneauV2.classList.remove('vin-rouge', 'vin-blanc', 'vin-rose', 'vin-bulles');
     panneauV2.classList.add(classeCouleur);
+    panneauV2.classList.toggle('fiche-vide', nbActives === 0);
   }
 
   var nomEl = document.getElementById('ficheV2-nom');
