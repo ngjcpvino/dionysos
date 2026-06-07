@@ -249,7 +249,7 @@ body::after {
    ========================================= */
 #spinner-overlay {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.75);
+  background: var(--voile-standard);
   display: flex; align-items: center; justify-content: center;
   flex-direction: column; gap: 20px;
   z-index: 99999;
@@ -342,21 +342,14 @@ body::after {
   grid-gap: var(--space-l);
 }
 
-.menu-v2-circle {
+.menu-v2-grid .cercle {
   width: 90px; height: 90px;
-  border-radius: 50%;
-  border: var(--largeur-bordure-1) solid var(--couleur-bordure-or);
-  background: var(--bg-card);
-  display: flex; align-items: center; justify-content: center;
   font-size: 32px;
-  cursor: pointer;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
 }
-.menu-v2-circle:active {
+.cercle:active {
   background: var(--gold-20);
 }
-.menu-v2-circle.desactive {
+.cercle.desactive {
   opacity: 0.3;
   pointer-events: none;
   cursor: default;
@@ -371,16 +364,21 @@ body::after {
 
 .btn-fermer {
   position: absolute;
-  top: var(--space-l); right: var(--space-l);
-  width: 40px; height: 40px;
-  background: none;
-  border: none;
+  top: var(--space-s); right: var(--space-s);
+  width: var(--taille-tactile);
+  height: var(--taille-tactile);
+  border-radius: 50%;
+  border: var(--largeur-bordure-1) solid var(--gold);
+  background: var(--bg-card);
   color: var(--white);
   font-size: var(--fs-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
-.btn-fermer:active { color: var(--gold); }
+.btn-fermer:active { background: var(--gold-20); }
 
 .titre-1 {
   color: var(--white);
@@ -489,26 +487,65 @@ body::after {
   font-size: var(--fs-base);
 }
 
-.carte-large {
+.carte {
+  display: flex;
+  align-items: stretch;
   width: 100%;
-  padding: var(--space-s) var(--space-m);
-  background: var(--bg-card);
-  border-bottom: var(--largeur-bordure-1) solid var(--couleur-bordure-tres-claire);
   margin-bottom: var(--space-s);
+  background: var(--bg-card);
+  border-bottom: var(--largeur-bordure-3) solid transparent;
+  color: var(--white);
+  font-size: var(--fs-base);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.carte-photo {
+  flex: 0 0 auto;
+  width: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--white-05);
+}
+.carte-photo img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  display: block;
+}
+.carte-centre {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: var(--space-s) var(--space-m);
+}
+.carte-titre {
   color: var(--white);
   font-size: var(--fs-base);
 }
-.carte-large .date {
+.carte-sous {
   display: block;
   color: var(--white-60);
   font-size: var(--fs-xs);
   margin-top: var(--space-xs);
 }
-.note-1 { border-bottom-color: var(--note-1); }
-.note-2 { border-bottom-color: var(--note-2); }
-.note-3 { border-bottom-color: var(--note-3); }
-.note-4 { border-bottom-color: var(--note-4); }
-.note-5 { border-bottom-color: var(--note-5); }
+.carte-droite {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  padding: var(--space-s) var(--space-m);
+  color: var(--white-60);
+  font-size: var(--fs-xs);
+  text-align: right;
+}
+.carte.note-1 { border-bottom-color: var(--note-1); }
+.carte.note-2 { border-bottom-color: var(--note-2); }
+.carte.note-3 { border-bottom-color: var(--note-3); }
+.carte.note-4 { border-bottom-color: var(--note-4); }
+.carte.note-5 { border-bottom-color: var(--note-5); }
+.carte.vin-rouge  { border-bottom-color: var(--vin-rouge); }
+.carte.vin-blanc  { border-bottom-color: var(--vin-blanc); }
+.carte.vin-rose   { border-bottom-color: var(--vin-rose); }
+.carte.vin-bulles { border-bottom-color: var(--vin-bulles); }
 
 .controle {
   display: flex;
@@ -517,24 +554,7 @@ body::after {
   margin-bottom: var(--space-s);
   font-size: var(--fs-base);
 }
-.btn-bascule {
-  width: var(--taille-tactile);
-  height: var(--taille-tactile);
-  border: var(--largeur-bordure-1) solid var(--gold);
-  background: var(--bg-card);
-  color: var(--white);
-  font-size: var(--fs-base);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  -webkit-tap-highlight-color: transparent;
-}
-.btn-bascule.actif {
-  background: var(--gold-30);
-  border-color: var(--gold);
-}
+
 
 .champ-cliquable {
   flex: 1;
@@ -563,7 +583,7 @@ body::after {
 .champ-saisie:focus { background: rgba(0,0,0,0.7); }
 .menu-liste {
   display: none;
-  width: 160px;
+  width: 110px;
   margin: 0 auto var(--space-s);
   border: var(--largeur-bordure-1) solid var(--couleur-bordure-tres-claire);
   background: var(--bg-card);
@@ -578,6 +598,27 @@ body::after {
 }
 .accord-item.actif { background: var(--gold-30); }
 
+/* ===== CERCLE — rond générique V2 (bordure or, fond sombre, centré) ===== */
+.cercle {
+  width: var(--taille-tactile);
+  height: var(--taille-tactile);
+  flex: none;
+  border-radius: 50%;
+  border: var(--largeur-bordure-1) solid var(--gold);
+  background: var(--bg-card);
+  color: var(--white);
+  font-size: var(--fs-base);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.cercle.actif { background: var(--gold); border-color: var(--gold); }
+#ficheV2-aime-oui:not(.actif),
+#ficheV2-aime-non:not(.actif) { color: var(--white-50); border-color: var(--white-15); }
+
 /* ===== ROUNDEL — bouton standard V2 (futur .bouton-londres) ===== */
 .roundel {
   position: relative;
@@ -589,6 +630,7 @@ body::after {
   margin: var(--space-l) auto;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+}
 
 .roundel-anneau {
   position: absolute;
@@ -597,6 +639,7 @@ body::after {
   transform: translate(-50%, -50%);
   width: 80px;
   height: 80px;
+  aspect-ratio: 1 / 1;
   flex: none;
   border-radius: 50%;
   border: var(--largeur-bordure-10) solid var(--gold);
@@ -608,17 +651,21 @@ body::after {
   top: 50%;
   transform: translate(-50%, -50%);
   z-index: 1;
-  min-width: 110px;
+  width: 110px;
   background: var(--black);
   color: var(--white);
   text-align: center;
   text-transform: uppercase;
   letter-spacing: var(--ls-wide);
   font-size: var(--fs-12);
-  padding: var(--space-xs) var(--space-l);
+  padding: var(--space-xs) 0;
   white-space: nowrap;
   box-sizing: border-box;
 }
+
+
+
+
 
 /* =========================================
    SCAN V2

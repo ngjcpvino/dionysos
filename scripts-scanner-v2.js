@@ -169,6 +169,7 @@ function enchainerMenuApresCreationV2(code) {
 }
 
 function creerVinManuelV2() {
+  var code = vinInconnuV2Code;
   var nom = (document.getElementById('vinInconnuV2-nom').value || '').trim();
   if (!nom) {
     afficherMessage('Entrez un nom');
@@ -190,7 +191,7 @@ let menuActionV2Context = null;
 function ouvrirMenuActionV2(code, wineResult) {
   menuActionV2Context = { code: code, wineResult: wineResult };
   const nom = (wineResult && wineResult.wine && wineResult.wine.nom) ? wineResult.wine.nom : 'Vin inconnu';
-  document.getElementById('menuActionV2-nom').textContent = nom;
+  document.getElementById('menuActionV2-nom').textContent = decodeHTML(nom);
   document.getElementById('menuActionV2-codebarre').textContent = code;
 
   var nbActives = (wineResult && typeof wineResult.count === 'number') ? wineResult.count : 0;
@@ -284,7 +285,7 @@ function construireArriveeV2() {
   arriveeV2Choix = { meuble: '', rangee: '', espace: '' };
 
   var nom = (menuActionV2Context.wineResult && menuActionV2Context.wineResult.wine && menuActionV2Context.wineResult.wine.nom) ? menuActionV2Context.wineResult.wine.nom : 'Vin';
-  document.getElementById('arriveeV2-nom').textContent = nom;
+  document.getElementById('arriveeV2-nom').textContent = decodeHTML(nom);
   document.getElementById('arriveeV2-codebarre').textContent = menuActionV2Context.code;
 
   var nbActives = (menuActionV2Context.wineResult && typeof menuActionV2Context.wineResult.count === 'number') ? menuActionV2Context.wineResult.count : 0;
@@ -304,7 +305,7 @@ function construireArriveeV2() {
   meubles = meubles.filter(function(m) { return meubleALibre(m); });
   meubles.sort(function(a, b) { return a.localeCompare(b); });
   menuMeuble.innerHTML = meubles.map(function(m) {
-    return '<div class="accord-item" onclick="choisirMeubleArrivee(\'' + m + '\')">' + m + '</div>';
+    return '<div class="item-liste" onclick="choisirMeubleArrivee(\'' + m + '\')">' + m + '</div>';
   }).join('');
   menuMeuble.classList.remove('ouvert');
   document.getElementById('arriveeV2-rangee-menu').innerHTML = '';
@@ -346,7 +347,7 @@ function choisirMeubleArrivee(meuble) {
   rangees = rangees.filter(function(r) { return rangeeALibre(meuble, r); });
   rangees.sort(function(a, b) { return parseInt(a) - parseInt(b); });
   document.getElementById('arriveeV2-rangee-menu').innerHTML = rangees.map(function(r) {
-    return '<div class="accord-item" onclick="choisirRangeeArrivee(\'' + r + '\')">' + r + '</div>';
+    return '<div class="item-liste" onclick="choisirRangeeArrivee(\'' + r + '\')">' + r + '</div>';
   }).join('');
   document.getElementById('arriveeV2-espace-menu').innerHTML = '';
 }
@@ -364,7 +365,7 @@ function choisirRangeeArrivee(rangee) {
   espaces = espaces.filter(function(e) { return occ.indexOf(String(e)) === -1; });
   espaces.sort(function(a, b) { return parseInt(a) - parseInt(b); });
   document.getElementById('arriveeV2-espace-menu').innerHTML = espaces.map(function(e) {
-    return '<div class="accord-item" onclick="choisirEspaceArrivee(\'' + e + '\')">' + e + '</div>';
+    return '<div class="item-liste" onclick="choisirEspaceArrivee(\'' + e + '\')">' + e + '</div>';
   }).join('');
 }
 
@@ -387,7 +388,7 @@ function choisirEspaceArrivee(espace) {
         espaces.sort(function(a, b) { return parseInt(a) - parseInt(b); });
         var menu = document.getElementById('arriveeV2-espace-menu');
         menu.innerHTML = espaces.map(function(e) {
-          return '<div class="accord-item" onclick="choisirEspaceArrivee(\'' + e + '\')">' + e + '</div>';
+          return '<div class="item-liste" onclick="choisirEspaceArrivee(\'' + e + '\')">' + e + '</div>';
         }).join('');
         menu.classList.add('ouvert');
       });
@@ -420,7 +421,7 @@ function construireDeplacerV2() {
   deplacerV2Choix = { row: 0, bottle: 0, meuble: '', rangee: '', espace: '' };
 
   var nom = (menuActionV2Context.wineResult && menuActionV2Context.wineResult.wine && menuActionV2Context.wineResult.wine.nom) ? menuActionV2Context.wineResult.wine.nom : 'Vin';
-  document.getElementById('deplacerV2-nom').textContent = nom;
+  document.getElementById('deplacerV2-nom').textContent = decodeHTML(nom);
   document.getElementById('deplacerV2-codebarre').textContent = menuActionV2Context.code;
 
   document.getElementById('deplacerV2-meuble-barre').textContent = 'Meuble';
@@ -442,7 +443,7 @@ function construireDeplacerV2() {
     var menu = document.getElementById('deplacerV2-bouteille-menu');
     menu.innerHTML = bottles.map(function(b) {
       var emp = (b.meuble && b.rangee && b.espace) ? (b.meuble + '-' + b.rangee + '-' + b.espace) : 'À ranger';
-      return '<div class="accord-item" onclick="choisirBouteilleDeplacer(' + b.row + ',' + b.bottle + ')">' + emp + '</div>';
+      return '<div class="item-liste" onclick="choisirBouteilleDeplacer(' + b.row + ',' + b.bottle + ')">' + emp + '</div>';
     }).join('');
     document.getElementById('deplacerV2-choix-bouteille').style.display = 'block';
     document.getElementById('deplacerV2-destination').style.display = 'none';
@@ -464,7 +465,7 @@ function construireMeublesDeplacer() {
   meubles = meubles.filter(function(m) { return meubleALibre(m); });
   meubles.sort(function(a, b) { return a.localeCompare(b); });
   document.getElementById('deplacerV2-meuble-menu').innerHTML = meubles.map(function(m) {
-    return '<div class="accord-item" onclick="choisirMeubleDeplacer(\'' + m + '\')">' + m + '</div>';
+    return '<div class="item-liste" onclick="choisirMeubleDeplacer(\'' + m + '\')">' + m + '</div>';
   }).join('');
 }
 
@@ -490,7 +491,7 @@ function choisirMeubleDeplacer(meuble) {
   rangees = rangees.filter(function(r) { return rangeeALibre(meuble, r); });
   rangees.sort(function(a, b) { return parseInt(a) - parseInt(b); });
   document.getElementById('deplacerV2-rangee-menu').innerHTML = rangees.map(function(r) {
-    return '<div class="accord-item" onclick="choisirRangeeDeplacer(\'' + r + '\')">' + r + '</div>';
+    return '<div class="item-liste" onclick="choisirRangeeDeplacer(\'' + r + '\')">' + r + '</div>';
   }).join('');
 }
 
@@ -507,7 +508,7 @@ function choisirRangeeDeplacer(rangee) {
   espaces = espaces.filter(function(e) { return occ.indexOf(String(e)) === -1; });
   espaces.sort(function(a, b) { return parseInt(a) - parseInt(b); });
   document.getElementById('deplacerV2-espace-menu').innerHTML = espaces.map(function(e) {
-    return '<div class="accord-item" onclick="choisirEspaceDeplacer(\'' + e + '\')">' + e + '</div>';
+    return '<div class="item-liste" onclick="choisirEspaceDeplacer(\'' + e + '\')">' + e + '</div>';
   }).join('');
 }
 
@@ -530,7 +531,7 @@ function choisirEspaceDeplacer(espace) {
         espaces.sort(function(a, b) { return parseInt(a) - parseInt(b); });
         var menu = document.getElementById('deplacerV2-espace-menu');
         menu.innerHTML = espaces.map(function(e) {
-          return '<div class="accord-item" onclick="choisirEspaceDeplacer(\'' + e + '\')">' + e + '</div>';
+          return '<div class="item-liste" onclick="choisirEspaceDeplacer(\'' + e + '\')">' + e + '</div>';
         }).join('');
         menu.classList.add('ouvert');
       });

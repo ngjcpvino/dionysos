@@ -109,7 +109,7 @@ function afficherFicheV2(result) {
   var accordsActuels = (wine.Accords || '').split(',').map(function(a) { return a.trim(); }).filter(Boolean);
   var itemsAccords = (CONFIG && CONFIG.accords ? CONFIG.accords : []).map(function(acc) {
     var sel = accordsActuels.indexOf(acc) !== -1;
-    return '<div class="accord-item' + (sel ? ' actif' : '') + '" onclick="toggleAccordV2(this)" data-accord="' + acc + '">' + acc + '</div>';
+    return '<div class="item-liste' + (sel ? ' actif' : '') + '" onclick="toggleAccordV2(this)" data-accord="' + acc + '">' + acc + '</div>';
   }).join('');
   html += '<div class="controle"><span class="libelle">Accords</span>' +
           '<div id="ficheV2-accords-display" class="champ-cliquable" onclick="basculerMenuAccordsV2()">' + (accordsActuels.length ? accordsActuels.join(', ') : 'Aucun') + '</div></div>';
@@ -117,10 +117,10 @@ function afficherFicheV2(result) {
 
   var aime = wine.Racheter || 'Oui';
   html += '<div class="controle"><span class="libelle">Racheter ?</span>' +
-          '<div id="ficheV2-aime-oui" class="btn-bascule' + (aime === 'Oui' ? ' actif' : '') + '" onclick="setAimeV2(\'Oui\')">✓</div>' +
-          '<div id="ficheV2-aime-non" class="btn-bascule' + (aime === 'Non' ? ' actif' : '') + '" onclick="setAimeV2(\'Non\')">✗</div>' +
+          '<div id="ficheV2-aime-oui" class="cercle' + (aime === 'Oui' ? ' actif' : '') + '" onclick="setAimeV2(\'Oui\')">✓</div>' +
+          '<div id="ficheV2-aime-non" class="cercle' + (aime === 'Non' ? ' actif' : '') + '" onclick="setAimeV2(\'Non\')">✗</div>' +
           '<span class="libelle">Sur-inventaire?</span>' +
-          '<div id="ficheV2-panier" class="btn-bascule' + (wine.Panier === 'Oui' ? ' actif' : '') + '" onclick="togglePanierV2()">' + (wine.Panier === 'Oui' ? '✓' : '') + '</div></div>';
+          '<div id="ficheV2-panier" class="cercle' + (wine.Panier === 'Oui' ? ' actif' : '') + '" onclick="togglePanierV2()">' + (wine.Panier === 'Oui' ? '✓' : '') + '</div></div>';
 
   html += '<div id="ficheV2-plats"></div>';
   html += ligne('Recettes', wine.Recettes);
@@ -177,7 +177,7 @@ function basculerMenuAccordsV2() {
 function toggleAccordV2(element) {
   element.classList.toggle('actif');
   var menu = document.getElementById('ficheV2-accords-menu');
-  var selectionnes = Array.prototype.map.call(menu.querySelectorAll('.accord-item.actif'), function(el) { return el.getAttribute('data-accord'); });
+  var selectionnes = Array.prototype.map.call(menu.querySelectorAll('.item-liste.actif'), function(el) { return el.getAttribute('data-accord'); });
   var display = document.getElementById('ficheV2-accords-display');
   if (display) display.textContent = selectionnes.length ? selectionnes.join(', ') : 'Aucun';
   appelBackend('updateWineField', { codebarre: CURRENT_WINE_CODEBARRE, field: 'Accords', value: selectionnes.join(', ') }, { spinner: 'Sauvegarde' }).catch(function(err) { afficherMessage('Erreur: ' + err); });
@@ -227,7 +227,7 @@ function chargerPlatsV2(codebarre) {
     var cartes = mets.map(function(m) {
       var note = parseInt(m.bonAccord) || 0;
       var classeNote = (note >= 1 && note <= 5) ? ' note-' + note : '';
-      return '<div class="carte-large' + classeNote + '">' + (m.plat || '—') + '<span class="date">' + (m.date || '') + '</span></div>';
+      return '<div class="carte' + classeNote + '"><div class="carte-centre"><span class="carte-titre">' + (m.plat || '—') + '</span></div><div class="carte-droite">' + (m.date || '') + '</div></div>';
     }).join('');
     conteneur.innerHTML = cartes;
   }
@@ -260,7 +260,8 @@ function trouverCeVinV2() {
       if (dispo.length === 0) { div.innerHTML = '<div class="texte-secondaire">Aucune succursale avec stock</div>'; return; }
       div.innerHTML = dispo.slice(0, 10).map(function(s) {
         var sousInfo = [s.adresse, s.ville].filter(Boolean).join(', ');
-        return '<div class="carte-large">' + s.nom + ' · ' + s.quantite + ' btl<span class="date">' + sousInfo + '</span></div>';
+        var droite = [s.quantite + ' btl', s.distance].filter(Boolean).join('<br>');
+        return '<div class="carte"><div class="carte-centre"><span class="carte-titre">' + s.nom + '</span><span class="carte-sous">' + sousInfo + '</span></div><div class="carte-droite">' + droite + '</div></div>';
       }).join('');
     }).catch(function(err) { div.innerHTML = '<div class="texte-secondaire">Erreur : ' + err + '</div>'; });
   }
