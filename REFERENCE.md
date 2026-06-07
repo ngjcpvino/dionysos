@@ -1,240 +1,47 @@
-# DIONYSOS — Cahier de charges
-*Dernière mise à jour : 28 février 2026 — migration terminée*
+# 📌 REFERENCE — Règles de travail Dionysos (à lire en premier, chaque conversation)
 
+> Ce fichier est la SEULE source des règles. Le lire au complet au tout premier message, puis travailler. Ne jamais faire répéter ces règles à l'utilisateur.
 
-## QUI EST L'UTILISATEUR
+## Démarrage d'une conversation
+- Lire CE fichier ET le `.md` d'état au complet, en une seule passe (chercher chaque fichier nécessaire, pour de vrai), PUIS travailler.
+- Ne pas redemander à l'utilisateur d'expliquer sa façon de procéder. Ne pas redemander quels fichiers existent. Ne pas annoncer « je vais lire » plusieurs fois.
+- L'utilisateur ne doit JAMAIS avoir à re-justifier son fonctionnement ni à répéter ces consignes.
 
-- Claude Idéateur, développeur francophone autodidacte, travaille depuis chez lui.
-- Il est infatigable — "abandonner n'est pas dans mon vocabulaire".
-- Il préfère les réponses courtes et solutions directes, sans explications inutiles.
-- Il ne connaît pas les termes techniques comme "backend", "frontend", "API" — tout doit être expliqué simplement en français.
-- Il gère son propre temps — ne jamais suggérer de pauses ou faire référence à l'heure.
-- Il est curieux et veut toujours améliorer ce projet. Il est drôle, mais soupe au lait et il le sait. Mais c'est toujours sans rancune :-).
+## Les fichiers sont tous là
+- Tout est dans le projet (dépôt `ngjcpvino/dionysos`). Ne JAMAIS dire qu'un fichier manque ni demander de le téléverser : il est là, le chercher.
+- Si une recherche ne ramène pas un passage, refaire la recherche autrement. Ne pas conclure trop vite qu'il manque.
+- Lire le code AVANT de parler, pour de vrai. Le code écrit fait foi. Ne pas faire répéter ce qui est déjà décidé.
 
----
+## Aucun raisonnement à voix haute — RÈGLE STRICTE
+- INTERDIT : tout déroulé du genre « voilà la cause, ce n'est pas X c'est Y, parce que telle fonction fait ceci… ». Si quelque chose est mal codé, c'est l'IA qui l'a mal codé ; l'utilisateur n'a pas à lire l'enquête.
+- INTERDIT aussi : afficher à l'écran les étapes de recherche (« je dois confirmer l'occurrence… », « occurrences trouvées : … »). Tout ça se fait en SILENCE.
+- Format imposé pour une correction : « Tu dois changer ceci pour que ça fasse ça. » Puis le Trouve/Remplace. Rien d'autre. Aucune explication de mécanisme, aucune justification.
 
-## 1. ARCHITECTURE DU PROJET
+## Changements de code — LE PLUS IMPORTANT
+- Jamais de code sans OK explicite.
+- **UN SEUL bloc Trouve/Remplace à la fois.** Jamais plusieurs blocs d'un coup, même s'ils vont ensemble. L'utilisateur doit pouvoir dire OK (fait) ou non entre chaque bloc.
+- Après chaque bloc, ATTENDRE le **OK** avant le suivant. « OK » = c'est **FAIT** (déjà appliqué chez lui), pas « vas-y ». On enchaîne, l'utilisateur publie une fois à la fin.
+- Le **Trouve ceci** est copié EXACTEMENT depuis le fichier (jamais reconstruit de mémoire), pour que le Rechercher de Notepad++ le trouve à tous les coups. Si le passage exact n'est pas retrouvé, le dire et demander de le coller — ne JAMAIS inventer un bloc approximatif.
+- À l'intérieur d'un même bloc, couvrir TOUT ce qui change au même endroit (ne pas redécouper en micro-bouts ligne par ligne sans raison).
+- **Regrouper dans UN SEUL bloc plusieurs remplacements du même fichier, proches, sans dépendance entre eux** (ex. 3 lignes à modifier dans la même fonction). Ne découper en blocs séparés que si un OK doit confirmer une étape AVANT que la suivante ait du sens. Inutile = aller-retour stupide à éviter.
+- Un bloc = un OK. Mais « un bloc » peut contenir plusieurs paires Trouve/Remplace du même fichier données ensemble.
+- Format : **Trouve ceci** / **Remplace par ceci** (deux blocs dans la conversation, pas d'artefact pour le code). Toujours indiquer le **nom du FICHIER** (pas la fonction).
+- Toujours modifier dans le bon fichier : plusieurs classes existent en double entre `styles.css` (V1, figé) et `styles-v2.css` (V2). Toucher uniquement le V2.
 
-### Ancienne architecture (Apps Script) — ABANDONNÉE
-| Fichier | Rôle |
-|---|---|
-| Code.gs | Backend — toutes les fonctions serveur |
-| Index.html | Structure HTML |
-| Styles.html | CSS |
-| scripts-clean.html | JavaScript frontend |
-| REFERENCE.html | Règles du projet |
+## Format des échanges
+- Réponses courtes, en clair, jamais en jargon ni en code dans les explications.
+- Jamais de boutons à cliquer / choix multiples. Une question = une phrase en texte. Options = puces.
+- Une seule question à la fois, et seulement si la réponse n'est pas déjà connue ou décidée. Ne jamais redemander la permission pour un morceau déjà au plan.
+- Scénarios et options en puces, jamais en paragraphes.
+- Pas de formules de remplissage, pas de souhaits temporels, pas d'estimation de durée.
+- Ne jamais demander si l'utilisateur veut arrêter / faire une pause. Il mène, l'IA suit.
 
-### Nouvelle architecture (GitHub Pages) — COMPLÈTE ET FONCTIONNELLE
-| Fichier | Rôle |
-|---|---|
-| index.html | Structure HTML |
-| styles.css | CSS centralisé — aucun style inline |
-| scripts-config.js | Constantes + fonction appelBackend() |
-| scripts-init.js | Variables globales, navigation, menu |
-| scripts-inventaire.js | Inventaire, filtres, stats accueil, historique |
-| scripts-fiche.js | Fiche vin, édition, bouteilles, succursales, utils |
-| scripts-scanner.js | Scanner Quagga, saisie manuelle, popup nouveau vin |
-| scripts-listes.js | Racheter, emplacements, promotions, à compléter |
-| Code.gs | Backend API (Apps Script — inchangé) |
+## Rigueur (en SILENCE)
+- Vérifier les impacts (qui appelle la fonction, IDs/classes/variables partagés, ce qui casse ailleurs) — sans l'étaler à l'écran.
+- Anticiper les cas limites soi-même (refus, données périmées, max atteint, re-choix, vide, fermeture) — c'est le rôle de l'IA, pas de l'utilisateur.
+- Ne jamais bâtir sur une supposition.
+- Toute décision prise en conversation est écrite dans le `.md` d'état immédiatement.
 
-### Ordre de chargement dans index.html
-scripts-config.js → scripts-init.js → scripts-inventaire.js → scripts-fiche.js → scripts-scanner.js → scripts-listes.js
-
-### Configuration
-| Paramètre | Valeur |
-|---|---|
-| URL GitHub Pages | https://ngjcpvino.github.io/dionysos/ |
-| URL Apps Script |https://script.google.com/macros/s/AKfycbxRh6eOQDUy3hXoNNKF6n6gUxhppKB452UqZuPB1mZAC_rzb1jZ5LbPsBuZDH521uq1eA/exec |
-| Spreadsheet ID | 1Y4OCwcb2XBTPDTl_KDUGHgEiXgwqqXHmWSw6XQVSe3g |
-| Clé API lecture | AIzaSyBuennUE5SMN1YkV_38JObgGYj6_aAmTSc |
-| Client ID OAuth2 | 363308093275-13fdbai89mli8bmf8i34ck9nqe5b1eb0.apps.googleusercontent.com |
-| Compte Google Cloud | ngjcpvino@gmail.com |
-| Repo GitHub | github.com/ngjcpvino/dionysos |
-
----
-
-## 2. RÈGLES ABSOLUES DU PROJET
-
-- Zéro style en dur — tout passe par des classes CSS dans styles.css
-- Zéro style inline dans le HTML ou le JS
-- Toujours vérifier si une classe CSS existe avant d'en créer une nouvelle
-- Une seule fonction pour générer les cartes de vin : genererCardVin(item, options)
-- Ne jamais créer une deuxième fonction qui fait la même chose qu'une existante
-- Procéder une étape à la fois et attendre un OK avant de passer à la suivante
-- Toujours vérifier l'impact d'un changement sur toutes les pages
-- Avant tout travail de code, lire ce fichier REFERENCE et s'y conformer
-
----
-
-## 3. PONT ENTRE GITHUB PAGES ET APPS SCRIPT
-
-Tous les appels au backend passent par appelBackend(action, data) définie dans scripts-config.js.
-⚠️ La migration est TERMINÉE — tous les google.script.run ont été remplacés dans les 5 fichiers.
-
-SYNTAXE À UTILISER pour tout nouvel appel :
-
-  // Lecture simple
-  appelBackend('getInventoryData').then(fn).catch(function(err) { afficherMessage('Erreur: ' + err); });
-
-  // Avec paramètres
-  appelBackend('getWineBottles', { codebarre: codebarre }).then(fn).catch(function(err) { afficherMessage('Erreur: ' + err); });
-
-  // Écriture sans retour
-  appelBackend('updateWineField', { codebarre: cb, field: 'Accords', value: val }).catch(function(err) { afficherMessage('Erreur: ' + err); });
-
-  // Écriture avec confirmation
-  appelBackend('saveWineEdits', data).then(function() { afficherMessage('OK'); }).catch(function(err) { afficherMessage('Erreur: ' + err); });
-
-POINTS IMPORTANTS :
-- index.html : balise base target top retirée (elle bloquait le chargement des JS)
-- doPost() dans Code.gs corrigé — les noms de paramètres correspondent exactement au frontend
-- Après chaque modification de Code.gs : Déployer → Gérer les déploiements → Nouvelle version
-- Images/icônes : créer un dossier /images/ sur GitHub, accès via src="images/fichier.png"
-
----
-
-## 4. GOOGLE SHEETS — BASE DE DONNÉES
-
-| Onglet | Contenu |
-|---|---|
-| Vino | Catalogue des vins (col A=code-barres, col B=code SAQ, etc.) |
-| Bouteilles | Inventaire des bouteilles (emplacement, meuble, rangée, espace, état) |
-| Historique | Historique des accords mets-vin |
-| CONFIG | Succursales préférées (col I-J) et toutes les succursales SAQ (col K-N) |
-
----
-
-## 5. VARIABLES CSS IMPORTANTES
-
-| Variable | Valeur |
-|---|---|
-| --gold | #c9813c |
-| --gold-hover | #C98D4F |
-| --bg-card | rgba(0,0,0,0.50) |
-| --bg-overlay | rgba(0,0,0,0.85) |
-| --bg-panel | rgba(20,20,20,0.95) |
-| --error | #f44336 |
-| --success | #4caf50 |
-| --warning | #ffc107 |
-| --white-50 | rgba(255,255,255,0.6) |
-| --white-70 | rgba(255,255,255,0.9) |
-
----
-
-## 6. PAGES DE L'APPLICATION
-
-| ID de vue | Description |
-|---|---|
-| view-accueil | Titre DIONYSOS, compteur bouteilles, cépages, appellations, saisie manuelle |
-| view-liste | Cave à vin — liste filtrée de tous les vins |
-| ficheVinOverlay | Fiche détaillée d'un vin (overlay) |
-| view-emplacements | Vue par meuble avec doublons et cépages manquants |
-| view-historique | Historique des vins bus avec accords mets-vin |
-| view-racheter | Liste d'achat avec vérification dispo SAQ |
-| view-recherche | Recherche avancée — 10 filtres |
-| view-aranger | Bouteilles sans emplacement assigné |
-| view-promotions | Promotions SAQ — mes vins + autres vins |
-
----
-
-## 7. FONCTIONS BACKEND — Code.gs
-
-Toutes accessibles via doPost() avec appelBackend(action, data).
-
-| Fonction | Rôle |
-|---|---|
-| getInventoryData() | Retourne toutes les bouteilles de la cave |
-| getWineBottles(codebarre) | Retourne les infos d'un vin + ses bouteilles |
-| addBottle(formData) | Ajoute une bouteille |
-| actionBouteille(row, action, detail) | Boire ou déplacer une bouteille |
-| saveWineEdits(data) | Sauvegarde les modifications d'une fiche vin |
-| updateWineField(codebarre, field, value) | Met à jour un champ spécifique |
-| supprimerBouteille(row, bottle) | Supprime une bouteille |
-| mettreBotteilleARanger(row, bottle) | Met une bouteille en statut À ranger |
-| ajouterVinAvecBouteilles(...) | Ajoute un nouveau vin avec scraping SAQ |
-| checkWineExists(code) | Vérifie si un vin existe par code-barres |
-| verifierDispoSAQ_GRAPHQL_V1(codeSAQ, succursale) | Vérifie dispo via GraphQL Adobe |
-| getPromotionsSAQ(listeCodesSAQ) | Retourne les promos SAQ pour mes vins |
-| getToutesPromotionsSAQ(mesCodesSAQ) | Retourne toutes les promos SAQ |
-| getSuccursalesDisponibles(codeSAQ, lat, lng) | Succursales où un vin est dispo |
-| getSuccursales() | Retourne les succursales préférées |
-| getToutesSuccursales() | Retourne les 401 succursales SAQ |
-| ajouterSuccursale(nom, numero) | Ajoute une succursale aux préférées |
-| getCodeBarresFromCodeSAQ(codeSAQ) | Retourne le code-barres pour un code SAQ |
-| getHistorique() | Retourne l'historique des vins bus |
-| getConfig() | Retourne la configuration (meubles, pays, cépages) |
-| verifierEtMettreAJourPrixSAQ(cb, codeSAQ) | Vérifie et met à jour le prix SAQ |
-| getScannedWinesIncomplete() | Retourne les vins scannés sans code SAQ |
-| completeScannedWine(row, codeSAQ) | Complète un vin scanné avec son code SAQ |
-
----
-
-## 8. API UTILISÉES
-
-### GraphQL Adobe/SAQ
-- URL : https://catalog-service.adobe.io/graphql
-- Clé API : 7a7d7422bd784f2481a047e03a73feaf
-- Usage : Recherche produits, vérification dispo, promotions
-
-### Store Locator SAQ
-- URL : https://www.saq.com/fr/store/locator/ajaxlist/context/product/id/{idInterne}
-- Usage : Succursales disponibles pour un vin, liste complète
-
-### Scraping SAQ
-- URL : https://www.saq.com/fr/{codeSAQ}
-- Usage : Récupérer toutes les infos d'un vin
-
----
-
-## 9. ÉTAT DE LA MIGRATION — 28 FÉVRIER 2026
-
-### MIGRATION COMPLÈTE ET FONCTIONNELLE ✅
-
-- Repo GitHub créé : github.com/ngjcpvino/dionysos
-- GitHub Pages activé : https://ngjcpvino.github.io/dionysos/
-- Google Cloud configuré : URL GitHub ajoutée aux origines OAuth2
-- doPost() dans Code.gs — backend testé et fonctionnel
-- styles.css uploadé (1200+ lignes, 24 sections)
-- index.html : balise base target top retirée
-- scripts-config.js créé avec appelBackend() et URL du serveur
-- Tous les google.script.run remplacés dans les 5 fichiers JS
-- Navigation, inventaire, fiche vin, scanner, listes, promotions SAQ — tout fonctionne
-
-### Étapes en attente
-
-- Tenter de corriger le style
-- Ajouter des éléments pour améliorer de projet
-- Solution pour photos
-  
----
-
-## 10. CHARTE DES COULEURS — ACCORDS METS-VIN
-
-| Note | Couleur |
-|---|---|
-| 1 — Très insatisfaisant | #FF4B2B |
-| 2 — Insatisfaisant | #FF9000 |
-| 3 — Neutre / Moyen | #FFD200 |
-| 4 — Satisfaisant | #8BC34A |
-| 5 — Très satisfaisant | #2ECC71 |
-
----
-
-## 11. MENU DE L'APPLICATION
-- ACCUEIL
-- CAVE À VIN
-- EMPLACEMENTS
-- HISTORIQUE
-- LISTE D'ACHAT
-- RECHERCHE
-- À RANGER
-- PROMOTIONS SAQ
-- OUVRIR SAQ
-- RAFRAÎCHIR
-
----
-
-## 12. UTILISATEURS
-- 2 utilisateurs
-- Accès internet quasi permanent
-- Utilisation principalement sur iPhone/iPad
+## Le `.md` d'état
+- Quand on le met à jour, le sortir en ENTIER (prêt à copier), jamais en fragments — sauf une section précise demandée.
+- Les règles de travail ne vivent QUE dans ce REFERENCE.md, pas dans le `.md` d'état (éviter le doublon).
