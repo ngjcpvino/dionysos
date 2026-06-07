@@ -179,6 +179,16 @@ function meubleALibre(meuble) {
 
 function ouvrirArriveeV2() {
   if (!menuActionV2Context) return;
+  appelBackend('getInventoryData', {}, { spinner: ' ' }).then(function(data) {
+    if (data) ALL_DATA = data;
+    construireArriveeV2();
+  }).catch(function() {
+    construireArriveeV2();
+  });
+}
+
+function construireArriveeV2() {
+  if (!menuActionV2Context) return;
   arriveeV2Choix = { meuble: '', rangee: '', espace: '' };
 
   var nom = (menuActionV2Context.wineResult && menuActionV2Context.wineResult.wine && menuActionV2Context.wineResult.wine.nom) ? menuActionV2Context.wineResult.wine.nom : 'Vin';

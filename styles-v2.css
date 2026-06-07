@@ -580,16 +580,16 @@ body::after {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 80px;
   height: 80px;
-  margin: var(--space-l) 0;
+  margin: var(--space-l) auto;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
 .roundel-anneau {
   position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
+  left: 0;
+  top: 0;
   width: 80px;
   height: 80px;
   border-radius: 50%;
@@ -597,15 +597,19 @@ body::after {
   box-sizing: border-box;
 }
 .roundel-barre {
-  position: relative;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   z-index: 1;
   background: var(--black);
   color: var(--white);
   text-align: center;
   text-transform: uppercase;
   letter-spacing: var(--ls-wide);
-  font-size: var(--fs-xs);
-  padding: var(--space-3) var(--space-xl);
+  font-size: var(--fs-12);
+  padding: var(--space-xs) var(--space-l);
+  white-space: nowrap;
 }
 
 /* =========================================
