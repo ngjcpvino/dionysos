@@ -694,6 +694,8 @@ body::after {
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
+.roundel-barre, .roundel-anneau { left: 50%; }
+}
 
 .roundel-anneau {
   position: absolute;
