@@ -94,6 +94,48 @@ Conteneur `#caveV2Container` (HTML) : barre épurée loupe `.cercle.gauche` / ti
 ### Menu burger V2 — ✅ TERMINÉ (structure + branchements actifs)
 Panneau `#burgerV2` `.panneau-droite` (glisse de droite) + voile `#burgerV2-voile`. 9 entrées `.item-liste` dans l'ordre V1. `toggleMenuV2` (branché sur le ☰ du header) + `fermerMenuBurgerV2` + `burgerV2Click(cible)` dans `scripts-scanner-v2.js`. Actifs : ACCUEIL (ferme les conteneurs), CAVE À VIN (`ouvrirCaveV2`), RAFRAÎCHIR (recharge `ALL_DATA`). Les 6 autres (Emplacements, Historique, Liste d'achat, Recherche, À ranger, Promotions) → toast « À venir » tant que leur page V2 n'est pas bâtie. Retour fiche→cave géré dans `fermerFicheV2` (provenance `'cave'`).
 
+## 🎯 DÉCISIONS look V2 unifié — ✅ TOUTES EXÉCUTÉES (NE PAS REDÉCIDER)
+
+### Règle d'or
+- Une liste est une liste : largeur, fond, espacement, comportement IDENTIQUES partout.
+- Un espace est un espace : l'écart entre items est le même sur tous les écrans.
+- Aucune valeur en dur : toujours les variables CSS (ex. 14px = var(--fs-base)).
+
+### 1. Largeur des listes
+Toute `.menu-liste` (accords fiche, filtres cave, cascade Arrivée/Déplacer, choix bouteille) = 80 % de largeur, centrée : width:80%; margin:0 auto.
+
+### 2. Espace entre items — une seule source
+L'écart vient UNIQUEMENT du margin-bottom de .item-liste. Neutraliser le gap flex des conteneurs (.panneau-gauche, .panneau-droite) pour ne pas cumuler. Écart identique partout.
+
+### 3. Panneaux sans fond
+.panneau-gauche et .panneau-droite : fond transparent. Garder seulement backdrop-filter:blur pour la lisibilité.
+
+### 4. Champs éditables = même style que la liste
+.champ-cliquable (champ Accords fiche) ET .champ-saisie (champs Modifier + recherche) prennent le MÊME style que .item-liste (fond --white-05 + fine bordure). Plus de fond noir --bg-card.
+- Texte à var(--fs-base) (14px), PAS en dur.
+- .champ-saisie : aligné à gauche (plus de text-align:center), hauteur adaptable au contenu (plus de height:50px fixe qui tronque) — on doit voir tout le texte saisi, y compris les longs/multilignes.
+
+### 5. Voile 0 bouteille — sur la CARTE, pas la fiche
+- ENLEVER le voile de la fiche : retirer la classe .fiche-vide dans afficherFicheV2 (scripts-fiche-v2.js) ET la règle CSS .fiche-vide (styles-v2.css).
+- ÉCRIRE le voile sur la carte de la liste cave : dans afficherCartesCaveV2, quand g.count === 0, ajouter une classe sur .carte + règle CSS qui voile la carte.
+
+### 6. Filtres cave — rétablir l'interconnexion (cascade)
+remplirFiltresCaveV2 doit ne proposer, pour chaque filtre, QUE les valeurs présentes dans les vins qui passent déjà les autres filtres (cascade couleur → cépage → pays → appellation → accords, comme la V1 dans scripts-inventaire.js). Actuellement elle liste tout ALL_DATA sans tenir compte des autres choix.
+
+### 7. Photo de carte cave — cadrage par la hauteur
+.carte-photo img : hauteur 100 %, largeur auto, le cadrage suit la hauteur (la largeur n'a pas d'importance, garder les proportions).
+
+### 8. Bouton ENREGISTRER (page Modifier) — sous le dernier champ
+Le .roundel ENREGISTRER se place DANS le flux, sous le dernier champ (DIVERS), sans chevaucher le contenu. Le look roundel est conservé.
+
+### 9. Boire — ACCORDS devient un champ
+Sur l'écran Boire, remplacer le .roundel ACCORDS par le MÊME champ cliquable + menu déroulant que dans la fiche vin (champ qui déplie la liste des accords dessous).
+
+### 10. Filtre cave — pas de premier item libellé — ✅ FAIT
+La liste d'un filtre ne montre QUE les vraies valeurs (Blanc, Rouge…), aucun item « Tous » ni libellé répété en tête. Le libellé reste sur le champ cliquable. Réinitialisation via le bouton Réinitialiser.
+
+---
+
 ## 🩹 Corrections d'apparence — ✅ TOUTES FAITES
 1. Spinner : voile `--voile-standard`. ✅
 2. `.roundel-anneau` : `aspect-ratio: 1/1` (cercle parfait). ✅

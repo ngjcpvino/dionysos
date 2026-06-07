@@ -640,8 +640,20 @@ function construireFormBoireV2() {
   var accordsActuels = (menuActionV2Context.wineResult.wine.accords || '').split(',').map(function(a) { return a.trim(); }).filter(Boolean);
   document.getElementById('boireV2-accords-menu').innerHTML = (CONFIG && CONFIG.accords ? CONFIG.accords : []).map(function(acc) {
     var sel = accordsActuels.indexOf(acc) !== -1;
-    return '<div class="item-liste' + (sel ? ' actif' : '') + '" onclick="this.classList.toggle(\'actif\')" data-accord="' + acc + '">' + acc + '</div>';
+    return '<div class="item-liste' + (sel ? ' actif' : '') + '" onclick="toggleAccordBoireV2(this)" data-accord="' + acc + '">' + acc + '</div>';
   }).join('');
+  majAccordsDisplayBoireV2();
+}
+
+function toggleAccordBoireV2(el) {
+  el.classList.toggle('actif');
+  majAccordsDisplayBoireV2();
+}
+
+function majAccordsDisplayBoireV2() {
+  var sel = Array.prototype.map.call(document.querySelectorAll('#boireV2-accords-menu .item-liste.actif'), function(el) { return el.getAttribute('data-accord'); });
+  var disp = document.getElementById('boireV2-accords-display');
+  if (disp) disp.textContent = sel.length ? sel.join(', ') : 'Accords';
 }
 
 function boireV2PlatChange() {
@@ -820,7 +832,8 @@ function afficherCartesCaveV2(data) {
     var sous = [paysRegion, cepage].filter(Boolean).join('<br>');
     var photo = w['Photo URL'] ? '<div class="carte-photo"><img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
     var onclick = g.cb ? ' onclick="ouvrirFicheV2(\'' + g.cb + '\', \'cave\')"' : '';
-    return '<div class="carte ' + couleurClasseV2(w.Couleur) + '"' + onclick + '>' + photo +
+    var vide = g.count === 0 ? ' carte-vide' : '';
+    return '<div class="carte ' + couleurClasseV2(w.Couleur) + vide + '"' + onclick + '>' + photo +
            '<div class="carte-centre"><span class="carte-titre">' + nom + '</span><span class="carte-sous">' + sous + '</span></div>' +
            '<div class="carte-droite">' + g.count + ' btl' +
            (g.emplacements && g.emplacements.length ? '<br>' + g.emplacements.join('<br>') : '') +
@@ -841,25 +854,32 @@ var filtresCaveV2 = { couleur: '', cepage: '', pays: '', appellation: '', accord
 var libellesFiltreCaveV2 = { couleur: 'Couleurs', cepage: 'Cépages', pays: 'Pays', appellation: 'Appellations', accords: 'Accords' };
 
 function remplirFiltresCaveV2() {
+  var f = filtresCaveV2;
+  var base = (ALL_DATA || []);
+
+  var forCouleur = base;
+  var forCepage = f.couleur ? base.filter(function(i){ return i.Couleur === f.couleur; }) : base;
+  var forPays = forCepage.filter(function(i){ return !f.cepage || (i.Cepage && i.Cepage.indexOf(f.cepage) !== -1); });
+  var forAppellation = forPays.filter(function(i){ return !f.pays || i.Pays === f.pays; });
+  var forAccords = forAppellation.filter(function(i){ return !f.appellation || i.Appellation === f.appellation; });
+
   var sets = { couleur: {}, cepage: {}, pays: {}, appellation: {}, accords: {} };
-  (ALL_DATA || []).forEach(function(i) {
-    if (i.Couleur) sets.couleur[i.Couleur] = true;
-    if (i.Pays) sets.pays[i.Pays] = true;
-    if (i.Appellation) sets.appellation[i.Appellation] = true;
-    (i.Cepage || '').split(',').map(function(x){return x.trim();}).filter(Boolean).forEach(function(x){ sets.cepage[x] = true; });
-    (i.Accords || '').split(',').map(function(x){return x.trim();}).filter(Boolean).forEach(function(x){ sets.accords[x] = true; });
-  });
+  forCouleur.forEach(function(i){ if (i.Couleur) sets.couleur[i.Couleur] = true; });
+  forCepage.forEach(function(i){ (i.Cepage || '').split(',').map(function(x){return x.trim();}).filter(Boolean).forEach(function(x){ sets.cepage[x] = true; }); });
+  forPays.forEach(function(i){ if (i.Pays) sets.pays[i.Pays] = true; });
+  forAppellation.forEach(function(i){ if (i.Appellation) sets.appellation[i.Appellation] = true; });
+  forAccords.forEach(function(i){ (i.Accords || '').split(',').map(function(x){return x.trim();}).filter(Boolean).forEach(function(x){ sets.accords[x] = true; }); });
 
   Object.keys(sets).forEach(function(cle) {
     var menu = document.getElementById('caveV2-f-' + cle + '-menu');
+    if (!menu) return;
     var opts = Object.keys(sets[cle]).sort();
     var cur = filtresCaveV2[cle];
-    var html = '<div class="item-liste' + (cur === '' ? ' actif' : '') + '" onclick="choisirFiltreCaveV2(\'' + cle + '\', \'\')">' + libellesFiltreCaveV2[cle] + '</div>';
-    html += opts.map(function(v) {
+    menu.innerHTML = opts.map(function(v) {
       return '<div class="item-liste' + (v === cur ? ' actif' : '') + '" onclick="choisirFiltreCaveV2(\'' + cle + '\', \'' + v.replace(/'/g, "\\'") + '\')">' + v + '</div>';
     }).join('');
-    menu.innerHTML = html;
-    document.getElementById('caveV2-f-' + cle + '-display').textContent = cur === '' ? libellesFiltreCaveV2[cle] : cur;
+    var disp = document.getElementById('caveV2-f-' + cle + '-display');
+    if (disp) disp.textContent = cur === '' ? libellesFiltreCaveV2[cle] : cur;
   });
 }
 

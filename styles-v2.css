@@ -510,10 +510,9 @@ body::after {
   background: transparent;
 }
 .carte-photo img {
-  width: 60px;
   height: 60px;
-  object-fit: cover;
-  object-position: bottom;
+  width: auto;
+  object-fit: contain;
   display: block;
 }
 .carte-centre {
@@ -549,6 +548,7 @@ body::after {
 .carte.vin-blanc  { border-bottom-color: var(--vin-blanc); border-left: none; }
 .carte.vin-rose   { border-bottom-color: var(--vin-rose); border-left: none; }
 .carte.vin-bulles { border-bottom-color: var(--vin-bulles); border-left: none; }
+.carte.carte-vide { opacity: 0.45; }
 
 .controle {
   display: flex;
@@ -562,7 +562,7 @@ body::after {
 .champ-cliquable {
   flex: 1;
   padding: var(--space-s) var(--space-m);
-  background: var(--bg-card);
+  background: var(--white-05);
   border: var(--largeur-bordure-1) solid var(--couleur-bordure-tres-claire);
   color: var(--white);
   font-size: var(--fs-base);
@@ -572,13 +572,12 @@ body::after {
 .champ-saisie {
   width: 100%;
   max-width: 400px;
-  height: 50px;
-  padding: 0 var(--space-m);
-  background: var(--bg-card);
+  padding: var(--space-s) var(--space-m);
+  background: var(--white-05);
   border: var(--largeur-bordure-1) solid var(--couleur-bordure-tres-claire);
   color: var(--white);
-  font-size: var(--fs-md);
-  text-align: center;
+  font-size: var(--fs-base);
+  text-align: left;
   letter-spacing: var(--ls-tight);
   outline: none;
 }
@@ -586,8 +585,7 @@ body::after {
 .champ-saisie:focus { background: rgba(0,0,0,0.7); }
 .menu-liste {
   display: none;
-  width: max-content;
-  max-width: 100%;
+  width: 80%;
   margin: 0 auto var(--space-s);
   background: transparent;
 }
@@ -628,7 +626,7 @@ body::after {
   display: none;
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: var(--voile-standard);
+  background: transparent;
   z-index: 10000;
 }
 .panneau-voile.ouvert { display: block; }
@@ -638,25 +636,7 @@ body::after {
   width: var(--menu-width);
   transform: translateX(-100%);
   transition: transform 0.3s ease-out;
-  background: var(--bg-card);
-  backdrop-filter: blur(8px);
-  z-index: 10001;
-  padding: 60px var(--space-l) var(--space-l);
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-m);
-}
-.panneau-gauche.ouvert { transform: translateX(0); }
-
-
-.panneau-droite {
-  position: fixed;
-  top: 0; right: 0; bottom: 0;
-  width: var(--menu-width);
-  transform: translateX(100%);
-  transition: transform 0.3s ease-out;
-  background: rgba(0,0,0,0.35);
+  background: transparent;
   backdrop-filter: blur(8px);
   z-index: 10001;
   padding: 60px var(--space-l) var(--space-l);
@@ -665,7 +645,26 @@ body::after {
   -ms-overflow-style: none;
   display: flex;
   flex-direction: column;
-  gap: var(--space-m);
+  gap: var(--space-s);
+}
+.panneau-gauche::-webkit-scrollbar { display: none; }
+.panneau-gauche.ouvert { transform: translateX(0); }
+.panneau-droite {
+  position: fixed;
+  top: 0; right: 0; bottom: 0;
+  width: var(--menu-width);
+  transform: translateX(100%);
+  transition: transform 0.3s ease-out;
+  background: transparent;
+  backdrop-filter: blur(8px);
+  z-index: 10001;
+  padding: 60px var(--space-l) var(--space-l);
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-s);
 }
 .panneau-droite::-webkit-scrollbar { display: none; }
 .panneau-droite.ouvert { transform: translateX(0); }
@@ -674,11 +673,7 @@ body::after {
   font-weight: 300;
   letter-spacing: var(--ls-normal);
   text-transform: uppercase;
-}
-.panneau-separateur {
-  height: var(--largeur-bordure-1);
-  background: var(--couleur-bordure-tres-claire);
-  margin: var(--space-m) 0;
+  margin-bottom: 0;
 }
 
 .boire-verres {
@@ -698,7 +693,9 @@ body::after {
 #ficheV2-aime-oui:not(.actif),
 #ficheV2-aime-non:not(.actif) { color: var(--white-50); border-color: var(--white-15); }
 
-.fiche-vide { opacity: 0.45; }
+
+
+#editFicheV2-corps { padding-bottom: var(--space-xl); }
 
 /* ===== ROUNDEL — bouton standard V2 (futur .bouton-londres) ===== */
 .roundel {
