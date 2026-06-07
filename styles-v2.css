@@ -563,9 +563,10 @@ body::after {
 .champ-saisie:focus { background: rgba(0,0,0,0.7); }
 .menu-liste {
   display: none;
+  width: 160px;
+  margin: 0 auto var(--space-s);
   border: var(--largeur-bordure-1) solid var(--couleur-bordure-tres-claire);
   background: var(--bg-card);
-  margin-bottom: var(--space-s);
 }
 .menu-liste::-webkit-scrollbar { display: none; }
 .menu-liste.ouvert { display: block; }
@@ -588,32 +589,35 @@ body::after {
   margin: var(--space-l) auto;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-}
+
 .roundel-anneau {
   position: absolute;
-  left: 0;
-  top: 0;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   width: 80px;
   height: 80px;
+  flex: none;
   border-radius: 50%;
   border: var(--largeur-bordure-10) solid var(--gold);
   box-sizing: border-box;
 }
 .roundel-barre {
   position: absolute;
-  left: -20px;
-  right: -20px;
+  left: 50%;
   top: 50%;
-  transform: translateY(-50%);
+  transform: translate(-50%, -50%);
   z-index: 1;
+  min-width: 110px;
   background: var(--black);
   color: var(--white);
   text-align: center;
   text-transform: uppercase;
   letter-spacing: var(--ls-wide);
   font-size: var(--fs-12);
-  padding: var(--space-xs) 0;
+  padding: var(--space-xs) var(--space-l);
   white-space: nowrap;
+  box-sizing: border-box;
 }
 
 /* =========================================
