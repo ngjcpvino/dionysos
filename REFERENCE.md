@@ -19,7 +19,9 @@
 
 ## Changements de code — LE PLUS IMPORTANT
 - Jamais de code sans OK explicite.
-- **UN SEUL bloc Trouve/Remplace à la fois.** Jamais plusieurs blocs d'un coup, même s'ils vont ensemble. L'utilisateur doit pouvoir dire OK (fait) ou non entre chaque bloc.
+- **UNE SEULE paire Trouve ceci / Remplace par ceci par message. JAMAIS deux. Point.** Même si elles sont dans le même fichier, même si elles se suivent, même si ça paraît efficace : une seule par message, puis attendre le OK. C'est la règle qui prime sur tout.
+- Si plusieurs lignes à changer SE SUIVENT dans le fichier (contiguës), elles forment UNE SEULE paire (un seul Trouve/Remplace qui couvre tout le bloc contigu). Ne jamais découper un bloc contigu en deux passes.
+- Si les changements ne se suivent PAS, c'est une paire par message, un OK entre chaque.
 - Après chaque bloc, ATTENDRE le **OK** avant le suivant. « OK » = c'est **FAIT** (déjà appliqué chez lui), pas « vas-y ». On enchaîne, l'utilisateur publie une fois à la fin.
 - Le **Trouve ceci** est copié EXACTEMENT depuis le fichier (jamais reconstruit de mémoire), pour que le Rechercher de Notepad++ le trouve à tous les coups. Si le passage exact n'est pas retrouvé, le dire et demander de le coller — ne JAMAIS inventer un bloc approximatif.
 - À l'intérieur d'un même bloc, couvrir TOUT ce qui change au même endroit (ne pas redécouper en micro-bouts ligne par ligne sans raison).

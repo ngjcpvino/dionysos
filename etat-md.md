@@ -51,7 +51,7 @@ Socle (`:root`, reset, fond, responsive) · `.toast` · `#topNavV2` + `.bouton-n
 
 ### Arbre des résultats d'un scan (RÉFÉRENCE)
 - **A — Lecture** : A1 caméra indispo → entrée manuelle ; A2 rien lu → boutons toujours visibles ; A3 non-produit → ignorer ; A4 douteux → seuil 3 ; A5 sans code → manuel. **Checksum GTIN** ✅ (`gtinValide` ×3/×1, longueurs 8/12/13). Entrée manuelle sans checksum (volontaire). Torche écartée, Quagga conservé.
-- **B — Vin existe** : B1 stock > 0 → menu complet ; B2 0 bouteille → seules Visualiser + Arrivée utiles. *(B1/B2 pas encore distingués)*
+- **B — Vin existe** : B1 stock > 0 → menu complet ; B2 0 bouteille → Déplacer/Boire/Donner grisés (`.desactive`), seules Visualiser + Arrivée actives. ✅ FAIT (`ouvrirMenuActionV2` applique `.desactive` aux 3 ids si `count === 0`, `count` = bouteilles actives de `checkWineExists`).
 - **C — Vin absent** ✅ : recherche SAQ auto. C1 trouvé → `creerVinSAQV2` → menu. C2 introuvable → page « Vin inconnu » (code-barres + nom) → `creerVinManuelV2` → menu.
 - **D — Erreur** → message, réessayer.
 
@@ -70,34 +70,9 @@ Page `#deplacerV2Container`. `ouvrirDeplacerV2` → recharge `ALL_DATA` → `con
 **Blocs** : Information · Dégustation (Arômes + 7 cartes) · Production · Notes (Accords → `Accords` ; À racheter ✓/✗ → `Racheter` ; Sur-inventaire 🛒 → `Panier` ; Historique des plats trié 5→1 ; Recettes/Notes/Divers) · Inventaire (lecture seule) · Photo cliquable · « Où trouver ce vin » (`.roundel`, géoloc) · Prix auto.
 Dépend du socle : `decodeHTML`, `appelBackend`, `afficherMessage`, `CONFIG`, `ALL_HISTORIQUE`, `CURRENT_WINE_*`.
 
-## 🍷 Boire V2 — PLANIFIÉ (à coder)
-Conteneur unique `#boireV2Container`, titre **« Boire »**, nom + code-barres. Le corps se reconstruit (liste bouteilles → formulaire), comme Déplacer.
-- **Choix bouteille** : plusieurs bouteilles actives → liste (emplacement ou « À ranger ») ; **une seule → sauté**, direct au formulaire.
-- **Formulaire** (réutiliser styles existants) :
-  - **Plat** : `.champ-saisie`, saisie libre, **facultatif**.
-  - **Appréciation** : **5 verres 🍷** identiques au V1 (opacité 0.3 éteint / 1 allumé, clic allume de 1 à la note). **Désactivés (grisés, non cliquables) tant qu'aucun plat n'est saisi** ; deviennent **obligatoires si un plat est saisi**. Aucun plat → verres restent vides. Pas de valeur par défaut (≠ V1 qui mettait 3). Pas de re-grisage dynamique si on efface le plat après coup.
-  - **Accords** : liste déroulante (`.menu-liste`/`.item-liste`), **part des accords actuels du vin** et **ajoute**. **Ne s'enregistre qu'au Confirmer** (pas à chaque clic, ≠ fiche).
-  - **Confirmer** : `.roundel`.
-- **Confirmer** → `actionBouteille { row, action:'boire', bottle, plat, bonAccord }` (+ `updateWineField` Accords si accords cochés) → données fraîches (`ALL_DATA` + `checkWineExists`) → toast **« Santé ! »** → **retour accueil**.
-- **✕** : formulaire → liste (si plusieurs) ou menu (si une seule) ; liste → menu. (Retour accueil seulement après Confirmer.)
-- **Anti-gel** : `.catch` → `retourAccueilV2()`. Ajouter `#boireV2Container` à la liste masquée par `retourAccueilV2()`.
-- Branché dans `menuV2Click('boire')`.
-
-## 🎁 Donner V2 — PLANIFIÉ (à coder)
-Donner = **simple sortie d'inventaire**, aucun détail à saisir. (N'existait pas en V1 ; backend `actionBouteille` accepte « donner ».)
-- Conteneur unique, titre **« Donner »**, nom + code-barres.
-- **Choix bouteille** : plusieurs → liste (emplacement / « À ranger ») ; une seule → direct.
-- **Écran de confirmation** : bouteille choisie affichée + bouton **Confirmer** (`.roundel`). Pas de plat, pas de verres, pas d'accords.
-- **Confirmer** → `actionBouteille { row, action:'donner', bottle }` → données fraîches → toast **« Bouteille donnée »** → **retour accueil**.
-- **✕** : formulaire → liste (si plusieurs) ou menu (si une seule) ; liste → menu.
-- **Anti-gel** : `.catch` → `retourAccueilV2()`. Ajouter le conteneur Donner à la liste masquée.
-- Branché dans `menuV2Click('donner')`.
-
-### Plan de codage Boire + Donner (4 blocs, code commun mutualisé)
-- **Bloc A — HTML** : les deux conteneurs (`#boireV2Container` + `#donnerV2Container`) dans `index-v2.html`.
-- **Bloc B — CSS** : les 5 verres 🍷 + style d'appoint dans `styles-v2.css` (rien si l'existant suffit).
-- **Bloc C — JS** : tout Boire + Donner avec helpers partagés (choix bouteille, écran confirm, données fraîches, retour accueil, anti-gel) dans `scripts-scanner-v2.js`.
-- **Bloc D — branchements** : `menuV2Click('boire')` + `('donner')` et ajout des deux conteneurs dans `retourAccueilV2()`.
+## 🍷 Boire V2 — ✅ TERMINÉ
+## 🎁 Donner V2 — ✅ TERMINÉ
+Conteneurs `#boireV2Container` / `#donnerV2Container` (HTML), verres 🍷 (CSS `.boire-verres`/`.boire-verre`/`.allume`/`.desactive`), JS commun dans `scripts-scanner-v2.js` (`actionV2Choix`, `bottlesActivesV2`, `empBouteilleV2`, ouvrir/construire/confirmer/fermer pour Boire et Donner). Branchés dans `menuV2Click('boire'/'donner')` + ajoutés à `retourAccueilV2`. Conformes données fraîches (`getInventoryData` + `checkWineExists` après écriture). Boire : plat facultatif, verres grisés tant que pas de plat, obligatoires si plat ; accords partent des accords du vin, enregistrés au Confirmer. Donner : sortie simple, écran de confirmation.
 
 ## 🔤 Renommage `.accord-item` → `.item-liste` — ✅ TERMINÉ
 CSS (`styles-v2.css` : `.item-liste` + `.item-liste.actif`, items légèrement espacés) et JS (`scripts-fiche-v2.js` accords + sélecteur ; `scripts-scanner-v2.js` Arrivée meuble/rangée/espace + Déplacer meuble/rangée/espace + liste bouteilles) tous renommés. Aucun `accord-item` ne reste dans les fichiers V2.
@@ -109,58 +84,41 @@ JS adapté : `chargerPlatsV2` (plats → centre = nom du plat, droite = date, ba
 
 Reste à venir : la carte **vin** (photo gauche + nom/pays·région/cépage + nb bouteilles + bande couleur) sera générée par la page CAVE À VIN V2, avec ces mêmes classes. Toutes les cartes seront cliquables (clic → fiche V2) une fois cette page codée.
 
-## 🍇 Page CAVE À VIN V2 — PLANIFIÉ (à coder)
-Page plein écran V2 (`.modal-v2-fullscreen`), inventaire complet. Réf. V1 : `chargerInventaire` / `afficherCartes` / `genererCardVin` ; vins **groupés par code-barres**. Cliquable → fiche V2.
+## 🍇 Page CAVE À VIN V2 — ✅ TERMINÉ (sauf branchement burger)
+Conteneur `#caveV2Container` (HTML) : barre épurée loupe `.cercle.gauche` / titre « Les vins de Bacchus » / `.btn-fermer` droite, `#caveV2-compte`, `#caveV2-cartes`. Panneau filtres `.panneau-gauche` glissant de gauche + voile `.panneau-voile` (CSS ajouté). JS dans `scripts-scanner-v2.js` : `ouvrirCaveV2`/`fermerCaveV2`, `grouperVinsV2` (par code-barres, tri couleur puis nom), `afficherCartesCaveV2` (cartes `.carte` : photo gauche si dispo, centre nom + pays•région + cépage, droite nb btl, bande bas couleur, clic → `ouvrirFicheV2(cb, 'cave')`), filtres interdépendants `remplirFiltresCaveV2`/`appliquerFiltresCaveV2`/`reinitialiserFiltresCaveV2`, `ouvrirFiltresCaveV2`/`fermerFiltresCaveV2`. Ajouté à `retourAccueilV2`.
+**RESTE** : brancher `ouvrirCaveV2()` depuis le futur menu burger (entrée CAVE À VIN). Et `fermerFicheV2` devra revenir à la cave si `FICHE_V2_PROVENANCE === 'cave'`.
 
-**Carte de vin V2 (DÉCIDÉ) :**
-- Photo en vignette à GAUCHE. Sans photo : cadre vide légèrement teinté, même gabarit.
-- À droite : nom · pays•région · cépage · nombre de bouteilles.
-- Bordure couleur du vin (`.vin-*`).
-- Clic → `ouvrirFicheV2(codebarre, provenance)`.
+## 🏠 Accueil V2 — ✅ TERMINÉ
+`#accueilV2-titre` : padding haut `25vh` (DIONYSOS descendu). `.bouton-navigation` : 40×40 (scan/SAQ/burger même gabarit), images 40×40 `object-fit:contain`, burger ☰ `line-height:1` → les 3 boutons du header à la même hauteur.
 
-**Apparence (DÉCIDÉ) :**
-- Barre du haut épurée, 3 éléments : gauche = rond loupe (ouvre filtres) · centre = titre « Les vins de Bacchus » · droite = rond ✕ (ferme). Les deux ronds même style (`.btn-bascule` + `.gauche`/`.droite`).
-- Panneau filtres (ouvert par la loupe) : 5 critères (couleur, cépage, pays, appellation, accords — interdépendants comme V1), ligne de séparation, champ recherche par nom, reset.
-- Format d'ouverture : comme le menu burger (280px, fond sombre translucide, items espacés) mais **glisse de la GAUCHE**. Symétrique du burger.
-- Liste de cartes `.carte` en dessous.
+### Menu burger V2 — ✅ TERMINÉ (structure + branchements actifs)
+Panneau `#burgerV2` `.panneau-droite` (glisse de droite) + voile `#burgerV2-voile`. 9 entrées `.item-liste` dans l'ordre V1. `toggleMenuV2` (branché sur le ☰ du header) + `fermerMenuBurgerV2` + `burgerV2Click(cible)` dans `scripts-scanner-v2.js`. Actifs : ACCUEIL (ferme les conteneurs), CAVE À VIN (`ouvrirCaveV2`), RAFRAÎCHIR (recharge `ALL_DATA`). Les 6 autres (Emplacements, Historique, Liste d'achat, Recherche, À ranger, Promotions) → toast « À venir » tant que leur page V2 n'est pas bâtie. Retour fiche→cave géré dans `fermerFicheV2` (provenance `'cave'`).
 
-**Reste à décider :** tri (V1 = couleur puis nom). Données fraîches à l'ouverture.
+## 🩹 Corrections d'apparence — ✅ TOUTES FAITES
+1. Spinner : voile `--voile-standard`. ✅
+2. `.roundel-anneau` : `aspect-ratio: 1/1` (cercle parfait). ✅
+3. `.roundel-barre` : `width: 110px` fixe, padding horizontal 0 (largeur « Pigeonnier », même pour tous). ✅
+4. `.menu-liste` : `width: 110px` (alignée roundel). ✅
+5. Icône `+` (Arrivée) : emoji `➕` remplacé par `+` blanc. ✅
+6. Icône Déplacer : ⇄ (fait en C3). ✅
+7. `.btn-fermer` : rond (bordure or, fond sombre, `--taille-tactile`), rapproché du bord (`--space-s`). ✅
+8. Boutons fiche non sélectionnés : `#ficheV2-aime-oui/non:not(.actif)` en gris. ✅
+9. Titre page Arrivée : « Ajouter ». ✅
+10. Nom décodé (`decodeHTML`) dans menu d'action + Arrivée + Déplacer. ✅
 
-## 🏠 Accueil V2 — ajustements PLANIFIÉS (à coder)
-Accueil minimal : header (`#topNavV2`) avec 3 boutons `.bouton-navigation` (scan `gauche` / SAQ `centre` / burger ☰ `droite`) + `#accueilV2-titre` (DIONYSOS) + `#accueilV2-soustitre` (VIA VINOSTO).
-- **Descendre « DIONYSOS »** : augmenter le `padding`/`margin` haut de `#accueilV2-titre`.
-- **3 boutons header même hauteur** : harmoniser scan + SAQ + burger (le SAQ paraît trop gros). `.bouton-navigation` 50×50 ; images 45×45 ; burger ☰ texte 40px. Levier : hauteur commune aux trois.
-
-### Menu burger V2 — PLANIFIÉ (à coder, pages une à une)
-`toggleMenuV2` pas encore codé. **Mêmes 9 entrées qu'en V1, ouverture à DROITE.** Chaque entrée = page plein écran V2 (`.modal-v2-fullscreen`), bâtie une à une. Ordre V1 :
-1. ACCUEIL · 2. CAVE À VIN (`chargerInventaire`) · 3. EMPLACEMENTS (`chargerEmplacements`) · 4. HISTORIQUE (`chargerHistorique`) · 5. LISTE D'ACHAT (`chargerListeRacheter`) · 6. RECHERCHE (`chargerPageRecherche`) · 7. À RANGER (`chargerListeARanger`) · 8. PROMOTIONS SAQ (`chargerPromotions`) · 9. 🔄 RAFRAÎCHIR (`refreshApp`).
-
-Styles V1 (panneau latéral) à NE PAS réutiliser — refaire en V2.
-**Apparence (DÉCIDÉ) :** panneau 280px, ouverture à droite, fond légèrement sombre translucide, chaque item = rectangle `.item-liste` légèrement espacés.
-
-## 🩹 Corrections d'apparence EN ATTENTE
-1. **Spinner** : voile translucide (pas opaque) sur l'écran réellement affiché. ✅ FAIT (voile passé à `--voile-standard`).
-2. **`.roundel-anneau`** : cercle parfait, jamais ovale.
-3. **`.roundel-barre`** : centrée H et V dans l'anneau ; largeur fixe calée sur « Pigeonnier » (la barre dépasse un peu l'anneau de chaque côté) ; tous les items même largeur, même les chiffres à 1 caractère.
-4. **`.menu-liste`** : largeur fixe (= « Pigeonnier »), centrée sous le roundel ; fond sombre + lignes séparatrices ; s'ouvre SOUS le roundel, jamais par-dessus l'anneau.
-5. **Menu d'action — icône `+` (Arrivée)** : blanc, pas gris.
-6. **Menu d'action — icône Déplacer** : ⇄ en blanc. ✅ FAIT (C3).
-7. **`.btn-fermer` (les ✕)** : style de `.btn-bascule` (rond, bordure or, fond sombre), rapproché du bord.
-8. **Fiche vin — `.btn-bascule` non sélectionnés** : ✓ / ✗ en gris sur fond noir (état actif inchangé).
-9. **Page Arrivée — titre** : « Faites un choix » → « Ajouter » (uniquement la page Arrivée, pas le titre du menu d'action).
-10. **Menu d'action — nom non décodé** : appliquer `decodeHTML` au nom dans `ouvrirMenuActionV2` (et vérifier Arrivée / Déplacer / Boire / Donner).
-
-## ⚠️ À FAIRE (file)
+## ✏️ CRAYON — édition fiche V2 — ✅ TERMINÉ
+Crayon `.cercle.gauche` (✎) dans l'entête de la fiche V2 → `ouvrirEditFicheV2`. Overlay `#editFicheV2Overlay` (HTML) avec corps `#editFicheV2-corps` rempli dynamiquement depuis `EDIT_FICHE_V2_CHAMPS` (26 champs texte `.champ-saisie`, pré-remplis depuis `CURRENT_WINE_DATA`, libellé via `.titre-3`). `sauverEditFicheV2` → `saveWineEdits` (data + `codebarre` + `aime` conservé) → données fraîches via réouverture `ouvrirFicheV2`. `fermerEditFicheV2` ferme l'overlay. Ajouté à `retourAccueilV2`. JS dans `scripts-fiche-v2.js`. Note : `saveWineEdits` n'inclut pas Accords/Racheter/Panier (gérés en direct ailleurs dans la fiche).
 - **Bugs** : A1 `creerVinManuelV2` ✅ FAIT · A2 spinner ✅ FAIT · A3 nom non décodé menu d'action (= correction 10).
 - **Renommage `.accord-item` → `.item-liste`** : ✅ FAIT.
 - **Carte universelle `.carte`** : ✅ FAIT.
 - **Classe `.cercle` générique** : ✅ FAIT. Une seule classe `.cercle` (rond, bordure or, fond sombre, centré, `--taille-tactile` par défaut) + `.cercle.actif` (fond or) + `.cercle.desactive` (grisé, non cliquable) dans `styles-v2.css`. Remplace `.btn-bascule` (supprimée ; 3 boutons fiche Racheter/✗/Panier passés à `.cercle`) et `.menu-v2-circle` (supprimée ; 6 cercles du menu d'action passés à `.cercle`, taille 90px via `.menu-v2-grid .cercle`). Accolade manquante de `.roundel` corrigée au passage. Icône Déplacer passée à ⇄ (correction d'apparence #6 faite). L'anneau du `.roundel` n'a PAS été fusionné (structure anneau+barre distincte conservée).
 - **Corrections d'apparence** restantes (2 à 9).
-- **Boire + Donner** (4 blocs).
-- **Menu action scan** : distinguer B1/B2 (griser Déplacer/Boire/Donner si 0 bouteille).
-- **CRAYON — modifier les infos** (fiche). Backend prêt (`saveWineEdits`, `updateWineField`). Page d'édition plein écran V2, champs `.champ-saisie`.
-- **Menu burger V2** + **Page CAVE À VIN V2**.
-- **Accueil V2** : descendre DIONYSOS, 3 boutons même hauteur.
+- **Boire + Donner** : ✅ FAIT.
+- **Menu action scan B1/B2** : ✅ FAIT (grisage déjà en place).
+- **CRAYON (édition fiche)** : ✅ FAIT.
+- **Menu burger V2** : ✅ FAIT (CAVE À VIN branchée, retour fiche→cave géré). Reste à bâtir les 6 pages V2 manquantes (Emplacements, Historique, Liste d'achat, Recherche, À ranger, Promotions) — actuellement « À venir ».
+- **Page CAVE À VIN V2** : ✅ FAIT.
+- **Accueil V2** : ✅ FAIT.
 
 ## 🐞 En suspens
 - **Vue emplacements V1 instable** : un même filtre renvoie parfois une bouteille de moins (cache backend ou formules volatiles du Sheet). Impacte la cascade Arrivée, d'où la vérif réelle finale.
