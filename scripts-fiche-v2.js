@@ -232,14 +232,10 @@ function chargerPlatsV2(codebarre) {
     conteneur.innerHTML = cartes;
   }
 
-  if (ALL_HISTORIQUE && ALL_HISTORIQUE.length > 0) {
+  appelBackend('getHistorique', {}, { spinner: '' }).then(function(data) {
+    ALL_HISTORIQUE = data || [];
     rendrePlats(ALL_HISTORIQUE);
-  } else {
-    appelBackend('getHistorique', {}, { spinner: '' }).then(function(data) {
-      ALL_HISTORIQUE = data || [];
-      rendrePlats(ALL_HISTORIQUE);
-    }).catch(function() {});
-  }
+  }).catch(function() {});
 }
 
 function fermerFicheV2() {
