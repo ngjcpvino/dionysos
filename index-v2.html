@@ -190,11 +190,20 @@
   <div id="caveV2-filtres-voile" class="panneau-voile" onclick="fermerFiltresCaveV2()"></div>
   <div id="caveV2-filtres" class="panneau-gauche">
     <div class="titre-3">Filtrer</div>
-    <select id="caveV2-f-couleur" class="champ-saisie" onchange="appliquerFiltresCaveV2()"></select>
-    <select id="caveV2-f-cepage" class="champ-saisie" onchange="appliquerFiltresCaveV2()"></select>
-    <select id="caveV2-f-pays" class="champ-saisie" onchange="appliquerFiltresCaveV2()"></select>
-    <select id="caveV2-f-appellation" class="champ-saisie" onchange="appliquerFiltresCaveV2()"></select>
-    <select id="caveV2-f-accords" class="champ-saisie" onchange="appliquerFiltresCaveV2()"></select>
+    <div class="champ-cliquable" id="caveV2-f-couleur-display" onclick="basculerFiltreCaveV2('couleur')">Couleurs</div>
+    <div id="caveV2-f-couleur-menu" class="menu-liste"></div>
+
+    <div class="champ-cliquable" id="caveV2-f-cepage-display" onclick="basculerFiltreCaveV2('cepage')">Cépages</div>
+    <div id="caveV2-f-cepage-menu" class="menu-liste"></div>
+
+    <div class="champ-cliquable" id="caveV2-f-pays-display" onclick="basculerFiltreCaveV2('pays')">Pays</div>
+    <div id="caveV2-f-pays-menu" class="menu-liste"></div>
+
+    <div class="champ-cliquable" id="caveV2-f-appellation-display" onclick="basculerFiltreCaveV2('appellation')">Appellations</div>
+    <div id="caveV2-f-appellation-menu" class="menu-liste"></div>
+
+    <div class="champ-cliquable" id="caveV2-f-accords-display" onclick="basculerFiltreCaveV2('accords')">Accords</div>
+    <div id="caveV2-f-accords-menu" class="menu-liste"></div>
     <div class="panneau-separateur"></div>
     <input type="text" id="caveV2-f-nom" class="champ-saisie" placeholder="Rechercher par nom" oninput="appliquerFiltresCaveV2()">
     <div class="roundel" onclick="reinitialiserFiltresCaveV2()">

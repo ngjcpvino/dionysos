@@ -828,42 +828,53 @@ function fermerFiltresCaveV2() {
   document.getElementById('caveV2-filtres').classList.remove('ouvert');
 }
 
-function remplirFiltresCaveV2() {
-  var c = document.getElementById('caveV2-f-couleur').value;
-  var cep = document.getElementById('caveV2-f-cepage').value;
-  var p = document.getElementById('caveV2-f-pays').value;
-  var app = document.getElementById('caveV2-f-appellation').value;
-  var a = document.getElementById('caveV2-f-accords').value;
+var filtresCaveV2 = { couleur: '', cepage: '', pays: '', appellation: '', accords: '' };
+var libellesFiltreCaveV2 = { couleur: 'Couleurs', cepage: 'Cépages', pays: 'Pays', appellation: 'Appellations', accords: 'Accords' };
 
-  var sets = { c: {}, cep: {}, p: {}, app: {}, a: {} };
+function remplirFiltresCaveV2() {
+  var sets = { couleur: {}, cepage: {}, pays: {}, appellation: {}, accords: {} };
   (ALL_DATA || []).forEach(function(i) {
-    if (i.Couleur) sets.c[i.Couleur] = true;
-    if (i.Pays) sets.p[i.Pays] = true;
-    if (i.Appellation) sets.app[i.Appellation] = true;
-    (i.Cepage || '').split(',').map(function(x){return x.trim();}).filter(Boolean).forEach(function(x){ sets.cep[x] = true; });
-    (i.Accords || '').split(',').map(function(x){return x.trim();}).filter(Boolean).forEach(function(x){ sets.a[x] = true; });
+    if (i.Couleur) sets.couleur[i.Couleur] = true;
+    if (i.Pays) sets.pays[i.Pays] = true;
+    if (i.Appellation) sets.appellation[i.Appellation] = true;
+    (i.Cepage || '').split(',').map(function(x){return x.trim();}).filter(Boolean).forEach(function(x){ sets.cepage[x] = true; });
+    (i.Accords || '').split(',').map(function(x){return x.trim();}).filter(Boolean).forEach(function(x){ sets.accords[x] = true; });
   });
 
-  function fill(id, obj, label, cur) {
-    var sel = document.getElementById(id);
-    var opts = Object.keys(obj).sort();
-    sel.innerHTML = '<option value="">' + label + '</option>' + opts.map(function(v) {
-      return '<option value="' + v + '"' + (v === cur ? ' selected' : '') + '>' + v + '</option>';
+  Object.keys(sets).forEach(function(cle) {
+    var menu = document.getElementById('caveV2-f-' + cle + '-menu');
+    var opts = Object.keys(sets[cle]).sort();
+    var cur = filtresCaveV2[cle];
+    var html = '<div class="item-liste' + (cur === '' ? ' actif' : '') + '" onclick="choisirFiltreCaveV2(\'' + cle + '\', \'\')">' + libellesFiltreCaveV2[cle] + '</div>';
+    html += opts.map(function(v) {
+      return '<div class="item-liste' + (v === cur ? ' actif' : '') + '" onclick="choisirFiltreCaveV2(\'' + cle + '\', \'' + v.replace(/'/g, "\\'") + '\')">' + v + '</div>';
     }).join('');
-  }
-  fill('caveV2-f-couleur', sets.c, 'COULEURS', c);
-  fill('caveV2-f-cepage', sets.cep, 'CÉPAGES', cep);
-  fill('caveV2-f-pays', sets.p, 'PAYS', p);
-  fill('caveV2-f-appellation', sets.app, 'APPELLATIONS', app);
-  fill('caveV2-f-accords', sets.a, 'ACCORDS', a);
+    menu.innerHTML = html;
+    document.getElementById('caveV2-f-' + cle + '-display').textContent = cur === '' ? libellesFiltreCaveV2[cle] : cur;
+  });
+}
+
+function basculerFiltreCaveV2(cle) {
+  var menu = document.getElementById('caveV2-f-' + cle + '-menu');
+  var ouvert = menu.classList.contains('ouvert');
+  ['couleur','cepage','pays','appellation','accords'].forEach(function(k) {
+    document.getElementById('caveV2-f-' + k + '-menu').classList.remove('ouvert');
+  });
+  if (!ouvert) menu.classList.add('ouvert');
+}
+
+function choisirFiltreCaveV2(cle, valeur) {
+  filtresCaveV2[cle] = valeur;
+  document.getElementById('caveV2-f-' + cle + '-menu').classList.remove('ouvert');
+  appliquerFiltresCaveV2();
 }
 
 function appliquerFiltresCaveV2() {
-  var c = document.getElementById('caveV2-f-couleur').value;
-  var cep = document.getElementById('caveV2-f-cepage').value;
-  var p = document.getElementById('caveV2-f-pays').value;
-  var app = document.getElementById('caveV2-f-appellation').value;
-  var a = document.getElementById('caveV2-f-accords').value;
+  var c = filtresCaveV2.couleur;
+  var cep = filtresCaveV2.cepage;
+  var p = filtresCaveV2.pays;
+  var app = filtresCaveV2.appellation;
+  var a = filtresCaveV2.accords;
   var nom = document.getElementById('caveV2-f-nom').value.toLowerCase().trim();
 
   var filtered = (ALL_DATA || []).filter(function(i) {
@@ -879,9 +890,7 @@ function appliquerFiltresCaveV2() {
 }
 
 function reinitialiserFiltresCaveV2() {
-  ['caveV2-f-couleur','caveV2-f-cepage','caveV2-f-pays','caveV2-f-appellation','caveV2-f-accords'].forEach(function(id) {
-    document.getElementById(id).value = '';
-  });
+  filtresCaveV2 = { couleur: '', cepage: '', pays: '', appellation: '', accords: '' };
   document.getElementById('caveV2-f-nom').value = '';
   remplirFiltresCaveV2();
   afficherCartesCaveV2(ALL_DATA);
