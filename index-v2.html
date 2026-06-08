@@ -223,6 +223,150 @@
   </div>
 </div>
 
+<!-- ====================== À RANGER V2 ====================== -->
+<div id="aRangerV2Container" class="modal-v2-fullscreen" style="display:none;">
+  <div class="modal-v2-content modale-haut">
+    <div class="btn-fermer" onclick="fermerARangerV2()">✕</div>
+    <h2 class="titre-1">À ranger</h2>
+    <div id="aRangerV2-compte" class="texte-secondaire"></div>
+    <div id="aRangerV2-cartes" class="contenu"></div>
+  </div>
+</div>
+
+<!-- ====================== HISTORIQUE V2 ====================== -->
+<div id="histoV2Container" class="modal-v2-fullscreen" style="display:none;">
+  <div class="modal-v2-content modale-haut">
+    <div class="cercle gauche" id="histoV2-loupe" onclick="ouvrirFiltresHistoV2()">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; vertical-align: middle;">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+    </div>
+    <h2 class="titre-1">Historique</h2>
+    <div class="btn-fermer" onclick="fermerHistoV2()">✕</div>
+    <div id="histoV2-compte" class="texte-secondaire"></div>
+    <div id="histoV2-cartes" class="contenu"></div>
+  </div>
+  <div id="histoV2-filtres-voile" class="panneau-voile" onclick="fermerFiltresHistoV2()"></div>
+  <div id="histoV2-filtres" class="panneau-gauche">
+    <div class="titre-3">Filtrer</div>
+    <div class="champ-cliquable" id="histoV2-f-mets-display" onclick="basculerFiltreHistoV2('mets')">Mets</div>
+    <div id="histoV2-f-mets-menu" class="menu-liste"></div>
+
+    <div class="champ-cliquable" id="histoV2-f-vin-display" onclick="basculerFiltreHistoV2('vin')">Vin</div>
+    <div id="histoV2-f-vin-menu" class="menu-liste"></div>
+
+    <div class="champ-cliquable" id="histoV2-f-accord-display" onclick="basculerFiltreHistoV2('accord')">Accord</div>
+    <div id="histoV2-f-accord-menu" class="menu-liste"></div>
+
+    <div class="panneau-separateur"></div>
+    <div class="roundel" onclick="reinitialiserFiltresHistoV2()">
+      <span class="roundel-anneau"></span>
+      <span class="roundel-barre">Réinitialiser</span>
+    </div>
+  </div>
+</div>
+
+<!-- ====================== CORRECTION METS HISTORIQUE V2 ====================== -->
+<div id="histoEditV2Overlay" class="modal-v2-fullscreen" style="display:none;">
+  <div class="modal-v2-content modale-haut">
+    <button class="btn-fermer" onclick="fermerHistoEditV2()">✕</button>
+    <h2 class="titre-1">Corriger</h2>
+    <div id="histoEditV2-vin" class="modal-v2-winename"></div>
+    <input type="text" id="histoEditV2-plat" class="champ-saisie" placeholder="Plat">
+    <div id="histoEditV2-verres" class="boire-verres"></div>
+    <div class="roundel" onclick="sauverHistoEditV2()">
+      <span class="roundel-anneau"></span>
+      <span class="roundel-barre">Enregistrer</span>
+    </div>
+  </div>
+</div>
+
+<!-- ====================== EMPLACEMENTS V2 ====================== -->
+<div id="empV2Container" class="modal-v2-fullscreen" style="display:none;">
+  <div class="modal-v2-content modale-haut">
+    <div class="cercle gauche" id="empV2-loupe" onclick="ouvrirFiltresEmpV2()">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; vertical-align: middle;">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+    </div>
+    <h2 class="titre-1">Emplacements</h2>
+    <div class="btn-fermer" onclick="fermerEmpV2()">✕</div>
+    <div id="empV2-compte" class="texte-secondaire"></div>
+    <div id="empV2-cartes" class="contenu"></div>
+  </div>
+  <div id="empV2-filtres-voile" class="panneau-voile" onclick="fermerFiltresEmpV2()"></div>
+  <div id="empV2-filtres" class="panneau-gauche">
+    <div class="titre-3">Filtrer</div>
+    <div class="champ-cliquable" id="empV2-f-meuble-display" onclick="basculerFiltreEmpV2('meuble')">Meuble</div>
+    <div id="empV2-f-meuble-menu" class="menu-liste"></div>
+
+    <div class="champ-cliquable" id="empV2-f-rangee-display" onclick="basculerFiltreEmpV2('rangee')">Rangée</div>
+    <div id="empV2-f-rangee-menu" class="menu-liste"></div>
+
+    <div class="champ-cliquable" id="empV2-f-espace-display" onclick="basculerFiltreEmpV2('espace')">Espace</div>
+    <div id="empV2-f-espace-menu" class="menu-liste"></div>
+
+    <div class="panneau-separateur"></div>
+    <div class="roundel" onclick="afficherListeEmpV2('doubles')">
+      <span class="roundel-anneau"></span>
+      <span class="roundel-barre">Vins en double</span>
+    </div>
+    <div id="empV2-btn-cepdoubles" class="roundel" style="display:none;" onclick="afficherListeEmpV2('cepdoubles')">
+      <span class="roundel-anneau"></span>
+      <span class="roundel-barre">Cépages doubles</span>
+    </div>
+    <div id="empV2-btn-cepmanquants" class="roundel" style="display:none;" onclick="afficherListeEmpV2('cepmanquants')">
+      <span class="roundel-anneau"></span>
+      <span class="roundel-barre">Cépages manquants</span>
+    </div>
+
+    <div class="panneau-separateur"></div>
+    <div class="roundel" onclick="reinitialiserFiltresEmpV2()">
+      <span class="roundel-anneau"></span>
+      <span class="roundel-barre">Réinitialiser</span>
+    </div>
+  </div>
+</div>
+
+<!-- ====================== LISTE D'ACHAT V2 ====================== -->
+<div id="achatV2Container" class="modal-v2-fullscreen" style="display:none;">
+  <div class="modal-v2-content modale-haut">
+    <div class="cercle gauche" onclick="ouvrirFiltresAchatV2()">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; vertical-align: middle;">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+    </div>
+    <h2 class="titre-1">Liste d'achat</h2>
+    <div class="btn-fermer" onclick="fermerAchatV2()">✕</div>
+    <div id="achatV2-compte" class="texte-secondaire"></div>
+    <div id="achatV2-cartes" class="contenu"></div>
+  </div>
+  <div id="achatV2-filtres-voile" class="panneau-voile" onclick="fermerFiltresAchatV2()"></div>
+  <div id="achatV2-filtres" class="panneau-gauche">
+    <div class="titre-3">Filtrer</div>
+    <div class="champ-cliquable" id="achatV2-f-couleur-display" onclick="basculerFiltreAchatV2('couleur')">Couleurs</div>
+    <div id="achatV2-f-couleur-menu" class="menu-liste"></div>
+
+    <div class="champ-cliquable" id="achatV2-f-pays-display" onclick="basculerFiltreAchatV2('pays')">Pays</div>
+    <div id="achatV2-f-pays-menu" class="menu-liste"></div>
+
+    <div class="champ-cliquable" id="achatV2-f-cepage-display" onclick="basculerFiltreAchatV2('cepage')">Cépages</div>
+    <div id="achatV2-f-cepage-menu" class="menu-liste"></div>
+
+    <div class="panneau-separateur"></div>
+    <div class="champ-cliquable" id="achatV2-f-succ-display" onclick="basculerFiltreAchatV2('succ')">Succursale</div>
+    <div id="achatV2-f-succ-menu" class="menu-liste"></div>
+
+    <div class="roundel" onclick="reinitialiserFiltresAchatV2()">
+      <span class="roundel-anneau"></span>
+      <span class="roundel-barre">Réinitialiser</span>
+    </div>
+  </div>
+</div>
+
 <!-- ====================== BOIRE V2 ====================== -->
 <div id="boireV2Container" class="modal-v2-fullscreen" style="display:none;">
   <div class="modal-v2-content modale-haut">

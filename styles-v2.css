@@ -758,6 +758,19 @@ body::after {
   box-sizing: border-box;
 }
 
+.emp-entete-meuble {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--black);
+  color: var(--gold);
+  font-size: var(--fs-sm);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  padding: var(--space-xs) var(--space-s);
+  margin-top: var(--space-s);
+}
+
 
 
 
