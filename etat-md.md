@@ -136,6 +136,39 @@ Sur l'écran Boire, remplacer le .roundel ACCORDS par le MÊME champ cliquable +
 La liste d'un filtre ne montre QUE les vraies valeurs (Blanc, Rouge…), aucun item « Tous » ni libellé répété en tête. Le libellé reste sur le champ cliquable. Réinitialisation via le bouton Réinitialiser.
 
 ---
+---
+
+## 📍 Page EMPLACEMENTS V2 — À BÂTIR (plan décidé, NE PAS REDÉCIDER)
+Base = page Cave V2, titre « Emplacements », look légèrement retouché.
+- **Panneau filtres (gauche)** : 3 filtres en cascade Meuble → Rangée → Espace. Bouton « Vins en double » TOUJOURS visible. Boutons « Cépages doubles » et « Cépages manquants » visibles SEULEMENT si un meuble est sélectionné. Toucher un de ces 3 boutons FERME le panneau et affiche la liste. La loupe suit `.cercle`/`.actif` : sombre si aucun filtre, OR si filtre/bouton actif.
+- **Corps par défaut** : bouteilles groupées MEUBLE → RANGÉE → cartes. En-tête de meuble DISCRET et COLLANT (sticky), change au meuble suivant, pas de gros titre. Séparateur « RANGÉE X » conservé. Carte = style Cave, emplacement (C-3-2) à droite.
+- **3 listes** : « Vins en double » = même code-barres en 2+ bouteilles (tous meubles si aucun meuble ; sinon dans le meuble). « Cépages doubles » = cépage dominant sur 2+ vins du meuble. « Cépages manquants » = cépage présent dans d'AUTRES meubles, absent du meuble choisi. Calcul pour TOUS les meubles (pas seulement Cellier/Pigeonnier comme V1). Présentation = cartes `.carte` style succursales (nom blanc dominant, emplacements/nombre discrets). AMÉLIORATION vs V1 : chaque vin UNE SEULE FOIS, emplacements REGROUPÉS (ex. « C-3-2, C-4-1, P-2-5 »), sur les 3 listes. Listes de cépages groupées par cépage, tête de groupe = titre doré discret (`.titre-3`).
+- **Interactions cartes** : toute la surface cliquable → ouvre DÉPLACER normal (choix de bouteille si plusieurs). Retour Déplacer → liste RAFRAÎCHIE.
+- **Fermeture** : loupe rouvre les filtres, X quitte la page.
+
+## 📜 Page HISTORIQUE V2 — À BÂTIR (plan décidé, NE PAS REDÉCIDER)
+But premier : aide à la décision repas — bons accords pour un type de mets, écarter les mauvais. Stats secondaires. V1 jugée faible : on repense.
+- **Panneau filtres (gauche)** : 3 portes d'entrée — Mets (plat précis) · Vin · Accord (catégorie, ex. « de l'asiatique »).
+- **Corps** : regroupé PAR VIN. Tête de chaque vin = vraie CARTE DE VIN style succursales (nom blanc dominant), CLIQUABLE → FICHE du vin. PAS de titre doré (jugé peu lisible et trop présent). Sous le vin : ses cartes de mets comme dans la fiche (plat + date, bande couleur selon note, triées 5→1).
+- **Correction d'entrée (manque criant V1)** : carte de mets CLIQUABLE → éditeur pour corriger la NOTE (1-5 coupes) ET le TEXTE du plat, sauvegardé dans l'Historique. PAS de suppression. À VÉRIFIER avant de coder : backend d'ÉCRITURE/correction d'une ligne d'historique (V1 a `getHistorique` en lecture seule ; identifier la ligne + fonction de mise à jour).
+- **À valider visuellement** : distinction nette zone « carte de vin » (→ fiche) vs « cartes de mets » (→ éditeur).
+
+## 🛒 Page LISTE D'ACHAT V2 — À BÂTIR (plan décidé, NE PAS REDÉCIDER)
+Même logique qu'en V1 (`afficherListeRacheter`), look V2. Base = Cave V2.
+- **Contenu (auto)** : un vin apparaît si (`Racheter`=Oui ET 0 bouteille en stock) OU (`Panier`=Oui). Groupé par code-barres, tri couleur puis nom.
+- **Panneau filtres (gauche)** : Couleur · Pays · Cépage en cascade + sélecteur de SUCCURSALE (avec ajout possible, `getSuccursales`/`ajouterSuccursale`).
+- **Corps** : cartes de vin V2. Si une succursale est choisie, chaque carte affiche la dispo + quantité à cette succursale (`getSuccursalesDisponibles` ou `verifierDispoSAQ_GRAPHQL_V1`). Carte cliquable → FICHE du vin.
+
+## 📦 Page À RANGER V2 — À BÂTIR (plan décidé, NE PAS REDÉCIDER)
+Même logique qu'en V1 (`afficherListeARanger`), look V2. Base = Cave V2, SANS filtres.
+- **Contenu** : bouteilles actives (statut ≠ Bu/Sorti) SANS emplacement. Groupées par code-barres, tri couleur puis nom. Si vide : « Tout est bien rangé! ».
+- **Look & interaction** : cartes de vin V2. Carte cliquable → DÉPLACER (assigner une place ; c'est un déplacement, pas un ajout). Retour → liste rafraîchie.
+
+## 🎬 Bouton ACTION dans la FICHE V2 — À BÂTIR (décidé, NE PAS REDÉCIDER)
+Dans la fiche vin, APRÈS le roundel « OÙ LE TROUVER », ajouter un roundel « ACTION » qui ouvre le MENU D'ACTION du vin courant (Visualiser/Arrivée/Déplacer/Boire/Donner) — PAS le scanner caméra. Technique : appeler `checkWineExists` sur le code-barres courant pour bâtir `menuActionV2Context` AVANT d'ouvrir `ouvrirMenuActionV2`.
+
+---
+
 
 ## 🩹 Corrections d'apparence — ✅ TOUTES FAITES
 1. Spinner : voile `--voile-standard`. ✅
