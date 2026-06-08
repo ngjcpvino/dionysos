@@ -133,7 +133,24 @@ Le .roundel ENREGISTRER se place DANS le flux, sous le dernier champ (DIVERS), s
 Sur l'écran Boire, remplacer le .roundel ACCORDS par le MÊME champ cliquable + menu déroulant que dans la fiche vin (champ qui déplie la liste des accords dessous).
 
 ### 10. Filtre cave — pas de premier item libellé — ✅ FAIT
-La liste d'un filtre ne montre QUE les vraies valeurs (Blanc, Rouge…), aucun item « Tous » ni libellé répété en tête. Le libellé reste sur le champ cliquable. Réinitialisation via le bouton Réinitialiser.
+La liste d'un filtre ne montre QUE les vraies valeurs (Blanc, Rouge…), aucun item « Tous » ni libellé ## 🛒 Page LISTE D'ACHAT V2 — À BÂTIR (plan décidé, NE PAS REDÉCIDER)
+
+Même logique qu'en V1 (`afficherListeRacheter`), refaite au look V2. Base = page Cave V2.
+
+### Contenu (automatique, pas manuel)
+- Un vin apparaît si : (`Racheter` = "Oui" ET 0 bouteille en stock) OU (`Panier` = "Oui").
+- Regroupement par code-barres, tri couleur (rouge→blanc→rosé→bulles) puis nom.
+
+### Panneau de filtres (gauche)
+- Filtres en cascade : Couleur · Pays · Cépage.
+- Sélecteur de SUCCURSALE dans le panneau (avec possibilité d'ajouter une succursale, comme V1 `getSuccursales`/`ajouterSuccursale`).
+
+### Corps
+- Cartes de vin V2 (style Cave).
+- Si une succursale est choisie : chaque carte affiche la dispo du vin à cette succursale (disponible + quantité), via `getSuccursalesDisponibles` ou `verifierDispoSAQ_GRAPHQL_V1`.
+- Carte cliquable → FICHE du vin (comme la Cave).
+
+---répété en tête. Le libellé reste sur le champ cliquable. Réinitialisation via le bouton Réinitialiser.
 
 ---
 ## 📜 Page HISTORIQUE V2 — À BÂTIR (plan décidé, NE PAS REDÉCIDER)
