@@ -236,6 +236,8 @@ body::after {
   z-index: 10002;
 }
 
+#menuActionV2Overlay { z-index: 10010; }
+
 /* ===== Titres accueil ===== */
 #accueilV2-titre {
   font-family: var(--police-titre);
