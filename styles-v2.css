@@ -225,9 +225,16 @@ body::after {
 .bouton-navigation:active img { opacity: 0.6; }
 
 /* ===== Position générique (parent en position:relative) ===== */
-.gauche { position: fixed; top: var(--space-s); left: var(--space-s); z-index: 10002; }
+.gauche { position: absolute; top: var(--space-s); left: var(--space-s); }
 .centre { position: absolute; top: var(--space-s); left: 50%; transform: translateX(-50%); }
 .droite { position: absolute; top: var(--space-s); right: var(--space-s); }
+
+#caveV2-loupe, #achatV2-loupe, #empV2-loupe, #histoV2-loupe {
+  position: fixed;
+  top: var(--space-s);
+  left: var(--space-s);
+  z-index: 10002;
+}
 
 /* ===== Titres accueil ===== */
 #accueilV2-titre {
