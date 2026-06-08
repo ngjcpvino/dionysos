@@ -136,6 +136,62 @@ Sur l'écran Boire, remplacer le .roundel ACCORDS par le MÊME champ cliquable +
 La liste d'un filtre ne montre QUE les vraies valeurs (Blanc, Rouge…), aucun item « Tous » ni libellé répété en tête. Le libellé reste sur le champ cliquable. Réinitialisation via le bouton Réinitialiser.
 
 ---
+## 📜 Page HISTORIQUE V2 — À BÂTIR (plan décidé, NE PAS REDÉCIDER)
+
+But premier : aide à la décision repas — trouver les bons accords pour un type de mets, écarter les mauvais. Les stats sont secondaires. La V1 est jugée faible : on repense, on ne copie pas.
+
+### Panneau de filtres (gauche, comme la Cave)
+- 3 filtres / portes d'entrée : Mets (plat précis) · Vin · Accord (catégorie, ex. « de l'asiatique »).
+
+### Corps
+- Regroupé PAR VIN.
+- Tête de chaque vin = une vraie CARTE DE VIN style succursales (nom en blanc dominant, infos discrètes). PAS de titre doré (`.titre-3` jugé peu lisible et trop présent).
+- Carte de vin en tête CLIQUABLE (sur le nom/la carte) → ouvre la FICHE du vin.
+- Sous le vin : ses cartes de mets comme dans la fiche (nom du plat + date, bande couleur selon la note, triées 5→1).
+
+### Correction d'une entrée (manque criant de la V1)
+- Carte de mets CLIQUABLE → ouvre un éditeur permettant de corriger la NOTE (1-5 coupes) ET le TEXTE du plat (faute de frappe), sauvegardé dans l'Historique.
+- PAS de suppression d'entrée (une entrée ne se crée pas par accident).
+- À VÉRIFIER avant de coder : backend d'ÉCRITURE/correction d'une ligne d'historique (la V1 a `getHistorique` en lecture ; identifier la ligne précise + fonction de mise à jour).
+
+### À valider visuellement demain
+- Distinction nette entre la zone « carte de vin » (→ fiche) et les « cartes de mets » (→ éditeur), pour ne pas confondre les deux clics.
+
+---
+
+## 📍 Page EMPLACEMENTS V2 — À BÂTIR (plan décidé, NE PAS REDÉCIDER)
+
+Base = page Cave V2 (même structure), titre « Emplacements », look légèrement retouché.
+
+### Panneau de filtres (gauche, comme la Cave)
+- 3 filtres en cascade : Meuble → Rangée → Espace (Meuble limite Rangée, qui limite Espace).
+- Bouton « Vins en double » : TOUJOURS visible (ne dépend pas du meuble).
+- Boutons « Cépages doubles » et « Cépages manquants » : visibles SEULEMENT si un meuble est sélectionné.
+- Toucher un de ces 3 boutons FERME le panneau et affiche la liste correspondante dans le corps.
+- La loupe (ouverture filtres) suit la logique `.cercle`/`.actif` : sombre si aucun filtre actif, OR si au moins un filtre/bouton appliqué.
+
+### Corps par défaut (aucun bouton-liste actif)
+- Bouteilles rangées, groupées MEUBLE → RANGÉE → cartes.
+- En-tête de meuble DISCRET et COLLANT en haut au défilement (sticky), change au meuble suivant. Pas de gros titre (hors ton V2).
+- Séparateur « RANGÉE X » conservé (défile normalement, sous l'en-tête meuble).
+- Carte de bouteille = style Cave, emplacement (ex. C-3-2) à droite.
+
+### Les 3 listes (Vins en double / Cépages doubles / Cépages manquants)
+- Définitions : « Vins en double » = même code-barres en 2+ bouteilles (tous meubles si aucun meuble ; sinon dans le meuble). « Cépages doubles » = cépage dominant sur 2+ vins du meuble. « Cépages manquants » = cépage présent dans d'AUTRES meubles mais absent du meuble choisi. Calcul pour TOUS les meubles (pas seulement Cellier/Pigeonnier comme la V1).
+- Présentation = LISTE DE CARTES `.carte`, style succursales : nom du vin en blanc dominant (`.carte-titre`), emplacements + nombre en discret (`.carte-sous`/`.carte-droite`).
+- AMÉLIORATION vs V1 : chaque vin (même code-barres) apparaît UNE SEULE FOIS, avec ses emplacements REGROUPÉS (ex. « C-3-2, C-4-1, P-2-5 »). S'applique aux 3 listes.
+- Listes de cépages : groupées par cépage, tête de groupe = titre doré discret (`.titre-3`, ex. « MERLOT »), puis ses cartes de vins dessous.
+
+### Interactions des cartes
+- Toute la surface de la carte est cliquable (cible tactile large, pas le petit code emplacement).
+- Clic → ouvre le menu DÉPLACER normal (si plusieurs bouteilles, propose le choix de la bouteille parmi les emplacements, comme le Déplacer habituel).
+- Retour du Déplacer → revient sur la liste Emplacements, RAFRAÎCHIE (une bouteille a bougé).
+
+### Fermeture
+- Pas de bouton dédié : la LOUPE rouvre les filtres (changer/désélectionner), le X quitte la page Emplacements.
+
+---
+
 
 ## 🩹 Corrections d'apparence — ✅ TOUTES FAITES
 1. Spinner : voile `--voile-standard`. ✅
