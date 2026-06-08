@@ -969,6 +969,8 @@ function appliquerFiltresAchatV2() {
       (!f.cepage || (i.Cepage && i.Cepage.indexOf(f.cepage) !== -1));
   });
   afficherCartesAchatV2(filtered);
+  var loupe = document.getElementById('achatV2-loupe');
+  if (loupe) loupe.classList.toggle('actif', !!(f.couleur || f.pays || f.cepage || f.succ));
 }
 
 function afficherCartesAchatV2(liste) {
@@ -1382,12 +1384,19 @@ function afficherHistoV2() {
     return true;
   });
 
+  // Photo par code-barres (vient de ALL_DATA)
+  var cbPhoto = {};
+  (ALL_DATA || []).forEach(function(d){
+    var cb = (d['Code-barres'] || '').toString().trim();
+    if (cb && d['Photo URL']) cbPhoto[cb] = d['Photo URL'];
+  });
+
   // Regrouper par vin (code-barres)
   var grouped = {};
   base.forEach(function(h){
     var cb = (h.codebarre || '').toString().trim();
     var key = cb || ('SANS_' + h.nom);
-    if (!grouped[key]) grouped[key] = { cb: cb, nom: h.nom, couleur: h.couleur, mets: [] };
+    if (!grouped[key]) grouped[key] = { cb: cb, nom: h.nom, couleur: h.couleur, photo: cbPhoto[cb] || '', mets: [] };
     grouped[key].mets.push(h);
   });
   var groupes = Object.values(grouped);
@@ -1396,23 +1405,36 @@ function afficherHistoV2() {
   document.getElementById('histoV2-compte').textContent = groupes.length + ' vin' + (groupes.length > 1 ? 's' : '');
   if (groupes.length === 0) { div.innerHTML = '<div class="texte-secondaire">Aucune entrée</div>'; return; }
 
+  var cbInfos = {};
+  (ALL_DATA || []).forEach(function(d){
+    var cb = (d['Code-barres'] || '').toString().trim();
+    if (cb) cbInfos[cb] = d;
+  });
+
   div.innerHTML = groupes.map(function(g){
     var nom = decodeHTML(g.nom || '—');
+    var info = cbInfos[g.cb] || {};
+    var pays = info.Pays || '';
+    var region = info.Region || '';
+    var paysRegion = (pays && region) ? (pays + ' • ' + region) : (pays || region);
+    var cepage = info.Cepage || '';
+    var sous = [paysRegion, cepage].filter(Boolean).join('<br>');
     var onclick = g.cb ? ' onclick="ouvrirFicheV2(\'' + g.cb + '\', \'histo\')"' : '';
-    var carteVin = '<div class="carte ' + couleurClasseV2(g.couleur) + '"' + onclick + '>' +
-      '<div class="carte-centre"><span class="carte-titre">' + nom + '</span></div></div>';
+    var photo = g.photo ? '<div class="carte-photo"><img src="' + g.photo + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
+    var carteVin = '<div class="carte histo-vin ' + couleurClasseV2(g.couleur) + '"' + onclick + '>' + photo +
+      '<div class="carte-centre"><span class="carte-titre">' + nom + '</span><span class="carte-sous">' + sous + '</span></div></div>';
 
     var mets = g.mets.slice().sort(function(a, b){ return (parseInt(b.bonAccord) || 0) - (parseInt(a.bonAccord) || 0); });
     var cartesMets = mets.map(function(m){
       var note = parseInt(m.bonAccord) || 0;
-      var classeNote = (note >= 1 && note <= 5) ? ' note-' + note : '';
+      var classeNote = (note >= 1 && note <= 5) ? ' bordure-gauche-' + note : '';
       var platEsc = (m.plat || '').replace(/'/g, "\\'");
-      return '<div class="carte' + classeNote + '" onclick="ouvrirHistoEditV2(' + m.row + ', \'' + platEsc + '\', ' + note + ', \'' + nom.replace(/'/g, "\\'") + '\')">' +
+      return '<div class="carte histo-mets' + classeNote + '" onclick="ouvrirHistoEditV2(' + m.row + ', \'' + platEsc + '\', ' + note + ', \'' + nom.replace(/'/g, "\\'") + '\')">' +
         '<div class="carte-centre"><span class="carte-titre">' + (m.plat || '—') + '</span></div>' +
         '<div class="carte-droite">' + (m.date || '') + '</div></div>';
     }).join('');
 
-    return carteVin + cartesMets;
+    return '<div class="histo-groupe">' + carteVin + cartesMets + '</div>';
   }).join('');
 }
 
@@ -1585,6 +1607,8 @@ function appliquerFiltresCaveV2() {
   });
   afficherCartesCaveV2(filtered);
   remplirFiltresCaveV2();
+  var loupe = document.getElementById('caveV2-loupe');
+  if (loupe) loupe.classList.toggle('actif', !!(c || cep || p || app || a || nom));
 }
 
 function reinitialiserFiltresCaveV2() {

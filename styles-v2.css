@@ -225,7 +225,7 @@ body::after {
 .bouton-navigation:active img { opacity: 0.6; }
 
 /* ===== Position générique (parent en position:relative) ===== */
-.gauche { position: absolute; top: var(--space-s); left: var(--space-s); }
+.gauche { position: fixed; top: var(--space-s); left: var(--space-s); z-index: 10002; }
 .centre { position: absolute; top: var(--space-s); left: 50%; transform: translateX(-50%); }
 .droite { position: absolute; top: var(--space-s); right: var(--space-s); }
 
@@ -374,7 +374,7 @@ body::after {
 }
 
 .btn-fermer {
-  position: absolute;
+  position: fixed;
   top: var(--space-s); right: var(--space-s);
   width: var(--taille-tactile);
   height: var(--taille-tactile);
@@ -387,6 +387,7 @@ body::after {
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  z-index: 10002;
   -webkit-tap-highlight-color: transparent;
 }
 .btn-fermer:active { background: var(--gold-20); }
@@ -547,6 +548,7 @@ body::after {
   color: var(--white-60);
   font-size: var(--fs-xs);
   text-align: right;
+  white-space: nowrap;
 }
 .carte.note-1 { border-bottom-color: var(--note-1); }
 .carte.note-2 { border-bottom-color: var(--note-2); }
@@ -780,7 +782,17 @@ body::after {
   text-align: center; 
   border-bottom: 1px solid var(--gold); 
 }
-
+.histo-groupe { margin-bottom: var(--space-xl); }
+.histo-mets {
+  margin-left: 60px;
+  border-bottom: none;
+  border-left: var(--largeur-bordure-3) solid transparent;
+}
+.histo-mets.bordure-gauche-1 { border-left-color: var(--note-1); }
+.histo-mets.bordure-gauche-2 { border-left-color: var(--note-2); }
+.histo-mets.bordure-gauche-3 { border-left-color: var(--note-3); }
+.histo-mets.bordure-gauche-4 { border-left-color: var(--note-4); }
+.histo-mets.bordure-gauche-5 { border-left-color: var(--note-5); }
 
 
 
