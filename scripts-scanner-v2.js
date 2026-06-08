@@ -205,6 +205,12 @@ function ouvrirMenuActionV2(code, wineResult) {
 
 function fermerMenuActionV2() {
   document.getElementById('menuActionV2Overlay').style.display = 'none';
+  if (FICHE_V2_ORIGINE && menuActionV2Context) {
+    var code = menuActionV2Context.code;
+    var origine = FICHE_V2_ORIGINE;
+    ouvrirFicheV2(code, origine);
+    return;
+  }
   menuActionV2Context = null;
 }
 
