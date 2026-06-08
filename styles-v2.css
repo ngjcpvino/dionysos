@@ -724,6 +724,7 @@ body::after {
   width: max-content;
   min-width: 80px;
   height: 80px;
+  flex: none;
   margin: var(--space-l) auto;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
