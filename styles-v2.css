@@ -164,21 +164,29 @@ body::after {
   transform: translate(-50%, -50%) scale(0.8);
   background: rgba(0,0,0,0.92);
   color: var(--white);
-  padding: var(--space-l) var(--space-xl);
-  border: var(--largeur-bordure-1) solid var(--white-05);
+  /* Remplacer le padding d'origine par un padding minimal de sécurité */
+  padding: var(--space-m); 
+  border: var(--largeur-bordure-1) solid var(--gold);
   font-weight: 300;
   letter-spacing: var(--ls-tight);
   text-transform: uppercase;
   z-index: 99999;
   text-align: center;
   font-size: clamp(13px, 3vw, 15px);
-   border-radius: 50%;
+  border-radius: 50%;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease, transform 0.3s ease;
-  max-width: 90%;
+  
+  /* --- NOUVEAUTÉS POUR LE RENDRE ROND --- */
+  width: 180px; /* Force une largeur fixe (ajustable) */
+  aspect-ratio: 1 / 1; /* Garantit que la hauteur reste égale à la largeur */
+  display: flex; /* Active Flexbox */
+  align-items: center; /* Centre le texte verticalement */
+  justify-content: center; /* Centre le texte horizontalement */
 }
 .toast.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+
 
 /* =========================================
    HEADER V2 & BOUTON NAVIGATION
@@ -456,10 +464,10 @@ body::after {
 .section:last-child { border-bottom: none; }
 
 /* ===== Couleur de vin (bordure gauche du panneau fiche) ===== */
-.vin-rouge  { border-left: var(--largeur-bordure-2) solid var(--vin-rouge); }
-.vin-blanc  { border-left: var(--largeur-bordure-2) solid var(--vin-blanc); }
-.vin-rose   { border-left: var(--largeur-bordure-2) solid var(--vin-rose); }
-.vin-bulles { border-left: var(--largeur-bordure-2) solid var(--vin-bulles); }
+.vin-rouge  { border-left: var(--largeur-bordure-1) solid var(--vin-rouge); }
+.vin-blanc  { border-left: var(--largeur-bordure-1) solid var(--vin-blanc); }
+.vin-rose   { border-left: var(--largeur-bordure-1) solid var(--vin-rose); }
+.vin-bulles { border-left: var(--largeur-bordure-1) solid var(--vin-bulles); }
 
 .photo { text-align: center; margin: var(--space-l) 0; }
 .photo img { max-height: 200px; width: auto; max-width: 100%; }
@@ -496,7 +504,7 @@ body::after {
   width: 100%;
   margin-bottom: var(--space-s);
   background: transparent;
-  border-bottom: var(--largeur-bordure-3) solid transparent;
+  border-bottom: var(--largeur-bordure-1) solid transparent;
   color: var(--white);
   font-size: var(--fs-base);
   cursor: pointer;
@@ -763,12 +771,14 @@ body::after {
   top: 0;
   z-index: 5;
   background: var(--black);
-  color: var(--gold);
+  color: var(--white);
   font-size: var(--fs-sm);
   letter-spacing: var(--ls-wide);
   text-transform: uppercase;
   padding: var(--space-xs) var(--space-s);
-  margin-top: var(--space-s);
+  margin-top: var(--space-m);
+  text-align: center; 
+  border-bottom: 1px solid var(--gold); 
 }
 
 
