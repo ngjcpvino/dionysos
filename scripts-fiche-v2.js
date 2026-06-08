@@ -198,6 +198,7 @@ function ouvrirActionDepuisFicheV2() {
   }).then(function(result) {
     if (!result || !result.exists) { afficherMessage('Vin introuvable'); return; }
     document.getElementById('ficheV2Overlay').style.display = 'none';
+    FICHE_V2_ORIGINE = FICHE_V2_PROVENANCE;
     FICHE_V2_PROVENANCE = 'menuScan';
     ouvrirMenuActionV2(code, result);
   }).catch(function() { retourAccueilV2(); });
@@ -276,6 +277,15 @@ function fermerFicheV2() {
   document.getElementById('ficheV2Overlay').style.display = 'none';
   var panneauV2 = document.querySelector('#ficheV2Overlay .modal-v2-content');
   if (panneauV2) panneauV2.classList.remove('vin-rouge', 'vin-blanc', 'vin-rose', 'vin-bulles');
+  if (FICHE_V2_PROVENANCE === 'menuScan' && FICHE_V2_ORIGINE) {
+    var origine = FICHE_V2_ORIGINE;
+    FICHE_V2_ORIGINE = null;
+    FICHE_V2_PROVENANCE = null;
+    if (origine === 'cave') { document.getElementById('caveV2Container').style.display = 'flex'; return; }
+    if (origine === 'achat') { ouvrirAchatV2(); return; }
+    if (origine === 'histo') { ouvrirHistoV2(); return; }
+    return;
+  }
   if (FICHE_V2_PROVENANCE === 'menuScan' && menuActionV2Context) {
     ouvrirMenuActionV2(menuActionV2Context.code, menuActionV2Context.wineResult);
   } else if (FICHE_V2_PROVENANCE === 'cave') {
