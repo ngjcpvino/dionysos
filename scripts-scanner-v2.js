@@ -1444,8 +1444,8 @@ function afficherHistoV2() {
   }).join('');
 }
 
-function ouvrirHistoEditV2(row, plat, note, nom) {
-  histoEditV2 = { row: row, note: note || 0 };
+function ouvrirHistoEditV2(row, plat, note, nom, provenance) {
+  histoEditV2 = { row: row, note: note || 0, provenance: provenance || 'histo' };
   document.getElementById('histoEditV2-vin').textContent = nom || '';
   document.getElementById('histoEditV2-plat').value = plat || '';
   var v = document.getElementById('histoEditV2-verres');
@@ -1470,8 +1470,12 @@ function sauverHistoEditV2() {
     return appelBackend('getHistorique', {}).then(function(data){
       ALL_HISTORIQUE = data || [];
       document.getElementById('histoEditV2Overlay').style.display = 'none';
-      remplirFiltresHistoV2();
-      afficherHistoV2();
+      if (histoEditV2.provenance === 'fiche') {
+        chargerPlatsV2(CURRENT_WINE_CODEBARRE);
+      } else {
+        remplirFiltresHistoV2();
+        afficherHistoV2();
+      }
       afficherMessage('Corrigé');
     });
   }).catch(function(){ retourAccueilV2(); });
