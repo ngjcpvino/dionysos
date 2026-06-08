@@ -262,7 +262,9 @@ function chargerPlatsV2(codebarre) {
     var cartes = mets.map(function(m) {
       var note = parseInt(m.bonAccord) || 0;
       var classeNote = (note >= 1 && note <= 5) ? ' note-' + note : '';
-      return '<div class="carte fiche-mets' + classeNote + '"><div class="carte-centre"><span class="carte-titre">' + (m.plat || '—') + '</span></div><div class="carte-droite">' + (m.date || '') + '</div></div>';
+      var platEsc = (m.plat || '').replace(/'/g, "\\'");
+      var nomEsc = decodeHTML((CURRENT_WINE_DATA && CURRENT_WINE_DATA.Nom) || '').replace(/'/g, "\\'");
+      return '<div class="carte fiche-mets' + classeNote + '" onclick="ouvrirHistoEditV2(' + m.row + ', \'' + platEsc + '\', ' + note + ', \'' + nomEsc + '\', \'fiche\')"><div class="carte-centre"><span class="carte-titre">' + (m.plat || '—') + '</span></div><div class="carte-droite">' + (m.date || '') + '</div></div>';
     }).join('');
     conteneur.innerHTML = cartes;
   }
