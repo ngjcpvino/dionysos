@@ -262,7 +262,7 @@ function chargerPlatsV2(codebarre) {
     var cartes = mets.map(function(m) {
       var note = parseInt(m.bonAccord) || 0;
       var classeNote = (note >= 1 && note <= 5) ? ' note-' + note : '';
-      return '<div class="carte' + classeNote + '"><div class="carte-centre"><span class="carte-titre">' + (m.plat || '—') + '</span></div><div class="carte-droite">' + (m.date || '') + '</div></div>';
+      return '<div class="carte fiche-mets' + classeNote + '"><div class="carte-centre"><span class="carte-titre">' + (m.plat || '—') + '</span></div><div class="carte-droite">' + (m.date || '') + '</div></div>';
     }).join('');
     conteneur.innerHTML = cartes;
   }
