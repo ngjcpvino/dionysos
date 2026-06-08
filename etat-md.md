@@ -67,7 +67,8 @@ Page `#deplacerV2Container`. `ouvrirDeplacerV2` → recharge `ALL_DATA` → `con
 
 ## 📄 Fiche V2 (`scripts-fiche-v2.js`) — consultation + champs éditables
 `ouvrirFicheV2(codebarre, provenance)` mémorise `FICHE_V2_PROVENANCE`. Panneau `#ficheV2Overlay`, bordure couleur du vin (`.vin-*`).
-**Blocs** : Information · Dégustation (Arômes + 7 cartes) · Production · Notes (Accords → `Accords` ; À racheter ✓/✗ → `Racheter` ; Sur-inventaire 🛒 → `Panier` ; Historique des plats trié 5→1 ; Recettes/Notes/Divers) · Inventaire (lecture seule) · Photo cliquable · « Où trouver ce vin » (`.roundel`, géoloc) · Prix auto.
+**Blocs** : Information (Cépages, Pastille, Classification, Désignation, Particularité) · Description+Prix (bloc séparé, sans libellé, sous Information) · Dégustation (Arômes + 7 cartes) · Production · Notes (Accords → `Accords` ; Racheter ✓/✗ → `Racheter` et Sur-inventaire → `Panier`, en DEUX COLONNES `.deux-colonnes`/`.colonne-controle`/`.colonne-ronds` ; Recettes/Notes/Divers) · Historique des plats (bloc séparé sans titre, trié 5→1, vide=invisible) · Inventaire (lecture seule) · Photo cliquable · « Où trouver ce vin » (`.roundel`, géoloc) · Prix auto.
+Note `.roundel` : `flex:none` pour que la boîte garde ses 80px (l'anneau ne déborde plus, pas de chevauchement quand une liste rapproche les roundels).
 Dépend du socle : `decodeHTML`, `appelBackend`, `afficherMessage`, `CONFIG`, `ALL_HISTORIQUE`, `CURRENT_WINE_*`.
 
 ## 🍷 Boire V2 — ✅ TERMINÉ
