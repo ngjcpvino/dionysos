@@ -802,7 +802,7 @@ body::after {
 .histo-mets.bordure-gauche-3 { border-left-color: var(--note-3); }
 .histo-mets.bordure-gauche-4 { border-left-color: var(--note-4); }
 .histo-mets.bordure-gauche-5 { border-left-color: var(--note-5); }
-
+.fiche-mets { margin-left: 60px; width: calc(100% - 60px); }
 
 
 
