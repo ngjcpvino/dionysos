@@ -198,6 +198,7 @@ function ouvrirActionDepuisFicheV2() {
   }).then(function(result) {
     if (!result || !result.exists) { afficherMessage('Vin introuvable'); return; }
     document.getElementById('ficheV2Overlay').style.display = 'none';
+    FICHE_V2_PROVENANCE = 'menuScan';
     ouvrirMenuActionV2(code, result);
   }).catch(function() { retourAccueilV2(); });
 }
