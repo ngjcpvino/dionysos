@@ -75,9 +75,15 @@ function afficherFicheV2(result) {
   html += ligne('Classification', wine.Classification);
   html += ligne('Désignation', wine.Designation);
   html += ligne('Particularité', wine['Particularité']);
-  if (wine.Description) html += '<div class="texte">' + decodeHTML(wine.Description) + '</div>';
-   if (wine.Prix) html += '<div class="ligne-info"><span class="libelle">Prix : </span><span id="ficheV2-prix">' + parseFloat(wine.Prix).toFixed(2) + '</span> $</div>';
   html += '</div>';
+
+  // === DESCRIPTION + PRIX (sans libellé) ===
+  if (wine.Description || wine.Prix) {
+    html += '<div class="section">';
+    if (wine.Description) html += '<div class="texte">' + decodeHTML(wine.Description) + '</div>';
+    if (wine.Prix) html += '<div class="ligne-info"><span id="ficheV2-prix">' + parseFloat(wine.Prix).toFixed(2) + '</span> $</div>';
+    html += '</div>';
+  }
 
   // === DÉGUSTATION ===
   html += '<div class="section">';
@@ -116,17 +122,29 @@ function afficherFicheV2(result) {
   html += '<div id="ficheV2-accords-menu" class="menu-liste">' + itemsAccords + '</div>';
 
   var aime = wine.Racheter || 'Oui';
-  html += '<div class="controle"><span class="libelle">Racheter ?</span>' +
-          '<div id="ficheV2-aime-oui" class="cercle' + (aime === 'Oui' ? ' actif' : '') + '" onclick="setAimeV2(\'Oui\')">✓</div>' +
-          '<div id="ficheV2-aime-non" class="cercle' + (aime === 'Non' ? ' actif' : '') + '" onclick="setAimeV2(\'Non\')">✗</div>' +
-          '<span class="libelle">Sur-inventaire?</span>' +
-          '<div id="ficheV2-panier" class="cercle' + (wine.Panier === 'Oui' ? ' actif' : '') + '" onclick="togglePanierV2()">' + (wine.Panier === 'Oui' ? '✓' : '') + '</div></div>';
+  html += '<div class="deux-colonnes">' +
+            '<div class="colonne-controle">' +
+              '<span class="libelle">Racheter ?</span>' +
+              '<div class="colonne-ronds">' +
+                '<div id="ficheV2-aime-oui" class="cercle' + (aime === 'Oui' ? ' actif' : '') + '" onclick="setAimeV2(\'Oui\')">✓</div>' +
+                '<div id="ficheV2-aime-non" class="cercle' + (aime === 'Non' ? ' actif' : '') + '" onclick="setAimeV2(\'Non\')">✗</div>' +
+              '</div>' +
+            '</div>' +
+            '<div class="colonne-controle">' +
+              '<span class="libelle">Sur-inventaire ?</span>' +
+              '<div class="colonne-ronds">' +
+                '<div id="ficheV2-panier" class="cercle' + (wine.Panier === 'Oui' ? ' actif' : '') + '" onclick="togglePanierV2()">' + (wine.Panier === 'Oui' ? '✓' : '') + '</div>' +
+              '</div>' +
+            '</div>' +
+          '</div>';
 
-  html += '<div id="ficheV2-plats"></div>';
   html += ligne('Recettes', wine.Recettes);
   html += ligne('Notes', wine['Notes temporaires']);
   html += ligne('Divers', wine.Divers);
   html += '</div>';
+
+  // === HISTORIQUE DES PLATS (bloc séparé, sans titre) ===
+  html += '<div class="section"><div id="ficheV2-plats"></div></div>';
 
 // === INVENTAIRE (lecture seule) ===
   var bottlesActives = bottles.filter(function(b) { return b.statut !== 'Bu' && b.statut !== 'Sorti'; });

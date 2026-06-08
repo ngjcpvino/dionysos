@@ -558,6 +558,23 @@ body::after {
   margin-bottom: var(--space-s);
   font-size: var(--fs-base);
 }
+.deux-colonnes {
+  display: flex;
+  gap: var(--space-l);
+  margin-top: var(--space-l);
+  margin-bottom: var(--space-s);
+}
+.colonne-controle {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-s);
+}
+.colonne-ronds {
+  display: flex;
+  gap: var(--space-s);
+}
 
 
 .champ-cliquable {
