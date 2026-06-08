@@ -182,9 +182,24 @@ function afficherFicheV2(result) {
     html += '<div id="ficheV2-succursales"></div>';
   }
 
+  html += '<div class="roundel" onclick="ouvrirActionDepuisFicheV2()"><span class="roundel-anneau"></span><span class="roundel-barre">ACTION</span></div>';
+
   document.getElementById('ficheV2-corps').innerHTML = html;
   chargerPlatsV2(CURRENT_WINE_CODEBARRE);
   verifierPrixV2(CURRENT_WINE_CODEBARRE, wine['Code SAQ']);
+}
+
+function ouvrirActionDepuisFicheV2() {
+  var code = CURRENT_WINE_CODEBARRE;
+  if (!code) return;
+  appelBackend('getInventoryData', {}, { spinner: ' ' }).then(function(data) {
+    if (data) ALL_DATA = data;
+    return appelBackend('checkWineExists', { codebarre: code });
+  }).then(function(result) {
+    if (!result || !result.exists) { afficherMessage('Vin introuvable'); return; }
+    document.getElementById('ficheV2Overlay').style.display = 'none';
+    ouvrirMenuActionV2(code, result);
+  }).catch(function() { retourAccueilV2(); });
 }
 
 function basculerMenuAccordsV2() {
@@ -264,6 +279,10 @@ function fermerFicheV2() {
     ouvrirMenuActionV2(menuActionV2Context.code, menuActionV2Context.wineResult);
   } else if (FICHE_V2_PROVENANCE === 'cave') {
     document.getElementById('caveV2Container').style.display = 'flex';
+  } else if (FICHE_V2_PROVENANCE === 'achat') {
+    document.getElementById('achatV2Container').style.display = 'flex';
+  } else if (FICHE_V2_PROVENANCE === 'histo') {
+    ouvrirHistoV2();
   }
   FICHE_V2_PROVENANCE = null;
 }
