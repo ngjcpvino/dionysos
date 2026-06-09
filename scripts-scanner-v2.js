@@ -1162,14 +1162,14 @@ function afficherEmpV2() {
     parPlace[w.Meuble + '|' + w.Rangee + '|' + w.Espace] = w;
   });
 
-  // meubles à dessiner : celui filtré, sinon les 3 de CONFIG
-  var meubles = f.meuble ? [f.meuble] : Object.keys(CONFIG.meubles || {});
+  // meubles à dessiner : celui filtré, sinon les 3 de CONFIG (ordre alphabétique)
+  var meubles = f.meuble ? [f.meuble] : Object.keys(CONFIG.meubles || {}).sort(function(a,b){ return a.localeCompare(b); });
 
   var html = '';
   meubles.forEach(function(meuble){
     var rangeesDef = (CONFIG.meubles && CONFIG.meubles[meuble]) ? CONFIG.meubles[meuble] : {};
-  html += '<div class="emp-meuble">' + meuble + '</div>';
-    Object.keys(rangeesDef).forEach(function(rangee){
+    html += '<div class="emp-bloc"><div class="emp-meuble">' + meuble + '</div>';
+    Object.keys(rangeesDef).sort(function(a,b){ return parseInt(a) - parseInt(b); }).forEach(function(rangee){
       if (f.rangee && String(rangee) !== String(f.rangee)) return;
       var espacesDef = rangeesDef[rangee] || [];
       var nb = espacesDef.length;
@@ -1194,6 +1194,7 @@ function afficherEmpV2() {
                 '<div class="emp-ronds">' + lignes + '</div>' +
               '</div>';
     });
+    html += '</div>';
   });
   div.innerHTML = html;
   brancherTirerRangeesEmpV2();
