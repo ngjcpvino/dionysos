@@ -384,7 +384,7 @@ body::after {
   color: var(--white);
   font-size: var(--fs-lg);
   letter-spacing: var(--ls-tight);
-  margin: var(--space-xl) 0 var(--space-m) 0;
+  margin: 0 0 var(--space-l) 0;
 }
 .emp-compte { color: var(--white-50); font-size: var(--fs-xs); }
 .emp-rangee-nom { color: var(--white-50); font-size: var(--fs-sm); }
@@ -392,7 +392,7 @@ body::after {
 
 /* rangée fermée : tout sur une ligne */
 .emp-rangee:not(.ouvert) {
-  display: flex; align-items: center; justify-content: space-between;
+  display: flex; align-items: flex-start; justify-content: space-between;
   gap: var(--space-m);
 }
 .emp-rangee:not(.ouvert) .emp-ronds { flex: 1; }

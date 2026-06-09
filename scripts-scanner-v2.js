@@ -874,10 +874,10 @@ function baseAchatV2() {
   var grouped = {};
   (ALL_DATA || []).forEach(function(item) {
     var cb = (item['Code-barres'] || '').toString().trim().replace(/\s+/g, '');
-    if (!cb) return;
-    if (!grouped[cb]) grouped[cb] = { wine: item, cb: cb, count: 0 };
+    var key = cleVinV2(item);
+    if (!grouped[key]) grouped[key] = { wine: item, cb: cb, count: 0 };
     var statut = item.Statut || 'En stock';
-    if (statut !== 'Bu' && statut !== 'Sorti') grouped[cb].count++;
+    if (statut !== 'Bu' && statut !== 'Sorti') grouped[key].count++;
   });
   return Object.values(grouped).filter(function(g) {
     var racheter = (g.wine.Racheter || '') === 'Oui';
@@ -1179,7 +1179,8 @@ function afficherEmpV2() {
         var w = parPlace[meuble + '|' + rangee + '|' + esp];
         if (w) occ++;
         var photo = (w && w['Photo URL']) ? w['Photo URL'] : '';
-        ronds.push('<div class="cercle" data-photo="' + photo + '"></div>');
+        var cb = (w && w['Code-barres']) ? w['Code-barres'].toString().trim().replace(/\s+/g, '') : '';
+        ronds.push('<div class="cercle" data-photo="' + photo + '" data-cb="' + cb + '"></div>');
       });
       // 7 espaces = quinconce 4 bas + 3 haut ; sinon une seule ligne
       var lignes;
@@ -1216,6 +1217,14 @@ function brancherTirerRangeesEmpV2() {
         Array.prototype.forEach.call(el.querySelectorAll('.cercle'), function(c){
           var p = c.getAttribute('data-photo');
           c.innerHTML = p ? '<img src="' + p + '" alt="">' : '';
+          var cb = c.getAttribute('data-cb');
+          if (cb) {
+            c.addEventListener('click', function(ev){
+              ev.stopPropagation();
+              document.getElementById('empV2Container').style.display = 'none';
+              ouvrirApresTap(function(){ ouvrirFicheV2(cb, 'emplacements'); });
+            });
+          }
         });
       }
     });
@@ -1240,6 +1249,18 @@ function cepageDominant(w) {
   return c;
 }
 
+// Regroupe par Code SAQ (repli code-barres, puis nom) — fusionne un même vin mal codé
+function grouperParSaqEmpV2(liste) {
+  var grouped = {};
+  liste.forEach(function(w){
+    var key = cleVinV2(w);
+    if (!grouped[key]) grouped[key] = { wine: w, emplacements: [], count: 0 };
+    grouped[key].count++;
+    grouped[key].emplacements.push(w.Meuble.toString().substring(0,1).toUpperCase() + '-' + w.Rangee + '-' + w.Espace);
+  });
+  return Object.values(grouped);
+}
+
 function afficherListeEmpV2(type) {
   fermerFiltresEmpV2();
   var f = filtresEmpV2;
@@ -1251,7 +1272,7 @@ function afficherListeEmpV2(type) {
   if (type === 'doubles') {
     // Même code-barres en 2+ bouteilles. Si meuble choisi → dans le meuble, sinon tous.
     var portee = f.meuble ? tousRanges.filter(function(i){ return String(i.Meuble) === String(f.meuble); }) : tousRanges;
-    var groupes = grouperParCbEmpV2(portee).filter(function(g){ return g.count >= 2; });
+    var groupes = grouperParSaqEmpV2(portee).filter(function(g){ return g.count >= 2; });
     titre = 'Vins en double';
     if (groupes.length === 0) { html = '<div class="texte-secondaire">Aucun vin en double</div>'; }
     else { html = groupes.map(function(g){ return empCarteVinV2(g.wine, g.count + ' btl<br>' + g.emplacements.join(', ')); }).join(''); }
@@ -1259,7 +1280,7 @@ function afficherListeEmpV2(type) {
   } else if (type === 'cepdoubles') {
     // Cépage dominant présent sur 2+ vins DIFFÉRENTS du meuble choisi
     var dansMeuble = tousRanges.filter(function(i){ return String(i.Meuble) === String(f.meuble); });
-    var parCb = grouperParCbEmpV2(dansMeuble);
+    var parCb = grouperParSaqEmpV2(dansMeuble);
     var parCepage = {};
     parCb.forEach(function(g){
       var cep = cepageDominant(g.wine);
@@ -1272,7 +1293,7 @@ function afficherListeEmpV2(type) {
     if (cles.length === 0) { html = '<div class="texte-secondaire">Aucun cépage en double</div>'; }
     else {
       html = cles.map(function(cep){
-        return '<div class="titre-3">' + cep + '</div>' + parCepage[cep].map(function(g){
+        return '<div class="emp-meuble">' + cep + '</div>' + parCepage[cep].map(function(g){
           return empCarteVinV2(g.wine, g.count + ' btl<br>' + g.emplacements.join(', '));
         }).join('');
       }).join('');
@@ -1285,7 +1306,7 @@ function afficherListeEmpV2(type) {
     var cepDansMeuble = {};
     dansMeuble2.forEach(function(w){ var c = cepageDominant(w); if (c) cepDansMeuble[c] = true; });
     var parCepageHors = {};
-    grouperParCbEmpV2(horsMeuble).forEach(function(g){
+    grouperParSaqEmpV2(horsMeuble).forEach(function(g){
       var cep = cepageDominant(g.wine);
       if (!cep || cepDansMeuble[cep]) return;
       if (!parCepageHors[cep]) parCepageHors[cep] = [];
@@ -1296,7 +1317,7 @@ function afficherListeEmpV2(type) {
     if (cles2.length === 0) { html = '<div class="texte-secondaire">Aucun cépage manquant</div>'; }
     else {
       html = cles2.map(function(cep){
-        return '<div class="titre-3">' + cep + '</div>' + parCepageHors[cep].map(function(g){
+        return '<div class="emp-meuble">' + cep + '</div>' + parCepageHors[cep].map(function(g){
           return empCarteVinV2(g.wine, g.count + ' btl<br>' + g.emplacements.join(', '));
         }).join('');
       }).join('');
@@ -1444,11 +1465,11 @@ function afficherHistoV2() {
     if (cb && d['Photo URL']) cbPhoto[cb] = d['Photo URL'];
   });
 
-  // Regrouper par vin (code-barres)
+  // Regrouper par vin (Code SAQ sinon code-barres) — même clé que partout
   var grouped = {};
   base.forEach(function(h){
     var cb = (h.codebarre || '').toString().trim();
-    var key = cb || ('SANS_' + h.nom);
+    var key = cleVinV2({ 'Code SAQ': h.codeSAQ, 'Code-barres': h.codebarre });
     if (!grouped[key]) grouped[key] = { cb: cb, nom: h.nom, couleur: h.couleur, photo: cbPhoto[cb] || '', mets: [] };
     grouped[key].mets.push(h);
   });
@@ -1532,6 +1553,15 @@ function fermerHistoEditV2() {
   document.getElementById('histoEditV2Overlay').style.display = 'none';
 }
 
+// Clé d'un vin : Code SAQ, sinon code-barres, sinon rien (bouteille non regroupée)
+function cleVinV2(item) {
+  var saq = (item['Code SAQ'] || '').toString().trim();
+  if (saq) return 'SAQ_' + saq;
+  var cb = (item['Code-barres'] || '').toString().trim().replace(/\s+/g, '');
+  if (cb) return 'CB_' + cb;
+  return 'SEUL_' + (item.row != null ? item.row : Math.random());
+}
+
 function couleurClasseV2(couleur) {
   couleur = (couleur || '').toLowerCase();
   if (couleur.indexOf('rouge') !== -1) return 'vin-rouge';
@@ -1545,7 +1575,7 @@ function grouperVinsV2(data) {
   var grouped = {};
   data.forEach(function(item) {
     var cb = (item['Code-barres'] || '').toString().trim().replace(/\s+/g, '');
-    var key = cb !== '' ? cb : 'SANS_CB_' + item.Nom;
+    var key = cleVinV2(item);
     if (!grouped[key]) grouped[key] = { wine: item, cb: cb, count: 0, emplacements: [] };
     var statut = item.Statut || 'En stock';
     if (statut !== 'Bu' && statut !== 'Sorti') {
