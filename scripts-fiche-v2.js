@@ -297,6 +297,8 @@ function fermerFicheV2() {
     document.getElementById('achatV2Container').style.display = 'flex';
   } else if (FICHE_V2_PROVENANCE === 'histo') {
     ouvrirHistoV2();
+  } else if (FICHE_V2_PROVENANCE === 'emplacements') {
+    ouvrirEmpV2();
   }
   FICHE_V2_PROVENANCE = null;
 }
