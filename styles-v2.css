@@ -237,6 +237,7 @@ body::after {
 }
 
 #menuActionV2Overlay { z-index: 10010; }
+#histoEditV2Overlay { z-index: 10010; }
 
 /* ===== Titres accueil ===== */
 #accueilV2-titre {
@@ -605,6 +606,7 @@ body::after {
   font-size: var(--fs-base);
   cursor: pointer;
 }
+.panneau-gauche .champ-cliquable { flex: none; }
 
 .champ-saisie {
   width: 100%;

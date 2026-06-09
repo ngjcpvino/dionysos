@@ -200,7 +200,8 @@ function ouvrirActionDepuisFicheV2() {
     document.getElementById('ficheV2Overlay').style.display = 'none';
     FICHE_V2_ORIGINE = FICHE_V2_PROVENANCE;
     FICHE_V2_PROVENANCE = 'menuScan';
-    ouvrirMenuActionV2(code, result);
+    setTimeout(function() { ouvrirMenuActionV2(code, result); }, 0);
+	
   }).catch(function() { retourAccueilV2(); });
 }
 
@@ -264,7 +265,7 @@ function chargerPlatsV2(codebarre) {
       var classeNote = (note >= 1 && note <= 5) ? ' note-' + note : '';
       var platEsc = (m.plat || '').replace(/'/g, "\\'");
       var nomEsc = decodeHTML((CURRENT_WINE_DATA && CURRENT_WINE_DATA.Nom) || '').replace(/'/g, "\\'");
-      return '<div class="carte fiche-mets' + classeNote + '" onclick="ouvrirHistoEditV2(' + m.row + ', \'' + platEsc + '\', ' + note + ', \'' + nomEsc + '\', \'fiche\')"><div class="carte-centre"><span class="carte-titre">' + (m.plat || '—') + '</span></div><div class="carte-droite">' + (m.date || '') + '</div></div>';
+      return '<div class="carte fiche-mets' + classeNote + '" onclick="ouvrirApresTap(function(){ouvrirHistoEditV2(' + m.row + ', \'' + platEsc + '\', ' + note + ', \'' + nomEsc + '\', \'fiche\')})"><div class="carte-centre"><span class="carte-titre">' + (m.plat || '—') + '</span></div><div class="carte-droite">' + (m.date || '') + '</div></div>';
     }).join('');
     conteneur.innerHTML = cartes;
   }
