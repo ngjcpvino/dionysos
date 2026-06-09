@@ -1190,8 +1190,9 @@ function afficherEmpV2() {
         lignes = '<div class="ligne-ronds">' + ronds.join('') + '</div>';
       }
       html += '<div class="emp-rangee" data-meuble="' + meuble + '" data-rangee="' + rangee + '">' +
-                '<div class="emp-rangee-titre">Rangée ' + rangee + '<span class="emp-compte">' + occ + '/' + nb + '</span></div>' +
+                '<span class="emp-rangee-nom">Rangée ' + rangee + '</span>' +
                 '<div class="emp-ronds">' + lignes + '</div>' +
+                '<span class="emp-compte">' + occ + '/' + nb + '</span>' +
               '</div>';
     });
     html += '</div>';

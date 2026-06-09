@@ -386,14 +386,23 @@ body::after {
   letter-spacing: var(--ls-tight);
   margin: var(--space-xl) 0 var(--space-m) 0;
 }
-.emp-rangee-titre {
-  display: flex; justify-content: space-between; align-items: center;
-  color: var(--white-50);
-  font-size: var(--fs-sm);
-  margin-bottom: var(--space-xs);
-}
 .emp-compte { color: var(--white-50); font-size: var(--fs-xs); }
+.emp-rangee-nom { color: var(--white-50); font-size: var(--fs-sm); }
 .emp-ronds { display: flex; flex-direction: column; align-items: center; }
+
+/* rangée fermée : tout sur une ligne */
+.emp-rangee:not(.ouvert) {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--space-m);
+}
+.emp-rangee:not(.ouvert) .emp-ronds { flex: 1; }
+
+/* rangée tirée : empilé */
+.emp-rangee.ouvert { display: block; }
+.emp-rangee.ouvert .emp-rangee-nom,
+.emp-rangee.ouvert .emp-compte {
+  display: block; margin-bottom: var(--space-xs);
+}
 .emp-ronds .ligne-ronds { gap: var(--space-s); margin-bottom: var(--space-s); }
 
 /* rangée fermée : petits ronds, pas de quinconce */
