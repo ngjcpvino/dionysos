@@ -373,6 +373,12 @@ body::after {
 }
 
 /* ===== Emplacements : meuble graphique ===== */
+.emp-bloc {
+  border: var(--largeur-bordure-1) solid var(--couleur-bordure-tres-claire);
+  background: var(--white-03);
+  padding: var(--space-s) var(--space-m) var(--space-m);
+  margin-bottom: var(--space-xl);
+}
 .emp-rangee { cursor: pointer; -webkit-tap-highlight-color: transparent; margin-bottom: var(--space-l); }
 .emp-meuble {
   color: var(--white);
@@ -397,7 +403,7 @@ body::after {
 /* rangée tirée : gros ronds + quinconce */
 .emp-rangee.ouvert .ligne-ronds .cercle { width: 52px; height: 52px; overflow: hidden; }
 .emp-rangee.ouvert .ligne-ronds.haut { margin-bottom: var(--space-s); }
-.emp-rangee.ouvert .cercle img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.emp-rangee.ouvert .cercle img { width: 100%; height: 100%; object-fit: cover; object-position: center 90%; border-radius: 50%; }
 .emp-ronds .ligne-ronds.haut { display: flex; }
 
 
