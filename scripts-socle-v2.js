@@ -18,6 +18,12 @@ let CURRENT_WINE_CODEBARRE = null;
 let CURRENT_WINE_DATA = null;
 let CURRENT_WINE_BOTTLES = [];
 let FICHE_V2_PROVENANCE = null;
+
+// Évite le « double-clic » : le même tap qui traverse un overlay fermé
+// jusqu'à un élément du nouvel overlay ouvert au même pixel.
+function ouvrirApresTap(fn) {
+  setTimeout(fn, 0);
+}
 let FICHE_V2_ORIGINE = null;
 
 // ==================== INITIALISATION ====================
