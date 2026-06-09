@@ -121,10 +121,11 @@
 <!-- ====================== ARRIVÉE V2 ====================== -->
 <div id="arriveeV2Container" class="modal-v2-fullscreen" style="display:none;">
   <div class="modal-v2-content modale-haut">
-    <button class="btn-fermer" onclick="fermerArriveeV2()">✕</button>
-    <h2 class="titre-1">Ajouter</h2>
-    <div id="arriveeV2-nom" class="modal-v2-winename"></div>
-    <div id="arriveeV2-codebarre" class="modal-v2-codebarre"></div>
+  
+  <button class="btn-fermer" onclick="fermerArriveeV2()">✕</button>
+    <h2 id="arriveeV2-nom" class="titre-1"></h2>
+    <div id="arriveeV2-origine" class="texte-secondaire"></div>
+    <div class="titre-2" style="text-align:center;">Ajouter</div>
 
     <div class="roundel" onclick="basculerListeArrivee('meuble')">
       <span class="roundel-anneau"></span>
@@ -155,9 +156,9 @@
 <div id="deplacerV2Container" class="modal-v2-fullscreen" style="display:none;">
   <div class="modal-v2-content modale-haut">
     <button class="btn-fermer" onclick="fermerDeplacerV2()">✕</button>
-    <h2 class="titre-1">Déplacer</h2>
-    <div id="deplacerV2-nom" class="modal-v2-winename"></div>
-    <div id="deplacerV2-codebarre" class="modal-v2-codebarre"></div>
+    <h2 id="deplacerV2-nom" class="titre-1"></h2>
+    <div id="deplacerV2-origine" class="texte-secondaire"></div>
+    <div class="titre-2" style="text-align:center;">Déplacer</div>
 
     <div id="deplacerV2-choix-bouteille" style="display:none; width:100%; max-width:600px;">
       <div class="texte-secondaire">Quelle bouteille déplacer ?</div>
@@ -249,6 +250,10 @@
     <div class="btn-fermer" onclick="fermerHistoV2()">✕</div>
     <div id="histoV2-compte" class="texte-secondaire"></div>
     <div id="histoV2-cartes" class="contenu"></div>
+    <div class="roundel" onclick="ouvrirHistoAjoutV2()">
+      <span class="roundel-anneau"></span>
+      <span class="roundel-barre">Ajouter</span>
+    </div>
   </div>
   <div id="histoV2-filtres-voile" class="panneau-voile" onclick="fermerFiltresHistoV2()"></div>
   <div id="histoV2-filtres" class="panneau-gauche">
@@ -270,12 +275,34 @@
   </div>
 </div>
 
+<!-- ====================== AJOUT MANUEL HISTORIQUE V2 ====================== -->
+<div id="histoAjoutV2Overlay" class="modal-v2-fullscreen" style="display:none;">
+  <div class="modal-v2-content modale-haut">
+    <button class="btn-fermer" onclick="fermerHistoAjoutV2()">✕</button>
+    <h2 id="histoAjoutV2-vin" class="titre-1">Choisir un vin</h2>
+    <div class="titre-2" style="text-align:center;">Ajouter au carnet</div>
+    <input type="text" id="histoAjoutV2-recherche" class="champ-saisie" placeholder="Rechercher un vin par nom" oninput="rechercherVinHistoAjoutV2()">
+    <div id="histoAjoutV2-resultats" class="menu-liste"></div>
+    <div id="histoAjoutV2-form" style="display:none; width:100%; max-width:400px;">
+      <input type="text" id="histoAjoutV2-plat" class="champ-saisie" placeholder="Plat">
+      <div id="histoAjoutV2-verres" class="boire-verres"></div>
+      <div class="champ-cliquable" id="histoAjoutV2-accords-display" onclick="basculerMenuAccordsHistoAjoutV2()">Accords</div>
+      <div id="histoAjoutV2-accords-menu" class="menu-liste"></div>
+      <div class="roundel" onclick="confirmerHistoAjoutV2()">
+        <span class="roundel-anneau"></span>
+        <span class="roundel-barre">Enregistrer</span>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ====================== CORRECTION METS HISTORIQUE V2 ====================== -->
 <div id="histoEditV2Overlay" class="modal-v2-fullscreen" style="display:none;">
   <div class="modal-v2-content modale-haut">
-    <button class="btn-fermer" onclick="fermerHistoEditV2()">✕</button>
-    <h2 class="titre-1">Corriger</h2>
-    <div id="histoEditV2-vin" class="modal-v2-winename"></div>
+    
+	<button class="btn-fermer" onclick="fermerHistoEditV2()">✕</button>
+    <h2 id="histoEditV2-vin" class="titre-1"></h2>
+    <div class="titre-2" style="text-align:center;">Corriger</div>
     <input type="text" id="histoEditV2-plat" class="champ-saisie" placeholder="Plat">
     <div id="histoEditV2-verres" class="boire-verres"></div>
     <div class="roundel" onclick="sauverHistoEditV2()">
@@ -374,9 +401,9 @@
 <div id="boireV2Container" class="modal-v2-fullscreen" style="display:none;">
   <div class="modal-v2-content modale-haut">
     <button class="btn-fermer" onclick="fermerBoireV2()">✕</button>
-    <h2 class="titre-1">Boire</h2>
-    <div id="boireV2-nom" class="modal-v2-winename"></div>
-    <div id="boireV2-codebarre" class="modal-v2-codebarre"></div>
+    <h2 id="boireV2-nom" class="titre-1"></h2>
+    <div id="boireV2-origine" class="texte-secondaire"></div>
+    <div class="titre-2" style="text-align:center;">Boire</div>
 
     <div id="boireV2-choix-bouteille" style="display:none; width:100%; max-width:600px;">
       <div class="texte-secondaire">Quelle bouteille ?</div>
@@ -400,9 +427,9 @@
 <div id="donnerV2Container" class="modal-v2-fullscreen" style="display:none;">
   <div class="modal-v2-content modale-haut">
     <button class="btn-fermer" onclick="fermerDonnerV2()">✕</button>
-    <h2 class="titre-1">Donner</h2>
-    <div id="donnerV2-nom" class="modal-v2-winename"></div>
-    <div id="donnerV2-codebarre" class="modal-v2-codebarre"></div>
+    <h2 id="donnerV2-nom" class="titre-1"></h2>
+    <div id="donnerV2-origine" class="texte-secondaire"></div>
+    <div class="titre-2" style="text-align:center;">Donner</div>
 
     <div id="donnerV2-choix-bouteille" style="display:none; width:100%; max-width:600px;">
       <div class="texte-secondaire">Quelle bouteille ?</div>
