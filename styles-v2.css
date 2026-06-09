@@ -843,8 +843,18 @@ body::after {
   border-bottom: 1px solid var(--gold); 
 }
 .histo-groupe { margin-bottom: var(--space-xl); }
+.histo-vin {
+  border-bottom: none;
+  border-top: var(--largeur-bordure-3) solid transparent;
+  padding-top: var(--space-s);
+}
+.histo-vin.vin-rouge  { border-top-color: var(--vin-rouge); }
+.histo-vin.vin-blanc  { border-top-color: var(--vin-blanc); }
+.histo-vin.vin-rose   { border-top-color: var(--vin-rose); }
+.histo-vin.vin-bulles { border-top-color: var(--vin-bulles); }
 .histo-mets {
   margin-left: 60px;
+  width: auto;
   border-bottom: none;
   border-left: var(--largeur-bordure-3) solid transparent;
 }
