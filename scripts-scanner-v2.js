@@ -299,9 +299,7 @@ function construireArriveeV2() {
   if (!menuActionV2Context) return;
   arriveeV2Choix = { meuble: '', rangee: '', espace: '' };
 
-  var nom = (menuActionV2Context.wineResult && menuActionV2Context.wineResult.wine && menuActionV2Context.wineResult.wine.nom) ? menuActionV2Context.wineResult.wine.nom : 'Vin';
-  document.getElementById('arriveeV2-nom').textContent = decodeHTML(nom);
-  document.getElementById('arriveeV2-codebarre').textContent = menuActionV2Context.code;
+  rendreEnteteActionV2('arrivee');
 
   var nbActives = (menuActionV2Context.wineResult && typeof menuActionV2Context.wineResult.count === 'number') ? menuActionV2Context.wineResult.count : 0;
   if (nbActives >= 5) {
@@ -435,9 +433,7 @@ function construireDeplacerV2() {
   if (!menuActionV2Context) return;
   deplacerV2Choix = { row: 0, bottle: 0, meuble: '', rangee: '', espace: '' };
 
-  var nom = (menuActionV2Context.wineResult && menuActionV2Context.wineResult.wine && menuActionV2Context.wineResult.wine.nom) ? menuActionV2Context.wineResult.wine.nom : 'Vin';
-  document.getElementById('deplacerV2-nom').textContent = decodeHTML(nom);
-  document.getElementById('deplacerV2-codebarre').textContent = menuActionV2Context.code;
+  rendreEnteteActionV2('deplacer');
 
   document.getElementById('deplacerV2-meuble-barre').textContent = 'Meuble';
   document.getElementById('deplacerV2-rangee-barre').textContent = 'Rangée';
@@ -600,9 +596,12 @@ function empBouteilleV2(b) {
 
 function rendreEnteteActionV2(prefixe) {
   var r = menuActionV2Context.wineResult;
-  var nom = (r && r.wine && r.wine.nom) ? r.wine.nom : 'Vin';
+  var w = (r && r.wine) ? r.wine : {};
+  var nom = w.nom || 'Vin';
   document.getElementById(prefixe + 'V2-nom').textContent = decodeHTML(nom);
-  document.getElementById(prefixe + 'V2-codebarre').textContent = menuActionV2Context.code;
+  var origine = [w.pays, w.region, w.appellation].filter(Boolean).map(decodeHTML).join(' • ');
+  var el = document.getElementById(prefixe + 'V2-origine');
+  if (el) el.textContent = origine;
 }
 
 // ---------- BOIRE ----------
@@ -1324,7 +1323,7 @@ function afficherListeEmpV2(type) {
     }
   }
 
-  document.getElementById('empV2-compte').textContent = titre;
+  document.getElementById('empV2-compte').textContent = f.meuble ? (titre + ' · ' + f.meuble) : titre;
   div.innerHTML = html;
 }
 
@@ -1551,6 +1550,120 @@ function sauverHistoEditV2() {
 
 function fermerHistoEditV2() {
   document.getElementById('histoEditV2Overlay').style.display = 'none';
+}
+
+// ===== Ajout manuel d'un accord au carnet (Historique) =====
+var histoAjoutV2 = { codebarre: '', codeSAQ: '', nom: '', note: 0 };
+
+function ouvrirHistoAjoutV2() {
+  histoAjoutV2 = { codebarre: '', codeSAQ: '', nom: '', note: 0 };
+  document.getElementById('histoAjoutV2-vin').textContent = 'Choisir un vin';
+  document.getElementById('histoAjoutV2-recherche').value = '';
+  document.getElementById('histoAjoutV2-recherche').style.display = 'block';
+  document.getElementById('histoAjoutV2-resultats').innerHTML = '';
+  document.getElementById('histoAjoutV2-resultats').classList.remove('ouvert');
+  document.getElementById('histoAjoutV2-form').style.display = 'none';
+  document.getElementById('histoAjoutV2-plat').value = '';
+  document.getElementById('histoAjoutV2Overlay').style.display = 'flex';
+}
+
+function fermerHistoAjoutV2() {
+  document.getElementById('histoAjoutV2Overlay').style.display = 'none';
+}
+
+function rechercherVinHistoAjoutV2() {
+  var q = document.getElementById('histoAjoutV2-recherche').value.toLowerCase().trim();
+  var menu = document.getElementById('histoAjoutV2-resultats');
+  if (q.length < 2) { menu.innerHTML = ''; menu.classList.remove('ouvert'); return; }
+  var vus = {};
+  var vins = [];
+  (ALL_DATA || []).forEach(function(d){
+    var nom = decodeHTML(d.Nom || '');
+    var cb = (d['Code-barres'] || '').toString().trim().replace(/\s+/g, '');
+    if (!nom || !cb) return;
+    var cle = cleVinV2(d);
+    if (vus[cle]) return;
+    if (nom.toLowerCase().indexOf(q) === -1) return;
+    vus[cle] = true;
+    vins.push({ nom: nom, cb: cb, saq: (d['Code SAQ'] || '').toString().trim() });
+  });
+  vins.sort(function(a, b){ return a.nom.localeCompare(b.nom); });
+  menu.innerHTML = vins.slice(0, 20).map(function(v){
+    return '<div class="item-liste" onclick="choisirVinHistoAjoutV2(\'' + v.cb + '\', \'' + v.saq + '\', \'' + v.nom.replace(/'/g, "\\'") + '\')">' + v.nom + '</div>';
+  }).join('');
+  menu.classList.add('ouvert');
+}
+
+function choisirVinHistoAjoutV2(cb, saq, nom) {
+  histoAjoutV2.codebarre = cb;
+  histoAjoutV2.codeSAQ = saq;
+  histoAjoutV2.nom = nom;
+  histoAjoutV2.note = 0;
+  document.getElementById('histoAjoutV2-vin').textContent = nom;
+  document.getElementById('histoAjoutV2-recherche').style.display = 'none';
+  document.getElementById('histoAjoutV2-resultats').innerHTML = '';
+  document.getElementById('histoAjoutV2-resultats').classList.remove('ouvert');
+
+  var v = document.getElementById('histoAjoutV2-verres');
+  v.innerHTML = '';
+  for (var i = 1; i <= 5; i++) {
+    v.innerHTML += '<span class="boire-verre" data-note="' + i + '" onclick="choisirNoteHistoAjoutV2(' + i + ')">🍷</span>';
+  }
+  var accordsActuels = [];
+  var vin = (ALL_DATA || []).filter(function(d){ return (d['Code-barres'] || '').toString().trim().replace(/\s+/g, '') === cb; })[0];
+  if (vin && vin.Accords) accordsActuels = vin.Accords.split(',').map(function(a){ return a.trim(); }).filter(Boolean);
+  document.getElementById('histoAjoutV2-accords-menu').innerHTML = (CONFIG && CONFIG.accords ? CONFIG.accords : []).map(function(acc){
+    var sel = accordsActuels.indexOf(acc) !== -1;
+    return '<div class="item-liste' + (sel ? ' actif' : '') + '" onclick="toggleAccordHistoAjoutV2(this)" data-accord="' + acc + '">' + acc + '</div>';
+  }).join('');
+  majAccordsDisplayHistoAjoutV2();
+  document.getElementById('histoAjoutV2-form').style.display = 'block';
+}
+
+function choisirNoteHistoAjoutV2(note) {
+  histoAjoutV2.note = note;
+  Array.prototype.forEach.call(document.querySelectorAll('#histoAjoutV2-verres .boire-verre'), function(el){
+    el.classList.toggle('allume', parseInt(el.getAttribute('data-note')) <= note);
+  });
+}
+
+function basculerMenuAccordsHistoAjoutV2() {
+  document.getElementById('histoAjoutV2-accords-menu').classList.toggle('ouvert');
+}
+
+function toggleAccordHistoAjoutV2(el) {
+  el.classList.toggle('actif');
+  majAccordsDisplayHistoAjoutV2();
+}
+
+function majAccordsDisplayHistoAjoutV2() {
+  var sel = Array.prototype.map.call(document.querySelectorAll('#histoAjoutV2-accords-menu .item-liste.actif'), function(el){ return el.getAttribute('data-accord'); });
+  var disp = document.getElementById('histoAjoutV2-accords-display');
+  if (disp) disp.textContent = sel.length ? sel.join(', ') : 'Accords';
+}
+
+function confirmerHistoAjoutV2() {
+  if (!histoAjoutV2.codebarre) { afficherMessage('Choisissez un vin'); return; }
+  var plat = document.getElementById('histoAjoutV2-plat').value.trim();
+  if (!plat) { afficherMessage('Entrez un plat'); return; }
+  if (histoAjoutV2.note === 0) { afficherMessage('Choisissez une appréciation'); return; }
+  var accords = Array.prototype.map.call(document.querySelectorAll('#histoAjoutV2-accords-menu .item-liste.actif'), function(el){ return el.getAttribute('data-accord'); });
+  appelBackend('ajouterHistoriqueManuel', { codebarre: histoAjoutV2.codebarre, plat: plat, note: histoAjoutV2.note }, { spinner: 'Enregistrement' }).then(function(){
+    if (accords.length) {
+      return appelBackend('updateWineField', { codebarre: histoAjoutV2.codebarre, field: 'Accords', value: accords.join(', ') });
+    }
+  }).then(function(){
+    return appelBackend('getInventoryData', {});
+  }).then(function(data){
+    if (data) ALL_DATA = data;
+    return appelBackend('getHistorique', {});
+  }).then(function(data){
+    ALL_HISTORIQUE = data || [];
+    document.getElementById('histoAjoutV2Overlay').style.display = 'none';
+    remplirFiltresHistoV2();
+    afficherHistoV2();
+    afficherMessage('Ajouté au carnet');
+  }).catch(function(){ retourAccueilV2(); });
 }
 
 // Clé d'un vin : Code SAQ, sinon code-barres, sinon rien (bouteille non regroupée)
