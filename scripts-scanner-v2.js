@@ -1156,23 +1156,68 @@ function afficherEmpV2() {
   document.getElementById('empV2-compte').textContent = base.length + ' bouteille' + (base.length > 1 ? 's' : '');
   if (base.length === 0) { div.innerHTML = '<div class="texte-secondaire">Aucune bouteille rangée</div>'; return; }
 
-  var html = '';
-  var meubleCourant = null;
-  var rangeeCourante = null;
+  // index des bouteilles présentes par meuble|rangee|espace
+  var parPlace = {};
   base.forEach(function(w){
-    if (String(w.Meuble) !== String(meubleCourant)) {
-      meubleCourant = w.Meuble;
-      rangeeCourante = null;
-      html += '<div class="emp-entete-meuble">' + w.Meuble + '</div>';
-    }
-    if (String(w.Rangee) !== String(rangeeCourante)) {
-      rangeeCourante = w.Rangee;
-      html += '<div class="titre-3">RANGÉE ' + w.Rangee + '</div>';
-    }
-    var emp = w.Meuble.toString().substring(0,1).toUpperCase() + '-' + w.Rangee + '-' + w.Espace;
-    html += empCarteVinV2(w, emp);
+    parPlace[w.Meuble + '|' + w.Rangee + '|' + w.Espace] = w;
+  });
+
+  // meubles à dessiner : celui filtré, sinon les 3 de CONFIG
+  var meubles = f.meuble ? [f.meuble] : Object.keys(CONFIG.meubles || {});
+
+  var html = '';
+  meubles.forEach(function(meuble){
+    var rangeesDef = (CONFIG.meubles && CONFIG.meubles[meuble]) ? CONFIG.meubles[meuble] : {};
+  html += '<div class="emp-meuble">' + meuble + '</div>';
+    Object.keys(rangeesDef).forEach(function(rangee){
+      if (f.rangee && String(rangee) !== String(f.rangee)) return;
+      var espacesDef = rangeesDef[rangee] || [];
+      var nb = espacesDef.length;
+      var occ = 0;
+      var ronds = [];
+      espacesDef.forEach(function(esp){
+        var w = parPlace[meuble + '|' + rangee + '|' + esp];
+        if (w) occ++;
+        var photo = (w && w['Photo URL']) ? w['Photo URL'] : '';
+        ronds.push('<div class="cercle" data-photo="' + photo + '"></div>');
+      });
+      // 7 espaces = quinconce 4 bas + 3 haut ; sinon une seule ligne
+      var lignes;
+      if (nb === 7) {
+        lignes = '<div class="ligne-ronds haut">' + ronds.slice(4,7).join('') + '</div>' +
+                 '<div class="ligne-ronds bas">' + ronds.slice(0,4).join('') + '</div>';
+      } else {
+        lignes = '<div class="ligne-ronds">' + ronds.join('') + '</div>';
+      }
+      html += '<div class="emp-rangee" data-meuble="' + meuble + '" data-rangee="' + rangee + '">' +
+                '<div class="emp-rangee-titre">Rangée ' + rangee + '<span class="emp-compte">' + occ + '/' + nb + '</span></div>' +
+                '<div class="emp-ronds">' + lignes + '</div>' +
+              '</div>';
+    });
   });
   div.innerHTML = html;
+  brancherTirerRangeesEmpV2();
+}
+
+// Tirer une rangée : gros ronds + photo ; une seule ouverte à la fois
+function brancherTirerRangeesEmpV2() {
+  var rangees = document.querySelectorAll('#empV2-cartes .emp-rangee');
+  Array.prototype.forEach.call(rangees, function(el){
+    el.addEventListener('click', function(){
+      var dejaOuvert = el.classList.contains('ouvert');
+      Array.prototype.forEach.call(rangees, function(r){
+        r.classList.remove('ouvert');
+        Array.prototype.forEach.call(r.querySelectorAll('.cercle'), function(c){ c.innerHTML = ''; });
+      });
+      if (!dejaOuvert) {
+        el.classList.add('ouvert');
+        Array.prototype.forEach.call(el.querySelectorAll('.cercle'), function(c){
+          var p = c.getAttribute('data-photo');
+          c.innerHTML = p ? '<img src="' + p + '" alt="">' : '';
+        });
+      }
+    });
+  });
 }
 
 // Regroupe par code-barres : { wine, emplacements:[], count }

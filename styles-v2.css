@@ -37,6 +37,7 @@ html, body {
   --largeur-bordure-6: 6px;
   --largeur-bordure-7: 7px;
   --largeur-bordure-8: 8px;
+  --largeur-bordure-9: 9px;
   --largeur-bordure-10: 10px;
 
   /* ===== BORDURES — couleurs ===== */
@@ -357,16 +358,49 @@ body::after {
   letter-spacing: var(--ls-tight);
 }
 
-.menu-v2-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 90px);
-  grid-gap: var(--space-l);
+.ligne-ronds {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-l);
+  margin-bottom: var(--space-l);
 }
+.ligne-ronds:last-child { margin-bottom: 0; }
 
-.menu-v2-grid .cercle {
+.menu-v2-grid .ligne-ronds .cercle,
+#menuActionV2Overlay .ligne-ronds .cercle {
   width: 90px; height: 90px;
   font-size: 32px;
 }
+
+/* ===== Emplacements : meuble graphique ===== */
+.emp-rangee { cursor: pointer; -webkit-tap-highlight-color: transparent; margin-bottom: var(--space-l); }
+.emp-meuble {
+  color: var(--white);
+  font-size: var(--fs-lg);
+  letter-spacing: var(--ls-tight);
+  margin: var(--space-xl) 0 var(--space-m) 0;
+}
+.emp-rangee-titre {
+  display: flex; justify-content: space-between; align-items: center;
+  color: var(--white-50);
+  font-size: var(--fs-sm);
+  margin-bottom: var(--space-xs);
+}
+.emp-compte { color: var(--white-50); font-size: var(--fs-xs); }
+.emp-ronds { display: flex; flex-direction: column; align-items: center; }
+.emp-ronds .ligne-ronds { gap: var(--space-s); margin-bottom: var(--space-s); }
+
+/* rangée fermée : petits ronds, pas de quinconce */
+.emp-rangee:not(.ouvert) .ligne-ronds .cercle { width: 26px; height: 26px; }
+.emp-rangee:not(.ouvert) .ligne-ronds.haut { display: none; }
+
+/* rangée tirée : gros ronds + quinconce */
+.emp-rangee.ouvert .ligne-ronds .cercle { width: 52px; height: 52px; overflow: hidden; }
+.emp-rangee.ouvert .ligne-ronds.haut { margin-bottom: var(--space-s); }
+.emp-rangee.ouvert .cercle img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.emp-ronds .ligne-ronds.haut { display: flex; }
+
+
 .cercle:active {
   background: var(--gold-20);
 }
@@ -760,7 +794,7 @@ body::after {
   aspect-ratio: 1 / 1;
   flex: none;
   border-radius: 50%;
-  border: var(--largeur-bordure-10) solid var(--gold);
+  border: var(--largeur-bordure-8) solid var(--gold);
   box-sizing: border-box;
 }
 .roundel-barre {
