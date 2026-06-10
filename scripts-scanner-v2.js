@@ -192,8 +192,7 @@ function ouvrirMenuActionV2(code, wineResult) {
   menuActionV2Context = { code: code, wineResult: wineResult };
   const w = (wineResult && wineResult.wine) ? wineResult.wine : {};
   document.getElementById('menuActionV2-nom').textContent = decodeHTML(w.nom || 'Vin inconnu');
-  var codebarreEl = document.getElementById('menuActionV2-codebarre');
-  if (codebarreEl) codebarreEl.textContent = code;
+  
   var origineEl = document.getElementById('menuActionV2-origine');
   if (origineEl) origineEl.textContent = [w.pays, w.region, w.appellation].filter(Boolean).map(decodeHTML).join(' • ');
 
