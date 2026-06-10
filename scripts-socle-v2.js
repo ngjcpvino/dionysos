@@ -41,15 +41,22 @@ window.onload = function() {
 // ==================== BACKEND ====================
 async function appelBackend(action, data = {}, options = {}) {
   if (options.spinner) _afficherSpinner(options.spinner);
+  const controleur = new AbortController();
+  const minuterie = setTimeout(function() { controleur.abort(); }, 30000);
   try {
     const response = await fetch(API_URL, {
       method: 'POST',
-      body: JSON.stringify({ action: action, data: data })
+      body: JSON.stringify({ action: action, data: data }),
+      signal: controleur.signal
     });
     const json = await response.json();
     if (!json.success) throw new Error(json.error || 'Erreur backend');
     return json.result;
+  } catch (e) {
+    if (e.name === 'AbortError') throw new Error('Le serveur ne répond pas');
+    throw e;
   } finally {
+    clearTimeout(minuterie);
     if (options.spinner) _cacherSpinner();
   }
 }

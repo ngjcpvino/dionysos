@@ -104,6 +104,8 @@ Entrée burger `'promotions'` → toast « À venir ». Backend dispo : `getProm
 Crayon `.cercle.gauche` (✎) → `ouvrirEditFicheV2`. `#editFicheV2Overlay`, 26 champs. `sauverEditFicheV2` → `saveWineEdits` (n'inclut pas Accords/Racheter/Panier, gérés en direct).
 
 ## 🐞 En suspens
+- **`addBottle` max 5 silencieux** : le backend renvoie `success:false` (max 5 bouteilles) mais le front ne lit pas ce champ et affiche « Bouteille ajoutée ! ». Protégé seulement par le blocage côté cascade. À corriger dans le front (lire `res.success`).
+- **`saveWineEdits` ignore les champs vidés** : effacer un champ dans l'édition de fiche ne le vide pas dans le Sheet (les `if (data.x)` sautent les valeurs vides). La mémoire locale, elle, se vide → divergence jusqu'au Rafraîchir. À corriger dans `Code.gs`.
 - **Vue emplacements V1 instable** : un filtre renvoie parfois une bouteille de moins. D'où la vérif réelle finale à l'Arrivée.
 - **Extraire la Cave** dans `scripts-cave-v2.js` — un jour.
 - **Page Promotions SAQ** : contenu à décider.

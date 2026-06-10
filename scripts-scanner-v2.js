@@ -190,9 +190,12 @@ let menuActionV2Context = null;
 
 function ouvrirMenuActionV2(code, wineResult) {
   menuActionV2Context = { code: code, wineResult: wineResult };
-  const nom = (wineResult && wineResult.wine && wineResult.wine.nom) ? wineResult.wine.nom : 'Vin inconnu';
-  document.getElementById('menuActionV2-nom').textContent = decodeHTML(nom);
-  document.getElementById('menuActionV2-codebarre').textContent = code;
+  const w = (wineResult && wineResult.wine) ? wineResult.wine : {};
+  document.getElementById('menuActionV2-nom').textContent = decodeHTML(w.nom || 'Vin inconnu');
+  var codebarreEl = document.getElementById('menuActionV2-codebarre');
+  if (codebarreEl) codebarreEl.textContent = code;
+  var origineEl = document.getElementById('menuActionV2-origine');
+  if (origineEl) origineEl.textContent = [w.pays, w.region, w.appellation].filter(Boolean).map(decodeHTML).join(' • ');
 
   var nbActives = (wineResult && typeof wineResult.count === 'number') ? wineResult.count : 0;
   ['menuV2-deplacer', 'menuV2-boire', 'menuV2-donner'].forEach(function(id) {
@@ -214,11 +217,16 @@ function fermerMenuActionV2() {
   menuActionV2Context = null;
 }
 
-function retourAccueilV2() {
-  ['scannerV2Container', 'saisieManuelleV2Container', 'vinInconnuV2Container', 'menuActionV2Overlay', 'arriveeV2Container', 'deplacerV2Container', 'boireV2Container', 'donnerV2Container', 'caveV2Container', 'editFicheV2Overlay', 'ficheV2Overlay'].forEach(function(id) {
+function cacherToutesPagesV2() {
+  ['scannerV2Container', 'saisieManuelleV2Container', 'vinInconnuV2Container', 'menuActionV2Overlay', 'arriveeV2Container', 'deplacerV2Container', 'boireV2Container', 'donnerV2Container', 'caveV2Container', 'aRangerV2Container', 'histoV2Container', 'histoAjoutV2Overlay', 'histoEditV2Overlay', 'empV2Container', 'achatV2Container', 'editFicheV2Overlay', 'ficheV2Overlay'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.style.display = 'none';
   });
+  fermerMenuBurgerV2();
+}
+
+function retourAccueilV2() {
+  cacherToutesPagesV2();
   menuActionV2Context = null;
   afficherMessage('Un problème est survenu, veuillez recommencer');
 }
@@ -287,12 +295,7 @@ function meubleALibre(meuble) {
 
 function ouvrirArriveeV2() {
   if (!menuActionV2Context) return;
-  appelBackend('getInventoryData', {}, { spinner: ' ' }).then(function(data) {
-    if (data) ALL_DATA = data;
-    construireArriveeV2();
-  }).catch(function() {
-    construireArriveeV2();
-  });
+  construireArriveeV2();
 }
 
 function construireArriveeV2() {
@@ -421,12 +424,7 @@ var deplacerV2Choix = { row: 0, bottle: 0, meuble: '', rangee: '', espace: '' };
 
 function ouvrirDeplacerV2() {
   if (!menuActionV2Context) return;
-  appelBackend('getInventoryData', {}, { spinner: ' ' }).then(function(data) {
-    if (data) ALL_DATA = data;
-    construireDeplacerV2();
-  }).catch(function() {
-    construireDeplacerV2();
-  });
+  construireDeplacerV2();
 }
 
 function construireDeplacerV2() {
@@ -444,8 +442,9 @@ function construireDeplacerV2() {
 
   var bottles = (menuActionV2Context.wineResult && menuActionV2Context.wineResult.bottles) ? menuActionV2Context.wineResult.bottles : [];
 
+  var rowVin = menuActionV2Context.wineResult.row;
   if (bottles.length === 1) {
-    deplacerV2Choix.row = bottles[0].row;
+    deplacerV2Choix.row = bottles[0].row || rowVin;
     deplacerV2Choix.bottle = bottles[0].bottle;
     document.getElementById('deplacerV2-choix-bouteille').style.display = 'none';
     document.getElementById('deplacerV2-destination').style.display = 'block';
@@ -454,7 +453,7 @@ function construireDeplacerV2() {
     var menu = document.getElementById('deplacerV2-bouteille-menu');
     menu.innerHTML = bottles.map(function(b) {
       var emp = (b.meuble && b.rangee && b.espace) ? (b.meuble + '-' + b.rangee + '-' + b.espace) : 'À ranger';
-      return '<div class="item-liste" onclick="choisirBouteilleDeplacer(' + b.row + ',' + b.bottle + ')">' + emp + '</div>';
+      return '<div class="item-liste" onclick="choisirBouteilleDeplacer(' + (b.row || rowVin) + ',' + b.bottle + ')">' + emp + '</div>';
     }).join('');
     document.getElementById('deplacerV2-choix-bouteille').style.display = 'block';
     document.getElementById('deplacerV2-destination').style.display = 'none';
@@ -607,13 +606,7 @@ function rendreEnteteActionV2(prefixe) {
 // ---------- BOIRE ----------
 function ouvrirBoireV2() {
   if (!menuActionV2Context) return;
-  appelBackend('getInventoryData', {}, { spinner: ' ' }).then(function(data) {
-    if (data) ALL_DATA = data;
-    return appelBackend('checkWineExists', { codebarre: menuActionV2Context.code });
-  }).then(function(result) {
-    if (result) menuActionV2Context.wineResult = result;
-    construireBoireV2();
-  }).catch(function() { retourAccueilV2(); });
+  construireBoireV2();
 }
 
 function construireBoireV2() {
@@ -703,7 +696,8 @@ function confirmerBoireV2() {
     return appelBackend('checkWineExists', { codebarre: menuActionV2Context.code });
   }).then(function(result) {
     if (result) menuActionV2Context.wineResult = result;
-    document.getElementById('boireV2Container').style.display = 'none';
+    ALL_HISTORIQUE = [];
+    cacherToutesPagesV2();
     menuActionV2Context = null;
     afficherMessage('Santé !');
   }).catch(function() { retourAccueilV2(); });
@@ -724,13 +718,7 @@ function fermerBoireV2() {
 // ---------- DONNER ----------
 function ouvrirDonnerV2() {
   if (!menuActionV2Context) return;
-  appelBackend('getInventoryData', {}, { spinner: ' ' }).then(function(data) {
-    if (data) ALL_DATA = data;
-    return appelBackend('checkWineExists', { codebarre: menuActionV2Context.code });
-  }).then(function(result) {
-    if (result) menuActionV2Context.wineResult = result;
-    construireDonnerV2();
-  }).catch(function() { retourAccueilV2(); });
+  construireDonnerV2();
 }
 
 function construireDonnerV2() {
@@ -766,7 +754,7 @@ function confirmerDonnerV2() {
     return appelBackend('checkWineExists', { codebarre: menuActionV2Context.code });
   }).then(function(result) {
     if (result) menuActionV2Context.wineResult = result;
-    document.getElementById('donnerV2Container').style.display = 'none';
+    cacherToutesPagesV2();
     menuActionV2Context = null;
     afficherMessage('Bouteille donnée');
   }).catch(function() { retourAccueilV2(); });
@@ -787,11 +775,8 @@ function fermerDonnerV2() {
 // ==================== CAVE À VIN V2 ====================
 function ouvrirCaveV2() {
   document.getElementById('caveV2Container').style.display = 'flex';
-  appelBackend('getInventoryData', {}, { spinner: ' ' }).then(function(data) {
-    ALL_DATA = data || [];
-    remplirFiltresCaveV2();
-    afficherCartesCaveV2(ALL_DATA);
-  }).catch(function() { retourAccueilV2(); });
+  remplirFiltresCaveV2();
+  afficherCartesCaveV2(ALL_DATA || []);
 }
 
 function fermerCaveV2() {
@@ -802,10 +787,7 @@ function fermerCaveV2() {
 // ==================== À RANGER V2 ====================
 function ouvrirARangerV2() {
   document.getElementById('aRangerV2Container').style.display = 'flex';
-  appelBackend('getInventoryData', {}, { spinner: ' ' }).then(function(data) {
-    ALL_DATA = data || [];
-    afficherCartesARangerV2();
-  }).catch(function() { retourAccueilV2(); });
+  afficherCartesARangerV2();
 }
 
 function fermerARangerV2() {
@@ -839,12 +821,11 @@ function afficherCartesARangerV2() {
 }
 
 function deplacerDepuisARangerV2(code) {
-  appelBackend('checkWineExists', { codebarre: code }, { spinner: ' ' }).then(function(result) {
-    if (!result || !result.exists) { afficherMessage('Vin introuvable'); return; }
-    document.getElementById('aRangerV2Container').style.display = 'none';
-    menuActionV2Context = { code: code, wineResult: result, retour: 'aranger' };
-    ouvrirApresTap(ouvrirDeplacerV2);
-  }).catch(function() { retourAccueilV2(); });
+  var result = wineResultDepuisMemoireV2(code);
+  if (!result) { afficherMessage('Vin introuvable'); return; }
+  document.getElementById('aRangerV2Container').style.display = 'none';
+  menuActionV2Context = { code: code, wineResult: result, retour: 'aranger' };
+  ouvrirApresTap(ouvrirDeplacerV2);
 }
 
 // ==================== LISTE D'ACHAT V2 ====================
@@ -854,10 +835,12 @@ var succursalesAchatV2 = [];
 
 function ouvrirAchatV2() {
   document.getElementById('achatV2Container').style.display = 'flex';
-  appelBackend('getInventoryData', {}, { spinner: ' ' }).then(function(data) {
-    ALL_DATA = data || [];
-    return appelBackend('getSuccursales', {});
-  }).then(function(succ) {
+  if (succursalesAchatV2.length) {
+    remplirFiltresAchatV2();
+    appliquerFiltresAchatV2();
+    return;
+  }
+  appelBackend('getSuccursales', {}, { spinner: ' ' }).then(function(succ) {
     succursalesAchatV2 = succ || [];
     remplirFiltresAchatV2();
     appliquerFiltresAchatV2();
@@ -1033,12 +1016,9 @@ var filtresEmpV2 = { meuble: '', rangee: '', espace: '' };
 
 function ouvrirEmpV2() {
   document.getElementById('empV2Container').style.display = 'flex';
-  appelBackend('getInventoryData', {}, { spinner: ' ' }).then(function(data) {
-    ALL_DATA = data || [];
-    filtresEmpV2 = { meuble: '', rangee: '', espace: '' };
-    remplirFiltresEmpV2();
-    afficherEmpV2();
-  }).catch(function() { retourAccueilV2(); });
+  filtresEmpV2 = { meuble: '', rangee: '', espace: '' };
+  remplirFiltresEmpV2();
+  afficherEmpV2();
 }
 
 function fermerEmpV2() {
@@ -1327,13 +1307,43 @@ function afficherListeEmpV2(type) {
   div.innerHTML = html;
 }
 
+function wineResultDepuisMemoireV2(code) {
+  var cb = (code || '').toString().trim();
+  var items = (ALL_DATA || []).filter(function(i) {
+    return (i['Code-barres'] || '').toString().trim() === cb;
+  });
+  if (!items.length) return null;
+  var w = items[0];
+  var actives = items.filter(function(i) {
+    var statut = i.Statut || 'En stock';
+    return i.bottle && i.bottle > 0 && statut !== 'Bu' && statut !== 'Sorti';
+  });
+  return {
+    exists: true,
+    row: w.row,
+    count: actives.length,
+    wine: {
+      nom: w.Nom || '',
+      couleur: w.Couleur || '',
+      cepage: w.Cepage || '',
+      pays: w.Pays || '',
+      aime: w.Racheter || 'Oui',
+      accords: w.Accords || '',
+      region: w.Region || '',
+      appellation: w.Appellation || ''
+    },
+    bottles: actives.map(function(i) {
+      return { nom: w.Nom || '', row: i.row, bottle: i.bottle, meuble: i.Meuble || '', rangee: i.Rangee || '', espace: i.Espace || '', statut: i.Statut || 'En stock' };
+    })
+  };
+}
+
 function deplacerDepuisEmpV2(code) {
-  appelBackend('checkWineExists', { codebarre: code }, { spinner: ' ' }).then(function(result) {
-    if (!result || !result.exists) { afficherMessage('Vin introuvable'); return; }
-    document.getElementById('empV2Container').style.display = 'none';
-    menuActionV2Context = { code: code, wineResult: result, retour: 'emplacements' };
-    ouvrirApresTap(ouvrirDeplacerV2);
-  }).catch(function() { retourAccueilV2(); });
+  var result = wineResultDepuisMemoireV2(code);
+  if (!result) { afficherMessage('Vin introuvable'); return; }
+  document.getElementById('empV2Container').style.display = 'none';
+  menuActionV2Context = { code: code, wineResult: result, retour: 'emplacements' };
+  ouvrirApresTap(ouvrirDeplacerV2);
 }
 
 // ==================== HISTORIQUE V2 ====================
@@ -1342,12 +1352,14 @@ var histoEditV2 = { row: 0, note: 0 };
 
 function ouvrirHistoV2() {
   document.getElementById('histoV2Container').style.display = 'flex';
-  appelBackend('getInventoryData', {}, { spinner: ' ' }).then(function(data) {
-    ALL_DATA = data || [];
-    return appelBackend('getHistorique', {});
-  }).then(function(data) {
+  filtresHistoV2 = { mets: '', vin: '', accord: '' };
+  if (ALL_HISTORIQUE && ALL_HISTORIQUE.length) {
+    remplirFiltresHistoV2();
+    afficherHistoV2();
+    return;
+  }
+  appelBackend('getHistorique', {}, { spinner: ' ' }).then(function(data) {
     ALL_HISTORIQUE = data || [];
-    filtresHistoV2 = { mets: '', vin: '', accord: '' };
     remplirFiltresHistoV2();
     afficherHistoV2();
   }).catch(function() { retourAccueilV2(); });
@@ -1832,20 +1844,19 @@ function fermerMenuBurgerV2() {
 function burgerV2Click(cible) {
   fermerMenuBurgerV2();
   if (cible === 'accueil') {
-    ['caveV2Container'].forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el) el.style.display = 'none';
-    });
+    cacherToutesPagesV2();
+    menuActionV2Context = null;
     return;
   }
-  if (cible === 'cave') { ouvrirCaveV2(); return; }
-  if (cible === 'aranger') { ouvrirARangerV2(); return; }
-  if (cible === 'racheter') { ouvrirAchatV2(); return; }
-  if (cible === 'emplacements') { ouvrirEmpV2(); return; }
-  if (cible === 'historique') { ouvrirHistoV2(); return; }
+  if (cible === 'cave') { cacherToutesPagesV2(); ouvrirCaveV2(); return; }
+  if (cible === 'aranger') { cacherToutesPagesV2(); ouvrirARangerV2(); return; }
+  if (cible === 'racheter') { cacherToutesPagesV2(); ouvrirAchatV2(); return; }
+  if (cible === 'emplacements') { cacherToutesPagesV2(); ouvrirEmpV2(); return; }
+  if (cible === 'historique') { cacherToutesPagesV2(); ouvrirHistoV2(); return; }
   if (cible === 'refresh') {
     appelBackend('getInventoryData', {}, { spinner: 'Synchronisation' }).then(function(data) {
       ALL_DATA = data || [];
+      ALL_HISTORIQUE = [];
       afficherMessage('✓ Synchronisé');
     }).catch(function() { afficherMessage('Erreur de synchronisation'); });
     return;
@@ -1857,14 +1868,12 @@ function ajouterBouteilleArrivee(meuble, rangee, espace) {
   var code = menuActionV2Context ? menuActionV2Context.code : null;
   if (!code) { afficherMessage('Vin introuvable'); return; }
   appelBackend('addBottle', { codebarre: code, meuble: meuble, rangee: rangee, espace: espace }, { spinner: 'Mise en cave' }).then(function() {
-    afficherMessage('Bouteille ajoutée !');
-    document.getElementById('arriveeV2Container').style.display = 'none';
     return appelBackend('getInventoryData', {});
   }).then(function(data) {
     if (data) ALL_DATA = data;
-    return appelBackend('checkWineExists', { codebarre: code });
-  }).then(function(result) {
-    if (result && menuActionV2Context) menuActionV2Context.wineResult = result;
+    cacherToutesPagesV2();
+    menuActionV2Context = null;
+    afficherMessage('Bouteille ajoutée !');
   }).catch(function() {
     retourAccueilV2();
   });

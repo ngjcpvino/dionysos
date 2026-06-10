@@ -432,6 +432,16 @@ body::after {
   position: relative;
 }
 
+.titre-action {
+  color: var(--white);
+  font-size: var(--fs-base);
+  font-weight: 400;
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  text-align: center;
+  margin: var(--space-l) 0 var(--space-s) 0;
+}
+
 .btn-fermer {
   position: fixed;
   top: var(--space-s); right: var(--space-s);
