@@ -335,28 +335,7 @@ body::after {
 }
 .modal-v2-content::-webkit-scrollbar { display: none; }
 
-.modal-v2-title {
-  color: var(--gold);
-  font-size: var(--fs-lg);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-wide);
-  margin: 0 0 30px 0;
-  font-weight: 300;
-}
 
-.modal-v2-winename {
-  color: var(--white);
-  font-size: var(--fs-xl);
-  text-align: center;
-  margin-bottom: var(--space-s);
-}
-
-.modal-v2-codebarre {
-  color: var(--white-50);
-  font-size: var(--fs-sm);
-  margin-bottom: 40px;
-  letter-spacing: var(--ls-tight);
-}
 
 .ligne-ronds {
   display: flex;
@@ -366,7 +345,6 @@ body::after {
 }
 .ligne-ronds:last-child { margin-bottom: 0; }
 
-.menu-v2-grid .ligne-ronds .cercle,
 #menuActionV2Overlay .ligne-ronds .cercle {
   width: 90px; height: 90px;
   font-size: 32px;
