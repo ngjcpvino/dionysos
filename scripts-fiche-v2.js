@@ -11,6 +11,11 @@ function ouvrirFicheV2(codebarre, provenance) {
   document.getElementById('ficheV2-origine').innerHTML = '';
   document.getElementById('ficheV2-corps').innerHTML = '';
 
+  var resultMemoire = ficheDepuisMemoireV2(codebarre);
+  if (resultMemoire) {
+    afficherFicheV2(resultMemoire);
+    return;
+  }
   appelBackend('getWineBottles', { codebarre: codebarre }, { spinner: '...' }).then(function(result) {
     if (!result) {
       fermerFicheV2();
@@ -22,6 +27,57 @@ function ouvrirFicheV2(codebarre, provenance) {
     fermerFicheV2();
     afficherMessage('Erreur: ' + err);
   });
+}
+
+function ficheDepuisMemoireV2(codebarre) {
+  var cb = (codebarre || '').toString().trim();
+  var items = (ALL_DATA || []).filter(function(i) {
+    return (i['Code-barres'] || '').toString().trim() === cb;
+  });
+  if (!items.length) return null;
+  var w = items[0];
+  var wine = {
+    'Code-barres': w['Code-barres'],
+    'Code SAQ': w['Code SAQ'] || '',
+    'Nom': w.Nom || '',
+    'Prix': w.Prix || '',
+    'Couleur': w.Couleur || '',
+    'Cépage': w.Cepage || '',
+    'Cepage': w.Cepage || '',
+    'Pays': w.Pays || '',
+    'Region': w.Region || '',
+    'Appellation': w.Appellation || '',
+    'Désignation': w['Désignation'] || '',
+    'Designation': w['Désignation'] || '',
+    'Classification': w.Classification || '',
+    'Format': w.Format || '',
+    'Alcool': w.Alcool || '',
+    'Sucre': w.Sucre || '',
+    'Particularité': w['Particularité'] || '',
+    'Producteur': w.Producteur || '',
+    'Agent promo': w['Agent promo'] || '',
+    'Millésime dégusté': w['Millésime dégusté'] || '',
+    'Arômes': w['Arômes'] || '',
+    'Acidité': w['Acidité'] || '',
+    'Sucrosité': w['Sucrosité'] || '',
+    'Corps': w.Corps || '',
+    'Bouche': w.Bouche || '',
+    'Température': w['Température'] || '',
+    'Temperature': w['Température'] || '',
+    'Description': w.Description || '',
+    'Racheter': w.Racheter || 'Oui',
+    'Accords': w.Accords || '',
+    'Recettes': w.Recettes || '',
+    'Notes temporaires': w['Notes temporaires'] || '',
+    'Divers': w.Divers || '',
+    'Pastille gout': w['Pastille gout'] || '',
+    'Photo URL': w['Photo URL'] || '',
+    'Panier': w.Panier || ''
+  };
+  var bottles = items.filter(function(i) { return i.bottle && i.bottle > 0; }).map(function(i) {
+    return { row: i.row, bottle: i.bottle, meuble: i.Meuble || '', rangee: i.Rangee || '', espace: i.Espace || '', statut: i.Statut || '' };
+  });
+  return { wine: wine, bottles: bottles };
 }
  
 function afficherFicheV2(result) {
@@ -192,17 +248,12 @@ function afficherFicheV2(result) {
 function ouvrirActionDepuisFicheV2() {
   var code = CURRENT_WINE_CODEBARRE;
   if (!code) return;
-  appelBackend('getInventoryData', {}, { spinner: ' ' }).then(function(data) {
-    if (data) ALL_DATA = data;
-    return appelBackend('checkWineExists', { codebarre: code });
-  }).then(function(result) {
-    if (!result || !result.exists) { afficherMessage('Vin introuvable'); return; }
-    document.getElementById('ficheV2Overlay').style.display = 'none';
-    FICHE_V2_ORIGINE = FICHE_V2_PROVENANCE;
-    FICHE_V2_PROVENANCE = 'menuScan';
-    setTimeout(function() { ouvrirMenuActionV2(code, result); }, 0);
-	
-  }).catch(function() { retourAccueilV2(); });
+  var result = wineResultDepuisMemoireV2(code);
+  if (!result) { afficherMessage('Vin introuvable'); return; }
+  document.getElementById('ficheV2Overlay').style.display = 'none';
+  FICHE_V2_ORIGINE = FICHE_V2_PROVENANCE;
+  FICHE_V2_PROVENANCE = 'menuScan';
+  setTimeout(function() { ouvrirMenuActionV2(code, result); }, 0);
 }
 
 function basculerMenuAccordsV2() {
@@ -216,7 +267,19 @@ function toggleAccordV2(element) {
   var selectionnes = Array.prototype.map.call(menu.querySelectorAll('.item-liste.actif'), function(el) { return el.getAttribute('data-accord'); });
   var display = document.getElementById('ficheV2-accords-display');
   if (display) display.textContent = selectionnes.length ? selectionnes.join(', ') : 'Aucun';
-  appelBackend('updateWineField', { codebarre: CURRENT_WINE_CODEBARRE, field: 'Accords', value: selectionnes.join(', ') }, { spinner: 'Sauvegarde' }).catch(function(err) { afficherMessage('Erreur: ' + err); });
+  appelBackend('updateWineField', { codebarre: CURRENT_WINE_CODEBARRE, field: 'Accords', value: selectionnes.join(', ') }, { spinner: 'Sauvegarde' }).then(function() {
+    majMemoireVinV2(CURRENT_WINE_CODEBARRE, { 'Accords': selectionnes.join(', ') });
+    if (CURRENT_WINE_DATA) CURRENT_WINE_DATA.Accords = selectionnes.join(', ');
+  }).catch(function(err) { afficherMessage('Erreur: ' + err); });
+}
+
+function majMemoireVinV2(codebarre, champs) {
+  var cb = (codebarre || '').toString().trim();
+  (ALL_DATA || []).forEach(function(i) {
+    if ((i['Code-barres'] || '').toString().trim() === cb) {
+      Object.keys(champs).forEach(function(k) { i[k] = champs[k]; });
+    }
+  });
 }
 
 function setAimeV2(value) {
@@ -224,7 +287,10 @@ function setAimeV2(value) {
   var non = document.getElementById('ficheV2-aime-non');
   if (oui) oui.classList.toggle('actif', value === 'Oui');
   if (non) non.classList.toggle('actif', value === 'Non');
-  appelBackend('updateWineField', { codebarre: CURRENT_WINE_CODEBARRE, field: 'Racheter', value: value }, { spinner: 'Sauvegarde' }).catch(function(err) { afficherMessage('Erreur: ' + err); });
+  appelBackend('updateWineField', { codebarre: CURRENT_WINE_CODEBARRE, field: 'Racheter', value: value }, { spinner: 'Sauvegarde' }).then(function() {
+    majMemoireVinV2(CURRENT_WINE_CODEBARRE, { 'Racheter': value });
+    if (CURRENT_WINE_DATA) CURRENT_WINE_DATA.Racheter = value;
+  }).catch(function(err) { afficherMessage('Erreur: ' + err); });
 }
 
 function togglePanierV2() {
@@ -234,7 +300,10 @@ function togglePanierV2() {
   var newValue = actif ? '' : 'Oui';
   btn.classList.toggle('actif', !actif);
   btn.textContent = newValue === 'Oui' ? '✓' : '';
-  appelBackend('updateWineField', { codebarre: CURRENT_WINE_CODEBARRE, field: 'Panier', value: newValue }, { spinner: 'Sauvegarde' }).catch(function(err) { afficherMessage('Erreur: ' + err); });
+  appelBackend('updateWineField', { codebarre: CURRENT_WINE_CODEBARRE, field: 'Panier', value: newValue }, { spinner: 'Sauvegarde' }).then(function() {
+    majMemoireVinV2(CURRENT_WINE_CODEBARRE, { 'Panier': newValue });
+    if (CURRENT_WINE_DATA) CURRENT_WINE_DATA.Panier = newValue;
+  }).catch(function(err) { afficherMessage('Erreur: ' + err); });
 }
 
 function verifierPrixV2(codebarre, codeSAQ) {
@@ -270,6 +339,10 @@ function chargerPlatsV2(codebarre) {
     conteneur.innerHTML = cartes;
   }
 
+  if (ALL_HISTORIQUE && ALL_HISTORIQUE.length) {
+    rendrePlats(ALL_HISTORIQUE);
+    return;
+  }
   appelBackend('getHistorique', {}, { spinner: '' }).then(function(data) {
     ALL_HISTORIQUE = data || [];
     rendrePlats(ALL_HISTORIQUE);
@@ -378,11 +451,18 @@ function fermerEditFicheV2() {
 
 function sauverEditFicheV2() {
   var data = { codebarre: CURRENT_WINE_CODEBARRE, aime: (CURRENT_WINE_DATA && CURRENT_WINE_DATA.Racheter) || 'Oui' };
+  var champsMemoire = {};
   EDIT_FICHE_V2_CHAMPS.forEach(function(c) {
     var el = document.getElementById('editV2-' + c[1]);
-    data[c[1]] = el ? el.value : '';
+    var valeur = el ? el.value : '';
+    data[c[1]] = valeur;
+    var cle = c[2];
+    if (cle === 'Designation') cle = 'Désignation';
+    if (cle === 'Temperature') cle = 'Température';
+    champsMemoire[cle] = valeur;
   });
   appelBackend('saveWineEdits', data, { spinner: 'Sauvegarde' }).then(function() {
+    majMemoireVinV2(CURRENT_WINE_CODEBARRE, champsMemoire);
     document.getElementById('editFicheV2Overlay').style.display = 'none';
     afficherMessage('Modifications enregistrées');
     ouvrirFicheV2(CURRENT_WINE_CODEBARRE, FICHE_V2_PROVENANCE);
