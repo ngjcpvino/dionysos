@@ -113,6 +113,7 @@ function fermerSaisieManuelleV2() {
 }
 
 function traiterResultatScanV2(code) {
+  FICHE_V2_ORIGINE = null;
   appelBackend('checkWineExists', { codebarre: code }, { spinner: 'Vérification' }).then(function(result) {
     if (result.exists) {
       ouvrirMenuActionV2(code, result);
@@ -201,6 +202,8 @@ function ouvrirMenuActionV2(code, wineResult) {
     var el = document.getElementById(id);
     if (el) el.classList.toggle('desactive', nbActives === 0);
   });
+  var oeil = document.getElementById('menuV2-visualiser');
+  if (oeil) oeil.classList.toggle('desactive', !!FICHE_V2_ORIGINE);
 
   document.getElementById('menuActionV2Overlay').style.display = 'flex';
 }
@@ -231,34 +234,34 @@ function retourAccueilV2() {
 }
 
 function menuV2Click(action) {
-  if (action === 'visualiser') {
-    const code = menuActionV2Context ? menuActionV2Context.code : CURRENT_WINE_CODEBARRE;
-    document.getElementById('menuActionV2Overlay').style.display = 'none';
-    setTimeout(function() { ouvrirFicheV2(code, 'menuScan'); }, 0);
-    return;
-  }
-  if (action === 'arrivee') {
-    document.getElementById('menuActionV2Overlay').style.display = 'none';
-    setTimeout(ouvrirArriveeV2, 0);
-    return;
-  }
-  if (action === 'deplacer') {
-    document.getElementById('menuActionV2Overlay').style.display = 'none';
-    setTimeout(ouvrirDeplacerV2, 0);
-    return;
-  }
   var nbActives = (menuActionV2Context && menuActionV2Context.wineResult && typeof menuActionV2Context.wineResult.count === 'number') ? menuActionV2Context.wineResult.count : 0;
   if (nbActives === 0 && (action === 'deplacer' || action === 'boire' || action === 'donner')) {
     afficherMessage('Aucune bouteille en stock');
     return;
   }
+  if (action === 'visualiser') {
+    const code = menuActionV2Context ? menuActionV2Context.code : CURRENT_WINE_CODEBARRE;
+    cacherToutesPagesV2();
+    setTimeout(function() { ouvrirFicheV2(code, 'menuScan'); }, 0);
+    return;
+  }
+  if (action === 'arrivee') {
+    cacherToutesPagesV2();
+    setTimeout(ouvrirArriveeV2, 0);
+    return;
+  }
+  if (action === 'deplacer') {
+    cacherToutesPagesV2();
+    setTimeout(ouvrirDeplacerV2, 0);
+    return;
+  }
   if (action === 'boire') {
-    document.getElementById('menuActionV2Overlay').style.display = 'none';
+    cacherToutesPagesV2();
     setTimeout(ouvrirBoireV2, 0);
     return;
   }
   if (action === 'donner') {
-    document.getElementById('menuActionV2Overlay').style.display = 'none';
+    cacherToutesPagesV2();
     setTimeout(ouvrirDonnerV2, 0);
     return;
   }

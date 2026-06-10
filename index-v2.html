@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <link rel="stylesheet" href="styles-v2.css">
+<script>
+  document.write('<link rel="stylesheet" href="styles-v2.css?v=' + Math.floor(Date.now() / 3600000) + '">');
+</script>
 </head>
 <body>
 
@@ -105,7 +107,7 @@
     <div id="menuActionV2-origine" class="texte-secondaire"></div>
    
      <div class="ligne-ronds">
-      <div class="cercle" onclick="menuV2Click('visualiser')">👁</div>
+      <div class="cercle" id="menuV2-visualiser" onclick="menuV2Click('visualiser')">👁</div>
       <div class="cercle" onclick="menuV2Click('arrivee')">+</div>
       <div class="cercle" id="menuV2-deplacer" onclick="menuV2Click('deplacer')">⇄</div>
     </div>
@@ -469,9 +471,14 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
-<script src="scripts-socle-v2.js"></script>
-<script src="scripts-scanner-v2.js"></script>
-<script src="scripts-fiche-v2.js"></script>
+<script>
+(function() {
+  var v = Math.floor(Date.now() / 3600000);
+  ['scripts-socle-v2.js', 'scripts-scanner-v2.js', 'scripts-fiche-v2.js'].forEach(function(f) {
+    document.write('<script src="' + f + '?v=' + v + '"><\/script>');
+  });
+})();
+</script>
 
 </body>
 </html>
