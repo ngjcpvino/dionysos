@@ -1516,7 +1516,7 @@ function afficherHistoV2() {
       var note = parseInt(m.bonAccord) || 0;
       var classeNote = (note >= 1 && note <= 5) ? ' bordure-gauche-' + note : '';
       var platEsc = (m.plat || '').replace(/'/g, "\\'");
-      return '<div class="carte histo-mets' + classeNote + '" onclick="ouvrirApresTap(function(){ouvrirHistoEditV2(' + m.row + ', \'' + platEsc + '\', ' + note + ', \'' + nom.replace(/'/g, "\\'") + '\')})">' +
+      return '<div class="carte histo-mets' + classeNote + '" onclick="ouvrirApresTap(function(){ouvrirHistoEditV2(' + m.row + ', \'' + platEsc + '\', ' + note + ', \'' + nom.replace(/'/g, "\\'") + '\', \'histo\', \'' + (m.codeSAQ || '') + '\', \'' + (m.codebarre || '') + '\')})">' +
         '<div class="carte-centre"><span class="carte-titre">' + (m.plat || '—') + '</span></div>' +
         '<div class="carte-droite">' + (m.date || '') + '</div></div>';
     }).join('');
@@ -1525,9 +1525,23 @@ function afficherHistoV2() {
   }).join('');
 }
 
-function ouvrirHistoEditV2(row, plat, note, nom, provenance) {
+function ouvrirHistoEditV2(row, plat, note, nom, provenance, codeSAQ, codebarre) {
   histoEditV2 = { row: row, note: note || 0, provenance: provenance || 'histo' };
   document.getElementById('histoEditV2-vin').textContent = nom || '';
+  var w = null;
+  if ((provenance || 'histo') === 'fiche') {
+    w = CURRENT_WINE_DATA;
+  } else {
+    var saq = (codeSAQ || '').toString().trim();
+    var cb = (codebarre || '').toString().trim();
+    w = (ALL_DATA || []).find(function(i) {
+      if (saq) return (i['Code SAQ'] || '').toString().trim() === saq;
+      if (cb) return (i['Code-barres'] || '').toString().trim() === cb;
+      return false;
+    }) || null;
+  }
+  var origineEl = document.getElementById('histoEditV2-origine');
+  if (origineEl) origineEl.textContent = w ? [w.Pays, w.Region, w.Appellation].filter(Boolean).map(decodeHTML).join(' • ') : '';
   document.getElementById('histoEditV2-plat').value = plat || '';
   var v = document.getElementById('histoEditV2-verres');
   v.innerHTML = '';

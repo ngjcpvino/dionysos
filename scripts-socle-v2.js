@@ -30,7 +30,7 @@ let FICHE_V2_ORIGINE = null;
 window.onload = function() {
   appelBackend('getConfig', {}, { spinner: ' ' }).then(function(cfg) {
     CONFIG = cfg;
-    return appelBackend('getInventoryData', {});
+    return appelBackend('getInventoryData', {}, { spinner: ' ' });
   }).then(function(data) {
     ALL_DATA = data || [];
   }).catch(function(err) {
