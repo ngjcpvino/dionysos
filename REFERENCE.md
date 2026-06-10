@@ -47,3 +47,15 @@
 ## Le `.md` d'état
 - Quand on le met à jour, le sortir en ENTIER (prêt à copier), jamais en fragments — sauf une section précise demandée.
 - Les règles de travail ne vivent QUE dans ce REFERENCE.md, pas dans le `.md` d'état (éviter le doublon).
+
+## Contexte GLOBAL obligatoire — jamais en vase clos
+- Rien ne se conçoit isolément : chaque écran, classe ou fonction fait partie d'un TOUT. Avant de créer, regarder comment le reste de l'app le fait déjà, et faire PAREIL.
+- Tout nouvel écran part d'un écran existant validé comme GABARIT (titre, classes, structure, espacements). Jamais réécrit de mémoire, jamais réinventé.
+- Avant de créer une classe, une variable ou une fonction : chercher si elle existe. L'existant gagne toujours sur le neuf.
+- Un titre s'écrit pareil partout, une liste se comporte pareil partout, un bouton se ferme pareil partout. Toute exception doit être DEMANDÉE, jamais improvisée.
+
+## Vérification avant livraison — OBLIGATOIRE, en silence
+- Chaque parcours utilisateur est tracé JUSQU'AU BOUT avant de livrer : succès, erreur, annulation, retour. Une fonction qui ouvre une page a TOUJOURS sa sortie définie.
+- Chaque livraison est vérifiée contre : (1) les décisions du `.md` d'état, (2) le style des pages existantes, (3) la règle des données fraîches (toute écriture au Sheet resynchronise les mémoires), (4) l'impact sur les autres pages (IDs, classes, variables, z-index, navigation).
+- Un travail demandé « complet » couvre TOUS les volets : navigation, style, gels/blocages, aboutissement de chaque fonction, données. Si un volet ne peut pas être couvert, le dire AVANT, pas après.
+- L'utilisateur ne devrait JAMAIS découvrir lui-même qu'un titre diffère, qu'une page reste ouverte ou qu'un bouton ne mène nulle part. Ces vérifications sont le travail de l'IA.
