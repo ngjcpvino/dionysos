@@ -1016,6 +1016,106 @@ function chargerDispoAchatV2(liste) {
   });
 }
 
+// ==================== GESTION DES SUCCURSALES FAVORITES ====================
+var toutesSuccursalesV2 = [];
+var gererFavCibleV2 = '';
+
+function gererFavoritesV2(cible) {
+  gererFavCibleV2 = cible;
+  if (toutesSuccursalesV2.length) { rendreGererFavoritesV2(); return; }
+  appelBackend('getToutesSuccursales', {}, { spinner: ' ' }).then(function(liste) {
+    toutesSuccursalesV2 = liste || [];
+    rendreGererFavoritesV2();
+  }).catch(function() { afficherMessage('Liste des succursales indisponible'); });
+}
+
+function rendreGererFavoritesV2() {
+  var menu = document.getElementById(gererFavCibleV2 + '-f-succ-menu');
+  if (!menu) return;
+  var favNums = succursalesAchatV2.map(function(s) { return s.numero; });
+  var html = '<div class="item-liste actif" onclick="finirGererFavoritesV2()">Terminé</div>';
+  html += succursalesAchatV2.map(function(s) {
+    return '<div class="item-liste" onclick="retirerFavoriteV2(\'' + s.numero + '\')">✗ ' + s.nom + '</div>';
+  }).join('');
+  html += toutesSuccursalesV2.filter(function(s) { return favNums.indexOf(s.numero) === -1; }).map(function(s) {
+    var nom = (s.ville + ' — ' + s.adresse);
+    return '<div class="item-liste" onclick="ajouterFavoriteV2(\'' + s.numero + '\', \'' + nom.replace(/'/g, "\\'") + '\')">+ ' + nom + '</div>';
+  }).join('');
+  menu.innerHTML = html;
+  menu.classList.add('ouvert');
+}
+
+function ajouterFavoriteV2(numero, nom) {
+  appelBackend('ajouterSuccursale', { nom: nom, numero: numero }, { spinner: 'Ajout' }).then(function() {
+    succursalesAchatV2.push({ nom: nom, numero: numero });
+    rendreGererFavoritesV2();
+  }).catch(function(err) { afficherMessage('Erreur: ' + err); });
+}
+
+function retirerFavoriteV2(numero) {
+  appelBackend('supprimerSuccursale', { numero: numero }, { spinner: 'Retrait' }).then(function() {
+    succursalesAchatV2 = succursalesAchatV2.filter(function(s) { return s.numero !== numero; });
+    rendreGererFavoritesV2();
+  }).catch(function(err) { afficherMessage('Erreur: ' + err); });
+}
+
+function finirGererFavoritesV2() {
+  if (gererFavCibleV2 === 'promoV2') remplirFiltresPromoV2();
+  else if (gererFavCibleV2 === 'achatV2') remplirFiltresAchatV2();
+  var menu = document.getElementById(gererFavCibleV2 + '-f-succ-menu');
+  if (menu) menu.classList.add('ouvert');
+}
+
+// ==================== RECHERCHE V2 ====================
+function ouvrirRechercheV2() {
+  document.getElementById('rechercheV2Container').style.display = 'flex';
+  var champ = document.getElementById('rechercheV2-champ');
+  champ.value = '';
+  document.getElementById('rechercheV2-compte').textContent = '';
+  document.getElementById('rechercheV2-cartes').innerHTML = '<div class="texte-secondaire">Tape un mot : agent, producteur, arôme, appellation…</div>';
+}
+
+function fermerRechercheV2() {
+  document.getElementById('rechercheV2Container').style.display = 'none';
+}
+
+function normaliserRechercheV2(t) {
+  return (t || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+function lancerRechercheV2() {
+  var terme = normaliserRechercheV2(document.getElementById('rechercheV2-champ').value.trim());
+  var compte = document.getElementById('rechercheV2-compte');
+  var div = document.getElementById('rechercheV2-cartes');
+  if (terme.length < 2) {
+    compte.textContent = '';
+    div.innerHTML = '<div class="texte-secondaire">Tape un mot : agent, producteur, arôme, appellation…</div>';
+    return;
+  }
+  var champsExclus = { row: 1, bottle: 1, Statut: 1, Meuble: 1, Rangee: 1, Espace: 1, 'Date d\'ajout': 1, 'Date sortie': 1, Source: 1, 'Photo URL': 1 };
+  var trouves = (ALL_DATA || []).filter(function(i) {
+    return Object.keys(i).some(function(k) {
+      if (champsExclus[k]) return false;
+      return normaliserRechercheV2(i[k]).indexOf(terme) !== -1;
+    });
+  });
+  var groups = grouperVinsV2(trouves);
+  compte.textContent = groups.length + ' vin' + (groups.length > 1 ? 's' : '') + ' trouvé' + (groups.length > 1 ? 's' : '');
+  if (!groups.length) { div.innerHTML = '<div class="texte-secondaire">Aucun résultat</div>'; return; }
+  div.innerHTML = groups.map(function(g) {
+    var w = g.wine;
+    var nom = decodeHTML(w.Nom || '—');
+    var paysRegion = (w.Pays && w.Region) ? (w.Pays + ' • ' + w.Region) : (w.Pays || w.Region || '');
+    var sous = [paysRegion, w.Cepage || ''].filter(Boolean).join('<br>');
+    var photo = w['Photo URL'] ? '<div class="carte-photo"><img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
+    var onclick = g.cb ? ' onclick="ouvrirApresTap(function(){ouvrirFicheV2(\'' + g.cb + '\', \'recherche\')})"' : '';
+    var vide = g.count === 0 ? ' carte-vide' : '';
+    return '<div class="carte ' + couleurClasseV2(w.Couleur) + vide + '"' + onclick + '>' + photo +
+           '<div class="carte-centre"><span class="carte-titre">' + nom + '</span><span class="carte-sous">' + sous + '</span></div>' +
+           '<div class="carte-droite">' + g.count + ' btl</div></div>';
+  }).join('');
+}
+
 // ==================== PROMOTIONS V2 ====================
 var promoModeV2 = 'mes';
 var filtresPromoV2 = { couleur: '', pays: '', cepage: '', succ: '' };
