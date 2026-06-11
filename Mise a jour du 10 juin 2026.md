@@ -40,7 +40,7 @@ App à **2 utilisateurs sur 2 téléphones** ; la vérité partagée = le Sheet.
 - `majMemoireVinV2(cb, champs)` → met à jour les items `ALL_DATA` d'un vin après une écriture directe.
 
 ## 🛡️ Anti-gel V2 (RÈGLE)
-`appelBackend` : **timeout 30 s** (`AbortController`) → erreur « Le serveur ne répond pas », spinner toujours retiré (`finally`). `retourAccueilV2()` = `cacherToutesPagesV2()` + `menuActionV2Context=null` + message. Branchée dans le `.catch` de tout écrivain.
+`appelBackend` : **timeout 30 s par défaut, ajustable par appel** (`options.timeout` — utilisé par Promotions : 120 s et 300 s) via `AbortController` → erreur « Le serveur ne répond pas », spinner toujours retiré (`finally`). `retourAccueilV2()` = `cacherToutesPagesV2()` + `menuActionV2Context=null` + message. Branchée dans le `.catch` de tout écrivain.
 
 ## 🧭 Navigation V2 (RÈGLES, 9 juin 2026)
 - **`cacherToutesPagesV2()`** (dans `scripts-scanner-v2.js`) cache TOUS les conteneurs/overlays V2 + ferme le burger. Liste complète maintenue à jour à chaque nouvel écran.
@@ -80,7 +80,7 @@ App à **2 utilisateurs sur 2 téléphones** ; la vérité partagée = le Sheet.
 - **D — Erreur** → message + `retourAccueilV2`.
 
 ### ➕ Arrivée V2 — ✅ TERMINÉ
-S'ouvre depuis la mémoire. Cascade ne propose que le libre, vérif réelle (`checkLocationAvailable`) avant ajout. Max 5 bloqué côté cascade. Écrit puis resync `ALL_DATA` (2 appels), puis ACCUEIL.
+S'ouvre depuis la mémoire. Cascade ne propose que le libre, vérif réelle (`checkLocationAvailable`) avant ajout. Max 5 : blocage cascade ET le front lit `res.success` — refus backend = message affiché, page Arrivée reste ouverte. Écrit puis resync `ALL_DATA` (2 appels), puis ACCUEIL.
 
 ### ⇄ Déplacer V2 — ✅ TERMINÉ
 S'ouvre depuis la mémoire. 1 bouteille → direct ; plusieurs → liste (`row` de la bouteille, repli sur `wineResult.row` quand le contexte vient du scan). Vérif réelle. `fermerDeplacerV2` revient selon `menuActionV2Context.retour`.
@@ -88,8 +88,8 @@ S'ouvre depuis la mémoire. 1 bouteille → direct ; plusieurs → liste (`row` 
 ## 📄 Fiche V2 (`scripts-fiche-v2.js`)
 `ouvrirFicheV2(codebarre, provenance)` : bâtie depuis `ficheDepuisMemoireV2` (instantanée), secours backend. Plats depuis `ALL_HISTORIQUE` (paresseux). Panneau `#ficheV2Overlay`, bordure couleur du vin. La carte Température s'affiche SANS le « De » de tête (`replace(/^De\s+/i, '')`).
 **Blocs** : Information · Description+Prix · Dégustation · Production · Notes (Accords ; Racheter ✓/✗ ; Sur-inventaire `Panier` ; Recettes/Notes/Divers) · Historique des plats (`.fiche-mets` indentées 60px, cliquables → éditeur correction) · Inventaire (lecture seule) · Photo · roundel « OÙ LE TROUVER » · roundel « ACTION » · Prix auto (`verifierPrixV2`, silencieux).
-**Écritures directes** : Racheter/Panier/Accords → `updateWineField` puis `majMemoireVinV2` + `CURRENT_WINE_DATA`. Édition (26 champs) → `saveWineEdits` puis `majMemoireVinV2` (clés `Designation`→`Désignation`, `Temperature`→`Température`) puis rouvre la fiche.
-**Retour fiche** (`fermerFicheV2`) : `menuScan` + `FICHE_V2_ORIGINE` → liste d'origine ; sinon `menuScan` → menu d'action ; 'cave'/'achat'/'histo' → leur page.
+**Écritures directes** : Racheter/Panier/Accords → `updateWineField` puis `majMemoireVinV2` + `CURRENT_WINE_DATA`. Édition (26 champs) → `saveWineEdits` puis `majMemoireVinV2` (clés `Designation`→`Désignation`, `Temperature`→`Température`) puis rouvre la fiche. `saveWineEdits` (backend) écrit tout champ ENVOYÉ, y compris vide — vider un champ dans l'édition le vide aussi dans le Sheet.
+**Retour fiche** (`fermerFicheV2`) : `menuScan` + `FICHE_V2_ORIGINE` → liste d'origine ; sinon `menuScan` → menu d'action ; 'cave'/'achat'/'histo'/'promo'/'recherche'/'emplacements' → leur page.
 
 ## 🎬 Bouton ACTION dans la FICHE V2 — ✅ TERMINÉ
 `ouvrirActionDepuisFicheV2` : contexte depuis `wineResultDepuisMemoireV2` (plus d'appels), masque la fiche, `FICHE_V2_ORIGINE` = provenance, `FICHE_V2_PROVENANCE='menuScan'`, ouvre le menu. ✕ du menu : si `FICHE_V2_ORIGINE` → rouvre la fiche.
@@ -115,11 +115,18 @@ S'ouvrent depuis la mémoire. Boire : plat facultatif, verres grisés sans plat,
 ## 📜 Page HISTORIQUE V2 — ✅ TERMINÉ
 `#histoV2Container`, mémoire (`ALL_HISTORIQUE` paresseux). Filtres Mets · Vin · Accord. Corps PAR VIN (`.histo-groupe`, bande couleur en haut de la carte vin) : carte vin → fiche ; cartes `.histo-mets` (barre couleur gauche, date droite) → éditeur `#histoEditV2Overlay`. **Page Corriger au gabarit commun** : ✕, nom (`.titre-1`), origine (`#histoEditV2-origine`), titre blanc « Corriger ». `ouvrirHistoEditV2(row, plat, note, nom, provenance, codeSAQ, codebarre)` : provenance 'fiche' = origine depuis `CURRENT_WINE_DATA` ; sinon retrouvée dans `ALL_DATA` par Code SAQ d'abord, code-barres sinon (jamais par le nom). Correction NOTE + plat → `corrigerHistorique` (resync). Ajout manuel (roundel « Ajouter ») → `histoAjoutV2Overlay` : recherche par nom dans `ALL_DATA`, plat + note + Accords → `ajouterHistoriqueManuel` (resync). `getHistorique` renvoie `row`, `codeSAQ`, `couleur`.
 
-## 🎁 Page PROMOTIONS SAQ — À DÉCIDER (NON BÂTIE)
-Burger `'promotions'` → « À venir ». Backend dispo : `getPromotionsSAQ` (tes vins), `getToutesPromotionsSAQ` (hors les tiens). **À décider** : tes vins, toutes, ou les deux.
+## 🎁 Page PROMOTIONS SAQ V2 — ✅ TERMINÉ
+`#promoV2Container`, gabarit Liste d'achat. Ouverture = **Mes promos** (vins de la cave en rabais, via `getPromotionsSAQ` + codes SAQ de `ALL_DATA`, spinner, timeout 120 s) ; **Découvertes** (`getToutesPromotionsSAQ`, ≤ 30 $, hors mes vins) chargées EN ARRIÈRE-PLAN dès l'ouverture (silencieux, timeout 300 s) → bascule quasi instantanée. Mémoire de session (`promosMesV2`/`promosDecV2`).
+**Panneau gauche** : Afficher (Mes promos / Découvertes, actif en or) · filtres couleur/pays/cépage · Succursale (favorites individuelles, puis « Mes favorites » = `FAV`, puis « Toutes les succursales » = `TOUTES`).
+**Cartes** (tri rabais décroissant) : photo (mes vins), nom, origine ; à droite (enveloppé dans un `<div>` — la zone est flex, sinon tout s'étale sur une ligne) : prix barré (`.prix-barre`), prix promo, `+X pts` bonis, dispo.
+**Dispo** : une succursale → `X btl`/✗ par carte ; `FAV` → chaque favorite avec stock et quantité (1 appel `getSuccursalesDisponibles` par carte, timeout 120 s) ; `TOUTES` → tap sur une carte = 3 succursales les plus proches avec stock (géolocalisation).
+**Clic carte** : Mes promos → fiche (provenance 'promo') ; Découvertes → page SAQ du vin ; mode `TOUTES` → dispo proches.
 
-### Menu burger V2 — ✅ TERMINÉ
-`#burgerV2` + voile. Actifs : ACCUEIL, CAVE, EMPLACEMENTS, HISTORIQUE, LISTE D'ACHAT, À RANGER, RAFRAÎCHIR. À venir : RECHERCHE, PROMOTIONS SAQ.
+## 🔍 Page RECHERCHE V2 — ✅ TERMINÉ
+`#rechercheV2Container`, gabarit À ranger + champ. UN champ qui fouille TOUS les champs de TOUS les vins (`ALL_DATA`) — agent, producteur, arômes, description, appellation… — accents et majuscules ignorés (`normaliserRechercheV2`), minimum 2 caractères. Champs exclus de la fouille : row, bottle, Statut, Meuble/Rangee/Espace, dates, Source, Photo URL. Résultats groupés par vin (`grouperVinsV2`), cartes standards (compte de bouteilles à droite, voile si 0) → fiche (provenance 'recherche').
+
+### Menu burger V2 — ✅ TERMINÉ (complet, plus aucun « À venir »)
+`#burgerV2` + voile. ACCUEIL, CAVE, EMPLACEMENTS, HISTORIQUE, LISTE D'ACHAT, RECHERCHE, À RANGER, PROMOTIONS SAQ, RAFRAÎCHIR.
 
 ## 🏠 Accueil V2 — ✅ TERMINÉ
 `#accueilV2-titre` padding `25vh`. `.bouton-navigation` 40×40 (scan/SAQ/burger), `.gauche`/`.droite` en `absolute`.
@@ -130,8 +137,6 @@ Crayon (✎) → `ouvrirEditFicheV2`, 26 champs. Sauvegarde conforme mémoire (v
 ## 🐞 En suspens
 - **Vue emplacements V1 instable** : un filtre renvoie parfois une bouteille de moins. D'où la vérif réelle finale à l'Arrivée.
 - **Découpage des JS** (proposé, non tranché, pas tout de suite) : socle / navigation / scan / actions / pages / fiche — `scripts-scanner-v2.js` est un fourre-tout. **Même exercice voulu pour `Code.gs`** (lecture / écriture / SAQ / historique / utilitaires).
-- **Page Promotions SAQ** : contenu à décider.
-- **Liste d'achat — dispo SAQ lente** : un appel `verifierDispoSAQ_GRAPHQL_V1` par carte quand une succursale est choisie.
 
 ## 📇 Champs d'un vin (référence)
 Code-barres (CUP), Code SAQ, Nom, Prix, Couleur, Cépages, Pays, Région, Appellation, Désignation, Classification, Format, Alcool, Sucre, Particularité, Producteur, Agent promo, Millésime dégusté, Arômes, Acidité, Sucrosité, Corps, Bouche, Température, Description, Aimé (`Racheter`), Accords, Recettes, Notes temporaires, Divers, Pastille gout (32), Photo URL (33), Panier (34). Bouteilles : index 35-69 (5 × 7).
