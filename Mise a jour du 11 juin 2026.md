@@ -137,6 +137,7 @@ Crayon (✎) → `ouvrirEditFicheV2`, 26 champs. Sauvegarde conforme mémoire (v
 ## 🐞 En suspens
 - **Vue emplacements V1 instable** : un filtre renvoie parfois une bouteille de moins. D'où la vérif réelle finale à l'Arrivée.
 - **Découpage des JS** (proposé, non tranché, pas tout de suite) : socle / navigation / scan / actions / pages / fiche — `scripts-scanner-v2.js` est un fourre-tout. **Même exercice voulu pour `Code.gs`** (lecture / écriture / SAQ / historique / utilitaires).
+- **Panneaux de filtres dupliqués dans le HTML** : le même bloc (Filtrer · Couleurs/Pays/Cépages · Succursale) est copié dans plusieurs pages (achat, promo, variantes Cave/Emp/Histo). À remplacer par UNE fonction JS qui génère le panneau (préfixe en paramètre) — à faire en même temps que le découpage. La duplication coûte en lecture et en tokens à chaque session.
 
 ## 📇 Champs d'un vin (référence)
 Code-barres (CUP), Code SAQ, Nom, Prix, Couleur, Cépages, Pays, Région, Appellation, Désignation, Classification, Format, Alcool, Sucre, Particularité, Producteur, Agent promo, Millésime dégusté, Arômes, Acidité, Sucrosité, Corps, Bouche, Température, Description, Aimé (`Racheter`), Accords, Recettes, Notes temporaires, Divers, Pastille gout (32), Photo URL (33), Panier (34). Bouteilles : index 35-69 (5 × 7).
