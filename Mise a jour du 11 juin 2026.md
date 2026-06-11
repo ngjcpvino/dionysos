@@ -134,6 +134,15 @@ S'ouvrent depuis la mémoire. Boire : plat facultatif, verres grisés sans plat,
 ## ✏️ CRAYON — édition fiche V2 — ✅ TERMINÉ
 Crayon (✎) → `ouvrirEditFicheV2`, 26 champs. Sauvegarde conforme mémoire (voir Fiche V2).
 
+## 📋 PROCHAINE SESSION — demandes à exécuter (10 juin 2026, dans l'ordre)
+1. **Scroll** : toute page rouverte (par n'importe quel chemin) doit revenir EN HAUT — remettre `scrollTop = 0` du `.modal-v2-content` à chaque `ouvrir...V2`.
+2. **Champ mets** : la boîte de texte du plat ne replie pas — le texte long est invisible. Permettre le retour à la ligne (textarea ou repli).
+3. **Fiche — section plats vide** : la barre séparatrice s'affiche même sans aucun mets. La masquer quand il n'y a rien.
+4. **Photo de la bouteille (fiche)** : le clic ouvre la page SAQ — remplacer par un MODAL : la bouteille en grand + ✕ pour fermer.
+5. **Succursales trouvées (Où le trouver / dispo proches)** : tap sur une succursale = ouvrir Plans avec l'itinéraire (lien `maps` avec l'adresse).
+6. **Cartes mets** : la date à droite est centrée verticalement — la vouloir EN HAUT à droite du rectangle.
+7. **Photo manquante/erronée** : pouvoir la corriger — (a) bouton « Mettre à jour la photo » qui rescrape la SAQ pour CE vin mais n'écrit QUE la photo (aucun autre champ touché), (b) possibilité de fournir SA PROPRE photo (URL ou téléversement — méthode à trancher avec l'utilisateur).
+
 ## 🐞 En suspens
 - **Vue emplacements V1 instable** : un filtre renvoie parfois une bouteille de moins. D'où la vérif réelle finale à l'Arrivée.
 - **Découpage des JS** (proposé, non tranché, pas tout de suite) : socle / navigation / scan / actions / pages / fiche — `scripts-scanner-v2.js` est un fourre-tout. **Même exercice voulu pour `Code.gs`** (lecture / écriture / SAQ / historique / utilitaires).
