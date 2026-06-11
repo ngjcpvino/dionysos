@@ -1132,6 +1132,7 @@ function remplirFiltresPromoV2() {
   }).join('');
   items += '<div class="item-liste' + (f.succ === 'FAV' ? ' actif' : '') + '" onclick="choisirFiltrePromoV2(\'succ\', \'FAV\')">Mes favorites</div>';
   items += '<div class="item-liste' + (f.succ === 'TOUTES' ? ' actif' : '') + '" onclick="choisirFiltrePromoV2(\'succ\', \'TOUTES\')">Toutes les succursales</div>';
+  items += '<div class="item-liste" onclick="gererFavoritesV2(\'promoV2\')">Gérer mes favorites</div>';
   document.getElementById('promoV2-f-succ-menu').innerHTML = items;
   var dispSucc = document.getElementById('promoV2-f-succ-display');
   if (dispSucc) {
