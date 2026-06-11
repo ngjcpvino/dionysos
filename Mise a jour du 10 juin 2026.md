@@ -1,4 +1,4 @@
-# 🍷 Dionysos — État du projet (consolidé)
+# 🍷 Dionysos — État du projet (consolidé, à jour au 10 juin 2026)
 
 > Les RÈGLES DE TRAVAIL sont dans `REFERENCE.md` (à lire en premier). Ce fichier-ci ne contient que l'état technique du projet. Seuls deux `.md` existent : `REFERENCE.md` et celui-ci.
 
@@ -10,7 +10,7 @@
 ## 🏗️ Stratégie V2 — deux sites parallèles (DÉCIDÉ)
 On bâtit le V2 comme **un site complet et autonome, côte à côte avec le V1**.
 
-**Site V1 (actuel, figé)** : `index.html`, `styles.css`, tous les `scripts-*.js` V1. On n'y touche plus. **Nettoyé (9 juin 2026)** : plus aucune trace de V2 dans `index.html` (scripts V2 retirés, blocs HTML V2 retirés, fichiers `scripts-*-V2.js` à V majuscule supprimés du dépôt).
+**Site V1 (actuel, figé)** : `index.html`, `styles.css`, tous les `scripts-*.js` V1. On n'y touche plus. **Nettoyé** : plus aucune trace de V2 dans `index.html` ; les fichiers `scripts-*-V2.js` (V majuscule) n'existent plus dans le dépôt.
 
 **Site V2 (parallèle, en construction)** : `index-v2.html`, `styles-v2.css`, `scripts-socle-v2.js` + modules `-v2.js`. `index-v2.html` charge **uniquement** ses propres fichiers.
 
@@ -45,14 +45,21 @@ App à **2 utilisateurs sur 2 téléphones** ; la vérité partagée = le Sheet.
 ## 🧭 Navigation V2 (RÈGLES, 9 juin 2026)
 - **`cacherToutesPagesV2()`** (dans `scripts-scanner-v2.js`) cache TOUS les conteneurs/overlays V2 + ferme le burger. Liste complète maintenue à jour à chaque nouvel écran.
 - **Burger** : chaque cible fait `cacherToutesPagesV2()` puis ouvre sa page ; 'accueil' = tout cacher + contexte null ; RAFRAÎCHIR = resync `ALL_DATA` + vide `ALL_HISTORIQUE`.
+- **Menu d'action (`menuV2Click`)** : chaque bouton fait `cacherToutesPagesV2()` avant d'ouvrir (sinon une liste restée ouverte dessous repassait par-dessus la page d'action). La garde « 0 bouteille » est vérifiée AVANT tout.
+- **Œil grisé** : `#menuV2-visualiser` reçoit `.desactive` quand on arrive de la fiche (`FICHE_V2_ORIGINE` défini). `traiterResultatScanV2` remet `FICHE_V2_ORIGINE = null` (un scan neuf rallume l'œil).
 - **Après confirmation Boire / Donner / Arrivée → retour à l'ACCUEIL** (décidé). Déplacer garde son retour (`'aranger'`/`'emplacements'`/menu) — utile pour ranger en série.
 - **✕ des pages vin** : Boire/Donner/Arrivée rouvrent le menu d'action (seul chemin d'accès) ; Déplacer honore `menuActionV2Context.retour`.
+- **Démarrage** : le spinner du `window.onload` couvre `getConfig` ET `getInventoryData` — l'app n'est utilisable qu'une fois la mémoire complète (plus jamais de Cave à 0).
 
 **Z-index des overlays empilés (RÈGLE).** Tous les écrans V2 partagent `z-index:9999`. Un overlay ouvert PAR-DESSUS un autre reçoit un z-index supérieur : `#menuActionV2Overlay` et `#histoEditV2Overlay` = `10010` ; loupes fixes et `.btn-fermer` = `10002` ; spinner/toast = `99999`.
 
 **Ouverture d'overlay différée — anti « double-clic » (RÈGLE).** Tout passage « masquer un overlay puis en ouvrir un autre » ouvre via `ouvrirApresTap(fn)` (`setTimeout 0`, dans `scripts-socle-v2.js`). Appliqué : `menuV2Click`, `ouvrirActionDepuisFicheV2`, `deplacerDepuisARangerV2/EmpV2`, cartes → fiche, cartes mets → éditeur.
 
 **Loupe/X collés au défilement (RÈGLE).** `.modal-v2-content` défile, donc loupe et ✕ sont `position:fixed`. `.gauche` reste `absolute` (accueil + crayon fiche).
+
+**Fond stable (RÈGLE iOS).** `.modal-v2-fullscreen` est en `width:100%; height:100%` — JAMAIS `100vh` : sur iPhone/iPad, `100vh` inclut la barre Safari repliée, l'image « cover » se recadre et le fond paraît se tasser entre l'accueil et les pages. Le fond de chaque page reste OPAQUE (rideau qui masque la page en dessous) — ne jamais le rendre transparent.
+
+**Anti-cache iPhone (RÈGLE).** `index-v2.html` charge `styles-v2.css` et les 3 JS par `document.write` avec `?v=` + heure courante (`Math.floor(Date.now()/3600000)`) : les fichiers se rechargent seuls au plus tard une heure après une publication, sans rien modifier à la main.
 
 ## 📂 Fichiers
 **V1 (figé, pur V1)** : index.html · styles.css · scripts-config.js · scripts-init.js · scripts-inventaire.js · scripts-fiche.js · scripts-scanner.js · scripts-listes.js
@@ -79,7 +86,7 @@ S'ouvre depuis la mémoire. Cascade ne propose que le libre, vérif réelle (`ch
 S'ouvre depuis la mémoire. 1 bouteille → direct ; plusieurs → liste (`row` de la bouteille, repli sur `wineResult.row` quand le contexte vient du scan). Vérif réelle. `fermerDeplacerV2` revient selon `menuActionV2Context.retour`.
 
 ## 📄 Fiche V2 (`scripts-fiche-v2.js`)
-`ouvrirFicheV2(codebarre, provenance)` : bâtie depuis `ficheDepuisMemoireV2` (instantanée), secours backend. Plats depuis `ALL_HISTORIQUE` (paresseux). Panneau `#ficheV2Overlay`, bordure couleur du vin.
+`ouvrirFicheV2(codebarre, provenance)` : bâtie depuis `ficheDepuisMemoireV2` (instantanée), secours backend. Plats depuis `ALL_HISTORIQUE` (paresseux). Panneau `#ficheV2Overlay`, bordure couleur du vin. La carte Température s'affiche SANS le « De » de tête (`replace(/^De\s+/i, '')`).
 **Blocs** : Information · Description+Prix · Dégustation · Production · Notes (Accords ; Racheter ✓/✗ ; Sur-inventaire `Panier` ; Recettes/Notes/Divers) · Historique des plats (`.fiche-mets` indentées 60px, cliquables → éditeur correction) · Inventaire (lecture seule) · Photo · roundel « OÙ LE TROUVER » · roundel « ACTION » · Prix auto (`verifierPrixV2`, silencieux).
 **Écritures directes** : Racheter/Panier/Accords → `updateWineField` puis `majMemoireVinV2` + `CURRENT_WINE_DATA`. Édition (26 champs) → `saveWineEdits` puis `majMemoireVinV2` (clés `Designation`→`Désignation`, `Temperature`→`Température`) puis rouvre la fiche.
 **Retour fiche** (`fermerFicheV2`) : `menuScan` + `FICHE_V2_ORIGINE` → liste d'origine ; sinon `menuScan` → menu d'action ; 'cave'/'achat'/'histo' → leur page.
@@ -100,13 +107,13 @@ S'ouvrent depuis la mémoire. Boire : plat facultatif, verres grisés sans plat,
 `#aRangerV2Container`, mémoire, sans filtres. Bouteilles actives sans emplacement, tri couleur puis nom. Vide → « Tout est bien rangé! ». Clic → `deplacerDepuisARangerV2` (`retour='aranger'`).
 
 ## 🛒 Page LISTE D'ACHAT V2 — ✅ TERMINÉ
-`#achatV2Container`, mémoire (succursales chargées une fois puis cache). Contenu auto : (`Racheter`=Oui ET 0 bouteille) OU (`Panier`=Oui). Filtres CASCADE + Succursale. Dispo + quantité par carte si succursale choisie. Clic → `ouvrirFicheV2(cb,'achat')`.
+`#achatV2Container`, mémoire (succursales chargées une fois puis cache). Contenu auto : (`Racheter`=Oui ET 0 bouteille) OU (`Panier`=Oui). Filtres CASCADE + Succursale — **TOUS remis à zéro à chaque ouverture, succursale comprise**. Cartes SANS prix : nom + origine, dispo seule à droite en petit (`X btl` vert `.dispo-oui` / `✗` rouge `.dispo-non`) quand une succursale est choisie. Clic → `ouvrirFicheV2(cb,'achat')`. Les noms de succursales replient dans le panneau (`.panneau-gauche .item-liste { white-space: normal }`).
 
 ## 📍 Page EMPLACEMENTS V2 — ✅ TERMINÉ
-`#empV2Container`, mémoire. Filtres CASCADE Meuble → Rangée → Espace. Boutons « Vins en double », « Cépages doubles »/« manquants » (si meuble). Vue groupée MEUBLE → RANGÉE → cartes. Clic → `deplacerDepuisEmpV2` (`retour='emplacements'`).
+`#empV2Container`, mémoire. Filtres CASCADE Meuble → Rangée → Espace. Boutons « Vins en double », « Cépages doubles »/« manquants » (si meuble). Vue groupée MEUBLE → RANGÉE → cartes. Rangée tirée : le décompte reste en haut à droite (`.emp-rangee.ouvert` en `position:relative`, `.emp-compte` en `absolute` haut-droite). Clic → `deplacerDepuisEmpV2` (`retour='emplacements'`).
 
 ## 📜 Page HISTORIQUE V2 — ✅ TERMINÉ
-`#histoV2Container`, mémoire (`ALL_HISTORIQUE` paresseux). Filtres Mets · Vin · Accord. Corps PAR VIN (`.histo-groupe`, bande couleur en haut de la carte vin) : carte vin → fiche ; cartes `.histo-mets` (barre couleur gauche, date droite) → éditeur `#histoEditV2Overlay`. Correction NOTE + plat → `corrigerHistorique` (resync). Ajout manuel (roundel « Ajouter ») → `histoAjoutV2Overlay` : recherche par nom dans `ALL_DATA`, plat + note + Accords → `ajouterHistoriqueManuel` (resync). `getHistorique` renvoie `row`, `codeSAQ`, `couleur`.
+`#histoV2Container`, mémoire (`ALL_HISTORIQUE` paresseux). Filtres Mets · Vin · Accord. Corps PAR VIN (`.histo-groupe`, bande couleur en haut de la carte vin) : carte vin → fiche ; cartes `.histo-mets` (barre couleur gauche, date droite) → éditeur `#histoEditV2Overlay`. **Page Corriger au gabarit commun** : ✕, nom (`.titre-1`), origine (`#histoEditV2-origine`), titre blanc « Corriger ». `ouvrirHistoEditV2(row, plat, note, nom, provenance, codeSAQ, codebarre)` : provenance 'fiche' = origine depuis `CURRENT_WINE_DATA` ; sinon retrouvée dans `ALL_DATA` par Code SAQ d'abord, code-barres sinon (jamais par le nom). Correction NOTE + plat → `corrigerHistorique` (resync). Ajout manuel (roundel « Ajouter ») → `histoAjoutV2Overlay` : recherche par nom dans `ALL_DATA`, plat + note + Accords → `ajouterHistoriqueManuel` (resync). `getHistorique` renvoie `row`, `codeSAQ`, `couleur`.
 
 ## 🎁 Page PROMOTIONS SAQ — À DÉCIDER (NON BÂTIE)
 Burger `'promotions'` → « À venir ». Backend dispo : `getPromotionsSAQ` (tes vins), `getToutesPromotionsSAQ` (hors les tiens). **À décider** : tes vins, toutes, ou les deux.
@@ -121,10 +128,8 @@ Burger `'promotions'` → « À venir ». Backend dispo : `getPromotionsSAQ` (te
 Crayon (✎) → `ouvrirEditFicheV2`, 26 champs. Sauvegarde conforme mémoire (voir Fiche V2).
 
 ## 🐞 En suspens
-- **`addBottle` max 5 silencieux** : le backend renvoie `success:false` mais le front affiche « Bouteille ajoutée ! ». Protégé seulement par le blocage cascade. À corriger (lire `res.success`).
-- **`saveWineEdits` ignore les champs vidés** : effacer un champ ne le vide pas dans le Sheet ; la mémoire locale, elle, se vide → divergence jusqu'au Rafraîchir. À corriger dans `Code.gs`.
 - **Vue emplacements V1 instable** : un filtre renvoie parfois une bouteille de moins. D'où la vérif réelle finale à l'Arrivée.
-- **Découpage des JS** (proposé, non tranché) : socle / navigation / scan / actions / pages / fiche — `scripts-scanner-v2.js` est un fourre-tout.
+- **Découpage des JS** (proposé, non tranché, pas tout de suite) : socle / navigation / scan / actions / pages / fiche — `scripts-scanner-v2.js` est un fourre-tout. **Même exercice voulu pour `Code.gs`** (lecture / écriture / SAQ / historique / utilitaires).
 - **Page Promotions SAQ** : contenu à décider.
 - **Liste d'achat — dispo SAQ lente** : un appel `verifierDispoSAQ_GRAPHQL_V1` par carte quand une succursale est choisie.
 
@@ -146,9 +151,10 @@ Code-barres (CUP), Code SAQ, Nom, Prix, Couleur, Cépages, Pays, Région, Appell
 - Clés sans accent consommées par la fiche/édition : `Designation`, `Temperature`, `Cepage` — fournies par `ficheDepuisMemoireV2`, PAS par `getWineBottles`.
 - Toute nouvelle page V2 : l'ajouter à la liste de `cacherToutesPagesV2()`.
 - Toute nouvelle écriture : resynchroniser (`getInventoryData` ou `majMemoireVinV2`), et invalider `ALL_HISTORIQUE` si elle touche l'historique.
+- Jamais `100vh` dans le V2 (iOS recadre le fond) : toujours `height:100%`.
 - Overlay par-dessus un autre : z-index supérieur (l'ordre HTML ne suffit pas).
 - Loupe/X d'une page-liste : `position:fixed`, sinon ils défilent avec le contenu.
-- Carte avec date à droite : `white-space:nowrap` sinon tronquée.
+- Carte avec date à droite : `white-space:nowrap` sinon tronquée (exception : items des panneaux de filtres, qui replient).
 - Carte indentée pleine largeur : `width: calc(100% - indent)` sinon elle dépasse à droite.
 - Casse CSS sensible : `.roundel` futur `.bouton-londres`.
 - Toujours modifier dans `styles-v2.css` (V2), jamais `styles.css` (V1).

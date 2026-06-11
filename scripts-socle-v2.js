@@ -42,7 +42,7 @@ window.onload = function() {
 async function appelBackend(action, data = {}, options = {}) {
   if (options.spinner) _afficherSpinner(options.spinner);
   const controleur = new AbortController();
-  const minuterie = setTimeout(function() { controleur.abort(); }, 30000);
+  const minuterie = setTimeout(function() { controleur.abort(); }, options.timeout || 30000);
   try {
     const response = await fetch(API_URL, {
       method: 'POST',

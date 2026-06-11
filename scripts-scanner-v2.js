@@ -220,7 +220,7 @@ function fermerMenuActionV2() {
 }
 
 function cacherToutesPagesV2() {
-  ['scannerV2Container', 'saisieManuelleV2Container', 'vinInconnuV2Container', 'menuActionV2Overlay', 'arriveeV2Container', 'deplacerV2Container', 'boireV2Container', 'donnerV2Container', 'caveV2Container', 'aRangerV2Container', 'histoV2Container', 'histoAjoutV2Overlay', 'histoEditV2Overlay', 'empV2Container', 'achatV2Container', 'editFicheV2Overlay', 'ficheV2Overlay'].forEach(function(id) {
+  ['scannerV2Container', 'saisieManuelleV2Container', 'vinInconnuV2Container', 'menuActionV2Overlay', 'arriveeV2Container', 'deplacerV2Container', 'boireV2Container', 'donnerV2Container', 'caveV2Container', 'aRangerV2Container', 'histoV2Container', 'histoAjoutV2Overlay', 'histoEditV2Overlay', 'empV2Container', 'achatV2Container', 'promoV2Container', 'rechercheV2Container', 'editFicheV2Overlay', 'ficheV2Overlay'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.style.display = 'none';
   });
@@ -837,6 +837,7 @@ var succursalesAchatV2 = [];
 
 function ouvrirAchatV2() {
   document.getElementById('achatV2Container').style.display = 'flex';
+  filtresAchatV2 = { couleur: '', pays: '', cepage: '', succ: '' };
   if (succursalesAchatV2.length) {
     remplirFiltresAchatV2();
     appliquerFiltresAchatV2();
@@ -984,10 +985,10 @@ function afficherCartesAchatV2(liste) {
     var photo = w['Photo URL'] ? '<div class="carte-photo"><img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
     var onclick = cb ? ' onclick="ouvrirApresTap(function(){ouvrirFicheV2(\'' + cb + '\', \'achat\')})"' : '';
     var dispoId = w['Code SAQ'] ? ' id="achatV2-dispo-' + w['Code SAQ'] + '"' : '';
-    var dispo = (filtresAchatV2.succ && w['Code SAQ']) ? '<br><span class="texte-secondaire"' + dispoId + '>…</span>' : '';
+    var dispo = (filtresAchatV2.succ && w['Code SAQ']) ? '<span' + dispoId + '>…</span>' : '';
     return '<div class="carte ' + couleurClasseV2(w.Couleur) + '"' + onclick + '>' + photo +
            '<div class="carte-centre"><span class="carte-titre">' + nom + '</span><span class="carte-sous">' + sous + '</span></div>' +
-           '<div class="carte-droite">' + (w.Prix ? w.Prix + ' $' : '') + dispo + '</div></div>';
+           '<div class="carte-droite">' + dispo + '</div></div>';
   }).join('');
 
   if (filtresAchatV2.succ) chargerDispoAchatV2(liste);
@@ -1002,15 +1003,249 @@ function chargerDispoAchatV2(liste) {
       var el = document.getElementById('achatV2-dispo-' + codeSAQ);
       if (!el) return;
       if (res && res.disponible) {
-        el.textContent = (res.quantite != null ? res.quantite + ' en stock' : 'Disponible');
+        el.textContent = (res.quantite != null ? res.quantite + ' btl' : '✓');
+        el.classList.add('dispo-oui');
       } else {
-        el.textContent = 'Non dispo';
+        el.textContent = '✗';
+        el.classList.add('dispo-non');
       }
     }).catch(function(){
       var el = document.getElementById('achatV2-dispo-' + codeSAQ);
       if (el) el.textContent = '—';
     });
   });
+}
+
+// ==================== PROMOTIONS V2 ====================
+var promoModeV2 = 'mes';
+var filtresPromoV2 = { couleur: '', pays: '', cepage: '', succ: '' };
+var promosMesV2 = null;
+var promosDecV2 = null;
+var promosDecEnCours = false;
+
+function codesSAQCaveV2() {
+  var vues = {};
+  var codes = [];
+  (ALL_DATA || []).forEach(function(i) {
+    var c = (i['Code SAQ'] || '').toString().trim();
+    if (c && !vues[c]) { vues[c] = true; codes.push(c); }
+  });
+  return codes;
+}
+
+function vinParCodeSAQV2(codeSAQ) {
+  var c = (codeSAQ || '').toString().trim();
+  return (ALL_DATA || []).filter(function(i) {
+    return (i['Code SAQ'] || '').toString().trim() === c;
+  })[0] || null;
+}
+
+function ouvrirPromoV2() {
+  document.getElementById('promoV2Container').style.display = 'flex';
+  promoModeV2 = 'mes';
+  filtresPromoV2 = { couleur: '', pays: '', cepage: '', succ: '' };
+  if (!succursalesAchatV2.length) {
+    appelBackend('getSuccursales', {}, { spinner: '' }).then(function(succ) {
+      succursalesAchatV2 = succ || [];
+      remplirFiltresPromoV2();
+    }).catch(function() {});
+  }
+  chargerDecouvertesV2();
+  if (promosMesV2) { afficherPromoV2(); return; }
+  appelBackend('getPromotionsSAQ', { codesSAQ: codesSAQCaveV2() }, { spinner: ' ', timeout: 120000 }).then(function(promos) {
+    promosMesV2 = promos || [];
+    afficherPromoV2();
+  }).catch(function() { retourAccueilV2(); });
+}
+
+function chargerDecouvertesV2() {
+  if (promosDecV2 || promosDecEnCours) return;
+  promosDecEnCours = true;
+  appelBackend('getToutesPromotionsSAQ', { codesSAQ: codesSAQCaveV2() }, { spinner: '', timeout: 300000 }).then(function(promos) {
+    promosDecV2 = promos || [];
+    promosDecEnCours = false;
+    if (promoModeV2 === 'dec') afficherPromoV2();
+  }).catch(function() { promosDecEnCours = false; });
+}
+
+function fermerPromoV2() {
+  fermerFiltresPromoV2();
+  document.getElementById('promoV2Container').style.display = 'none';
+}
+
+function ouvrirFiltresPromoV2() {
+  document.getElementById('promoV2-filtres-voile').classList.add('ouvert');
+  document.getElementById('promoV2-filtres').classList.add('ouvert');
+}
+function fermerFiltresPromoV2() {
+  document.getElementById('promoV2-filtres-voile').classList.remove('ouvert');
+  document.getElementById('promoV2-filtres').classList.remove('ouvert');
+}
+
+function choisirModePromoV2(mode) {
+  promoModeV2 = mode;
+  filtresPromoV2.couleur = ''; filtresPromoV2.pays = ''; filtresPromoV2.cepage = '';
+  if (mode === 'dec' && !promosDecV2) chargerDecouvertesV2();
+  afficherPromoV2();
+  fermerFiltresPromoV2();
+}
+
+function listePromoCouranteV2() {
+  if (promoModeV2 === 'mes') {
+    return (promosMesV2 || []).map(function(p) {
+      var w = vinParCodeSAQV2(p.codeSAQ) || {};
+      return {
+        codeSAQ: p.codeSAQ, nom: p.nom, prixRegulier: p.prixRegulier, prixFinal: p.prixFinal,
+        rabais: p.rabais, pointsBonis: p.pointsBonis || 0,
+        couleur: w.Couleur || '', pays: w.Pays || '', region: w.Region || '',
+        cepage: w.Cepage || '', photo: w['Photo URL'] || '', cb: (w['Code-barres'] || '').toString().trim()
+      };
+    });
+  }
+  return (promosDecV2 || []).map(function(p) {
+    return {
+      codeSAQ: p.codeSAQ, nom: p.nom, prixRegulier: p.prixRegulier, prixFinal: p.prixFinal,
+      rabais: p.rabais, pointsBonis: p.pointsBonis || 0,
+      couleur: p.couleur || '', pays: p.pays || '', region: '', cepage: p.cepage || '', photo: '', cb: ''
+    };
+  });
+}
+
+function remplirFiltresPromoV2() {
+  var f = filtresPromoV2;
+  document.getElementById('promoV2-mode-mes').classList.toggle('actif', promoModeV2 === 'mes');
+  document.getElementById('promoV2-mode-dec').classList.toggle('actif', promoModeV2 === 'dec');
+
+  var base = listePromoCouranteV2();
+  var libelles = { couleur: 'Couleurs', pays: 'Pays', cepage: 'Cépages' };
+  ['couleur', 'pays', 'cepage'].forEach(function(cle) {
+    var menu = document.getElementById('promoV2-f-' + cle + '-menu');
+    menu.innerHTML = uniqueValeursAchat(base, cle).map(function(v) {
+      return '<div class="item-liste' + (String(v) === String(f[cle]) ? ' actif' : '') + '" onclick="choisirFiltrePromoV2(\'' + cle + '\', \'' + String(v).replace(/'/g, "\\'") + '\')">' + v + '</div>';
+    }).join('');
+    var disp = document.getElementById('promoV2-f-' + cle + '-display');
+    if (disp) disp.textContent = f[cle] === '' ? libelles[cle] : f[cle];
+  });
+
+  var items = succursalesAchatV2.map(function(s) {
+    return '<div class="item-liste' + (f.succ === s.numero ? ' actif' : '') + '" onclick="choisirFiltrePromoV2(\'succ\', \'' + s.numero + '\')">' + s.nom + '</div>';
+  }).join('');
+  items += '<div class="item-liste' + (f.succ === 'FAV' ? ' actif' : '') + '" onclick="choisirFiltrePromoV2(\'succ\', \'FAV\')">Mes favorites</div>';
+  items += '<div class="item-liste' + (f.succ === 'TOUTES' ? ' actif' : '') + '" onclick="choisirFiltrePromoV2(\'succ\', \'TOUTES\')">Toutes les succursales</div>';
+  document.getElementById('promoV2-f-succ-menu').innerHTML = items;
+  var dispSucc = document.getElementById('promoV2-f-succ-display');
+  if (dispSucc) {
+    if (f.succ === 'FAV') dispSucc.textContent = 'Mes favorites';
+    else if (f.succ === 'TOUTES') dispSucc.textContent = 'Toutes les succursales';
+    else {
+      var sel = succursalesAchatV2.filter(function(s) { return s.numero === f.succ; })[0];
+      dispSucc.textContent = sel ? sel.nom : 'Succursale';
+    }
+  }
+}
+
+function basculerFiltrePromoV2(cle) {
+  var menu = document.getElementById('promoV2-f-' + cle + '-menu');
+  var ouvert = menu.classList.contains('ouvert');
+  ['couleur','pays','cepage','succ'].forEach(function(k) {
+    document.getElementById('promoV2-f-' + k + '-menu').classList.remove('ouvert');
+  });
+  if (!ouvert) menu.classList.add('ouvert');
+}
+
+function choisirFiltrePromoV2(cle, valeur) {
+  filtresPromoV2[cle] = valeur;
+  document.getElementById('promoV2-f-' + cle + '-menu').classList.remove('ouvert');
+  afficherPromoV2();
+}
+
+function reinitialiserFiltresPromoV2() {
+  filtresPromoV2 = { couleur: '', pays: '', cepage: '', succ: '' };
+  afficherPromoV2();
+  fermerFiltresPromoV2();
+}
+
+function afficherPromoV2() {
+  remplirFiltresPromoV2();
+  var f = filtresPromoV2;
+  var div = document.getElementById('promoV2-cartes');
+  var compte = document.getElementById('promoV2-compte');
+  if (promoModeV2 === 'dec' && !promosDecV2) {
+    compte.textContent = '';
+    div.innerHTML = '<div class="texte-secondaire">Découvertes en chargement…</div>';
+    return;
+  }
+  var liste = listePromoCouranteV2().filter(function(p) {
+    return (!f.couleur || p.couleur === f.couleur) &&
+      (!f.pays || p.pays === f.pays) &&
+      (!f.cepage || (p.cepage && p.cepage.indexOf(f.cepage) !== -1));
+  });
+  liste.sort(function(a, b) { return (b.rabais || 0) - (a.rabais || 0); });
+  compte.textContent = liste.length + ' vin' + (liste.length > 1 ? 's' : '') + ' en promotion';
+  if (!liste.length) { div.innerHTML = '<div class="texte-secondaire">Aucune promotion</div>'; return; }
+  div.innerHTML = liste.map(function(p) {
+    var sous = [[p.pays, p.region].filter(Boolean).join(' • '), p.cepage].filter(Boolean).join('<br>');
+    var photo = p.photo ? '<div class="carte-photo"><img src="' + p.photo + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
+    var bonis = p.pointsBonis ? '<br>+' + p.pointsBonis + ' pts' : '';
+    var dispo = (f.succ && f.succ !== 'TOUTES') ? '<br><span id="promoV2-dispo-' + p.codeSAQ + '">…</span>' : '';
+    var droite = '<div><span class="prix-barre">' + p.prixRegulier.toFixed(2) + ' $</span><br>' + p.prixFinal.toFixed(2) + ' $' + bonis + dispo + '<span id="promoV2-proches-' + p.codeSAQ + '"></span></div>';
+    var onclick = '';
+    if (f.succ === 'TOUTES') onclick = ' onclick="dispoProchesPromoV2(\'' + p.codeSAQ + '\')"';
+    else if (promoModeV2 === 'mes' && p.cb) onclick = ' onclick="ouvrirApresTap(function(){ouvrirFicheV2(\'' + p.cb + '\', \'promo\')})"';
+    else if (promoModeV2 === 'dec') onclick = ' onclick="window.open(\'https://www.saq.com/fr/' + p.codeSAQ + '\')"';
+    return '<div class="carte ' + couleurClasseV2(p.couleur) + '"' + onclick + '>' + photo +
+           '<div class="carte-centre"><span class="carte-titre">' + decodeHTML(p.nom) + '</span><span class="carte-sous">' + sous + '</span></div>' +
+           '<div class="carte-droite">' + droite + '</div></div>';
+  }).join('');
+  var loupe = document.getElementById('promoV2-loupe');
+  if (loupe) loupe.classList.toggle('actif', !!(f.couleur || f.pays || f.cepage || f.succ));
+  if (f.succ && f.succ !== 'TOUTES') chargerDispoPromoV2(liste);
+}
+
+function chargerDispoPromoV2(liste) {
+  var f = filtresPromoV2;
+  var favoris = succursalesAchatV2.map(function(s) { return s.numero; });
+  liste.forEach(function(p) {
+    function el() { return document.getElementById('promoV2-dispo-' + p.codeSAQ); }
+    if (f.succ === 'FAV') {
+      appelBackend('getSuccursalesDisponibles', { codeSAQ: p.codeSAQ }, { spinner: '', timeout: 120000 }).then(function(succursales) {
+        var e = el(); if (!e) return;
+        var dansFav = (succursales || []).filter(function(s) { return favoris.indexOf(s.numero) !== -1 && s.quantite > 0; });
+        if (!dansFav.length) { e.innerHTML = '<span class="dispo-non">✗</span>'; return; }
+        e.innerHTML = dansFav.map(function(s) { return '<span class="dispo-oui">' + s.nom + ' ' + s.quantite + '</span>'; }).join('<br>');
+      }).catch(function() { var e = el(); if (e) e.textContent = '—'; });
+    } else {
+      appelBackend('verifierDispoSAQ_GRAPHQL_V1', { codeSAQ: p.codeSAQ, succursale: f.succ }, { spinner: '' }).then(function(res) {
+        var e = el(); if (!e) return;
+        if (res && res.disponible) {
+          e.innerHTML = '<span class="dispo-oui">' + (res.quantite ? res.quantite + ' btl' : '✓') + '</span>';
+        } else {
+          e.innerHTML = '<span class="dispo-non">✗</span>';
+        }
+      }).catch(function() { var e = el(); if (e) e.textContent = '—'; });
+    }
+  });
+}
+
+function dispoProchesPromoV2(codeSAQ) {
+  var el = document.getElementById('promoV2-proches-' + codeSAQ);
+  if (!el) return;
+  el.innerHTML = '<br>Recherche…';
+  function chercher(lat, lng) {
+    appelBackend('getSuccursalesDisponibles', { codeSAQ: codeSAQ, lat: lat, lng: lng }, { spinner: '', timeout: 120000 }).then(function(succursales) {
+      var dispo = (succursales || []).filter(function(s) { return s.quantite > 0; });
+      if (!dispo.length) { el.innerHTML = '<br><span class="dispo-non">✗</span>'; return; }
+      el.innerHTML = dispo.slice(0, 3).map(function(s) {
+        return '<br><span class="dispo-oui">' + s.nom + ' ' + s.quantite + '</span>';
+      }).join('');
+    }).catch(function() { el.innerHTML = ''; });
+  }
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      function(pos) { chercher(pos.coords.latitude, pos.coords.longitude); },
+      function() { chercher(null, null); }
+    );
+  } else { chercher(null, null); }
 }
 
 // ==================== EMPLACEMENTS V2 ====================
@@ -1869,6 +2104,8 @@ function burgerV2Click(cible) {
   if (cible === 'racheter') { cacherToutesPagesV2(); ouvrirAchatV2(); return; }
   if (cible === 'emplacements') { cacherToutesPagesV2(); ouvrirEmpV2(); return; }
   if (cible === 'historique') { cacherToutesPagesV2(); ouvrirHistoV2(); return; }
+  if (cible === 'promotions') { cacherToutesPagesV2(); ouvrirPromoV2(); return; }
+  if (cible === 'recherche') { cacherToutesPagesV2(); ouvrirRechercheV2(); return; }
   if (cible === 'refresh') {
     appelBackend('getInventoryData', {}, { spinner: 'Synchronisation' }).then(function(data) {
       ALL_DATA = data || [];
@@ -1883,9 +2120,14 @@ function burgerV2Click(cible) {
 function ajouterBouteilleArrivee(meuble, rangee, espace) {
   var code = menuActionV2Context ? menuActionV2Context.code : null;
   if (!code) { afficherMessage('Vin introuvable'); return; }
-  appelBackend('addBottle', { codebarre: code, meuble: meuble, rangee: rangee, espace: espace }, { spinner: 'Mise en cave' }).then(function() {
+  appelBackend('addBottle', { codebarre: code, meuble: meuble, rangee: rangee, espace: espace }, { spinner: 'Mise en cave' }).then(function(res) {
+    if (res && res.success === false) {
+      afficherMessage(res.message || 'Ajout refusé');
+      return null;
+    }
     return appelBackend('getInventoryData', {});
   }).then(function(data) {
+    if (data === null) return;
     if (data) ALL_DATA = data;
     cacherToutesPagesV2();
     menuActionV2Context = null;

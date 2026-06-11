@@ -370,6 +370,10 @@ function fermerFicheV2() {
     document.getElementById('achatV2Container').style.display = 'flex';
   } else if (FICHE_V2_PROVENANCE === 'histo') {
     ouvrirHistoV2();
+  } else if (FICHE_V2_PROVENANCE === 'promo') {
+    document.getElementById('promoV2Container').style.display = 'flex';
+  } else if (FICHE_V2_PROVENANCE === 'recherche') {
+    document.getElementById('rechercheV2Container').style.display = 'flex';
   } else if (FICHE_V2_PROVENANCE === 'emplacements') {
     ouvrirEmpV2();
   }
