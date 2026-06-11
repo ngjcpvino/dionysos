@@ -899,7 +899,7 @@ function remplirFiltresAchatV2() {
   var menuSucc = document.getElementById('achatV2-f-succ-menu');
   menuSucc.innerHTML = succursalesAchatV2.map(function(s){
     return '<div class="item-liste' + (s.numero === f.succ ? ' actif' : '') + '" onclick="choisirFiltreAchatV2(\'succ\', \'' + s.numero + '\')">' + s.nom + '</div>';
-  }).join('');
+  }).join('') + '<div class="item-liste" onclick="gererFavoritesV2(\'achatV2\')">Gérer mes favorites</div>';
   var dispSucc = document.getElementById('achatV2-f-succ-display');
   if (dispSucc) {
     var sel = succursalesAchatV2.filter(function(s){ return s.numero === f.succ; })[0];
