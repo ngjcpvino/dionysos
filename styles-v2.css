@@ -681,6 +681,7 @@ body::after {
 .item-liste:last-child { margin-bottom: 0; }
 .item-liste.actif { background: var(--gold-30); }
 .panneau-gauche .item-liste { white-space: normal; }
+.panneau-gauche .menu-liste { margin-left: auto; margin-right: 0; }
 
 /* ===== CERCLE — rond générique V2 (bordure or, fond sombre, centré) ===== */
 .cercle {
