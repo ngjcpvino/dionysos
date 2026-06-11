@@ -399,6 +399,59 @@
   </div>
 </div>
 
+<!-- ====================== PROMOTIONS V2 ====================== -->
+<div id="promoV2Container" class="modal-v2-fullscreen" style="display:none;">
+  <div class="modal-v2-content modale-haut">
+    <div class="cercle gauche" id="promoV2-loupe" onclick="ouvrirFiltresPromoV2()">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; vertical-align: middle;">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+    </div>
+    <h2 class="titre-1">Promotions</h2>
+    <div class="btn-fermer" onclick="fermerPromoV2()">✕</div>
+    <div id="promoV2-compte" class="texte-secondaire"></div>
+    <div id="promoV2-cartes" class="contenu"></div>
+  </div>
+  <div id="promoV2-filtres-voile" class="panneau-voile" onclick="fermerFiltresPromoV2()"></div>
+  <div id="promoV2-filtres" class="panneau-gauche">
+    <div class="titre-3">Afficher</div>
+    <div class="item-liste" id="promoV2-mode-mes" onclick="choisirModePromoV2('mes')">Mes promos</div>
+    <div class="item-liste" id="promoV2-mode-dec" onclick="choisirModePromoV2('dec')">Découvertes</div>
+
+    <div class="panneau-separateur"></div>
+    <div class="titre-3">Filtrer</div>
+    <div class="champ-cliquable" id="promoV2-f-couleur-display" onclick="basculerFiltrePromoV2('couleur')">Couleurs</div>
+    <div id="promoV2-f-couleur-menu" class="menu-liste"></div>
+
+    <div class="champ-cliquable" id="promoV2-f-pays-display" onclick="basculerFiltrePromoV2('pays')">Pays</div>
+    <div id="promoV2-f-pays-menu" class="menu-liste"></div>
+
+    <div class="champ-cliquable" id="promoV2-f-cepage-display" onclick="basculerFiltrePromoV2('cepage')">Cépages</div>
+    <div id="promoV2-f-cepage-menu" class="menu-liste"></div>
+
+    <div class="panneau-separateur"></div>
+    <div class="champ-cliquable" id="promoV2-f-succ-display" onclick="basculerFiltrePromoV2('succ')">Succursale</div>
+    <div id="promoV2-f-succ-menu" class="menu-liste"></div>
+
+    <div class="roundel" onclick="reinitialiserFiltresPromoV2()">
+      <span class="roundel-anneau"></span>
+      <span class="roundel-barre">Réinitialiser</span>
+    </div>
+  </div>
+</div>
+
+<!-- ====================== RECHERCHE V2 ====================== -->
+<div id="rechercheV2Container" class="modal-v2-fullscreen" style="display:none;">
+  <div class="modal-v2-content modale-haut">
+    <div class="btn-fermer" onclick="fermerRechercheV2()">✕</div>
+    <h2 class="titre-1">Recherche</h2>
+    <input type="text" id="rechercheV2-champ" class="champ-saisie" placeholder="Chercher dans tous les champs" oninput="lancerRechercheV2()">
+    <div id="rechercheV2-compte" class="texte-secondaire"></div>
+    <div id="rechercheV2-cartes" class="contenu"></div>
+  </div>
+</div>
+
 <!-- ====================== BOIRE V2 ====================== -->
 <div id="boireV2Container" class="modal-v2-fullscreen" style="display:none;">
   <div class="modal-v2-content modale-haut">

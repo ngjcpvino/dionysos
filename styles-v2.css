@@ -807,7 +807,7 @@ body::after {
   position: relative;
   z-index: 1;
   width: max-content;
-  min-width: 96px;
+  min-width: 110px;
   background: var(--black);
   color: var(--white);
   text-align: center;
@@ -817,6 +817,7 @@ body::after {
   padding: var(--space-xs) var(--space-l);
   white-space: nowrap;
   box-sizing: border-box;
+  border: var(--largeur-bordure-1) solid var(--couleur-bordure-tres-claire);
 }
 
 .emp-entete-meuble {
@@ -905,3 +906,6 @@ body::after {
 .color-white    { color: var(--white); }
 .color-muted    { color: var(--white-60); }
 .color-error    { color: var(--error); }
+.dispo-oui { color: var(--success); }
+.dispo-non { color: var(--error); }
+.prix-barre { text-decoration: line-through; color: var(--white-50); }
