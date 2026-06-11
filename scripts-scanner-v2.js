@@ -1048,7 +1048,7 @@ function filtrerGererFavoritesV2() {
   if (!div) return;
   var champ = document.getElementById('gererFavV2-filtre');
   var terme = normaliserRechercheV2(champ ? champ.value.trim() : '');
-  if (terme.length < 2) { div.innerHTML = '<div class="texte-secondaire">Tape une ville pour ajouter</div>'; return; }
+  if (terme.length < 2) { div.innerHTML = '<div class="texte-secondaire"></div>'; return; }
   var favNums = succursalesAchatV2.map(function(s) { return s.numero; });
   div.innerHTML = toutesSuccursalesV2.filter(function(s) {
     if (favNums.indexOf(s.numero) !== -1) return false;
