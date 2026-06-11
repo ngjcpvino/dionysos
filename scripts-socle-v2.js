@@ -24,6 +24,11 @@ let FICHE_V2_PROVENANCE = null;
 function ouvrirApresTap(fn) {
   setTimeout(fn, 0);
 }
+
+function remonterScrollV2(containerId) {
+  var c = document.querySelector('#' + containerId + ' .modal-v2-content');
+  if (c) c.scrollTop = 0;
+}
 let FICHE_V2_ORIGINE = null;
 
 // ==================== INITIALISATION ====================

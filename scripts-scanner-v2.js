@@ -134,11 +134,13 @@ function ouvrirVinInconnuV2(code) {
       creerVinSAQV2(code, codeSAQ);
     } else {
       document.getElementById('vinInconnuV2-codebarre-champ').value = code;
+      document.getElementById('vinInconnuV2-codesaq').value = '';
       document.getElementById('vinInconnuV2-nom').value = '';
       document.getElementById('vinInconnuV2Container').style.display = 'flex';
     }
   }).catch(function() {
     document.getElementById('vinInconnuV2-codebarre-champ').value = code;
+    document.getElementById('vinInconnuV2-codesaq').value = '';
     document.getElementById('vinInconnuV2-nom').value = '';
     document.getElementById('vinInconnuV2Container').style.display = 'flex';
   });
@@ -169,13 +171,44 @@ function enchainerMenuApresCreationV2(code) {
   });
 }
 
+function voirSAQVinInconnuV2() {
+  var code = (document.getElementById('vinInconnuV2-codebarre-champ').value || '').replace(/\D/g, '').trim() || vinInconnuV2Code || '';
+  if (!code) { afficherMessage('Code-barres manquant'); return; }
+  window.open('https://www.saq.com/fr/catalogsearch/result/?q=' + code.padStart(14, '0'), '_blank');
+}
+
 function creerVinManuelV2() {
-  var code = vinInconnuV2Code;
-  var nom = (document.getElementById('vinInconnuV2-nom').value || '').trim();
-  if (!nom) {
-    afficherMessage('Entrez un nom');
+  var code = (document.getElementById('vinInconnuV2-codebarre-champ').value || '').replace(/\D/g, '').trim();
+  if (!gtinValide(code)) {
+    afficherMessage('Code-barres invalide');
     return;
   }
+  vinInconnuV2Code = code;
+  var codeSAQ = (document.getElementById('vinInconnuV2-codesaq').value || '').replace(/\D/g, '').trim();
+  var nom = (document.getElementById('vinInconnuV2-nom').value || '').trim();
+
+  if (codeSAQ) {
+    document.getElementById('vinInconnuV2Container').style.display = 'none';
+    creerVinSAQV2(code, codeSAQ);
+    return;
+  }
+
+  appelBackend('chercherProduitSAQ_GRAPHQL_V1', { codebarre: code }, { spinner: 'Un instant svp' }).then(function(codeTrouve) {
+    if (codeTrouve) {
+      document.getElementById('vinInconnuV2Container').style.display = 'none';
+      creerVinSAQV2(code, codeTrouve);
+      return;
+    }
+    if (nom) { creerVinNomV2(code, nom); return; }
+    afficherMessage('Toujours introuvable — entrez un code SAQ ou un nom');
+  }).catch(function() {
+    if (nom) { creerVinNomV2(code, nom); return; }
+    afficherMessage('Toujours introuvable — entrez un code SAQ ou un nom');
+  });
+}
+
+function creerVinNomV2(code, nom) {
+  document.getElementById('vinInconnuV2Container').style.display = 'none';
   appelBackend('ajouterVinAvecBouteilles', { codebarre: code, codeSAQ: '', note: '', bouteilles: '[]', nom: nom }, { spinner: 'Un instant svp' }).then(function(res) {
     if (res && res.success) {
       enchainerMenuApresCreationV2(code);
@@ -220,7 +253,7 @@ function fermerMenuActionV2() {
 }
 
 function cacherToutesPagesV2() {
-  ['scannerV2Container', 'saisieManuelleV2Container', 'vinInconnuV2Container', 'menuActionV2Overlay', 'arriveeV2Container', 'deplacerV2Container', 'boireV2Container', 'donnerV2Container', 'caveV2Container', 'aRangerV2Container', 'histoV2Container', 'histoAjoutV2Overlay', 'histoEditV2Overlay', 'empV2Container', 'achatV2Container', 'promoV2Container', 'rechercheV2Container', 'editFicheV2Overlay', 'ficheV2Overlay'].forEach(function(id) {
+  ['scannerV2Container', 'saisieManuelleV2Container', 'vinInconnuV2Container', 'menuActionV2Overlay', 'arriveeV2Container', 'deplacerV2Container', 'boireV2Container', 'donnerV2Container', 'caveV2Container', 'aRangerV2Container', 'histoV2Container', 'histoAjoutV2Overlay', 'histoEditV2Overlay', 'empV2Container', 'achatV2Container', 'promoV2Container', 'rechercheV2Container', 'editFicheV2Overlay', 'ficheV2Overlay', 'photoV2Overlay'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.style.display = 'none';
   });
@@ -777,6 +810,7 @@ function fermerDonnerV2() {
 // ==================== CAVE À VIN V2 ====================
 function ouvrirCaveV2() {
   document.getElementById('caveV2Container').style.display = 'flex';
+  remonterScrollV2('caveV2Container');
   remplirFiltresCaveV2();
   afficherCartesCaveV2(ALL_DATA || []);
 }
@@ -789,6 +823,7 @@ function fermerCaveV2() {
 // ==================== À RANGER V2 ====================
 function ouvrirARangerV2() {
   document.getElementById('aRangerV2Container').style.display = 'flex';
+  remonterScrollV2('aRangerV2Container');
   afficherCartesARangerV2();
 }
 
@@ -837,6 +872,7 @@ var succursalesAchatV2 = [];
 
 function ouvrirAchatV2() {
   document.getElementById('achatV2Container').style.display = 'flex';
+  remonterScrollV2('achatV2Container');
   filtresAchatV2 = { couleur: '', pays: '', cepage: '', succ: '' };
   if (succursalesAchatV2.length) {
     remplirFiltresAchatV2();
@@ -1083,6 +1119,7 @@ function finirGererFavoritesV2() {
 // ==================== RECHERCHE V2 ====================
 function ouvrirRechercheV2() {
   document.getElementById('rechercheV2Container').style.display = 'flex';
+  remonterScrollV2('rechercheV2Container');
   var champ = document.getElementById('rechercheV2-champ');
   champ.value = '';
   document.getElementById('rechercheV2-compte').textContent = '';
@@ -1156,6 +1193,7 @@ function vinParCodeSAQV2(codeSAQ) {
 
 function ouvrirPromoV2() {
   document.getElementById('promoV2Container').style.display = 'flex';
+  remonterScrollV2('promoV2Container');
   promoModeV2 = 'mes';
   filtresPromoV2 = { couleur: '', pays: '', cepage: '', succ: '' };
   if (!succursalesAchatV2.length) {
@@ -1351,7 +1389,8 @@ function dispoProchesPromoV2(codeSAQ) {
       var dispo = (succursales || []).filter(function(s) { return s.quantite > 0; });
       if (!dispo.length) { el.innerHTML = '<br><span class="dispo-non">✗</span>'; return; }
       el.innerHTML = dispo.slice(0, 3).map(function(s) {
-        return '<br><span class="dispo-oui">' + s.nom + ' ' + s.quantite + '</span>';
+        var adresseMaps = encodeURIComponent([s.adresse, s.ville, 'QC'].filter(Boolean).join(', '));
+        return '<br><span class="dispo-oui" onclick="event.stopPropagation(); window.open(\'https://maps.apple.com/?daddr=' + adresseMaps + '\', \'_blank\')">' + s.nom + ' ' + s.quantite + '</span>';
       }).join('');
     }).catch(function() { el.innerHTML = ''; });
   }
@@ -1368,6 +1407,7 @@ var filtresEmpV2 = { meuble: '', rangee: '', espace: '' };
 
 function ouvrirEmpV2() {
   document.getElementById('empV2Container').style.display = 'flex';
+  remonterScrollV2('empV2Container');
   filtresEmpV2 = { meuble: '', rangee: '', espace: '' };
   remplirFiltresEmpV2();
   afficherEmpV2();
@@ -1513,11 +1553,11 @@ function afficherEmpV2() {
         var cb = (w && w['Code-barres']) ? w['Code-barres'].toString().trim().replace(/\s+/g, '') : '';
         ronds.push('<div class="cercle" data-photo="' + photo + '" data-cb="' + cb + '"></div>');
       });
-      // 7 espaces = quinconce 4 bas + 3 haut ; sinon une seule ligne
+      // 7 espaces = quinconce réel : bas 1-3-5-7, haut 2-4-6
       var lignes;
       if (nb === 7) {
-        lignes = '<div class="ligne-ronds haut">' + ronds.slice(4,7).join('') + '</div>' +
-                 '<div class="ligne-ronds bas">' + ronds.slice(0,4).join('') + '</div>';
+        lignes = '<div class="ligne-ronds haut">' + [ronds[1], ronds[3], ronds[5]].join('') + '</div>' +
+                 '<div class="ligne-ronds bas">' + [ronds[0], ronds[2], ronds[4], ronds[6]].join('') + '</div>';
       } else {
         lignes = '<div class="ligne-ronds">' + ronds.join('') + '</div>';
       }
@@ -1704,6 +1744,7 @@ var histoEditV2 = { row: 0, note: 0 };
 
 function ouvrirHistoV2() {
   document.getElementById('histoV2Container').style.display = 'flex';
+  remonterScrollV2('histoV2Container');
   filtresHistoV2 = { mets: '', vin: '', accord: '' };
   if (ALL_HISTORIQUE && ALL_HISTORIQUE.length) {
     remplirFiltresHistoV2();

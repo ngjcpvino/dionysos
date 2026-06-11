@@ -7,6 +7,7 @@ function ouvrirFicheV2(codebarre, provenance) {
   FICHE_V2_PROVENANCE = provenance || null;
   CURRENT_WINE_CODEBARRE = codebarre;
   document.getElementById('ficheV2Overlay').style.display = 'flex';
+  remonterScrollV2('ficheV2Overlay');
   document.getElementById('ficheV2-nom').textContent = 'Chargement...';
   document.getElementById('ficheV2-origine').innerHTML = '';
   document.getElementById('ficheV2-corps').innerHTML = '';
@@ -200,7 +201,7 @@ function afficherFicheV2(result) {
   html += '</div>';
 
   // === HISTORIQUE DES PLATS (bloc séparé, sans titre) ===
-  html += '<div class="section"><div id="ficheV2-plats"></div></div>';
+  html += '<div class="section" id="ficheV2-plats-section" style="display:none;"><div id="ficheV2-plats"></div></div>';
 
 // === INVENTAIRE (lecture seule) ===
   var bottlesActives = bottles.filter(function(b) { return b.statut !== 'Bu' && b.statut !== 'Sorti'; });
@@ -230,7 +231,7 @@ function afficherFicheV2(result) {
   html += '</div>';
 
   if (wine['Photo URL']) {
-    html += '<div class="photo"><img src="' + wine['Photo URL'] + '" alt="" loading="lazy" onclick="window.open(\'' + wine['Photo URL'] + '\', \'_blank\')" onerror="this.style.display=\'none\'"></div>';
+    html += '<div class="photo"><img src="' + wine['Photo URL'] + '" alt="" loading="lazy" onclick="ouvrirPhotoV2(\'' + wine['Photo URL'] + '\')" onerror="this.style.display=\'none\'"></div>';
   }
 
   if (wine['Code SAQ']) {
@@ -325,7 +326,9 @@ function chargerPlatsV2(codebarre) {
     var mets = (historique || []).filter(function(h) {
       return (h.codebarre || '').toString().trim() === cb;
     });
-    if (mets.length === 0) { conteneur.innerHTML = ''; return; }
+    var sectionPlats = document.getElementById('ficheV2-plats-section');
+    if (mets.length === 0) { conteneur.innerHTML = ''; if (sectionPlats) sectionPlats.style.display = 'none'; return; }
+    if (sectionPlats) sectionPlats.style.display = '';
     mets.sort(function(a, b) {
       return (parseInt(b.bonAccord) || 0) - (parseInt(a.bonAccord) || 0);
     });
@@ -349,6 +352,15 @@ function chargerPlatsV2(codebarre) {
   }).catch(function() {});
 }
 
+function ouvrirPhotoV2(url) {
+  document.getElementById('photoV2-img').src = url;
+  document.getElementById('photoV2Overlay').style.display = 'flex';
+}
+
+function fermerPhotoV2() {
+  document.getElementById('photoV2Overlay').style.display = 'none';
+}
+
 function fermerFicheV2() {
   document.getElementById('ficheV2Overlay').style.display = 'none';
   var panneauV2 = document.querySelector('#ficheV2Overlay .modal-v2-content');
@@ -357,7 +369,7 @@ function fermerFicheV2() {
     var origine = FICHE_V2_ORIGINE;
     FICHE_V2_ORIGINE = null;
     FICHE_V2_PROVENANCE = null;
-    if (origine === 'cave') { document.getElementById('caveV2Container').style.display = 'flex'; return; }
+    if (origine === 'cave') { document.getElementById('caveV2Container').style.display = 'flex'; remonterScrollV2('caveV2Container'); return; }
     if (origine === 'achat') { ouvrirAchatV2(); return; }
     if (origine === 'histo') { ouvrirHistoV2(); return; }
     return;
@@ -366,14 +378,18 @@ function fermerFicheV2() {
     ouvrirMenuActionV2(menuActionV2Context.code, menuActionV2Context.wineResult);
   } else if (FICHE_V2_PROVENANCE === 'cave') {
     document.getElementById('caveV2Container').style.display = 'flex';
+    remonterScrollV2('caveV2Container');
   } else if (FICHE_V2_PROVENANCE === 'achat') {
     document.getElementById('achatV2Container').style.display = 'flex';
+    remonterScrollV2('achatV2Container');
   } else if (FICHE_V2_PROVENANCE === 'histo') {
     ouvrirHistoV2();
   } else if (FICHE_V2_PROVENANCE === 'promo') {
     document.getElementById('promoV2Container').style.display = 'flex';
+    remonterScrollV2('promoV2Container');
   } else if (FICHE_V2_PROVENANCE === 'recherche') {
     document.getElementById('rechercheV2Container').style.display = 'flex';
+    remonterScrollV2('rechercheV2Container');
   } else if (FICHE_V2_PROVENANCE === 'emplacements') {
     ouvrirEmpV2();
   }
@@ -393,7 +409,8 @@ function trouverCeVinV2() {
       div.innerHTML = dispo.slice(0, 10).map(function(s) {
         var sousInfo = [s.adresse, s.ville].filter(Boolean).join(', ');
         var droite = [s.quantite + ' btl', s.distance].filter(Boolean).join('<br>');
-        return '<div class="carte"><div class="carte-centre"><span class="carte-titre">' + s.nom + '</span><span class="carte-sous">' + sousInfo + '</span></div><div class="carte-droite">' + droite + '</div></div>';
+        var adresseMaps = encodeURIComponent([s.adresse, s.ville, 'QC'].filter(Boolean).join(', '));
+        return '<div class="carte" onclick="window.open(\'https://maps.apple.com/?daddr=' + adresseMaps + '\', \'_blank\')"><div class="carte-centre"><span class="carte-titre">' + s.nom + '</span><span class="carte-sous">' + sousInfo + '</span></div><div class="carte-droite">' + droite + '</div></div>';
       }).join('');
     }).catch(function(err) { div.innerHTML = '<div class="texte-secondaire">Erreur : ' + err + '</div>'; });
   }
@@ -435,7 +452,8 @@ var EDIT_FICHE_V2_CHAMPS = [
   ['Description', 'description', 'Description'],
   ['Recettes', 'recettes', 'Recettes'],
   ['Notes', 'notestemp', 'Notes temporaires'],
-  ['Divers', 'divers', 'Divers']
+  ['Divers', 'divers', 'Divers'],
+  ['Photo', 'photo', 'Photo URL']
 ];
 
 function ouvrirEditFicheV2() {
@@ -445,12 +463,31 @@ function ouvrirEditFicheV2() {
     var valeur = decodeHTML((wine[c[2]] || '').toString()).replace(/"/g, '&quot;');
     return '<div class="titre-3">' + c[0] + '</div><input type="text" id="editV2-' + c[1] + '" class="champ-saisie" value="' + valeur + '">';
   }).join('');
+  html += '<div class="roundel" onclick="photoSAQDepuisEditV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Photo SAQ</span></div>';
   document.getElementById('editFicheV2-corps').innerHTML = html;
   document.getElementById('editFicheV2Overlay').style.display = 'flex';
+  remonterScrollV2('editFicheV2Overlay');
 }
 
 function fermerEditFicheV2() {
   document.getElementById('editFicheV2Overlay').style.display = 'none';
+}
+
+function photoSAQDepuisEditV2() {
+  var champSaq = document.getElementById('editV2-codesaq');
+  var codeSAQ = (champSaq && champSaq.value.trim()) || (CURRENT_WINE_DATA && CURRENT_WINE_DATA['Code SAQ']) || '';
+  if (!codeSAQ) { afficherMessage('Aucun code SAQ'); return; }
+  appelBackend('majPhotoSAQ', { codebarre: CURRENT_WINE_CODEBARRE, codeSAQ: codeSAQ }, { spinner: 'Photo SAQ' }).then(function(res) {
+    if (res && res.success) {
+      var champPhoto = document.getElementById('editV2-photo');
+      if (champPhoto) champPhoto.value = res.photoURL;
+      majMemoireVinV2(CURRENT_WINE_CODEBARRE, { 'Photo URL': res.photoURL });
+      if (CURRENT_WINE_DATA) CURRENT_WINE_DATA['Photo URL'] = res.photoURL;
+      afficherMessage('Photo mise à jour');
+    } else {
+      afficherMessage((res && res.message) || 'Photo introuvable');
+    }
+  }).catch(function(err) { afficherMessage('Erreur: ' + err); });
 }
 
 function sauverEditFicheV2() {
