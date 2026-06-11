@@ -239,6 +239,9 @@ body::after {
 
 #menuActionV2Overlay { z-index: 10010; }
 #histoEditV2Overlay { z-index: 10010; }
+#photoV2Overlay { z-index: 10010; }
+.photo-grande { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
+.photo-grande img { max-width: 90%; max-height: 85%; object-fit: contain; }
 
 /* ===== Titres accueil ===== */
 #accueilV2-titre {
@@ -661,6 +664,7 @@ body::after {
 }
 .champ-saisie::placeholder { color: var(--white-50); }
 .champ-saisie:focus { background: rgba(0,0,0,0.7); }
+textarea.champ-saisie { resize: none; font-family: inherit; line-height: 1.4; }
 .menu-liste {
   display: none;
   width: 80%;
@@ -857,6 +861,7 @@ body::after {
 .histo-mets.bordure-gauche-4 { border-left-color: var(--note-4); }
 .histo-mets.bordure-gauche-5 { border-left-color: var(--note-5); }
 .fiche-mets { margin-left: 60px; width: calc(100% - 60px); }
+.histo-mets .carte-droite, .fiche-mets .carte-droite { align-items: flex-start; }
 
 
 

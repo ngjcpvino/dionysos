@@ -89,7 +89,12 @@
     <div class="texte-secondaire">Ce vin n'a pas été trouvé sur SAQ</div>
     <div id="vinInconnuV2-saisie" style="width:100%; max-width:600px;">
       <input type="text" id="vinInconnuV2-codebarre-champ" class="champ-saisie" placeholder="Code-barres" inputmode="numeric">
+      <input type="text" id="vinInconnuV2-codesaq" class="champ-saisie" placeholder="Code SAQ" inputmode="numeric">
       <input type="text" id="vinInconnuV2-nom" class="champ-saisie" placeholder="Nom du vin">
+      <div class="roundel" onclick="voirSAQVinInconnuV2()">
+        <span class="roundel-anneau"></span>
+        <span class="roundel-barre">Voir SAQ</span>
+      </div>
       <div class="roundel" onclick="creerVinManuelV2()">
         <span class="roundel-anneau"></span>
         <span class="roundel-barre">Confirmer</span>
@@ -287,7 +292,7 @@
     <input type="text" id="histoAjoutV2-recherche" class="champ-saisie" placeholder="Rechercher un vin par nom" oninput="rechercherVinHistoAjoutV2()">
     <div id="histoAjoutV2-resultats" class="menu-liste"></div>
     <div id="histoAjoutV2-form" style="display:none; width:100%; max-width:400px;">
-      <input type="text" id="histoAjoutV2-plat" class="champ-saisie" placeholder="Plat">
+      <textarea id="histoAjoutV2-plat" class="champ-saisie" rows="2" placeholder="Plat"></textarea>
       <div id="histoAjoutV2-verres" class="boire-verres"></div>
       <div class="champ-cliquable" id="histoAjoutV2-accords-display" onclick="basculerMenuAccordsHistoAjoutV2()">Accords</div>
       <div id="histoAjoutV2-accords-menu" class="menu-liste"></div>
@@ -307,7 +312,7 @@
     <h2 id="histoEditV2-vin" class="titre-1"></h2>
     <div id="histoEditV2-origine" class="texte-secondaire"></div>
     <div class="titre-action">Corriger</div>
-    <input type="text" id="histoEditV2-plat" class="champ-saisie" placeholder="Plat">
+    <textarea id="histoEditV2-plat" class="champ-saisie" rows="2" placeholder="Plat"></textarea>
     <div id="histoEditV2-verres" class="boire-verres"></div>
     <div class="roundel" onclick="sauverHistoEditV2()">
       <span class="roundel-anneau"></span>
@@ -468,7 +473,7 @@
     </div>
 
     <div id="boireV2-form" style="display:none; width:100%; max-width:400px;">
-      <input type="text" id="boireV2-plat" class="champ-saisie" placeholder="Plat (facultatif)" oninput="boireV2PlatChange()">
+      <textarea id="boireV2-plat" class="champ-saisie" rows="2" placeholder="Plat (facultatif)" oninput="boireV2PlatChange()"></textarea>
       <div id="boireV2-verres" class="boire-verres"></div>
       <div class="champ-cliquable" id="boireV2-accords-display" onclick="basculerMenuAccordsBoireV2()">Accords</div>
       <div id="boireV2-accords-menu" class="menu-liste"></div>
@@ -519,10 +524,21 @@
     <button class="btn-fermer" onclick="fermerEditFicheV2()">✕</button>
     <h2 class="titre-1">Modifier</h2>
     <div id="editFicheV2-corps" class="contenu"></div>
-    <div class="roundel" onclick="sauverEditFicheV2()">
+	
+	
+	
+   <div class="roundel" onclick="sauverEditFicheV2()">
       <span class="roundel-anneau"></span>
       <span class="roundel-barre">Enregistrer</span>
     </div>
+  </div>
+</div>
+
+<!-- ====================== PHOTO V2 ====================== -->
+<div id="photoV2Overlay" class="modal-v2-fullscreen" style="display:none;">
+  <div class="modal-v2-content">
+    <button class="btn-fermer" onclick="fermerPhotoV2()">✕</button>
+    <div class="photo-grande"><img id="photoV2-img" src="" alt=""></div>
   </div>
 </div>
 
