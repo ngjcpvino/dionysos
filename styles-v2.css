@@ -909,3 +909,4 @@ body::after {
 .dispo-oui { color: var(--success); }
 .dispo-non { color: var(--error); }
 .prix-barre { text-decoration: line-through; color: var(--white-50); }
+.fav-x { float: right; color: var(--error); }

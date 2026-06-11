@@ -1032,17 +1032,31 @@ function gererFavoritesV2(cible) {
 function rendreGererFavoritesV2() {
   var menu = document.getElementById(gererFavCibleV2 + '-f-succ-menu');
   if (!menu) return;
-  var favNums = succursalesAchatV2.map(function(s) { return s.numero; });
   var html = '<div class="item-liste actif" onclick="finirGererFavoritesV2()">Terminé</div>';
   html += succursalesAchatV2.map(function(s) {
-    return '<div class="item-liste" onclick="retirerFavoriteV2(\'' + s.numero + '\')">✗ ' + s.nom + '</div>';
+    return '<div class="item-liste" onclick="retirerFavoriteV2(\'' + s.numero + '\')">' + s.nom + '<span class="fav-x">✗</span></div>';
   }).join('');
-  html += toutesSuccursalesV2.filter(function(s) { return favNums.indexOf(s.numero) === -1; }).map(function(s) {
+  html += '<input type="text" id="gererFavV2-filtre" class="champ-saisie" placeholder="Chercher une ville" oninput="filtrerGererFavoritesV2()">';
+  html += '<div id="gererFavV2-liste"></div>';
+  menu.innerHTML = html;
+  menu.classList.add('ouvert');
+  filtrerGererFavoritesV2();
+}
+
+function filtrerGererFavoritesV2() {
+  var div = document.getElementById('gererFavV2-liste');
+  if (!div) return;
+  var champ = document.getElementById('gererFavV2-filtre');
+  var terme = normaliserRechercheV2(champ ? champ.value.trim() : '');
+  if (terme.length < 2) { div.innerHTML = '<div class="texte-secondaire">Tape une ville pour ajouter</div>'; return; }
+  var favNums = succursalesAchatV2.map(function(s) { return s.numero; });
+  div.innerHTML = toutesSuccursalesV2.filter(function(s) {
+    if (favNums.indexOf(s.numero) !== -1) return false;
+    return normaliserRechercheV2(s.ville + ' ' + s.adresse).indexOf(terme) !== -1;
+ }).map(function(s) {
     var nom = (s.ville + ' — ' + s.adresse);
     return '<div class="item-liste" onclick="ajouterFavoriteV2(\'' + s.numero + '\', \'' + nom.replace(/'/g, "\\'") + '\')">+ ' + nom + '</div>';
   }).join('');
-  menu.innerHTML = html;
-  menu.classList.add('ouvert');
 }
 
 function ajouterFavoriteV2(numero, nom) {
