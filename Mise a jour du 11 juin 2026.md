@@ -143,6 +143,15 @@ Crayon (✎) → `ouvrirEditFicheV2`, 26 champs. Sauvegarde conforme mémoire (v
 6. **Cartes mets** : la date à droite est centrée verticalement — la vouloir EN HAUT à droite du rectangle.
 7. **Photo manquante/erronée** : pouvoir la corriger — (a) bouton « Mettre à jour la photo » qui rescrape la SAQ pour CE vin mais n'écrit QUE la photo (aucun autre champ touché), (b) possibilité de fournir SA PROPRE photo (URL ou téléversement — méthode à trancher avec l'utilisateur).
 
+## 🐞 Bogues du 11 juin 2026 — décidés, à corriger (dans l'ordre)
+8. **Toast invisible après le premier** : `afficherMessage` (scripts-socle-v2.js) pose `display:none` en ligne après le premier toast et ne le retire jamais — tous les messages suivants n'apparaissent pas (c'est pourquoi « Entrez un nom » semblait gelé). Fix : remettre `t.style.display = ''` avant chaque affichage.
+9. **Emplacements V2 — rangées à 7 espaces** : quinconce inversé. Réel : BAS = espaces 1-3-5-7 (4 ronds), HAUT = 2-4-6 (3 ronds). Actuel : bas 1-2-3-4, haut 5-6-7. Fix dans `afficherEmpV2` (scripts-scanner-v2.js).
+10. **Vin inconnu V2 — code SAQ manuel** (cas : CUP de la bouteille ≠ CUP en fiche SAQ, ex. 635335961957 vs 00635335596197) :
+   - Champ « Code SAQ » SOUS le champ code-barres + roundel « Voir SAQ » (ouvre saq.com avec le code-barres rallongé à 14 chiffres, comme le GO SAQ du V1).
+   - **Confirmer lit le champ code-barres TEL QUE CORRIGÉ** (actuellement ignoré — il utilise le code du scan original).
+   - Code SAQ rempli → création via SAQ avec ce code-barres ; sinon → relance la recherche SAQ avec le code-barres corrigé ; trouvé → création ; introuvable → message et la page reste ouverte ; sinon nom rempli → création manuelle.
+   - Backend déjà prêt : `ajouterVinAvecBouteilles` rattache le nouveau code-barres à la liste CUP du vin existant quand le code SAQ existe déjà (2 codes-barres par millésime).
+
 ## 🐞 En suspens
 - **Vue emplacements V1 instable** : un filtre renvoie parfois une bouteille de moins. D'où la vérif réelle finale à l'Arrivée.
 - **Découpage des JS** (proposé, non tranché, pas tout de suite) : socle / navigation / scan / actions / pages / fiche — `scripts-scanner-v2.js` est un fourre-tout. **Même exercice voulu pour `Code.gs`** (lecture / écriture / SAQ / historique / utilitaires).
