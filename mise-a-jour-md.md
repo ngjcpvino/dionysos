@@ -1,4 +1,4 @@
-# 🍷 Dionysos — État du projet (consolidé, à jour au 11 juin 2026)
+# 🍷 Dionysos — État du projet (consolidé, à jour au 11 juin 2026, soir)
 
 > Les RÈGLES DE TRAVAIL sont dans `REFERENCE.md` (à lire en premier). Ce fichier-ci ne contient que l'état technique du projet. Seuls deux `.md` existent : `REFERENCE.md` et celui-ci.
 
@@ -14,7 +14,7 @@ On bâtit le V2 comme **un site complet et autonome, côte à côte avec le V1**
 
 **Site V2 (parallèle, en construction)** : `index-v2.html`, `styles-v2.css`, `scripts-socle-v2.js` + modules `-v2.js`. `index-v2.html` charge **uniquement** ses propres fichiers.
 
-**Socle dupliqué (temporaire).** `scripts-socle-v2.js` recopie : `API_URL`, `appelBackend` + spinner, variables globales (`CONFIG`, `ALL_DATA`, `ALL_HISTORIQUE`, `CURRENT_WINE_*`, `FICHE_V2_PROVENANCE`, `FICHE_V2_ORIGINE`), `afficherMessage`, `decodeHTML`, `ouvrirApresTap`, `remonterScrollV2`, `window.onload` propre. `styles-v2.css` recopie `:root` + le fond.
+**Socle dupliqué (temporaire).** `scripts-socle-v2.js` recopie : `API_URL`, `appelBackend` + spinner, variables globales (`CONFIG`, `ALL_DATA`, `ALL_HISTORIQUE`, `CURRENT_WINE_*`, `FICHE_V2_PROVENANCE`, `FICHE_V2_ORIGINE`), `afficherMessage`, `decodeHTML`, `ouvrirApresTap`, `remonterScrollV2`, capteur d'erreurs globales, `window.onload` propre. `styles-v2.css` recopie `:root` + le fond.
 
 **Ménage final = renommage, pas de tri.** Quand V2 complet : supprimer tous les fichiers V1 d'un bloc, renommer `index-v2.html` → `index.html`, `styles-v2.css` → `styles.css`.
 
@@ -39,13 +39,17 @@ App à **2 utilisateurs sur 2 téléphones** ; la vérité partagée = le Sheet.
 - `wineResultDepuisMemoireV2(cb)` → équivalent `checkWineExists` depuis `ALL_DATA` (avec `row` dans chaque bouteille). Utilisé par Déplacer depuis listes et le bouton ACTION de la fiche.
 - `majMemoireVinV2(cb, champs)` → met à jour les items `ALL_DATA` d'un vin après une écriture directe.
 
+**Insensibilité casse/accents (11 juin 2026, RÈGLE)** : `normaliserRechercheV2` + aides `memeTexteV2(a,b)` et `contientTexteV2(texte, morceau)`. Appliquée aux CÉPAGES partout : filtres Cave/Achat/Promo (listes dédupliquées via `uniqueValeursAchat` normalisé et `retenir()` de la Cave, comparaisons par `contientTexteV2`), regroupements Cépages doubles/manquants (clés normalisées, affichage de la première forme rencontrée). Toute nouvelle comparaison de texte utilisateur passe par ces aides.
+
 ## 🛡️ Anti-gel V2 (RÈGLE)
 `appelBackend` : **timeout 30 s par défaut, ajustable par appel** (`options.timeout` — utilisé par Promotions : 120 s et 300 s) via `AbortController` → erreur « Le serveur ne répond pas », spinner toujours retiré (`finally`). `retourAccueilV2()` = `cacherToutesPagesV2()` + `menuActionV2Context=null` + message. Branchée dans le `.catch` de tout écrivain.
 
-**Toast réparé (11 juin 2026).** `afficherMessage` (socle V2) posait `display:none` en ligne après le premier toast et ne le retirait jamais — tous les messages suivants étaient invisibles. Corrigé : `t.style.display = ''` remis avant chaque affichage. Ne jamais réintroduire un `display:none` en ligne sans le retirer à l'affichage suivant.
+**Capteur d'erreurs globales (11 juin 2026).** Le socle écoute `window error` et `unhandledrejection` → toute erreur JS ou promesse échouée devient un toast « Erreur : … ». Outil de diagnostic : plus aucun gel silencieux.
+
+**Toast réparé (11 juin 2026 — la cause des « gels »).** `afficherMessage` (socle V2) posait `display:none` en ligne après le premier toast et ne le retirait jamais — tous les messages suivants étaient invisibles : chaque refus (« Entrez un nom », « Code-barres invalide ») semblait un gel. Signature du bogue : « marche au premier essai, mort ensuite ». Corrigé : `t.style.display = ''` remis avant chaque affichage. Ne jamais réintroduire un `display:none` en ligne sans le retirer à l'affichage suivant. ⚠️ Le correctif avait été présenté puis JAMAIS appliqué pendant une demi-session (marqué fait à tort) — leçon : un changement sans « ok » n'existe pas.
 
 ## 🧭 Navigation V2 (RÈGLES, 9 juin 2026)
-- **`cacherToutesPagesV2()`** (dans `scripts-scanner-v2.js`) cache TOUS les conteneurs/overlays V2 + ferme le burger. Liste complète maintenue à jour à chaque nouvel écran (incl. `photoV2Overlay` depuis le 11 juin 2026).
+- **`cacherToutesPagesV2()`** (dans `scripts-scanner-v2.js`) cache TOUS les conteneurs/overlays V2 + ferme le burger, avec garde `if (el)`. Liste complète maintenue à jour à chaque nouvel écran (incl. `photoV2Overlay` depuis le 11 juin 2026).
 - **Burger** : chaque cible fait `cacherToutesPagesV2()` puis ouvre sa page ; 'accueil' = tout cacher + contexte null ; RAFRAÎCHIR = resync `ALL_DATA` + vide `ALL_HISTORIQUE`.
 - **Menu d'action (`menuV2Click`)** : chaque bouton fait `cacherToutesPagesV2()` avant d'ouvrir (sinon une liste restée ouverte dessous repassait par-dessus la page d'action). La garde « 0 bouteille » est vérifiée AVANT tout.
 - **Œil grisé** : `#menuV2-visualiser` reçoit `.desactive` quand on arrive de la fiche (`FICHE_V2_ORIGINE` défini). `traiterResultatScanV2` remet `FICHE_V2_ORIGINE = null` (un scan neuf rallume l'œil).
@@ -56,13 +60,13 @@ App à **2 utilisateurs sur 2 téléphones** ; la vérité partagée = le Sheet.
 
 **Z-index des overlays empilés (RÈGLE).** Tous les écrans V2 partagent `z-index:9999`. Un overlay ouvert PAR-DESSUS un autre reçoit un z-index supérieur : `#menuActionV2Overlay`, `#histoEditV2Overlay` et `#photoV2Overlay` = `10010` ; loupes fixes et `.btn-fermer` = `10002` ; spinner/toast = `99999`.
 
-**Ouverture d'overlay différée — anti « double-clic » (RÈGLE).** Tout passage « masquer un overlay puis en ouvrir un autre » ouvre via `ouvrirApresTap(fn)` (`setTimeout 0`, dans `scripts-socle-v2.js`). Appliqué : `menuV2Click`, `ouvrirActionDepuisFicheV2`, `deplacerDepuisARangerV2/EmpV2`, cartes → fiche, cartes mets → éditeur.
+**Ouverture d'overlay différée — anti « double-clic » (RÈGLE).** Tout passage « masquer un overlay puis en ouvrir un autre » ouvre via `ouvrirApresTap(fn)` (`setTimeout 0`, dans `scripts-socle-v2.js`). Appliqué : `menuV2Click`, `ouvrirActionDepuisFicheV2`, `deplacerDepuisARangerV2/EmpV2`, cartes → fiche, cartes mets → éditeur, espace libre → scan.
 
 **Loupe/X collés au défilement (RÈGLE).** `.modal-v2-content` défile, donc loupe et ✕ sont `position:fixed`. `.gauche` reste `absolute` (accueil + crayon fiche).
 
 **Fond stable (RÈGLE iOS).** `.modal-v2-fullscreen` est en `width:100%; height:100%` — JAMAIS `100vh` : sur iPhone/iPad, `100vh` inclut la barre Safari repliée, l'image « cover » se recadre et le fond paraît se tasser entre l'accueil et les pages. Le fond de chaque page reste OPAQUE (rideau qui masque la page en dessous) — ne jamais le rendre transparent.
 
-**Anti-cache iPhone (RÈGLE).** `index-v2.html` charge `styles-v2.css` et les 3 JS par `document.write` avec `?v=` + heure courante (`Math.floor(Date.now()/3600000)`) : les fichiers se rechargent seuls au plus tard une heure après une publication, sans rien modifier à la main.
+**Anti-cache iPhone (RÈGLE).** `index-v2.html` charge `styles-v2.css` et les 3 JS par `document.write` avec `?v=` + heure courante (`Math.floor(Date.now()/3600000)`) : les fichiers se rechargent seuls au plus tard une heure après une publication. ⚠️ Un test fait tout de suite après une publication peut rouler les ANCIENS fichiers.
 
 ## 📂 Fichiers
 **V1 (figé, pur V1)** : index.html · styles.css · scripts-config.js · scripts-init.js · scripts-inventaire.js · scripts-fiche.js · scripts-scanner.js · scripts-listes.js
@@ -74,10 +78,11 @@ App à **2 utilisateurs sur 2 téléphones** ; la vérité partagée = le Sheet.
 ## 🎯 Scan V2 (`scripts-scanner-v2.js`)
 **Flux** : `startScanFromHomeV2` → `startScannerV2` (Quagga sur `#interactiveV2`, seuil 3) → `traiterResultatScanV2(code)` → `checkWineExists` (exception fraîche).
 - **Vin existe** → `ouvrirMenuActionV2` (gabarit commun) : 6 cercles 👁 Visualiser · ➕ Arrivée · ⇄ Déplacer · 🍷 Boire · 🎁 Donner · ✕. Contexte `menuActionV2Context`.
-- **Rescanner** / **Entrée manuelle** (`validerSaisieManuelleV2` ≥ 8 chiffres).
+- **Rescanner** / **Entrée manuelle** (`validerSaisieManuelleV2`).
+- **`gtinValide` accepte 8, 12, 13 et 14 chiffres** (11 juin 2026 — la SAQ affiche des CUP à 14 chiffres ; un vrai code tapé à 14 était déclaré « invalide »).
 
 ### Arbre des résultats d'un scan (RÉFÉRENCE)
-- **A — Lecture** : caméra indispo → manuel ; rien lu → boutons visibles ; douteux → seuil 3 ; checksum GTIN ✅. Quagga conservé.
+- **A — Lecture** : caméra indispo → manuel ; rien lu → boutons visibles ; douteux → seuil 3 ; checksum GTIN (8/12/13/14) ✅. Quagga conservé.
 - **B — Vin existe** : stock > 0 → menu complet ; 0 bouteille → Déplacer/Boire/Donner grisés. ✅
 - **C — Vin absent** ✅ (refait le 11 juin 2026) : recherche SAQ auto. Trouvé → `creerVinSAQV2` → menu. Introuvable → page « Vin inconnu » : champ code-barres (modifiable), champ **Code SAQ**, champ Nom, roundel **Voir SAQ** (`voirSAQVinInconnuV2` : saq.com avec le code-barres rallongé à 14 chiffres). **Confirmer (`creerVinManuelV2`) lit le code-barres TEL QUE CORRIGÉ (validé GTIN)** : Code SAQ rempli → `creerVinSAQV2` ; sinon relance `chercherProduitSAQ_GRAPHQL_V1` avec le code corrigé ; trouvé → création SAQ ; introuvable + nom rempli → `creerVinNomV2` (manuel) ; introuvable sans nom → message, la page reste ouverte. Cas couvert : CUP de la bouteille ≠ CUP en fiche SAQ (ex. 635335961957 vs 00635335596197). `ajouterVinAvecBouteilles` rattache le nouveau code-barres à la liste CUP du vin existant quand le code SAQ existe déjà (2 codes-barres par millésime).
 - **D — Erreur** → message + `retourAccueilV2`.
@@ -105,23 +110,33 @@ S'ouvrent depuis la mémoire. Boire : plat facultatif (champ = **textarea qui re
 3 zones flex + bande couleur en bas. `.carte-photo` 60px, `.carte-centre`, `.carte-droite` (`white-space:nowrap`). Bande : `.note-1..5` (plats), `.vin-*` (vin). `.carte-vide` = voile 0 bouteille. **Cartes mets : la date est EN HAUT à droite** (`.histo-mets .carte-droite, .fiche-mets .carte-droite { align-items: flex-start; }` — 11 juin 2026).
 
 ## 🍇 Page CAVE À VIN V2 — ✅ TERMINÉ
-`#caveV2Container`, mémoire. Loupe OR si filtre. Filtres CASCADE (couleur → cépage → pays → appellation → accords) + recherche nom. Cartes → `ouvrirFicheV2(cb,'cave')`.
+`#caveV2Container`, mémoire. Loupe OR si filtre. Filtres CASCADE (couleur → cépage → pays → appellation → accords). **Le champ texte du panneau fouille TOUS les champs du vin** (comme la Recherche, mêmes champs exclus ; accents/casse ignorés — 11 juin 2026). **Compte : total des vins + total des bouteilles en stock dessous** (11 juin 2026). Cartes → `ouvrirFicheV2(cb,'cave')`.
 
 ## 📦 Page À RANGER V2 — ✅ TERMINÉ
 `#aRangerV2Container`, mémoire, sans filtres. Bouteilles actives sans emplacement, tri couleur puis nom. Vide → « Tout est bien rangé! ». Clic → `deplacerDepuisARangerV2` (`retour='aranger'`).
 
-## 🛒 Page LISTE D'ACHAT V2 — ✅ TERMINÉ
-`#achatV2Container`, mémoire (succursales chargées une fois puis cache). Contenu auto : (`Racheter`=Oui ET 0 bouteille) OU (`Panier`=Oui). Filtres CASCADE + Succursale — **TOUS remis à zéro à chaque ouverture, succursale comprise**. Cartes SANS prix : nom + origine, dispo seule à droite en petit (`X btl` vert `.dispo-oui` / `✗` rouge `.dispo-non`) quand une succursale est choisie. Clic → `ouvrirFicheV2(cb,'achat')`. Les noms de succursales replient dans le panneau (`.panneau-gauche .item-liste { white-space: normal }`).
+## 🛒 Page LISTE D'ACHAT V2 — ✅ TERMINÉ (refonte 11 juin 2026)
+`#achatV2Container`, mémoire (succursales chargées une fois puis cache). Contenu auto : (`Racheter`=Oui ET 0 bouteille) OU (`Panier`=Oui). Filtres CASCADE + Succursale — **TOUS remis à zéro à chaque ouverture, succursale comprise**, et `panierSessionAchatV2 = {}`.
+**Apparence** : **SECTIONS PAR PAYS** (`.emp-meuble` en titre, pays en ordre alphabétique normalisé, « Sans pays » à la fin), vins en ordre alphabétique dessous. Cartes SANS prix : nom + origine.
+**Coche panier (mode conseiller SAQ)** : rond `.coche-panier` à droite de chaque carte (`togglePanierSessionV2`, `stopPropagation`) → carte voilée (`.carte-vide`), ✓ doré. **Session seulement** (`panierSessionAchatV2`, clé `cleCartePanierV2` = code-barres/code SAQ/nom), oubliée à la réouverture. **La carte cochée reste à sa place** (pas de réordonnancement — décidé : ça faisait trop bouger l'écran).
+**Succursale choisie** : dispo par carte (`X btl` vert / sinon) — **les vins NON disponibles sont CACHÉS** et le compte se **recalcule** (`majCompteAchatV2` compte les cartes visibles) au fil des réponses (11 juin 2026). Vins sans code SAQ : non vérifiables, restent visibles.
+Clic carte → `ouvrirFicheV2(cb,'achat')`. Les noms de succursales replient dans le panneau (`.panneau-gauche .item-liste { white-space: normal }`).
 
-## 📍 Page EMPLACEMENTS V2 — ✅ TERMINÉ
-`#empV2Container`, mémoire. Filtres CASCADE Meuble → Rangée → Espace. Boutons « Vins en double », « Cépages doubles »/« manquants » (si meuble). Vue groupée MEUBLE → RANGÉE → cartes. Rangée tirée : le décompte reste en haut à droite (`.emp-rangee.ouvert` en `position:relative`, `.emp-compte` en `absolute` haut-droite). **Quinconce des rangées à 7 espaces conforme au réel (11 juin 2026) : BAS = espaces 1-3-5-7 (4 ronds), HAUT = 2-4-6 (3 ronds).** Clic → `deplacerDepuisEmpV2` (`retour='emplacements'`).
+## 📍 Page EMPLACEMENTS V2 — ✅ TERMINÉ (enrichie 11 juin 2026)
+`#empV2Container`, mémoire. Filtres CASCADE Meuble → Rangée → Espace. Vue groupée MEUBLE → RANGÉE → ronds.
+- **Séparateurs discrets** : ligne centrée (15 % de retrait de chaque côté, `--couleur-bordure-tres-claire`) entre le titre du meuble et les rangées (`.emp-meuble::after`) et entre les rangées (`.emp-rangee + .emp-rangee::before`) — ne touche jamais le cadre (pas de look Excel).
+- **Quinconce des rangées à 7 espaces conforme au réel : BAS = espaces 1-3-5-7 (4 ronds), HAUT = 2-4-6 (3 ronds).**
+- **Rangée tirée** : gros ronds + photo ; **bordure du rond à la COULEUR DU VIN** (`data-couleur="var(--vin-*)"` posé au rendu, appliqué/retiré à l'ouverture/fermeture) ; le décompte reste en haut à droite.
+- **Rond occupé** → fiche du vin (provenance 'emplacements'). **Rond LIBRE → ouvre le SCAN** (11 juin 2026).
+- **Boutons** : « Vins en double » (global ou par meuble) ; « Cépages doubles » (meuble choisi seulement) ; « **Cépages manquants** » — **TOUJOURS visible** : avec meuble = cépages présents ailleurs et absents du meuble ; **SANS meuble (11 juin 2026) = cépages de toute ma liste de vins ABSENTS du stock actif** (0 bouteille), avec les vins à racheter dessous — sert à prioriser la liste d'achat. Regroupements insensibles à la casse.
+Clic carte (listes) → `deplacerDepuisEmpV2` (`retour='emplacements'`).
 
 ## 📜 Page HISTORIQUE V2 — ✅ TERMINÉ
-`#histoV2Container`, mémoire (`ALL_HISTORIQUE` paresseux). Filtres Mets · Vin · Accord. Corps PAR VIN (`.histo-groupe`, bande couleur en haut de la carte vin) : carte vin → fiche ; cartes `.histo-mets` (barre couleur gauche, date en haut à droite) → éditeur `#histoEditV2Overlay`. **Page Corriger au gabarit commun** : ✕, nom (`.titre-1`), origine (`#histoEditV2-origine`), titre blanc « Corriger » ; champ plat = textarea qui replie. `ouvrirHistoEditV2(row, plat, note, nom, provenance, codeSAQ, codebarre)` : provenance 'fiche' = origine depuis `CURRENT_WINE_DATA` ; sinon retrouvée dans `ALL_DATA` par Code SAQ d'abord, code-barres sinon (jamais par le nom). Correction NOTE + plat → `corrigerHistorique` (resync). Ajout manuel (roundel « Ajouter ») → `histoAjoutV2Overlay` : recherche par nom dans `ALL_DATA`, plat (textarea) + note + Accords → `ajouterHistoriqueManuel` (resync). `getHistorique` renvoie `row`, `codeSAQ`, `couleur`.
+`#histoV2Container`, mémoire (`ALL_HISTORIQUE` paresseux). Filtres Mets · Vin · Accord. Corps PAR VIN (`.histo-groupe`, bande couleur en haut de la carte vin) : carte vin → fiche ; cartes `.histo-mets` (barre couleur gauche, date en haut à droite) → éditeur `#histoEditV2Overlay`. **Page Corriger au gabarit commun** : ✕, nom (`.titre-1`), origine (`#histoEditV2-origine`), titre blanc « Corriger » ; champ plat = textarea qui replie. `ouvrirHistoEditV2(row, plat, note, nom, provenance, codeSAQ, codebarre)` : provenance 'fiche' = origine depuis `CURRENT_WINE_DATA` ; sinon retrouvée dans `ALL_DATA` par Code SAQ d'abord, code-barres sinon (jamais par le nom). Correction NOTE + plat → `corrigerHistorique` (resync). **Ajout manuel : le roundel « Ajouter » est dans le PANNEAU DE FILTRES** (11 juin 2026 — il était enterré sous les cartes en bas de page ; `ouvrirHistoAjoutV2` ferme le panneau) → `histoAjoutV2Overlay` : recherche par nom dans `ALL_DATA`, plat (textarea) + note + Accords → `ajouterHistoriqueManuel` (resync). `getHistorique` renvoie `row`, `codeSAQ`, `couleur`.
 
 ## 🎁 Page PROMOTIONS SAQ V2 — ✅ TERMINÉ
 `#promoV2Container`, gabarit Liste d'achat. Ouverture = **Mes promos** (vins de la cave en rabais, via `getPromotionsSAQ` + codes SAQ de `ALL_DATA`, spinner, timeout 120 s) ; **Découvertes** (`getToutesPromotionsSAQ`, ≤ 30 $, hors mes vins) chargées EN ARRIÈRE-PLAN dès l'ouverture (silencieux, timeout 300 s) → bascule quasi instantanée. Mémoire de session (`promosMesV2`/`promosDecV2`).
-**Panneau gauche** : Afficher (Mes promos / Découvertes, actif en or) · filtres couleur/pays/cépage · Succursale (favorites individuelles, puis « Mes favorites » = `FAV`, puis « Toutes les succursales » = `TOUTES`).
+**Panneau gauche** : Afficher (Mes promos / Découvertes, actif en or) · filtres couleur/pays/cépage (cépage insensible à la casse) · Succursale (favorites individuelles, puis « Mes favorites » = `FAV`, puis « Toutes les succursales » = `TOUTES`).
 **Cartes** (tri rabais décroissant) : photo (mes vins), nom, origine ; à droite (enveloppé dans un `<div>` — la zone est flex, sinon tout s'étale sur une ligne) : prix barré (`.prix-barre`), prix promo, `+X pts` bonis, dispo.
 **Dispo** : une succursale → `X btl`/✗ par carte ; `FAV` → chaque favorite avec stock et quantité (1 appel `getSuccursalesDisponibles` par carte, timeout 120 s) ; `TOUTES` → tap sur une carte = 3 succursales les plus proches avec stock (géolocalisation) — **chaque succursale affichée est cliquable → Plans/itinéraire (`maps.apple.com/?daddr=`, `event.stopPropagation()`)** (11 juin 2026).
 **Clic carte** : Mes promos → fiche (provenance 'promo') ; Découvertes → page SAQ du vin ; mode `TOUTES` → dispo proches.
@@ -141,7 +156,7 @@ Crayon (✎) → `ouvrirEditFicheV2`, 27 champs (incl. Photo) + roundel « Photo
 ## 🖼️ Modal PHOTO V2 — ✅ TERMINÉ (11 juin 2026)
 `#photoV2Overlay` (`z-index:10010`, dans `cacherToutesPagesV2`) : `.photo-grande img` (max 90 % / 85 %, `object-fit:contain`) + ✕ (`fermerPhotoV2`). Ouvert par le clic sur la photo de la fiche (`ouvrirPhotoV2(url)`), la fiche reste ouverte dessous.
 
-## ✅ RÉALISÉ le 11 juin 2026 (anciens points 1 à 10, tous faits)
+## ✅ RÉALISÉ le 11 juin 2026 — séance 1 (anciens points 1 à 10)
 1. **Scroll** : retour EN HAUT à chaque ouverture (`remonterScrollV2`, voir Navigation).
 2. **Champ mets** : textarea qui replie (`boireV2-plat`, `histoEditV2-plat`, `histoAjoutV2-plat` ; CSS `textarea.champ-saisie`).
 3. **Fiche — section plats vide** : barre masquée (`#ficheV2-plats-section`).
@@ -149,27 +164,27 @@ Crayon (✎) → `ouvrirEditFicheV2`, 27 champs (incl. Photo) + roundel « Photo
 5. **Succursales** : tap → Plans/itinéraire (fiche « Où le trouver » + promos dispo proches).
 6. **Cartes mets** : date en haut à droite.
 7. **Photo** : champ Photo (URL, accepte `images/...`) dans Modifier + roundel « Photo SAQ » (`majPhotoSAQ` backend, n'écrit QUE la photo). Décidé : URL, jamais de téléversement.
-8. **Toast invisible après le premier** : corrigé dans `afficherMessage` (socle).
+8. **Toast invisible après le premier** : corrigé dans `afficherMessage` (socle) — appliqué pour vrai en séance 2.
 9. **Emplacements — quinconce 7 espaces** : bas 1-3-5-7, haut 2-4-6.
 10. **Vin inconnu — code SAQ manuel** : champ Code SAQ + Voir SAQ + Confirmer qui lit le code-barres corrigé et relance la recherche (voir Arbre du scan, branche C).
 
-## 📋 PROCHAINE SESSION — tests du 11 juin 2026 (soir)
-**Bogues**
-1. **Saisie manuelle au scan = gel (« mort »)** — et gel aussi si un test a déjà été fait avant ; un vrai code entré est déclaré « code erroné ». À analyser en priorité.
-2. **« J'ai perdu l'ajout d'un mets »** — le roundel/chemin d'ajout manuel d'un mets (Historique) ne fonctionne plus ou a disparu. À analyser.
+## ✅ RÉALISÉ le 11 juin 2026 — séance 2 (tests du soir, Notes.md)
+1. **« Saisie manuelle = gel / code erroné »** : deux causes — le correctif du toast (point 8) n'avait JAMAIS été appliqué (chaque refus était invisible = faux gel) → appliqué ; `gtinValide` refusait les codes à 14 chiffres → accepte 14. + capteur d'erreurs globales (toast sur toute erreur JS). **À retester.**
+2. **« Ajout d'un mets perdu »** : le roundel « Ajouter » était enterré au bas de la page Historique → déplacé dans le panneau de filtres. **À retester.**
+3. **Emplacements — espace libre → scan.** ✅
+4. **Emplacements — séparateurs discrets.** ✅
+5. **Emplacements — bordure des ronds = couleur du vin (rangée ouverte).** ✅
+6. **Cépages insensibles à la casse partout** (filtres Cave/Achat/Promo, listes, doubles/manquants). ✅
+7. **Cave — champ texte qui fouille tous les champs.** ✅
+8. **Liste d'achat — succursale → non-disponibles cachés + compte recalculé** (couvre aussi « le total se recalcule »). ✅
+9. **Liste d'achat — sections par pays, vins alphabétiques.** ✅
+10. **Liste d'achat — coche panier session** (mode conseiller SAQ ; testé : carte voilée seulement, PAS renvoyée en bas — décidé après essai). ✅
+11. **Cave — total des bouteilles en stock sous le total des vins.** ✅
+12. **Emplacements — Cépages manquants global** (cépages de ma liste absents du stock, pour prioriser les achats). ✅
 
-**Demandes**
-3. **Emplacements** : tap sur un espace LIBRE → ouvre le scan.
-4. **Emplacements** : séparateur discret entre les rangées et entre le titre et les rangées — pas une ligne qui touche au cadre (pas un look Excel).
-5. **Emplacements** : rangée ouverte → la bordure du cercle prend la couleur du vin.
-6. **Cépages insensibles à la casse PARTOUT** : recherche, filtres et toutes les fonctions.
-7. **Cave** : ajouter un filtre RECHERCHE TEXTE (pas un choix).
-8. **Liste d'achat** : succursale choisie → cacher les vins non disponibles.
-9. **Liste d'achat** : apparence — voir le pays, tri alphabétique.
-10. **Liste d'achat — mode conseiller SAQ** : marquer un produit « rendu dans le panier » sans le scanner (le conseiller a l'iPhone en main). Méthode à trancher.
-11. **Liste d'achat** : le total se recalcule selon la succursale choisie.
-12. **Cave** : sous le total des vins, afficher le total des bouteilles en stock.
-13. **Emplacements** : « Cépages manquants » disponible pour TOUS les emplacements (pas seulement quand un meuble est choisi).
+## 📋 À RETESTER (après publication)
+- Saisie manuelle : codes 12, 13 et 14 chiffres — chaque refus doit afficher un toast ; plus aucun « gel ».
+- Ajout d'un mets : Historique → loupe → Ajouter.
 
 ## 🐞 En suspens
 - **Vue emplacements V1 instable** : un filtre renvoie parfois une bouteille de moins. D'où la vérif réelle finale à l'Arrivée.
@@ -196,11 +211,13 @@ Code-barres (CUP), Code SAQ, Nom, Prix, Couleur, Cépages, Pays, Région, Appell
 - Toute nouvelle écriture : resynchroniser (`getInventoryData` ou `majMemoireVinV2`), et invalider `ALL_HISTORIQUE` si elle touche l'historique.
 - `saveWineEdits` écrit tout champ envoyé, y compris vide ; la photo est protégée par `!== undefined` (le V1 ne l'envoie pas).
 - `updateWineField` ne connaît que Accords, Racheter, Panier — pas un écrivain générique.
+- Toute comparaison de texte utilisateur (cépages, etc.) passe par `normaliserRechercheV2` / `memeTexteV2` / `contientTexteV2`.
 - Jamais `100vh` dans le V2 (iOS recadre le fond) : toujours `height:100%`.
 - Overlay par-dessus un autre : z-index supérieur (l'ordre HTML ne suffit pas).
 - Loupe/X d'une page-liste : `position:fixed`, sinon ils défilent avec le contenu.
 - Carte avec date à droite : `white-space:nowrap` sinon tronquée (exception : items des panneaux de filtres, qui replient).
 - Carte indentée pleine largeur : `width: calc(100% - indent)` sinon elle dépasse à droite.
 - Toast : ne jamais poser `display:none` en ligne sans le retirer à l'affichage suivant.
+- Un changement présenté mais sans « ok » reçu N'EST PAS appliqué — ne jamais le marquer fait.
 - Casse CSS sensible : `.roundel` futur `.bouton-londres`.
 - Toujours modifier dans `styles-v2.css` (V2), jamais `styles.css` (V1).
