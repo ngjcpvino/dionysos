@@ -1040,7 +1040,7 @@ function afficherCartesAchatV2(liste) {
     var cocheHtml = '<span class="coche-panier' + (coche ? ' actif' : '') + '" onclick="togglePanierSessionV2(\'' + cle.replace(/'/g, "\\'") + '\', event)"></span>';
     return entete + '<div class="carte ' + couleurClasseV2(w.Couleur) + (coche ? ' carte-vide' : '') + '"' + onclick + '>' + photo +
            '<div class="carte-centre"><span class="carte-titre">' + nom + '</span><span class="carte-sous">' + sous + '</span></div>' +
-           '<div class="carte-droite">' + cocheHtml + dispo + '</div></div>';
+           '<div class="carte-droite">' + dispo + cocheHtml + '</div></div>';
   }).join('');
   
 

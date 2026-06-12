@@ -640,7 +640,7 @@ body::after {
   height: 26px;
   border-radius: 50%;
   border: var(--largeur-bordure-1) solid var(--gold);
-  margin-right: var(--space-s);
+  margin-left: var(--space-s);
   flex: none;
   -webkit-tap-highlight-color: transparent;
 }
