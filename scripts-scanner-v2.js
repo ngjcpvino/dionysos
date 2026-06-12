@@ -1051,9 +1051,14 @@ var panierSessionAchatV2 = {};
 
 function togglePanierSessionV2(cle, ev) {
   if (ev) ev.stopPropagation();
-  if (panierSessionAchatV2[cle]) delete panierSessionAchatV2[cle];
-  else panierSessionAchatV2[cle] = true;
-  appliquerFiltresAchatV2();
+  var actif;
+  if (panierSessionAchatV2[cle]) { delete panierSessionAchatV2[cle]; actif = false; }
+  else { panierSessionAchatV2[cle] = true; actif = true; }
+  if (ev && ev.target) {
+    ev.target.classList.toggle('actif', actif);
+    var carte = ev.target.closest('.carte');
+    if (carte) carte.classList.toggle('carte-vide', actif);
+  }
 }
 
 function majCompteAchatV2() {
