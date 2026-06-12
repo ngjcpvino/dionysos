@@ -83,12 +83,22 @@ function _cacherSpinner() {
   if (overlay) overlay.style.display = 'none';
 }
 
+// ==================== ERREURS GLOBALES ====================
+window.addEventListener('error', function(e) {
+  afficherMessage('Erreur : ' + (e.message || 'inconnue'));
+});
+window.addEventListener('unhandledrejection', function(e) {
+  var raison = e.reason && e.reason.message ? e.reason.message : e.reason;
+  afficherMessage('Erreur : ' + (raison || 'inconnue'));
+});
+
 // ==================== MESSAGES ====================
 function afficherMessage(m) {
   let t = document.getElementById('toast') || document.createElement('div');
   t.id = 'toast';
   t.className = 'toast';
   document.body.appendChild(t);
+  t.style.display = '';
   t.textContent = m;
   t.classList.add('show');
   setTimeout(function() {
