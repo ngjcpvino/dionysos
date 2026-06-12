@@ -360,7 +360,22 @@ body::after {
   padding: var(--space-s) var(--space-m) var(--space-m);
   margin-bottom: var(--space-xl);
 }
-.emp-rangee { cursor: pointer; -webkit-tap-highlight-color: transparent; margin-bottom: var(--space-l); }
+.emp-rangee { cursor: pointer; -webkit-tap-highlight-color: transparent; margin-bottom: var(--space-l); position: relative; }
+.emp-rangee + .emp-rangee::before {
+  content: '';
+  position: absolute;
+  top: calc(-1 * var(--space-s));
+  left: 15%; right: 15%;
+  border-top: var(--largeur-bordure-1) solid var(--couleur-bordure-tres-claire);
+}
+.emp-bloc .emp-meuble { position: relative; }
+.emp-bloc .emp-meuble::after {
+  content: '';
+  position: absolute;
+  bottom: calc(-1 * var(--space-s));
+  left: 15%; right: 15%;
+  border-top: var(--largeur-bordure-1) solid var(--couleur-bordure-tres-claire);
+}
 .emp-meuble {
   color: var(--white);
   font-size: var(--fs-xl);
@@ -612,6 +627,20 @@ body::after {
 .carte.vin-rose   { border-bottom-color: var(--vin-rose); border-left: none; }
 .carte.vin-bulles { border-bottom-color: var(--vin-bulles); border-left: none; }
 .carte.carte-vide { opacity: 0.45; }
+.coche-panier {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: var(--largeur-bordure-1) solid var(--gold);
+  margin-right: var(--space-s);
+  flex: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.coche-panier.actif { background: var(--gold-30); }
+.coche-panier.actif::after { content: '✓'; color: var(--gold-2); font-size: var(--fs-base); }
 
 .controle {
   display: flex;
