@@ -98,8 +98,10 @@ html, body {
   --fs-md: 16px;
   --fs-base: 14px;
   --fs-sm: 13px;
-  --fs-12: 12px;
   --fs-xs: 11px;
+  --fs-12: 12px;
+  --fs-20: 20px;
+  --fs-22: 22px;
   --space-3: 3px;
   --space-xs: 5px;
   --space-s: 10px;
@@ -378,7 +380,7 @@ body::after {
 }
 .emp-meuble {
   color: var(--white);
-  font-size: var(--fs-xl);
+  font-size: var(--fs-22);
   letter-spacing: var(--ls-tight);
   margin: 0 0 var(--space-l) 0;
 }
