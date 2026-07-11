@@ -1693,8 +1693,7 @@ function brancherTirerRangeesEmpV2() {
           if (cb) {
             c.addEventListener('click', function(ev){
               ev.stopPropagation();
-              document.getElementById('empV2Container').style.display = 'none';
-              ouvrirApresTap(function(){ ouvrirFicheV2(cb, 'emplacements'); });
+              ouvrirApresTap(function(){ ouvrirPhotoEmpV2(cb); });
             });
           } else {
             c.addEventListener('click', function(ev){
@@ -2238,6 +2237,7 @@ function couleurClasseV2(couleur) {
   if (couleur.indexOf('blanc') !== -1) return 'vin-blanc';
   if (couleur.indexOf('rose') !== -1 || couleur.indexOf('rosé') !== -1) return 'vin-rose';
   if (couleur.indexOf('bulle') !== -1 || couleur.indexOf('mousseux') !== -1) return 'vin-bulles';
+  if (couleur.indexOf('spiritueux') !== -1) return 'vin-spiritueux';
   return 'vin-rouge';
 }
 
@@ -2257,7 +2257,7 @@ function grouperVinsV2(data) {
       }
     }
   });
-  var ordre = { rouge: 1, blanc: 2, rose: 3, bulles: 4 };
+  var ordre = { rouge: 1, blanc: 2, rose: 3, bulles: 4, spiritueux: 5 };
   return Object.values(grouped).sort(function(a, b) {
     var va = ordre[(a.wine.Couleur || '').toLowerCase()] || 99;
     var vb = ordre[(b.wine.Couleur || '').toLowerCase()] || 99;
