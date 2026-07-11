@@ -618,6 +618,22 @@ function choisirEspaceDeplacer(espace) {
   });
 }
 
+function deplacerARangerV2() {
+  var c = deplacerV2Choix;
+  appelBackend('mettreBotteilleARanger', { row: c.row, bottle: c.bottle }, { spinner: 'Mise à ranger' }).then(function() {
+    afficherMessage('Bouteille mise à ranger');
+    return appelBackend('getInventoryData', {}).then(function(data) {
+      if (data) ALL_DATA = data;
+      return appelBackend('checkWineExists', { codebarre: menuActionV2Context.code }).then(function(result) {
+        if (result) menuActionV2Context.wineResult = result;
+        fermerDeplacerV2();
+      });
+    });
+  }).catch(function() {
+    retourAccueilV2();
+  });
+}
+
 function fermerDeplacerV2() {
   document.getElementById('deplacerV2Container').style.display = 'none';
   if (menuActionV2Context && menuActionV2Context.retour === 'aranger') {
