@@ -230,6 +230,26 @@ function ouvrirMenuActionV2(code, wineResult) {
   var origineEl = document.getElementById('menuActionV2-origine');
   if (origineEl) origineEl.textContent = [w.pays, w.region, w.appellation].filter(Boolean).map(decodeHTML).join(' • ');
 
+  var photoEl = document.getElementById('menuActionV2-photo');
+  if (photoEl) {
+    if (w.photoURL) {
+      photoEl.innerHTML = '<img src="' + w.photoURL + '" alt="" onerror="this.parentNode.style.display=\'none\'">';
+      photoEl.style.display = 'flex';
+    } else {
+      photoEl.innerHTML = '';
+      photoEl.style.display = 'none';
+    }
+  }
+
+  var bottlesMenu = (wineResult && wineResult.bottles) ? wineResult.bottles : [];
+  var activesMenu = bottlesMenu.filter(function(b) { return b.statut !== 'Bu' && b.statut !== 'Sorti'; });
+  var empEl = document.getElementById('menuActionV2-emplacements');
+  if (empEl) {
+    empEl.textContent = activesMenu.map(function(b) {
+      return (b.meuble && b.rangee && b.espace) ? (b.meuble + '-' + b.rangee + '-' + b.espace) : 'À ranger';
+    }).join(' · ');
+  }
+
   var nbActives = (wineResult && typeof wineResult.count === 'number') ? wineResult.count : 0;
   ['menuV2-deplacer', 'menuV2-boire', 'menuV2-donner'].forEach(function(id) {
     var el = document.getElementById(id);
