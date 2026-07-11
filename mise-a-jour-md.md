@@ -5,7 +5,7 @@
 ## 📁 Architecture
 - **Frontend** : GitHub Pages (dépôt `ngjcpvino/dionysos`)
 - **Backend** : Google Apps Script — projet « Vino 3.0 » — `Code.gs` (un seul backend, partagé V1/V2)
-- **Base** : Google Sheets (ID `1Y4OCwcb2XBTPDTl_KDUGHgEiXgwqqXHmWSw6XQVSe3g`)
+- **Base** : Google Sheets 
 
 ## 🏗️ Stratégie V2 — deux sites parallèles (DÉCIDÉ)
 On bâtit le V2 comme **un site complet et autonome, côte à côte avec le V1**.
