@@ -159,6 +159,14 @@ Crayon (✎) → `ouvrirEditFicheV2`, 27 champs (incl. Photo) + roundel « Photo
 - Conséquence assumée : l'adresse de base du site donne « page introuvable ». Ce n'est PAS une protection — la vraie protection = `SECURITE-API.md` (prochain chantier).
 - `Code.gs` : rien changé (backend conservé intégralement ; le tri des fonctions ex-V1 reste un chantier séparé).
 
+## 🔐 SÉCURITÉ — MOT DE PASSE D'APP — ✅ TERMINÉ (11 juillet 2026)
+Chaque appel à l'API doit fournir le mot de passe d'app, sinon le serveur refuse.
+- **Backend (`Code.gs`)** : vérification au point d'entrée unique `doPost` — le mot de passe reçu (`params.secret`) est comparé à la Script Property **`APP_SECRET`**. Absent ou faux → `{ success:false, error:'ACCES_REFUSE' }`, aucune donnée, aucun indice. **Si `APP_SECRET` n'est pas posée, tout passe** (garde-fou anti-blocage pendant une mise en route). Un seul contrôle couvre TOUTES les fonctions, lecture comprise.
+- **Front (`scripts-socle-v2.js`)** : le mot de passe vit dans `localStorage` (clé **`vinoSecret`**), jamais dans le code ni le dépôt. `appelBackend` l'ajoute automatiquement à chaque appel (`secret` dans le body). Réponse `ACCES_REFUSE` → efface `vinoSecret`, toast « Mot de passe incorrect », rouvre l'écran de saisie (couvre aussi un changement de mot de passe côté serveur : les 2 téléphones le redemandent).
+- **Écran de saisie (`index-v2.html`)** : `#secretV2Container` (gabarit `.modal-v2-fullscreen`, champ `#secretV2-champ` en `champ-saisie` type password, roundel CONFIRMER → `confirmerSecretV2`). Au démarrage : pas de `vinoSecret` → écran ; sinon `demarrerAppV2()` (l'ancien contenu du `window.onload`). ⚠️ **Volontairement ABSENT de `cacherToutesPagesV2()`** (exception à la règle) : on ne doit pas pouvoir le contourner par la navigation.
+- **Déploiement** : `appsscript.json` inchangé (`ANYONE_ANONYMOUS` nécessaire au fetch anonyme). `API_URL` reste dans le dépôt : le mot de passe la rend inoffensive. GitHub garde l'historique des anciennes versions — accepté, pas de réécriture d'historique (décidé).
+- **Mise en route faite** : front publié, `APP_SECRET` posée, backend redéployé, mot de passe entré sur les téléphones.
+
 ## ✅ RÉALISÉ le 11 juin 2026 — séance 1 (anciens points 1 à 10)
 1. **Scroll** : retour EN HAUT à chaque ouverture (`remonterScrollV2`, voir Navigation).
 2. **Champ mets** : textarea qui replie (`boireV2-plat`, `histoEditV2-plat`, `histoAjoutV2-plat` ; CSS `textarea.champ-saisie`).
@@ -225,3 +233,6 @@ Code-barres (CUP), Code SAQ, Nom, Prix, Couleur, Cépages, Pays, Région, Appell
 - Un changement présenté mais sans « ok » reçu N'EST PAS appliqué — ne jamais le marquer fait.
 - Casse CSS sensible : `.roundel` futur `.bouton-londres`.
 - Le dépôt n'a plus qu'UN css (`styles-v2.css`) et UN html (`index-v2.html`) — le V1 n'existe plus (11 juillet 2026).
+- Mot de passe d'app : `appelBackend` envoie `secret` automatiquement — ne JAMAIS l'ajouter à la main dans un appel. Changer le mot de passe = changer `APP_SECRET` + nouveau déploiement ; les téléphones le redemandent seuls.
+- `#secretV2Container` est HORS de `cacherToutesPagesV2()` — exception voulue, ne pas « corriger ».
+- Toute nouvelle fonction backend passe par le `switch` de `doPost` : elle est protégée automatiquement, rien à ajouter.
