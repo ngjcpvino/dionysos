@@ -169,6 +169,8 @@ function afficherFicheV2(result) {
   // === NOTES ===
   html += '<div class="section">';
   html += '<h3 class="titre-2">Notes</h3>';
+  html += '<div class="controle"><span class="libelle">Notes du sommelier</span>' +
+          '<div id="ficheV2-notes-display" class="champ-cliquable" onclick="editerNotesSommelierV2()">' + (wine['Notes temporaires'] ? decodeHTML(wine['Notes temporaires'].toString()) : 'Aucune') + '</div></div>';
   var accordsActuels = (wine.Accords || '').split(',').map(function(a) { return a.trim(); }).filter(Boolean);
   var itemsAccords = (CONFIG && CONFIG.accords ? CONFIG.accords : []).map(function(acc) {
     var sel = accordsActuels.indexOf(acc) !== -1;
@@ -196,7 +198,6 @@ function afficherFicheV2(result) {
           '</div>';
 
   html += ligne('Recettes', wine.Recettes);
-  html += ligne('Notes', wine['Notes temporaires']);
   html += ligne('Divers', wine.Divers);
   html += '</div>';
 
@@ -425,6 +426,41 @@ function trouverCeVinV2() {
   }
 }
 
+// ==================== NOTES DU SOMMELIER ====================
+function editerNotesSommelierV2() {
+  var disp = document.getElementById('ficheV2-notes-display');
+  if (!disp) return;
+  var valeur = (CURRENT_WINE_DATA && CURRENT_WINE_DATA['Notes temporaires']) ? decodeHTML(CURRENT_WINE_DATA['Notes temporaires'].toString()) : '';
+  disp.outerHTML = '<textarea id="ficheV2-notes-champ" class="champ-saisie"></textarea>';
+  var champ = document.getElementById('ficheV2-notes-champ');
+  champ.value = valeur;
+  champ.onblur = sauverNotesSommelierV2;
+  champ.focus();
+}
+
+function remettreNotesDisplayV2() {
+  var champ = document.getElementById('ficheV2-notes-champ');
+  if (!champ) return;
+  var valeur = (CURRENT_WINE_DATA && CURRENT_WINE_DATA['Notes temporaires']) ? decodeHTML(CURRENT_WINE_DATA['Notes temporaires'].toString()) : '';
+  champ.outerHTML = '<div id="ficheV2-notes-display" class="champ-cliquable" onclick="editerNotesSommelierV2()">' + (valeur || 'Aucune') + '</div>';
+}
+
+function sauverNotesSommelierV2() {
+  var champ = document.getElementById('ficheV2-notes-champ');
+  if (!champ) return;
+  var valeur = champ.value.trim();
+  var avant = ((CURRENT_WINE_DATA && CURRENT_WINE_DATA['Notes temporaires']) ? decodeHTML(CURRENT_WINE_DATA['Notes temporaires'].toString()) : '').trim();
+  if (valeur === avant) { remettreNotesDisplayV2(); return; }
+  appelBackend('updateWineField', { codebarre: CURRENT_WINE_CODEBARRE, field: 'Notes temporaires', value: valeur }, { spinner: '' }).then(function() {
+    majMemoireVinV2(CURRENT_WINE_CODEBARRE, { 'Notes temporaires': valeur });
+    if (CURRENT_WINE_DATA) CURRENT_WINE_DATA['Notes temporaires'] = valeur;
+    remettreNotesDisplayV2();
+    afficherMessage('Note sauvegardée');
+  }).catch(function() {
+    afficherMessage('Erreur de sauvegarde');
+  });
+}
+
 // ==================== ÉDITION FICHE V2 ====================
 var EDIT_FICHE_V2_CHAMPS = [
   ['Nom', 'nom', 'Nom'],
@@ -451,7 +487,7 @@ var EDIT_FICHE_V2_CHAMPS = [
   ['Pastille', 'pastille', 'Pastille gout'],
   ['Description', 'description', 'Description'],
   ['Recettes', 'recettes', 'Recettes'],
-  ['Notes', 'notestemp', 'Notes temporaires'],
+  ['Notes du sommelier', 'notestemp', 'Notes temporaires'],
   ['Divers', 'divers', 'Divers'],
   ['Photo', 'photo', 'Photo URL']
 ];

@@ -675,6 +675,8 @@ function rendreEnteteActionV2(prefixe) {
 }
 
 // ---------- BOIRE ----------
+var BOIRE_V2_NOTE_INITIALE = '';
+
 function ouvrirBoireV2() {
   if (!menuActionV2Context) return;
   construireBoireV2();
@@ -684,6 +686,10 @@ function construireBoireV2() {
   actionV2Choix = { row: menuActionV2Context.wineResult.row, bottle: 0, note: 0 };
   rendreEnteteActionV2('boire');
   document.getElementById('boireV2-plat').value = '';
+  var codeBoire = (menuActionV2Context.code || '').toString().trim();
+  var itemBoire = (ALL_DATA || []).filter(function(i) { return (i['Code-barres'] || '').toString().trim() === codeBoire; })[0];
+  BOIRE_V2_NOTE_INITIALE = itemBoire ? decodeHTML((itemBoire['Notes temporaires'] || '').toString()) : '';
+  document.getElementById('boireV2-notes').value = BOIRE_V2_NOTE_INITIALE;
   document.getElementById('boireV2-accords-menu').classList.remove('ouvert');
 
   var actives = bottlesActivesV2();
@@ -759,6 +765,11 @@ function confirmerBoireV2() {
   appelBackend('actionBouteille', { row: actionV2Choix.row, action: 'boire', bottle: actionV2Choix.bottle, plat: plat, bonAccord: actionV2Choix.note }, { spinner: 'Santé !' }).then(function() {
     if (accords.length) {
       return appelBackend('updateWineField', { codebarre: menuActionV2Context.code, field: 'Accords', value: accords.join(', ') });
+    }
+  }).then(function() {
+    var noteBoire = document.getElementById('boireV2-notes').value.trim();
+    if (noteBoire !== BOIRE_V2_NOTE_INITIALE.trim()) {
+      return appelBackend('updateWineField', { codebarre: menuActionV2Context.code, field: 'Notes temporaires', value: noteBoire });
     }
   }).then(function() {
     return appelBackend('getInventoryData', {});
