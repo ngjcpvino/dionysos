@@ -33,6 +33,14 @@ let FICHE_V2_ORIGINE = null;
 
 // ==================== INITIALISATION ====================
 window.onload = function() {
+  if (!localStorage.getItem('vinoSecret')) {
+    ouvrirSecretV2();
+    return;
+  }
+  demarrerAppV2();
+};
+
+function demarrerAppV2() {
   appelBackend('getConfig', {}, { spinner: ' ' }).then(function(cfg) {
     CONFIG = cfg;
     return appelBackend('getInventoryData', {}, { spinner: ' ' });
@@ -41,7 +49,23 @@ window.onload = function() {
   }).catch(function(err) {
     afficherMessage('Erreur de chargement : ' + err);
   });
-};
+}
+
+// ==================== MOT DE PASSE D'APP ====================
+function ouvrirSecretV2() {
+  var c = document.getElementById('secretV2Container');
+  if (c) c.style.display = 'flex';
+}
+
+function confirmerSecretV2() {
+  var champ = document.getElementById('secretV2-champ');
+  var valeur = champ.value.trim();
+  if (valeur === '') { afficherMessage('Entrez le mot de passe'); return; }
+  localStorage.setItem('vinoSecret', valeur);
+  champ.value = '';
+  document.getElementById('secretV2Container').style.display = 'none';
+  demarrerAppV2();
+}
 
 // ==================== BACKEND ====================
 async function appelBackend(action, data = {}, options = {}) {
@@ -51,11 +75,18 @@ async function appelBackend(action, data = {}, options = {}) {
   try {
     const response = await fetch(API_URL, {
       method: 'POST',
-      body: JSON.stringify({ action: action, data: data }),
+      body: JSON.stringify({ action: action, data: data, secret: localStorage.getItem('vinoSecret') || '' }),
       signal: controleur.signal
     });
     const json = await response.json();
-    if (!json.success) throw new Error(json.error || 'Erreur backend');
+    if (!json.success) {
+      if (json.error === 'ACCES_REFUSE') {
+        localStorage.removeItem('vinoSecret');
+        ouvrirSecretV2();
+        throw new Error('Mot de passe incorrect');
+      }
+      throw new Error(json.error || 'Erreur backend');
+    }
     return json.result;
   } catch (e) {
     if (e.name === 'AbortError') throw new Error('Le serveur ne répond pas');
