@@ -1690,8 +1690,8 @@ function afficherEmpV2() {
       var coul = 'var(--' + couleurClasseV2(w.Couleur) + ')';
       return '<div class="cercle" data-photo="' + photo + '" data-cb="' + cb + '" data-couleur="' + coul + '"></div>';
     }).join('');
-    html += '<div class="emp-bloc"><div class="emp-meuble">À RANGER</div>' +
-            '<div class="emp-rangee">' +
+    html += '<div class="emp-bloc"><div class="emp-meuble">À ranger</div>' +
+            '<div class="emp-rangee a-ranger">' +
               '<div class="emp-ronds"><div class="ligne-ronds">' + rondsAR + '</div></div>' +
               '<span class="emp-compte">' + aRanger.length + '</span>' +
             '</div></div>';

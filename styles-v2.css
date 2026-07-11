@@ -410,6 +410,7 @@ body::after {
   position: absolute; top: 0; right: 0;
 }
 .emp-ronds .ligne-ronds { gap: var(--space-s); margin-bottom: var(--space-s); }
+.emp-rangee.a-ranger .ligne-ronds { flex-wrap: wrap; justify-content: flex-start; row-gap: var(--space-s); }
 
 /* rangée fermée : petits ronds, pas de quinconce */
 .emp-rangee:not(.ouvert) .ligne-ronds .cercle { width: 26px; height: 26px; }
