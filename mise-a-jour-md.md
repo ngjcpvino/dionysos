@@ -1,22 +1,18 @@
-# 🍷 Dionysos — État du projet (consolidé, à jour au 11 juin 2026, soir)
+# 🍷 Dionysos — État du projet (consolidé, à jour au 11 juillet 2026)
 
-> Les RÈGLES DE TRAVAIL sont dans `REFERENCE.md` (à lire en premier). Ce fichier-ci ne contient que l'état technique du projet. Seuls deux `.md` existent : `REFERENCE.md` et celui-ci.
+> Les RÈGLES DE TRAVAIL sont dans `REFERENCE.md` (à lire en premier). Ce fichier-ci ne contient que l'état technique du projet. Seuls deux `.md` existent : `REFERENCE.md` et celui-ci (+ les spécifications du dossier « a faire »).
 
 ## 📁 Architecture
 - **Frontend** : GitHub Pages (dépôt `ngjcpvino/dionysos`)
-- **Backend** : Google Apps Script — projet « Vino 3.0 » — `Code.gs` (un seul backend, partagé V1/V2)
-- **Base** : Google Sheets 
+- **Backend** : Google Apps Script — projet « Vino 3.0 » — `Code.gs` (un seul backend)
+- **Base** : Google Sheets
 
-## 🏗️ Stratégie V2 — deux sites parallèles (DÉCIDÉ)
-On bâtit le V2 comme **un site complet et autonome, côte à côte avec le V1**.
+## 🏗️ Stratégie V2 — ✅ TERMINÉE (ménage fait le 11 juillet 2026)
+La stratégie « deux sites parallèles » est **terminée**. Le V1 est **supprimé** du dépôt (8 fichiers : `index.html`, `styles.css`, `scripts-config.js`, `scripts-init.js`, `scripts-inventaire.js`, `scripts-fiche.js`, `scripts-scanner.js`, `scripts-listes.js`). **Le V2 est LE site.**
 
-**Site V1 (actuel, figé)** : `index.html`, `styles.css`, tous les `scripts-*.js` V1. On n'y touche plus. **Nettoyé** : plus aucune trace de V2 dans `index.html` ; les fichiers `scripts-*-V2.js` (V majuscule) n'existent plus dans le dépôt.
+**Décision de Chantal (11 juillet 2026) — PAS de renommage** : les fichiers V2 **gardent leurs noms** (`index-v2.html`, `styles-v2.css`, les `-v2.js`). Les deux téléphones pointent déjà sur `.../index-v2.html` et ça reste ainsi. Conséquence assumée : l'adresse de base du site (sans `index-v2.html`) affiche « page introuvable » — voulu (page moins facile à trouver). ⚠️ Ce n'est PAS une protection : la vraie protection = chantier `SECURITE-API.md` (prochain).
 
-**Site V2 (parallèle, en construction)** : `index-v2.html`, `styles-v2.css`, `scripts-socle-v2.js` + modules `-v2.js`. `index-v2.html` charge **uniquement** ses propres fichiers.
-
-**Socle dupliqué (temporaire).** `scripts-socle-v2.js` recopie : `API_URL`, `appelBackend` + spinner, variables globales (`CONFIG`, `ALL_DATA`, `ALL_HISTORIQUE`, `CURRENT_WINE_*`, `FICHE_V2_PROVENANCE`, `FICHE_V2_ORIGINE`), `afficherMessage`, `decodeHTML`, `ouvrirApresTap`, `remonterScrollV2`, capteur d'erreurs globales, `window.onload` propre. `styles-v2.css` recopie `:root` + le fond.
-
-**Ménage final = renommage, pas de tri.** Quand V2 complet : supprimer tous les fichiers V1 d'un bloc, renommer `index-v2.html` → `index.html`, `styles-v2.css` → `styles.css`.
+**Socle V2.** `scripts-socle-v2.js` contient : `API_URL`, `appelBackend` + spinner, variables globales (`CONFIG`, `ALL_DATA`, `ALL_HISTORIQUE`, `CURRENT_WINE_*`, `FICHE_V2_PROVENANCE`, `FICHE_V2_ORIGINE`), `afficherMessage`, `decodeHTML`, `ouvrirApresTap`, `remonterScrollV2`, capteur d'erreurs globales, `window.onload` propre. `styles-v2.css` contient `:root` + le fond.
 
 ## 🎨 Système de design
 **Règle d'or** : « un chat est un chat ». Une valeur = un seul endroit (`:root`), nommée en français lisible (par sa **valeur**, ex. `--ls-9`, pas par son usage), réutilisée partout. Avant de créer une classe, vérifier si elle existe. Jamais de style en dur dans le JS ni de valeur magique dans une règle. **Réutiliser au maximum l'existant** (`.roundel`, `.champ-saisie`, `.menu-liste`/`.item-liste`, `.controle`, `.titre-1`, `.titre-action`) avant de créer du neuf.
@@ -68,12 +64,13 @@ App à **2 utilisateurs sur 2 téléphones** ; la vérité partagée = le Sheet.
 
 **Anti-cache iPhone (RÈGLE).** `index-v2.html` charge `styles-v2.css` et les 3 JS par `document.write` avec `?v=` + heure courante (`Math.floor(Date.now()/3600000)`) : les fichiers se rechargent seuls au plus tard une heure après une publication. ⚠️ Un test fait tout de suite après une publication peut rouler les ANCIENS fichiers.
 
-## 📂 Fichiers
-**V1 (figé, pur V1)** : index.html · styles.css · scripts-config.js · scripts-init.js · scripts-inventaire.js · scripts-fiche.js · scripts-scanner.js · scripts-listes.js
-**V2 (en construction)** : index-v2.html · styles-v2.css · scripts-socle-v2.js · scripts-scanner-v2.js (scan + menu + saisie manuelle + vin inconnu + Arrivée + Déplacer + Boire + Donner + Cave + filtres + À ranger + Liste d'achat + Emplacements + Historique + navigation) · scripts-fiche-v2.js
-**Backend** : Code.gs (commentaire de structure corrigé ; ligne morte `addBottle` retirée — 9 juin 2026 ; `majPhotoSAQ` + photo dans `saveWineEdits` — 11 juin 2026)
+## 📂 Fichiers (après le ménage du 11 juillet 2026)
+**Site (unique)** : index-v2.html · styles-v2.css · scripts-socle-v2.js · scripts-scanner-v2.js (scan + menu + saisie manuelle + vin inconnu + Arrivée + Déplacer + Boire + Donner + Cave + filtres + À ranger + Liste d'achat + Emplacements + Historique + navigation) · scripts-fiche-v2.js
+**V1 : SUPPRIMÉ du dépôt** (11 juillet 2026) : index.html · styles.css · scripts-config.js · scripts-init.js · scripts-inventaire.js · scripts-fiche.js · scripts-scanner.js · scripts-listes.js — n'existent plus.
+**Adresse du site** : `.../index-v2.html` (les raccourcis des deux téléphones, inchangés). L'adresse de base sans nom de fichier donne « page introuvable » (assumé).
+**Backend** : Code.gs (commentaire de structure corrigé ; ligne morte `addBottle` retirée — 9 juin 2026 ; `majPhotoSAQ` + photo dans `saveWineEdits` — 11 juin 2026). Les fonctions appelées seulement par le V1 restent (tri = chantier séparé, non demandé).
 **Sheets** : Vino · Historique · config/CONFIG · Vins scannés (non utilisé)
-**Docs** : REFERENCE.md (règles) · ce fichier (état). Les anciens audits et fichiers de décisions sont fusionnés ici et supprimés.
+**Docs** : REFERENCE.md (règles) · ce fichier (état) · dossier « a faire » (spécifications validées). Les anciens audits et fichiers de décisions sont fusionnés ici et supprimés.
 
 ## 🎯 Scan V2 (`scripts-scanner-v2.js`)
 **Flux** : `startScanFromHomeV2` → `startScannerV2` (Quagga sur `#interactiveV2`, seuil 3) → `traiterResultatScanV2(code)` → `checkWineExists` (exception fraîche).
@@ -96,7 +93,7 @@ S'ouvre depuis la mémoire. 1 bouteille → direct ; plusieurs → liste (`row` 
 ## 📄 Fiche V2 (`scripts-fiche-v2.js`)
 `ouvrirFicheV2(codebarre, provenance)` : bâtie depuis `ficheDepuisMemoireV2` (instantanée), secours backend. Plats depuis `ALL_HISTORIQUE` (paresseux). Panneau `#ficheV2Overlay`, bordure couleur du vin. La carte Température s'affiche SANS le « De » de tête (`replace(/^De\s+/i, '')`).
 **Blocs** : Information · Description+Prix · Dégustation · Production · Notes (Accords ; Racheter ✓/✗ ; Sur-inventaire `Panier` ; Recettes/Notes/Divers) · Historique des plats (`.fiche-mets` indentées 60px, cliquables → éditeur correction ; **section `#ficheV2-plats-section` MASQUÉE quand aucun mets** — 11 juin 2026) · Inventaire (lecture seule) · Photo (**clic → modal `#photoV2Overlay` : bouteille en grand + ✕, plus de page SAQ** — 11 juin 2026) · roundel « OÙ LE TROUVER » (**succursales cliquables → Plans/itinéraire `maps.apple.com/?daddr=`** — 11 juin 2026) · roundel « ACTION » · Prix auto (`verifierPrixV2`, silencieux).
-**Écritures directes** : Racheter/Panier/Accords → `updateWineField` puis `majMemoireVinV2` + `CURRENT_WINE_DATA`. Édition (**27 champs**, incl. **Photo URL** depuis le 11 juin 2026) → `saveWineEdits` puis `majMemoireVinV2` (clés `Designation`→`Désignation`, `Temperature`→`Température`) puis rouvre la fiche. `saveWineEdits` (backend) écrit tout champ ENVOYÉ, y compris vide — vider un champ dans l'édition le vide aussi dans le Sheet (la photo est gardée par `data.photo !== undefined` : le V1, qui ne l'envoie pas, ne l'efface pas).
+**Écritures directes** : Racheter/Panier/Accords → `updateWineField` puis `majMemoireVinV2` + `CURRENT_WINE_DATA`. Édition (**27 champs**, incl. **Photo URL** depuis le 11 juin 2026) → `saveWineEdits` puis `majMemoireVinV2` (clés `Designation`→`Désignation`, `Temperature`→`Température`) puis rouvre la fiche. `saveWineEdits` (backend) écrit tout champ ENVOYÉ, y compris vide — vider un champ dans l'édition le vide aussi dans le Sheet (la photo est gardée par `data.photo !== undefined` : un appel qui ne l'envoie pas ne l'efface pas).
 **Photo SAQ (11 juin 2026)** : roundel « Photo SAQ » dans la page Modifier → `photoSAQDepuisEditV2` → backend `majPhotoSAQ(codebarre, codeSAQ)` : rescrape la SAQ pour CE vin et n'écrit QUE la colonne Photo URL ; le front met à jour le champ, `majMemoireVinV2` et `CURRENT_WINE_DATA`. Photo personnelle : coller une URL (ou un chemin `images/...` du dépôt) dans le champ Photo de Modifier.
 **Retour fiche** (`fermerFicheV2`) : `menuScan` + `FICHE_V2_ORIGINE` → liste d'origine ; sinon `menuScan` → menu d'action ; 'cave'/'achat'/'histo'/'promo'/'recherche'/'emplacements' → leur page (avec `remonterScrollV2`).
 
@@ -156,6 +153,12 @@ Crayon (✎) → `ouvrirEditFicheV2`, 27 champs (incl. Photo) + roundel « Photo
 ## 🖼️ Modal PHOTO V2 — ✅ TERMINÉ (11 juin 2026)
 `#photoV2Overlay` (`z-index:10010`, dans `cacherToutesPagesV2`) : `.photo-grande img` (max 90 % / 85 %, `object-fit:contain`) + ✕ (`fermerPhotoV2`). Ouvert par le clic sur la photo de la fiche (`ouvrirPhotoV2(url)`), la fiche reste ouverte dessous.
 
+## ✅ MÉNAGE V1→V2 — FAIT le 11 juillet 2026
+- **Supprimés du dépôt (par Chantal, d'un bloc)** : index.html · styles.css · scripts-config.js · scripts-init.js · scripts-inventaire.js · scripts-fiche.js · scripts-scanner.js · scripts-listes.js.
+- **Renommage : NON** (décision Chantal, 11 juillet 2026). `index-v2.html`, `styles-v2.css` et les JS `-v2` gardent leurs noms — les raccourcis des deux téléphones pointent déjà sur `index-v2.html`. Aucune référence interne à corriger (le `document.write` et le `<link>` pointent déjà sur les bons noms).
+- Conséquence assumée : l'adresse de base du site donne « page introuvable ». Ce n'est PAS une protection — la vraie protection = `SECURITE-API.md` (prochain chantier).
+- `Code.gs` : rien changé (backend conservé intégralement ; le tri des fonctions ex-V1 reste un chantier séparé).
+
 ## ✅ RÉALISÉ le 11 juin 2026 — séance 1 (anciens points 1 à 10)
 1. **Scroll** : retour EN HAUT à chaque ouverture (`remonterScrollV2`, voir Navigation).
 2. **Champ mets** : textarea qui replie (`boireV2-plat`, `histoEditV2-plat`, `histoAjoutV2-plat` ; CSS `textarea.champ-saisie`).
@@ -183,13 +186,14 @@ Crayon (✎) → `ouvrirEditFicheV2`, 27 champs (incl. Photo) + roundel « Photo
 12. **Emplacements — Cépages manquants global** (cépages de ma liste absents du stock, pour prioriser les achats). ✅
 
 ## 📋 À RETESTER (après publication)
+- Le site complet à `.../index-v2.html` après la suppression du V1 : accueil, scan, fiche, cave, emplacements, boire, historique, liste d'achat, promos, recherche (vérifier que rien ne s'appuyait sur un fichier V1).
 - Saisie manuelle : codes 12, 13 et 14 chiffres — chaque refus doit afficher un toast ; plus aucun « gel ».
 - Ajout d'un mets : Historique → loupe → Ajouter.
 
 ## 🐞 En suspens
-- **Vue emplacements V1 instable** : un filtre renvoie parfois une bouteille de moins. D'où la vérif réelle finale à l'Arrivée.
-- **Découpage des JS** (proposé, non tranché, pas tout de suite) : socle / navigation / scan / actions / pages / fiche — `scripts-scanner-v2.js` est un fourre-tout. **Même exercice voulu pour `Code.gs`** (lecture / écriture / SAQ / historique / utilitaires).
+- **Découpage des JS** (proposé, non tranché, pas tout de suite) : socle / navigation / scan / actions / pages / fiche — `scripts-scanner-v2.js` est un fourre-tout. **Même exercice voulu pour `Code.gs`** (lecture / écriture / SAQ / historique / utilitaires — incluant le tri des fonctions ex-V1 devenues orphelines).
 - **Panneaux de filtres dupliqués dans le HTML** : le même bloc (Filtrer · Couleurs/Pays/Cépages · Succursale) est copié dans plusieurs pages (achat, promo, variantes Cave/Emp/Histo). À remplacer par UNE fonction JS qui génère le panneau (préfixe en paramètre) — à faire en même temps que le découpage. La duplication coûte en lecture et en tokens à chaque session.
+- ~~Vue emplacements V1 instable~~ : disparue avec la suppression du V1 (11 juillet 2026). La vérif réelle finale à l'Arrivée (`checkLocationAvailable`) reste, elle est toujours utile à 2 téléphones.
 
 ## 📇 Champs d'un vin (référence)
 Code-barres (CUP), Code SAQ, Nom, Prix, Couleur, Cépages, Pays, Région, Appellation, Désignation, Classification, Format, Alcool, Sucre, Particularité, Producteur, Agent promo, Millésime dégusté, Arômes, Acidité, Sucrosité, Corps, Bouche, Température, Description, Aimé (`Racheter`), Accords, Recettes, Notes temporaires, Divers, Pastille gout (32), Photo URL (33), Panier (34). Bouteilles : index 35-69 (5 × 7).
@@ -209,7 +213,7 @@ Code-barres (CUP), Code SAQ, Nom, Prix, Couleur, Cépages, Pays, Région, Appell
 - Clés sans accent consommées par la fiche/édition : `Designation`, `Temperature`, `Cepage` — fournies par `ficheDepuisMemoireV2`, PAS par `getWineBottles`.
 - Toute nouvelle page V2 : l'ajouter à la liste de `cacherToutesPagesV2()` ET appeler `remonterScrollV2` à son ouverture.
 - Toute nouvelle écriture : resynchroniser (`getInventoryData` ou `majMemoireVinV2`), et invalider `ALL_HISTORIQUE` si elle touche l'historique.
-- `saveWineEdits` écrit tout champ envoyé, y compris vide ; la photo est protégée par `!== undefined` (le V1 ne l'envoie pas).
+- `saveWineEdits` écrit tout champ envoyé, y compris vide ; la photo est protégée par `!== undefined` (un appel qui ne l'envoie pas ne l'efface pas).
 - `updateWineField` ne connaît que Accords, Racheter, Panier — pas un écrivain générique.
 - Toute comparaison de texte utilisateur (cépages, etc.) passe par `normaliserRechercheV2` / `memeTexteV2` / `contientTexteV2`.
 - Jamais `100vh` dans le V2 (iOS recadre le fond) : toujours `height:100%`.
@@ -220,4 +224,4 @@ Code-barres (CUP), Code SAQ, Nom, Prix, Couleur, Cépages, Pays, Région, Appell
 - Toast : ne jamais poser `display:none` en ligne sans le retirer à l'affichage suivant.
 - Un changement présenté mais sans « ok » reçu N'EST PAS appliqué — ne jamais le marquer fait.
 - Casse CSS sensible : `.roundel` futur `.bouton-londres`.
-- Toujours modifier dans `styles-v2.css` (V2), jamais `styles.css` (V1).
+- Le dépôt n'a plus qu'UN css (`styles-v2.css`) et UN html (`index-v2.html`) — le V1 n'existe plus (11 juillet 2026).
