@@ -92,7 +92,7 @@ S'ouvre depuis la mémoire. 1 bouteille → direct ; plusieurs → liste (`row` 
 
 ## 📄 Fiche V2 (`scripts-fiche-v2.js`)
 `ouvrirFicheV2(codebarre, provenance)` : bâtie depuis `ficheDepuisMemoireV2` (instantanée), secours backend. Plats depuis `ALL_HISTORIQUE` (paresseux). Panneau `#ficheV2Overlay`, bordure couleur du vin. La carte Température s'affiche SANS le « De » de tête (`replace(/^De\s+/i, '')`).
-**Blocs** : Information · Description+Prix · Dégustation · Production · Notes (Accords ; Racheter ✓/✗ ; Sur-inventaire `Panier` ; Recettes/Notes/Divers) · Historique des plats (`.fiche-mets` indentées 60px, cliquables → éditeur correction ; **section `#ficheV2-plats-section` MASQUÉE quand aucun mets** — 11 juin 2026) · Inventaire (lecture seule) · Photo (**clic → modal `#photoV2Overlay` : bouteille en grand + ✕, plus de page SAQ** — 11 juin 2026) · roundel « OÙ LE TROUVER » (**succursales cliquables → Plans/itinéraire `maps.apple.com/?daddr=`** — 11 juin 2026) · roundel « ACTION » · Prix auto (`verifierPrixV2`, silencieux).
+**Blocs** : Information · Description+Prix · Dégustation · Production · Notes (**Notes du sommelier** en premier — champ toujours visible, « Aucune » si vide, tap → textarea, sortie du champ = sauvegarde seulement si changé via `updateWineField('Notes temporaires')` + `majMemoireVinV2`, toast « Note sauvegardée » ; Accords avec item **« + Ajouter »** au bas du menu — voir Accords dynamiques ; Racheter ✓/✗ ; Sur-inventaire `Panier` ; Recettes/Divers — l'ancienne ligne « Notes » est retirée, remplacée par le champ) · Historique des plats (`.fiche-mets` indentées 60px, cliquables → éditeur correction ; **section `#ficheV2-plats-section` MASQUÉE quand aucun mets** — 11 juin 2026) · Inventaire (lecture seule) · Photo (**clic → modal `#photoV2Overlay` : bouteille en grand + ✕, plus de page SAQ** — 11 juin 2026) · roundel « OÙ LE TROUVER » (**succursales cliquables → Plans/itinéraire `maps.apple.com/?daddr=`** — 11 juin 2026) · roundel « ACTION » · Prix auto (`verifierPrixV2`, silencieux).
 **Écritures directes** : Racheter/Panier/Accords → `updateWineField` puis `majMemoireVinV2` + `CURRENT_WINE_DATA`. Édition (**27 champs**, incl. **Photo URL** depuis le 11 juin 2026) → `saveWineEdits` puis `majMemoireVinV2` (clés `Designation`→`Désignation`, `Temperature`→`Température`) puis rouvre la fiche. `saveWineEdits` (backend) écrit tout champ ENVOYÉ, y compris vide — vider un champ dans l'édition le vide aussi dans le Sheet (la photo est gardée par `data.photo !== undefined` : un appel qui ne l'envoie pas ne l'efface pas).
 **Photo SAQ (11 juin 2026)** : roundel « Photo SAQ » dans la page Modifier → `photoSAQDepuisEditV2` → backend `majPhotoSAQ(codebarre, codeSAQ)` : rescrape la SAQ pour CE vin et n'écrit QUE la colonne Photo URL ; le front met à jour le champ, `majMemoireVinV2` et `CURRENT_WINE_DATA`. Photo personnelle : coller une URL (ou un chemin `images/...` du dépôt) dans le champ Photo de Modifier.
 **Retour fiche** (`fermerFicheV2`) : `menuScan` + `FICHE_V2_ORIGINE` → liste d'origine ; sinon `menuScan` → menu d'action ; 'cave'/'achat'/'histo'/'promo'/'recherche'/'emplacements' → leur page (avec `remonterScrollV2`).
@@ -101,7 +101,7 @@ S'ouvre depuis la mémoire. 1 bouteille → direct ; plusieurs → liste (`row` 
 `ouvrirActionDepuisFicheV2` : contexte depuis `wineResultDepuisMemoireV2` (plus d'appels), masque la fiche, `FICHE_V2_ORIGINE` = provenance, `FICHE_V2_PROVENANCE='menuScan'`, ouvre le menu. ✕ du menu : si `FICHE_V2_ORIGINE` → rouvre la fiche.
 
 ## 🍷 Boire V2 / 🎁 Donner V2 — ✅ TERMINÉ
-S'ouvrent depuis la mémoire. Boire : plat facultatif (champ = **textarea qui replie**, 11 juin 2026), verres grisés sans plat, ACCORDS. Donner : confirmation. Confirmation = écrit + resync `ALL_DATA` + invalide `ALL_HISTORIQUE` (Boire) + ACCUEIL.
+S'ouvrent depuis la mémoire. Boire : **champ Notes du sommelier pré-rempli** (au-dessus du mets — voir Notes du sommelier), plat facultatif (champ = **textarea qui replie**, 11 juin 2026), verres grisés sans plat, ACCORDS. Donner : confirmation. Confirmation = écrit + resync `ALL_DATA` + invalide `ALL_HISTORIQUE` (Boire) + ACCUEIL.
 
 ## 🃏 Carte universelle `.carte` — ✅ TERMINÉ
 3 zones flex + bande couleur en bas. `.carte-photo` 60px, `.carte-centre`, `.carte-droite` (`white-space:nowrap`). Bande : `.note-1..5` (plats), `.vin-*` (vin). `.carte-vide` = voile 0 bouteille. **Cartes mets : la date est EN HAUT à droite** (`.histo-mets .carte-droite, .fiche-mets .carte-droite { align-items: flex-start; }` — 11 juin 2026).
@@ -124,7 +124,7 @@ Clic carte → `ouvrirFicheV2(cb,'achat')`. Les noms de succursales replient dan
 - **Séparateurs discrets** : ligne centrée (15 % de retrait de chaque côté, `--couleur-bordure-tres-claire`) entre le titre du meuble et les rangées (`.emp-meuble::after`) et entre les rangées (`.emp-rangee + .emp-rangee::before`) — ne touche jamais le cadre (pas de look Excel).
 - **Quinconce des rangées à 7 espaces conforme au réel : BAS = espaces 1-3-5-7 (4 ronds), HAUT = 2-4-6 (3 ronds).**
 - **Rangée tirée** : gros ronds + photo ; **bordure du rond à la COULEUR DU VIN** (`data-couleur="var(--vin-*)"` posé au rendu, appliqué/retiré à l'ouverture/fermeture) ; le décompte reste en haut à droite.
-- **Rond occupé** → fiche du vin (provenance 'emplacements'). **Rond LIBRE → ouvre le SCAN** (11 juin 2026).
+- **Rond occupé** → **grande photo ronde** (11 juillet 2026 — voir sa section) puis fiche du vin (provenance 'emplacements'). **Rond LIBRE → ouvre le SCAN** (11 juin 2026).
 - **Boutons** : « Vins en double » (global ou par meuble) ; « Cépages doubles » (meuble choisi seulement) ; « **Cépages manquants** » — **TOUJOURS visible** : avec meuble = cépages présents ailleurs et absents du meuble ; **SANS meuble (11 juin 2026) = cépages de toute ma liste de vins ABSENTS du stock actif** (0 bouteille), avec les vins à racheter dessous — sert à prioriser la liste d'achat. Regroupements insensibles à la casse.
 Clic carte (listes) → `deplacerDepuisEmpV2` (`retour='emplacements'`).
 
@@ -150,8 +150,35 @@ Clic carte (listes) → `deplacerDepuisEmpV2` (`retour='emplacements'`).
 ## ✏️ CRAYON — édition fiche V2 — ✅ TERMINÉ
 Crayon (✎) → `ouvrirEditFicheV2`, 27 champs (incl. Photo) + roundel « Photo SAQ ». Sauvegarde conforme mémoire (voir Fiche V2).
 
-## 🖼️ Modal PHOTO V2 — ✅ TERMINÉ (11 juin 2026)
-`#photoV2Overlay` (`z-index:10010`, dans `cacherToutesPagesV2`) : `.photo-grande img` (max 90 % / 85 %, `object-fit:contain`) + ✕ (`fermerPhotoV2`). Ouvert par le clic sur la photo de la fiche (`ouvrirPhotoV2(url)`), la fiche reste ouverte dessous.
+## 🖼️ Modal PHOTO V2 — ✅ TERMINÉ (11 juin 2026 ; mode rond 11 juillet 2026)
+`#photoV2Overlay` (`z-index:10010`, dans `cacherToutesPagesV2`) : `.photo-grande img` (max 90 % / 85 %, `object-fit:contain`) + ✕ (`fermerPhotoV2`). Ouvert par le clic sur la photo de la fiche (`ouvrirPhotoV2(url)`), la fiche reste ouverte dessous. **Deuxième mode « rond »** pour les Emplacements (classe `photo-ronde` — voir la section Grande photo ronde) : `#photoV2-nom` caché en mode fiche.
+
+## 🗒️ NOTES DU SOMMELIER — ✅ TERMINÉ (11 juillet 2026, testé)
+Le champ « Notes temporaires » du Sheet devient **« Notes du sommelier »** partout (aucun renommage de colonne).
+- **Fiche V2** : premier élément de la section Notes, toujours visible (« Aucune » si vide), tap → textarea `champ-saisie`, quitter le champ = sauvegarde si changé (`editerNotesSommelierV2` / `sauverNotesSommelierV2` / `remettreNotesDisplayV2`, `scripts-fiche-v2.js`). Erreur serveur → le texte reste à l'écran.
+- **Boire V2** : champ `#boireV2-notes` au-dessus du champ mets, **pré-rempli** avec la note du vin (`BOIRE_V2_NOTE_INITIALE`, lue de `ALL_DATA`). À la confirmation : écrit SEULEMENT si changé, avant la resync. Le ✕ n'écrit jamais.
+- **Édition crayon** : libellé « Notes » → « Notes du sommelier » (même champ `notestemp`).
+- **Backend** : `updateWineField` gère maintenant `Notes temporaires` (colonne NOTES_TEMP).
+
+## 🥃 SPIRITUEUX + COULEURS — ✅ TERMINÉ (11 juillet 2026, testé)
+- **5 couleurs** : `--vin-bulles` passe au doré champagne `#E8D08A` ; nouvelle `--vin-spiritueux` bleu vif `#446ffc` (+ dégradés spinner, animation `couleur-vin` à 5 pas de 20 %).
+- **Classes `.vin-spiritueux`** partout : fiche (bordure gauche), cartes (bande bas), historique (bande haut). `couleurClasseV2` et le classement fiche reconnaissent « spiritueux » ; tri couleur : spiritueux = 5e. Les ronds d'emplacements suivent automatiquement (ils passent par `couleurClasseV2`).
+- **Détection SAQ (`Code.gs`, dans `testScrapingSAQ`)** : le fil d'Ariane de la page (`class="breadcrumbs"`, lien `/fr/produits/<catégorie>/<type>`) — catégorie ≠ vin → `Couleur = "Spiritueux"`, cépages vidés, **type précis → Appellation** (s'affiche dans l'en-tête). Type introuvable → Appellation vide. Couvre le scan ET la création (tout passe par `testScrapingSAQ`).
+- Produits hors vin déjà en cave : correction au crayon (Couleur = Spiritueux, Appellation = type). Fait pour le Kamouraska.
+- ⚠️ RÈGLE : toute nouvelle couleur = ajouter la classe aux 4 blocs CSS (fiche, carte, histo-vin, variables+dégradé+keyframes), à `couleurClasseV2`, au classement de la fiche (2 endroits : classe + classList.remove de `afficherFicheV2` ET de `fermerFicheV2`) et au tri (`ordre` de `grouperVinsV2`).
+
+## ➕ ACCORDS DYNAMIQUES — ✅ TERMINÉ (11 juillet 2026, testé)
+Ajouter un accord (catégorie) depuis le menu Accords de la Fiche V2, sans ouvrir le Sheet.
+- **Front (`scripts-fiche-v2.js`)** : item « + Ajouter » au bas de `#ficheV2-accords-menu` → champ texte (Entrée confirme). Vide → toast, champ reste. **Doublon** (`memeTexteV2`) → l'existant est coché (pas d'écriture config). Nouveau → `ajouterAccordConfig` backend, poussé dans `CONFIG.accords` (tri alphabétique normalisé), menu re-rendu, **coché via `cocherAccordV2`** (qui passe par `toggleAccordV2` = la sauvegarde existante des accords du vin). Erreur → texte conservé. Fermer le menu → champ redevient « + Ajouter ».
+- **Backend (`Code.gs`)** : `ajouterAccordConfig(accord)` — trim, refuse vide, doublon insensible casse/accents (`normaliserAccord`), écrit dans la **première cellule vide de la colonne Accords** de config (parcourt la colonne, pas `getLastRow`). Branché au `doPost`.
+- Autre téléphone : voit le nouvel accord au prochain démarrage (Rafraîchir ne recharge pas CONFIG — accepté).
+
+## ⭕ EMPLACEMENTS — GRANDE PHOTO RONDE — ✅ TERMINÉ (11 juillet 2026, testé)
+Rangée ouverte : tap sur un **rond occupé** → **grande photo dans un grand rond** (bordure à la couleur du vin), ✕ **au-dessus, à l'extérieur** ; tap sur la photo → fiche (provenance 'emplacements') ; ✕ ou tap sur le fond → ferme, emplacements **tels quels** (pas de re-rendu). Rond libre → scan (intact).
+- **Réutilise `#photoV2Overlay`** avec un mode : classe `photo-ronde` + variables `PHOTO_V2_MODE`/`PHOTO_V2_CB`. Mode fiche 100 % intact (`ouvrirPhotoV2` remet tout à zéro, `onerror` compris).
+- `ouvrirPhotoEmpV2(cb)` (`scripts-fiche-v2.js`) : lit le vin de `ALL_DATA` (aucun appel), pose photo/nom/bordure (`var(--vin-*)` via `couleurClasseV2`). **Sans photo ou lien brisé → nom du vin au centre** (`#photoV2-nom`, caché en mode fiche). `clicPhotoV2` (stopPropagation) / `clicFondPhotoV2` / `fermerPhotoV2` (retire classe + contexte).
+- CSS : bloc `#photoV2Overlay.photo-ronde` (rond `min(80vw, 60vh)`, `object-fit:cover`, ✕ repositionné).
+- Fermer la fiche → retour emplacements par `fermerFicheV2` ('emplacements' → `ouvrirEmpV2`), la photo ne se rouvre pas.
 
 ## ✅ MÉNAGE V1→V2 — FAIT le 11 juillet 2026
 - **Supprimés du dépôt (par Chantal, d'un bloc)** : index.html · styles.css · scripts-config.js · scripts-init.js · scripts-inventaire.js · scripts-fiche.js · scripts-scanner.js · scripts-listes.js.
@@ -194,9 +221,7 @@ Chaque appel à l'API doit fournir le mot de passe d'app, sinon le serveur refus
 12. **Emplacements — Cépages manquants global** (cépages de ma liste absents du stock, pour prioriser les achats). ✅
 
 ## 📋 À RETESTER (après publication)
-- Le site complet à `.../index-v2.html` après la suppression du V1 : accueil, scan, fiche, cave, emplacements, boire, historique, liste d'achat, promos, recherche (vérifier que rien ne s'appuyait sur un fichier V1).
-- Saisie manuelle : codes 12, 13 et 14 chiffres — chaque refus doit afficher un toast ; plus aucun « gel ».
-- Ajout d'un mets : Historique → loupe → Ajouter.
+Rien en attente — tout testé et confirmé le 11 juillet 2026 (ménage, mot de passe, Notes du sommelier, Spiritueux, Accords dynamiques, Photo ronde, saisie manuelle, ajout d'un mets).
 
 ## 🐞 En suspens
 - **Découpage des JS** (proposé, non tranché, pas tout de suite) : socle / navigation / scan / actions / pages / fiche — `scripts-scanner-v2.js` est un fourre-tout. **Même exercice voulu pour `Code.gs`** (lecture / écriture / SAQ / historique / utilitaires — incluant le tri des fonctions ex-V1 devenues orphelines).
@@ -222,7 +247,9 @@ Code-barres (CUP), Code SAQ, Nom, Prix, Couleur, Cépages, Pays, Région, Appell
 - Toute nouvelle page V2 : l'ajouter à la liste de `cacherToutesPagesV2()` ET appeler `remonterScrollV2` à son ouverture.
 - Toute nouvelle écriture : resynchroniser (`getInventoryData` ou `majMemoireVinV2`), et invalider `ALL_HISTORIQUE` si elle touche l'historique.
 - `saveWineEdits` écrit tout champ envoyé, y compris vide ; la photo est protégée par `!== undefined` (un appel qui ne l'envoie pas ne l'efface pas).
-- `updateWineField` ne connaît que Accords, Racheter, Panier — pas un écrivain générique.
+- `updateWineField` connaît Accords, Racheter, Panier et `Notes temporaires` (11 juillet 2026) — toujours pas un écrivain générique.
+- Nouvelle couleur de vin : voir la RÈGLE de la section Spiritueux (4 blocs CSS + 4 endroits JS).
+- Mode rond de la photo (`photo-ronde`) : ne jamais toucher au comportement fiche de `#photoV2Overlay` ; `ouvrirPhotoV2` remet tout à zéro (`onerror = null` compris).
 - Toute comparaison de texte utilisateur (cépages, etc.) passe par `normaliserRechercheV2` / `memeTexteV2` / `contientTexteV2`.
 - Jamais `100vh` dans le V2 (iOS recadre le fond) : toujours `height:100%`.
 - Overlay par-dessus un autre : z-index supérieur (l'ordre HTML ne suffit pas).

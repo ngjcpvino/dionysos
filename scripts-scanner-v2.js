@@ -1535,11 +1535,21 @@ function bouteillesRangeesEmpV2() {
   });
 }
 
+// Bouteilles à ranger (actives, sans emplacement complet)
+function bouteillesARangerEmpV2() {
+  return (ALL_DATA || []).filter(function(i){
+    var statut = i.Statut || 'En stock';
+    if (statut === 'Bu' || statut === 'Sorti') return false;
+    return i.bottle && i.bottle > 0 && !(i.Meuble && i.Rangee && i.Espace);
+  });
+}
+
 function remplirFiltresEmpV2() {
   var f = filtresEmpV2;
   var base = bouteillesRangeesEmpV2();
 
   var meubles = uniqueValeursAchat(base, 'Meuble');
+  if (bouteillesARangerEmpV2().length) meubles.push('À ranger');
   var forRangee = f.meuble ? base.filter(function(i){ return String(i.Meuble) === String(f.meuble); }) : base;
   var rangees = uniqueValeursAchat(forRangee, 'Rangee');
   var forEspace = base.filter(function(i){
@@ -1610,7 +1620,10 @@ function empCarteVinV2(w, droite) {
 // Vue par défaut : groupé meuble → rangée → cartes
 function afficherEmpV2() {
   var f = filtresEmpV2;
-  var base = bouteillesRangeesEmpV2().filter(function(i){
+  var modeARanger = (f.meuble === 'À ranger');
+  var aRanger = bouteillesARangerEmpV2();
+  var montrerARanger = aRanger.length && (modeARanger || (!f.meuble && !f.rangee && !f.espace));
+  var base = modeARanger ? [] : bouteillesRangeesEmpV2().filter(function(i){
     return (!f.meuble || String(i.Meuble) === String(f.meuble)) &&
       (!f.rangee || String(i.Rangee) === String(f.rangee)) &&
       (!f.espace || String(i.Espace) === String(f.espace));
@@ -1623,8 +1636,9 @@ function afficherEmpV2() {
   });
 
   var div = document.getElementById('empV2-cartes');
-  document.getElementById('empV2-compte').textContent = base.length + ' bouteille' + (base.length > 1 ? 's' : '');
-  if (base.length === 0) { div.innerHTML = '<div class="texte-secondaire">Aucune bouteille rangée</div>'; return; }
+  var totalEmp = base.length + (montrerARanger ? aRanger.length : 0);
+  document.getElementById('empV2-compte').textContent = totalEmp + ' bouteille' + (totalEmp > 1 ? 's' : '');
+  if (totalEmp === 0) { div.innerHTML = '<div class="texte-secondaire">Aucune bouteille rangée</div>'; return; }
 
   // index des bouteilles présentes par meuble|rangee|espace
   var parPlace = {};
@@ -1633,7 +1647,7 @@ function afficherEmpV2() {
   });
 
   // meubles à dessiner : celui filtré, sinon les 3 de CONFIG (ordre alphabétique)
-  var meubles = f.meuble ? [f.meuble] : Object.keys(CONFIG.meubles || {}).sort(function(a,b){ return a.localeCompare(b); });
+  var meubles = modeARanger ? [] : (f.meuble ? [f.meuble] : Object.keys(CONFIG.meubles || {}).sort(function(a,b){ return a.localeCompare(b); }));
 
   var html = '';
   meubles.forEach(function(meuble){
@@ -1669,6 +1683,19 @@ function afficherEmpV2() {
     });
     html += '</div>';
   });
+  if (montrerARanger) {
+    var rondsAR = aRanger.map(function(w){
+      var photo = w['Photo URL'] || '';
+      var cb = (w['Code-barres'] || '').toString().trim().replace(/\s+/g, '');
+      var coul = 'var(--' + couleurClasseV2(w.Couleur) + ')';
+      return '<div class="cercle" data-photo="' + photo + '" data-cb="' + cb + '" data-couleur="' + coul + '"></div>';
+    }).join('');
+    html += '<div class="emp-bloc"><div class="emp-meuble">À RANGER</div>' +
+            '<div class="emp-rangee">' +
+              '<div class="emp-ronds"><div class="ligne-ronds">' + rondsAR + '</div></div>' +
+              '<span class="emp-compte">' + aRanger.length + '</span>' +
+            '</div></div>';
+  }
   div.innerHTML = html;
   brancherTirerRangeesEmpV2();
 }
