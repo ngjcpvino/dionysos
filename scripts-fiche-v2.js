@@ -235,19 +235,16 @@ function afficherFicheV2(result) {
     html += '<div class="photo"><img src="' + wine['Photo URL'] + '" alt="" loading="lazy" onclick="ouvrirPhotoV2(\'' + wine['Photo URL'] + '\')" onerror="this.style.display=\'none\'"></div>';
   }
 
- 
+  if (wine['Code SAQ']) {
+    html += '<div class="roundel" onclick="trouverCeVinV2()"><span class="roundel-anneau"></span><span class="roundel-barre">OÙ LE TROUVER</span></div>';
+    html += '<div id="ficheV2-succursales"></div>';
+  }
 
   html += '<div class="roundel" onclick="ouvrirActionDepuisFicheV2()"><span class="roundel-anneau"></span><span class="roundel-barre">ACTION</span></div>';
 
   document.getElementById('ficheV2-corps').innerHTML = html;
   chargerPlatsV2(CURRENT_WINE_CODEBARRE);
   verifierPrixV2(CURRENT_WINE_CODEBARRE, wine['Code SAQ']);
-  
-  
-   if (wine['Code SAQ']) {
-    html += '<div class="roundel" onclick="trouverCeVinV2()"><span class="roundel-anneau"></span><span class="roundel-barre">OÙ LE TROUVER</span></div>';
-    html += '<div id="ficheV2-succursales"></div>';
-  }
 }
 
 function ouvrirActionDepuisFicheV2() {
