@@ -557,10 +557,10 @@
 </div>
 
 <!-- ====================== PHOTO V2 ====================== -->
-<div id="photoV2Overlay" class="modal-v2-fullscreen" style="display:none;">
+<div id="photoV2Overlay" class="modal-v2-fullscreen" style="display:none;" onclick="clicFondPhotoV2()">
   <div class="modal-v2-content">
     <button class="btn-fermer" onclick="fermerPhotoV2()">✕</button>
-    <div class="photo-grande"><img id="photoV2-img" src="" alt=""></div>
+    <div class="photo-grande" onclick="clicPhotoV2(event)"><img id="photoV2-img" src="" alt=""><div id="photoV2-nom" class="titre-1" style="display:none;"></div></div>
   </div>
 </div>
 
