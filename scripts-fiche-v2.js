@@ -91,10 +91,11 @@ function afficherFicheV2(result) {
   var classeCouleur = couleur.includes('rouge') ? 'vin-rouge' :
                       couleur.includes('blanc') ? 'vin-blanc' :
                       couleur.includes('rose') || couleur.includes('rosé') ? 'vin-rose' :
-                      couleur.includes('bulle') || couleur.includes('mousseux') ? 'vin-bulles' : 'vin-rouge';
+                      couleur.includes('bulle') || couleur.includes('mousseux') ? 'vin-bulles' :
+                      couleur.includes('spiritueux') ? 'vin-spiritueux' : 'vin-rouge';
   var panneauV2 = document.querySelector('#ficheV2Overlay .modal-v2-content');
   if (panneauV2) {
-    panneauV2.classList.remove('vin-rouge', 'vin-blanc', 'vin-rose', 'vin-bulles');
+    panneauV2.classList.remove('vin-rouge', 'vin-blanc', 'vin-rose', 'vin-bulles', 'vin-spiritueux');
     panneauV2.classList.add(classeCouleur);
   }
 
@@ -178,6 +179,7 @@ function afficherFicheV2(result) {
   }).join('');
   html += '<div class="controle"><span class="libelle">Accords</span>' +
           '<div id="ficheV2-accords-display" class="champ-cliquable" onclick="basculerMenuAccordsV2()">' + (accordsActuels.length ? accordsActuels.join(', ') : 'Aucun') + '</div></div>';
+  itemsAccords += '<div class="item-liste" id="ficheV2-accord-ajouter" onclick="ouvrirAjoutAccordV2()">+ Ajouter</div>';
   html += '<div id="ficheV2-accords-menu" class="menu-liste">' + itemsAccords + '</div>';
 
   var aime = wine.Racheter || 'Oui';
@@ -260,7 +262,56 @@ function ouvrirActionDepuisFicheV2() {
 
 function basculerMenuAccordsV2() {
   var menu = document.getElementById('ficheV2-accords-menu');
-  if (menu) menu.classList.toggle('ouvert');
+  if (!menu) return;
+  var ouvert = menu.classList.toggle('ouvert');
+  if (!ouvert) remettreAjoutAccordV2();
+}
+
+function ouvrirAjoutAccordV2() {
+  var item = document.getElementById('ficheV2-accord-ajouter');
+  if (!item) return;
+  item.outerHTML = '<input type="text" id="ficheV2-accord-champ" class="champ-saisie" placeholder="Nouvel accord (Entrée pour confirmer)">';
+  var champ = document.getElementById('ficheV2-accord-champ');
+  champ.onkeydown = function(e) { if (e.key === 'Enter') { e.preventDefault(); confirmerAjoutAccordV2(); } };
+  champ.focus();
+}
+
+function remettreAjoutAccordV2() {
+  var champ = document.getElementById('ficheV2-accord-champ');
+  if (!champ) return;
+  champ.outerHTML = '<div class="item-liste" id="ficheV2-accord-ajouter" onclick="ouvrirAjoutAccordV2()">+ Ajouter</div>';
+}
+
+function cocherAccordV2(accord) {
+  var menu = document.getElementById('ficheV2-accords-menu');
+  var item = Array.prototype.filter.call(menu.querySelectorAll('.item-liste'), function(el) { return el.getAttribute('data-accord') === accord; })[0];
+  if (item && !item.classList.contains('actif')) toggleAccordV2(item);
+}
+
+function confirmerAjoutAccordV2() {
+  var champ = document.getElementById('ficheV2-accord-champ');
+  if (!champ) return;
+  var valeur = champ.value.trim();
+  if (!valeur) { afficherMessage('Entrez un accord'); return; }
+  var existant = (CONFIG && CONFIG.accords ? CONFIG.accords : []).filter(function(a) { return memeTexteV2(a, valeur); })[0];
+  if (existant) {
+    remettreAjoutAccordV2();
+    cocherAccordV2(existant);
+    return;
+  }
+  appelBackend('ajouterAccordConfig', { accord: valeur }, { spinner: 'Sauvegarde' }).then(function() {
+    CONFIG.accords.push(valeur);
+    CONFIG.accords.sort(function(a, b) { return normaliserRechercheV2(a).localeCompare(normaliserRechercheV2(b)); });
+    var menu = document.getElementById('ficheV2-accords-menu');
+    var selectionnes = Array.prototype.map.call(menu.querySelectorAll('.item-liste.actif'), function(el) { return el.getAttribute('data-accord'); });
+    menu.innerHTML = CONFIG.accords.map(function(acc) {
+      var sel = selectionnes.indexOf(acc) !== -1;
+      return '<div class="item-liste' + (sel ? ' actif' : '') + '" onclick="toggleAccordV2(this)" data-accord="' + acc + '">' + acc + '</div>';
+    }).join('') + '<div class="item-liste" id="ficheV2-accord-ajouter" onclick="ouvrirAjoutAccordV2()">+ Ajouter</div>';
+    cocherAccordV2(valeur);
+  }).catch(function() {
+    afficherMessage('Erreur, réessayez');
+  });
 }
 
 function toggleAccordV2(element) {
@@ -353,19 +404,76 @@ function chargerPlatsV2(codebarre) {
   }).catch(function() {});
 }
 
+var PHOTO_V2_MODE = 'fiche';
+var PHOTO_V2_CB = null;
+
 function ouvrirPhotoV2(url) {
-  document.getElementById('photoV2-img').src = url;
-  document.getElementById('photoV2Overlay').style.display = 'flex';
+  PHOTO_V2_MODE = 'fiche';
+  var overlay = document.getElementById('photoV2Overlay');
+  overlay.classList.remove('photo-ronde');
+  var img = document.getElementById('photoV2-img');
+  img.onerror = null;
+  img.style.display = '';
+  img.src = url;
+  document.getElementById('photoV2-nom').style.display = 'none';
+  var pg = document.querySelector('#photoV2Overlay .photo-grande');
+  if (pg) pg.style.borderColor = '';
+  overlay.style.display = 'flex';
+}
+
+function ouvrirPhotoEmpV2(cb) {
+  var cible = (cb || '').toString().trim();
+  var w = (ALL_DATA || []).filter(function(i) { return (i['Code-barres'] || '').toString().trim() === cible; })[0];
+  if (!w) return;
+  PHOTO_V2_MODE = 'rond';
+  PHOTO_V2_CB = cible;
+  var overlay = document.getElementById('photoV2Overlay');
+  overlay.classList.add('photo-ronde');
+  var img = document.getElementById('photoV2-img');
+  var nom = document.getElementById('photoV2-nom');
+  nom.textContent = decodeHTML((w.Nom || '—').toString());
+  var photo = w['Photo URL'] || '';
+  if (photo) {
+    img.style.display = '';
+    nom.style.display = 'none';
+    img.onerror = function() { img.style.display = 'none'; nom.style.display = ''; };
+    img.src = photo;
+  } else {
+    img.onerror = null;
+    img.removeAttribute('src');
+    img.style.display = 'none';
+    nom.style.display = '';
+  }
+  var pg = document.querySelector('#photoV2Overlay .photo-grande');
+  if (pg) pg.style.borderColor = 'var(--' + couleurClasseV2(w.Couleur) + ')';
+  overlay.style.display = 'flex';
+}
+
+function clicPhotoV2(event) {
+  if (PHOTO_V2_MODE !== 'rond') return;
+  event.stopPropagation();
+  var cb = PHOTO_V2_CB;
+  fermerPhotoV2();
+  ouvrirApresTap(function() { ouvrirFicheV2(cb, 'emplacements'); });
+}
+
+function clicFondPhotoV2() {
+  if (PHOTO_V2_MODE !== 'rond') return;
+  fermerPhotoV2();
 }
 
 function fermerPhotoV2() {
-  document.getElementById('photoV2Overlay').style.display = 'none';
+  var overlay = document.getElementById('photoV2Overlay');
+  overlay.style.display = 'none';
+  overlay.classList.remove('photo-ronde');
+  PHOTO_V2_MODE = 'fiche';
+  PHOTO_V2_CB = null;
 }
 
 function fermerFicheV2() {
   document.getElementById('ficheV2Overlay').style.display = 'none';
   var panneauV2 = document.querySelector('#ficheV2Overlay .modal-v2-content');
-  if (panneauV2) panneauV2.classList.remove('vin-rouge', 'vin-blanc', 'vin-rose', 'vin-bulles');
+  if (panneauV2) panneauV2.classList.remove('vin-rouge', 'vin-blanc', 'vin-rose', 'vin-bulles', 'vin-spiritueux');
   if (FICHE_V2_PROVENANCE === 'menuScan' && FICHE_V2_ORIGINE) {
     var origine = FICHE_V2_ORIGINE;
     FICHE_V2_ORIGINE = null;

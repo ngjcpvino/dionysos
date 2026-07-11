@@ -51,13 +51,15 @@ html, body {
   --vin-rouge: #8B0000;
   --vin-blanc: #f7f6da;
   --vin-rose: #FFC0CB;
-  --vin-bulles: #00ced1;
+  --vin-bulles: #E8D08A;
+  --vin-spiritueux: #446ffc;
 
   /* ===== DÉGRADÉS DE VIN (remplissage du spinner) ===== */
   --degrade-vin-rouge: linear-gradient(to top, #4a0000, #8B0000);
   --degrade-vin-blanc: linear-gradient(to top, #c9c79a, #f7f6da);
   --degrade-vin-rose: linear-gradient(to top, #d98a98, #FFC0CB);
-  --degrade-vin-bulles: linear-gradient(to top, #007a7d, #00ced1);
+  --degrade-vin-bulles: linear-gradient(to top, #b89f5e, #E8D08A);
+  --degrade-vin-spiritueux: linear-gradient(to top, #1f3db0, #446ffc);
 
   /* ===== COULEURS D'APPRÉCIATION (note 1 à 5) ===== */
   --note-1: #FF4B2B;
@@ -313,9 +315,10 @@ body::after {
 }
 @keyframes couleur-vin {
   0%   { background: var(--degrade-vin-rouge); }
-  25%  { background: var(--degrade-vin-blanc); }
-  50%  { background: var(--degrade-vin-rose); }
-  75%  { background: var(--degrade-vin-bulles); }
+  20%  { background: var(--degrade-vin-blanc); }
+  40%  { background: var(--degrade-vin-rose); }
+  60%  { background: var(--degrade-vin-bulles); }
+  80%  { background: var(--degrade-vin-spiritueux); }
   100% { background: var(--degrade-vin-rouge); }
 }
 
@@ -541,6 +544,7 @@ body::after {
 .vin-blanc  { border-left: var(--largeur-bordure-1) solid var(--vin-blanc); }
 .vin-rose   { border-left: var(--largeur-bordure-1) solid var(--vin-rose); }
 .vin-bulles { border-left: var(--largeur-bordure-1) solid var(--vin-bulles); }
+.vin-spiritueux { border-left: var(--largeur-bordure-1) solid var(--vin-spiritueux); }
 
 .photo { text-align: center; margin: var(--space-l) 0; }
 .photo img { max-height: 200px; width: auto; max-width: 100%; }
@@ -631,6 +635,37 @@ body::after {
 .carte.vin-blanc  { border-bottom-color: var(--vin-blanc); border-left: none; }
 .carte.vin-rose   { border-bottom-color: var(--vin-rose); border-left: none; }
 .carte.vin-bulles { border-bottom-color: var(--vin-bulles); border-left: none; }
+.carte.vin-spiritueux { border-bottom-color: var(--vin-spiritueux); border-left: none; }
+
+/* ===== Photo V2 — mode rond (Emplacements) ===== */
+#photoV2Overlay.photo-ronde .photo-grande {
+  width: min(80vw, 60vh);
+  height: min(80vw, 60vh);
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid var(--couleur-bordure-or);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#photoV2Overlay.photo-ronde .photo-grande img {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  object-fit: cover;
+}
+#photoV2Overlay.photo-ronde #photoV2-nom {
+  text-align: center;
+  padding: var(--space-3, 16px);
+}
+#photoV2Overlay.photo-ronde .btn-fermer {
+  position: absolute;
+  top: calc(50% - min(40vw, 30vh) - 60px);
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+}
 .carte.carte-vide { opacity: 0.45; }
 .coche-panier {
   display: inline-flex;
@@ -883,6 +918,7 @@ textarea.champ-saisie { resize: none; font-family: inherit; line-height: 1.4; }
 .histo-vin.vin-blanc  { border-top-color: var(--vin-blanc); }
 .histo-vin.vin-rose   { border-top-color: var(--vin-rose); }
 .histo-vin.vin-bulles { border-top-color: var(--vin-bulles); }
+.histo-vin.vin-spiritueux { border-top-color: var(--vin-spiritueux); }
 .histo-mets {
   margin-left: 60px;
   width: auto;
