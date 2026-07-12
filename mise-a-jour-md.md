@@ -92,7 +92,7 @@ S'ouvre depuis la mémoire. 1 bouteille → direct ; plusieurs → liste (`row` 
 
 ## 📄 Fiche V2 (`scripts-fiche-v2.js`)
 `ouvrirFicheV2(codebarre, provenance)` : bâtie depuis `ficheDepuisMemoireV2` (instantanée), secours backend. Plats depuis `ALL_HISTORIQUE` (paresseux). Panneau `#ficheV2Overlay`, bordure couleur du vin. La carte Température s'affiche SANS le « De » de tête (`replace(/^De\s+/i, '')`).
-**Blocs** : Information · Description+Prix · Dégustation · Production · Notes (**Notes du sommelier** en premier — champ toujours visible, « Aucune » si vide, tap → textarea, sortie du champ = sauvegarde seulement si changé via `updateWineField('Notes temporaires')` + `majMemoireVinV2`, toast « Note sauvegardée » ; Accords avec item **« + Ajouter »** au bas du menu — voir Accords dynamiques ; Racheter ✓/✗ ; Sur-inventaire `Panier` ; Recettes/Divers — l'ancienne ligne « Notes » est retirée, remplacée par le champ) · Historique des plats (`.fiche-mets` indentées 60px, cliquables → éditeur correction ; **section `#ficheV2-plats-section` MASQUÉE quand aucun mets** — 11 juin 2026) · Inventaire (lecture seule) · Photo (**clic → modal `#photoV2Overlay` : bouteille en grand + ✕, plus de page SAQ** — 11 juin 2026) · roundel « OÙ LE TROUVER » (**succursales cliquables → Plans/itinéraire `maps.apple.com/?daddr=`** — 11 juin 2026) · roundel « ACTION » · Prix auto (`verifierPrixV2`, silencieux).
+**Blocs** : Information · Description+Prix · Dégustation · Production · Notes (**Notes du sommelier** en premier — champ toujours visible, « Aucune » si vide, tap → textarea, sortie du champ = sauvegarde seulement si changé via `updateWineField('Notes temporaires')` + `majMemoireVinV2`, toast « Note sauvegardée » ; Accords avec item **« + Ajouter »** au bas du menu — voir Accords dynamiques ; Racheter ✓/✗ ; Sur-inventaire `Panier` ; Recettes/Divers — l'ancienne ligne « Notes » est retirée, remplacée par le champ) · Historique des plats (`.fiche-mets` indentées 60px, cliquables → éditeur correction ; **section `#ficheV2-plats-section` MASQUÉE quand aucun mets** — 11 juin 2026) · Inventaire (lecture seule) · Photo (**clic → modal `#photoV2Overlay` : bouteille en grand + ✕, plus de page SAQ** — 11 juin 2026) · roundel « ACTION » **puis** roundel « OÙ LE TROUVER » (ordre inversé le 11 juillet 2026 ; succursales cliquables → Plans/itinéraire `maps.apple.com/?daddr=` — 11 juin 2026) · Prix auto (`verifierPrixV2`, silencieux).
 **Écritures directes** : Racheter/Panier/Accords → `updateWineField` puis `majMemoireVinV2` + `CURRENT_WINE_DATA`. Édition (**27 champs**, incl. **Photo URL** depuis le 11 juin 2026) → `saveWineEdits` puis `majMemoireVinV2` (clés `Designation`→`Désignation`, `Temperature`→`Température`) puis rouvre la fiche. `saveWineEdits` (backend) écrit tout champ ENVOYÉ, y compris vide — vider un champ dans l'édition le vide aussi dans le Sheet (la photo est gardée par `data.photo !== undefined` : un appel qui ne l'envoie pas ne l'efface pas).
 **Photo SAQ (11 juin 2026)** : roundel « Photo SAQ » dans la page Modifier → `photoSAQDepuisEditV2` → backend `majPhotoSAQ(codebarre, codeSAQ)` : rescrape la SAQ pour CE vin et n'écrit QUE la colonne Photo URL ; le front met à jour le champ, `majMemoireVinV2` et `CURRENT_WINE_DATA`. Photo personnelle : coller une URL (ou un chemin `images/...` du dépôt) dans le champ Photo de Modifier.
 **Retour fiche** (`fermerFicheV2`) : `menuScan` + `FICHE_V2_ORIGINE` → liste d'origine ; sinon `menuScan` → menu d'action ; 'cave'/'achat'/'histo'/'promo'/'recherche'/'emplacements' → leur page (avec `remonterScrollV2`).
@@ -125,6 +125,7 @@ Clic carte → `ouvrirFicheV2(cb,'achat')`. Les noms de succursales replient dan
 - **Quinconce des rangées à 7 espaces conforme au réel : BAS = espaces 1-3-5-7 (4 ronds), HAUT = 2-4-6 (3 ronds).**
 - **Rangée tirée** : gros ronds + photo ; **bordure du rond à la COULEUR DU VIN** (`data-couleur="var(--vin-*)"` posé au rendu, appliqué/retiré à l'ouverture/fermeture) ; le décompte reste en haut à droite.
 - **Rond occupé** → **grande photo ronde** (11 juillet 2026 — voir sa section) puis fiche du vin (provenance 'emplacements'). **Rond LIBRE → ouvre le SCAN** (11 juin 2026).
+- **Bloc « À ranger »** en pseudo-meuble après les vrais meubles (11 juillet 2026 — voir sa section).
 - **Boutons** : « Vins en double » (global ou par meuble) ; « Cépages doubles » (meuble choisi seulement) ; « **Cépages manquants** » — **TOUJOURS visible** : avec meuble = cépages présents ailleurs et absents du meuble ; **SANS meuble (11 juin 2026) = cépages de toute ma liste de vins ABSENTS du stock actif** (0 bouteille), avec les vins à racheter dessous — sert à prioriser la liste d'achat. Regroupements insensibles à la casse.
 Clic carte (listes) → `deplacerDepuisEmpV2` (`retour='emplacements'`).
 
@@ -139,13 +140,13 @@ Clic carte (listes) → `deplacerDepuisEmpV2` (`retour='emplacements'`).
 **Clic carte** : Mes promos → fiche (provenance 'promo') ; Découvertes → page SAQ du vin ; mode `TOUTES` → dispo proches.
 
 ## 🔍 Page RECHERCHE V2 — ✅ TERMINÉ
-`#rechercheV2Container`, gabarit À ranger + champ. UN champ qui fouille TOUS les champs de TOUS les vins (`ALL_DATA`) — agent, producteur, arômes, description, appellation… — accents et majuscules ignorés (`normaliserRechercheV2`), minimum 2 caractères. Champs exclus de la fouille : row, bottle, Statut, Meuble/Rangee/Espace, dates, Source, Photo URL. Résultats groupés par vin (`grouperVinsV2`), cartes standards (compte de bouteilles à droite, voile si 0) → fiche (provenance 'recherche').
+`#rechercheV2Container`, gabarit À ranger + champ. **Accès : loupe de l'accueil** (plus dans le burger — 11 juillet 2026). UN champ qui fouille TOUS les champs de TOUS les vins (`ALL_DATA`) — agent, producteur, arômes, description, appellation… — accents et majuscules ignorés (`normaliserRechercheV2`), minimum 2 caractères. Champs exclus de la fouille : row, bottle, Statut, Meuble/Rangee/Espace, dates, Source, Photo URL. Résultats groupés par vin (`grouperVinsV2`), cartes standards (compte de bouteilles à droite, voile si 0) → fiche (provenance 'recherche').
 
-### Menu burger V2 — ✅ TERMINÉ (complet, plus aucun « À venir »)
-`#burgerV2` + voile. ACCUEIL, CAVE, EMPLACEMENTS, HISTORIQUE, LISTE D'ACHAT, RECHERCHE, À RANGER, PROMOTIONS SAQ, RAFRAÎCHIR.
+### Menu burger V2 — ✅ TERMINÉ
+`#burgerV2` + voile. ACCUEIL, CAVE, EMPLACEMENTS, HISTORIQUE, LISTE D'ACHAT, À RANGER, PROMOTIONS SAQ, RAFRAÎCHIR. (RECHERCHE retiré le 11 juillet 2026 — accessible par la loupe de l'accueil.)
 
 ## 🏠 Accueil V2 — ✅ TERMINÉ
-`#accueilV2-titre` padding `25vh`. `.bouton-navigation` 40×40 (scan/SAQ/burger), `.gauche`/`.droite` en `absolute`.
+`#accueilV2-titre` padding `25vh`. En-tête `#topNavV2` = **4 boutons répartis également** (flex `space-evenly`, 11 juillet 2026) : scan · SAQ · **loupe Recherche** · burger.
 
 ## ✏️ CRAYON — édition fiche V2 — ✅ TERMINÉ
 Crayon (✎) → `ouvrirEditFicheV2`, 27 champs (incl. Photo) + roundel « Photo SAQ ». Sauvegarde conforme mémoire (voir Fiche V2).
@@ -163,7 +164,7 @@ Le champ « Notes temporaires » du Sheet devient **« Notes du sommelier »** p
 ## 🥃 SPIRITUEUX + COULEURS — ✅ TERMINÉ (11 juillet 2026, testé)
 - **5 couleurs** : `--vin-bulles` passe au doré champagne `#E8D08A` ; nouvelle `--vin-spiritueux` bleu vif `#446ffc` (+ dégradés spinner, animation `couleur-vin` à 5 pas de 20 %).
 - **Classes `.vin-spiritueux`** partout : fiche (bordure gauche), cartes (bande bas), historique (bande haut). `couleurClasseV2` et le classement fiche reconnaissent « spiritueux » ; tri couleur : spiritueux = 5e. Les ronds d'emplacements suivent automatiquement (ils passent par `couleurClasseV2`).
-- **Détection SAQ (`Code.gs`, dans `testScrapingSAQ`)** : le fil d'Ariane de la page (`class="breadcrumbs"`, lien `/fr/produits/<catégorie>/<type>`) — catégorie ≠ vin → `Couleur = "Spiritueux"`, cépages vidés, **type précis → Appellation** (s'affiche dans l'en-tête). Type introuvable → Appellation vide. Couvre le scan ET la création (tout passe par `testScrapingSAQ`).
+- **Détection SAQ (`Code.gs`, dans `testScrapingSAQ`) — corrigée après test réel** : le fil d'Ariane s'est avéré non fiable ; la détection lit la **méta-description de la page** (og:description, repli meta name="description"), dont le texte commence par le type exact (« Vodka. Format… », « Vermouth blanc… », « Vin rouge… »). Type ne commençant pas par « Vin » → `Couleur = "Spiritueux"`, cépages vidés, **type complet → Appellation** (ex. « Vodka aromatisée (épice) »). Description introuvable → rien ne change (crayon). Couvre le scan ET la création (tout passe par `testScrapingSAQ`). Vérifié sur plusieurs fiches SAQ réelles.
 - Produits hors vin déjà en cave : correction au crayon (Couleur = Spiritueux, Appellation = type). Fait pour le Kamouraska.
 - ⚠️ RÈGLE : toute nouvelle couleur = ajouter la classe aux 4 blocs CSS (fiche, carte, histo-vin, variables+dégradé+keyframes), à `couleurClasseV2`, au classement de la fiche (2 endroits : classe + classList.remove de `afficherFicheV2` ET de `fermerFicheV2`) et au tri (`ordre` de `grouperVinsV2`).
 
@@ -179,6 +180,21 @@ Rangée ouverte : tap sur un **rond occupé** → **grande photo dans un grand r
 - `ouvrirPhotoEmpV2(cb)` (`scripts-fiche-v2.js`) : lit le vin de `ALL_DATA` (aucun appel), pose photo/nom/bordure (`var(--vin-*)` via `couleurClasseV2`). **Sans photo ou lien brisé → nom du vin au centre** (`#photoV2-nom`, caché en mode fiche). `clicPhotoV2` (stopPropagation) / `clicFondPhotoV2` / `fermerPhotoV2` (retire classe + contexte).
 - CSS : bloc `#photoV2Overlay.photo-ronde` (rond `min(80vw, 60vh)`, `object-fit:cover`, ✕ repositionné).
 - Fermer la fiche → retour emplacements par `fermerFicheV2` ('emplacements' → `ouvrirEmpV2`), la photo ne se rouvre pas.
+
+## 📦➡️📍 EMPLACEMENTS — BLOC « À RANGER » — ✅ TERMINÉ (11 juillet 2026, testé)
+Les bouteilles sans emplacement apparaissent aux Emplacements comme un pseudo-meuble **« À ranger »** (arbre validé) :
+- Bloc `emp-bloc` après les vrais meubles, **une ligne de ronds qui replie et se centre** (`.emp-rangee.a-ranger .ligne-ronds { flex-wrap: wrap; row-gap }`), un rond par bouteille, décompte simple (« 26 », pas de « /X »). Visible seulement s'il y a des bouteilles à ranger ET aucun filtre (ou le filtre « À ranger »).
+- Se tire comme une rangée (gros ronds, photo, bordure couleur) ; rond → grande photo ronde → fiche. `bouteillesARangerEmpV2()` (jumelle de `bouteillesRangeesEmpV2`).
+- **Filtre Meuble** : « À ranger » s'ajoute au bas de la liste (si non vide) — choisi, seul ce bloc s'affiche, Rangée/Espace vides ; un vrai meuble choisi le cache. Titre « À ranger » (casse identique au filtre — la comparaison est `f.meuble === 'À ranger'`).
+- Le compte du haut inclut les à-ranger quand le bloc est visible.
+- **Au passage** : `.emp-rangee.ouvert .ligne-ronds` replie aussi — une rangée tirée de 6+ gros ronds ne déborde plus de l'écran (bogue vu sur Spiritueux). Quinconce 7 intact.
+
+## 0️⃣ CODES-BARRES — ZÉROS DE TÊTE — ✅ TERMINÉ (11 juillet 2026, testé)
+**Bogue réel** : la SAQ affiche les CUP avec des zéros de tête ; un scan sans zéro créait une **2e ligne du même vin** (vu : recherche 3 btl / fiche 1 / doubles 2). Ligne doublon fusionnée à la main dans le Sheet (2 codes séparés d'une virgule en colonne A, apostrophe de tête conservée).
+**Correctif (`Code.gs`)** : `memeCodeBarre(a, b)` (chiffres seulement, zéros de tête ignorés, vide ≠ vide) + `listeContientCode(listeCUP, code)`, branchées aux **10 comparaisons de codes-barres** : checkWineExists, addBottle, ajouterHistoriqueManuel, updateWineData, updateWineField, getWineBottles, ajouterCodeSAQ, ajouterVinAvecBouteilles (n'ajoute plus un « même code avec zéro » à la liste CUP), verifierEtMettreAJourPrixSAQ, majPhotoSAQ. Seule la COMPARAISON change — rien de ce qui est écrit. ⚠️ RÈGLE : toute nouvelle comparaison de code-barres au backend passe par `memeCodeBarre`/`listeContientCode`. (Le front compare encore strictement — acceptable car il compare la mémoire à elle-même ; le Sheet est gardé propre par le backend.)
+
+## 🔍 ACCUEIL — LOUPE RECHERCHE — ✅ TERMINÉ (11 juillet 2026, testé)
+La Recherche se lance par une **loupe dans l'en-tête de l'accueil** (même dessin SVG que les loupes de pages), placée entre le logo SAQ et le burger. `#topNavV2` = ligne flex `justify-content: space-evenly`, les 4 boutons ont perdu `gauche`/`centre`/`droite` (classes intactes pour leurs autres usagers). **RECHERCHE retiré du burger** (ligne HTML + branche `burgerV2Click` supprimées). La loupe appelle `ouvrirRechercheV2()` directement (l'en-tête n'est accessible que de l'accueil).
 
 ## ✅ MÉNAGE V1→V2 — FAIT le 11 juillet 2026
 - **Supprimés du dépôt (par Chantal, d'un bloc)** : index.html · styles.css · scripts-config.js · scripts-init.js · scripts-inventaire.js · scripts-fiche.js · scripts-scanner.js · scripts-listes.js.
@@ -250,7 +266,7 @@ Code-barres (CUP), Code SAQ, Nom, Prix, Couleur, Cépages, Pays, Région, Appell
 - `updateWineField` connaît Accords, Racheter, Panier et `Notes temporaires` (11 juillet 2026) — toujours pas un écrivain générique.
 - Nouvelle couleur de vin : voir la RÈGLE de la section Spiritueux (4 blocs CSS + 4 endroits JS).
 - Mode rond de la photo (`photo-ronde`) : ne jamais toucher au comportement fiche de `#photoV2Overlay` ; `ouvrirPhotoV2` remet tout à zéro (`onerror = null` compris).
-- Toute comparaison de texte utilisateur (cépages, etc.) passe par `normaliserRechercheV2` / `memeTexteV2` / `contientTexteV2`.
+- Toute comparaison de texte utilisateur (cépages, etc.) passe par `normaliserRechercheV2` / `memeTexteV2` / `contientTexteV2` ; toute comparaison de CODE-BARRES au backend passe par `memeCodeBarre` / `listeContientCode` (zéros de tête).
 - Jamais `100vh` dans le V2 (iOS recadre le fond) : toujours `height:100%`.
 - Overlay par-dessus un autre : z-index supérieur (l'ordre HTML ne suffit pas).
 - Loupe/X d'une page-liste : `position:fixed`, sinon ils défilent avec le contenu.
