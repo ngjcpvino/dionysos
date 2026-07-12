@@ -236,29 +236,7 @@
     <div id="caveV2-cartes" class="contenu"></div>
   </div>
   <div id="caveV2-filtres-voile" class="panneau-voile" onclick="fermerFiltresCaveV2()"></div>
-  <div id="caveV2-filtres" class="panneau-gauche">
-    <div class="titre-3">Filtrer</div>
-    <div class="champ-cliquable" id="caveV2-f-couleur-display" onclick="basculerFiltreCaveV2('couleur')">Couleurs</div>
-    <div id="caveV2-f-couleur-menu" class="menu-liste"></div>
-
-    <div class="champ-cliquable" id="caveV2-f-cepage-display" onclick="basculerFiltreCaveV2('cepage')">Cépages</div>
-    <div id="caveV2-f-cepage-menu" class="menu-liste"></div>
-
-    <div class="champ-cliquable" id="caveV2-f-pays-display" onclick="basculerFiltreCaveV2('pays')">Pays</div>
-    <div id="caveV2-f-pays-menu" class="menu-liste"></div>
-
-    <div class="champ-cliquable" id="caveV2-f-appellation-display" onclick="basculerFiltreCaveV2('appellation')">Appellations</div>
-    <div id="caveV2-f-appellation-menu" class="menu-liste"></div>
-
-    <div class="champ-cliquable" id="caveV2-f-accords-display" onclick="basculerFiltreCaveV2('accords')">Accords</div>
-    <div id="caveV2-f-accords-menu" class="menu-liste"></div>
-    <div class="panneau-separateur"></div>
-    <input type="text" id="caveV2-f-nom" class="champ-saisie" placeholder="Rechercher par nom" oninput="appliquerFiltresCaveV2()">
-    <div class="roundel" onclick="reinitialiserFiltresCaveV2()">
-      <span class="roundel-anneau"></span>
-      <span class="roundel-barre">Réinitialiser</span>
-    </div>
-  </div>
+  <div id="caveV2-filtres" class="panneau-gauche"></div>
 </div>
 
 <!-- ====================== À RANGER V2 ====================== -->
@@ -286,27 +264,7 @@
     <div id="histoV2-cartes" class="contenu"></div>
   </div>
   <div id="histoV2-filtres-voile" class="panneau-voile" onclick="fermerFiltresHistoV2()"></div>
-  <div id="histoV2-filtres" class="panneau-gauche">
-    <div class="titre-3">Filtrer</div>
-    <div class="champ-cliquable" id="histoV2-f-mets-display" onclick="basculerFiltreHistoV2('mets')">Mets</div>
-    <div id="histoV2-f-mets-menu" class="menu-liste"></div>
-
-    <div class="champ-cliquable" id="histoV2-f-vin-display" onclick="basculerFiltreHistoV2('vin')">Vin</div>
-    <div id="histoV2-f-vin-menu" class="menu-liste"></div>
-
-    <div class="champ-cliquable" id="histoV2-f-accord-display" onclick="basculerFiltreHistoV2('accord')">Accord</div>
-    <div id="histoV2-f-accord-menu" class="menu-liste"></div>
-
-    <div class="panneau-separateur"></div>
-    <div class="roundel" onclick="ouvrirHistoAjoutV2()">
-      <span class="roundel-anneau"></span>
-      <span class="roundel-barre">Ajouter</span>
-    </div>
-    <div class="roundel" onclick="reinitialiserFiltresHistoV2()">
-      <span class="roundel-anneau"></span>
-      <span class="roundel-barre">Réinitialiser</span>
-    </div>
-  </div>
+  <div id="histoV2-filtres" class="panneau-gauche"></div>
 </div>
 
 <!-- ====================== AJOUT MANUEL HISTORIQUE V2 ====================== -->
@@ -362,37 +320,7 @@
     <div id="empV2-cartes" class="contenu"></div>
   </div>
   <div id="empV2-filtres-voile" class="panneau-voile" onclick="fermerFiltresEmpV2()"></div>
-  <div id="empV2-filtres" class="panneau-gauche">
-    <div class="titre-3">Filtrer</div>
-    <div class="champ-cliquable" id="empV2-f-meuble-display" onclick="basculerFiltreEmpV2('meuble')">Meuble</div>
-    <div id="empV2-f-meuble-menu" class="menu-liste"></div>
-
-    <div class="champ-cliquable" id="empV2-f-rangee-display" onclick="basculerFiltreEmpV2('rangee')">Rangée</div>
-    <div id="empV2-f-rangee-menu" class="menu-liste"></div>
-
-    <div class="champ-cliquable" id="empV2-f-espace-display" onclick="basculerFiltreEmpV2('espace')">Espace</div>
-    <div id="empV2-f-espace-menu" class="menu-liste"></div>
-
-    <div class="panneau-separateur"></div>
-    <div class="roundel" onclick="afficherListeEmpV2('doubles')">
-      <span class="roundel-anneau"></span>
-      <span class="roundel-barre">Vins en double</span>
-    </div>
-    <div id="empV2-btn-cepdoubles" class="roundel" style="display:none;" onclick="afficherListeEmpV2('cepdoubles')">
-      <span class="roundel-anneau"></span>
-      <span class="roundel-barre">Cépages doubles</span>
-    </div>
-    <div id="empV2-btn-cepmanquants" class="roundel" style="display:none;" onclick="afficherListeEmpV2('cepmanquants')">
-      <span class="roundel-anneau"></span>
-      <span class="roundel-barre">Cépages manquants</span>
-    </div>
-
-    <div class="panneau-separateur"></div>
-    <div class="roundel" onclick="reinitialiserFiltresEmpV2()">
-      <span class="roundel-anneau"></span>
-      <span class="roundel-barre">Réinitialiser</span>
-    </div>
-  </div>
+  <div id="empV2-filtres" class="panneau-gauche"></div>
 </div>
 
 <!-- ====================== LISTE D'ACHAT V2 ====================== -->
@@ -410,26 +338,7 @@
     <div id="achatV2-cartes" class="contenu"></div>
   </div>
   <div id="achatV2-filtres-voile" class="panneau-voile" onclick="fermerFiltresAchatV2()"></div>
-  <div id="achatV2-filtres" class="panneau-gauche">
-    <div class="titre-3">Filtrer</div>
-    <div class="champ-cliquable" id="achatV2-f-couleur-display" onclick="basculerFiltreAchatV2('couleur')">Couleurs</div>
-    <div id="achatV2-f-couleur-menu" class="menu-liste"></div>
-
-    <div class="champ-cliquable" id="achatV2-f-pays-display" onclick="basculerFiltreAchatV2('pays')">Pays</div>
-    <div id="achatV2-f-pays-menu" class="menu-liste"></div>
-
-    <div class="champ-cliquable" id="achatV2-f-cepage-display" onclick="basculerFiltreAchatV2('cepage')">Cépages</div>
-    <div id="achatV2-f-cepage-menu" class="menu-liste"></div>
-
-    <div class="panneau-separateur"></div>
-    <div class="champ-cliquable" id="achatV2-f-succ-display" onclick="basculerFiltreAchatV2('succ')">Succursales</div>
-    <div id="achatV2-f-succ-menu" class="menu-liste"></div>
-
-    <div class="roundel" onclick="reinitialiserFiltresAchatV2()">
-      <span class="roundel-anneau"></span>
-      <span class="roundel-barre">Réinitialiser</span>
-    </div>
-  </div>
+  <div id="achatV2-filtres" class="panneau-gauche"></div>
 </div>
 
 <!-- ====================== PROMOTIONS V2 ====================== -->
@@ -447,31 +356,7 @@
     <div id="promoV2-cartes" class="contenu"></div>
   </div>
   <div id="promoV2-filtres-voile" class="panneau-voile" onclick="fermerFiltresPromoV2()"></div>
-  <div id="promoV2-filtres" class="panneau-gauche">
-    <div class="titre-3">Afficher</div>
-    <div class="item-liste" id="promoV2-mode-mes" onclick="choisirModePromoV2('mes')">Mes promos</div>
-    <div class="item-liste" id="promoV2-mode-dec" onclick="choisirModePromoV2('dec')">Découvertes</div>
-
-    <div class="panneau-separateur"></div>
-    <div class="titre-3">Filtrer</div>
-    <div class="champ-cliquable" id="promoV2-f-couleur-display" onclick="basculerFiltrePromoV2('couleur')">Couleurs</div>
-    <div id="promoV2-f-couleur-menu" class="menu-liste"></div>
-
-    <div class="champ-cliquable" id="promoV2-f-pays-display" onclick="basculerFiltrePromoV2('pays')">Pays</div>
-    <div id="promoV2-f-pays-menu" class="menu-liste"></div>
-
-    <div class="champ-cliquable" id="promoV2-f-cepage-display" onclick="basculerFiltrePromoV2('cepage')">Cépages</div>
-    <div id="promoV2-f-cepage-menu" class="menu-liste"></div>
-
-    <div class="panneau-separateur"></div>
-    <div class="champ-cliquable" id="promoV2-f-succ-display" onclick="basculerFiltrePromoV2('succ')">Succursales</div>
-    <div id="promoV2-f-succ-menu" class="menu-liste"></div>
-
-    <div class="roundel" onclick="reinitialiserFiltresPromoV2()">
-      <span class="roundel-anneau"></span>
-      <span class="roundel-barre">Réinitialiser</span>
-    </div>
-  </div>
+  <div id="promoV2-filtres" class="panneau-gauche"></div>
 </div>
 
 <!-- ====================== RECHERCHE V2 ====================== -->
