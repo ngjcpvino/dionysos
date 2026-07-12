@@ -2432,7 +2432,7 @@ function burgerV2Click(cible) {
   if (cible === 'emplacements') { cacherToutesPagesV2(); ouvrirEmpV2(); return; }
   if (cible === 'historique') { cacherToutesPagesV2(); ouvrirHistoV2(); return; }
   if (cible === 'promotions') { cacherToutesPagesV2(); ouvrirPromoV2(); return; }
-  if (cible === 'recherche') { cacherToutesPagesV2(); ouvrirRechercheV2(); return; }
+  
   if (cible === 'refresh') {
     appelBackend('getInventoryData', {}, { spinner: 'Synchronisation' }).then(function(data) {
       ALL_DATA = data || [];
