@@ -666,8 +666,8 @@ body::after {
 }
 #photoV2Overlay.photo-ronde .btn-fermer {
   position: absolute;
-  top: calc(50% - min(40vw, 30vh) - 60px);
-  left: 50%;
+  top: calc(50% - min(40vw, 30vh) - 30px);
+  left: calc(50% + min(24vw, 18vh));
   right: auto;
   transform: translateX(-50%);
 }
