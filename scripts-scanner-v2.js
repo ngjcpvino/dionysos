@@ -2464,3 +2464,64 @@ function ajouterBouteilleArrivee(meuble, rangee, espace) {
   });
 }
 
+// ==================== PANNEAUX DE FILTRES (générés) ====================
+var PANNEAUX_V2 = {
+  cave: {
+    prefixe: 'caveV2', bascule: 'basculerFiltreCaveV2', reinit: 'reinitialiserFiltresCaveV2',
+    filtres: [['couleur', 'Couleurs'], ['cepage', 'Cépages'], ['pays', 'Pays'], ['appellation', 'Appellations'], ['accords', 'Accords']],
+    apres: '<div class="panneau-separateur"></div>' +
+           '<input type="text" id="caveV2-f-nom" class="champ-saisie" placeholder="Rechercher par nom" oninput="appliquerFiltresCaveV2()">'
+  },
+  histo: {
+    prefixe: 'histoV2', bascule: 'basculerFiltreHistoV2', reinit: 'reinitialiserFiltresHistoV2',
+    filtres: [['mets', 'Mets'], ['vin', 'Vin'], ['accord', 'Accord']],
+    apres: '<div class="panneau-separateur"></div>' +
+           '<div class="roundel" onclick="ouvrirHistoAjoutV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Ajouter</span></div>'
+  },
+  emp: {
+    prefixe: 'empV2', bascule: 'basculerFiltreEmpV2', reinit: 'reinitialiserFiltresEmpV2',
+    filtres: [['meuble', 'Meuble'], ['rangee', 'Rangée'], ['espace', 'Espace']],
+    apres: '<div class="panneau-separateur"></div>' +
+           '<div class="roundel" onclick="afficherListeEmpV2(\'doubles\')"><span class="roundel-anneau"></span><span class="roundel-barre">Vins en double</span></div>' +
+           '<div id="empV2-btn-cepdoubles" class="roundel" style="display:none;" onclick="afficherListeEmpV2(\'cepdoubles\')"><span class="roundel-anneau"></span><span class="roundel-barre">Cépages doubles</span></div>' +
+           '<div id="empV2-btn-cepmanquants" class="roundel" style="display:none;" onclick="afficherListeEmpV2(\'cepmanquants\')"><span class="roundel-anneau"></span><span class="roundel-barre">Cépages manquants</span></div>' +
+           '<div class="panneau-separateur"></div>'
+  },
+  achat: {
+    prefixe: 'achatV2', bascule: 'basculerFiltreAchatV2', reinit: 'reinitialiserFiltresAchatV2',
+    filtres: [['couleur', 'Couleurs'], ['pays', 'Pays'], ['cepage', 'Cépages']],
+    apres: '<div class="panneau-separateur"></div>' +
+           '<div class="champ-cliquable" id="achatV2-f-succ-display" onclick="basculerFiltreAchatV2(\'succ\')">Succursales</div>' +
+           '<div id="achatV2-f-succ-menu" class="menu-liste"></div>'
+  },
+  promo: {
+    prefixe: 'promoV2', bascule: 'basculerFiltrePromoV2', reinit: 'reinitialiserFiltresPromoV2',
+    avant: '<div class="titre-3">Afficher</div>' +
+           '<div class="item-liste" id="promoV2-mode-mes" onclick="choisirModePromoV2(\'mes\')">Mes promos</div>' +
+           '<div class="item-liste" id="promoV2-mode-dec" onclick="choisirModePromoV2(\'dec\')">Découvertes</div>' +
+           '<div class="panneau-separateur"></div>',
+    filtres: [['couleur', 'Couleurs'], ['pays', 'Pays'], ['cepage', 'Cépages']],
+    apres: '<div class="panneau-separateur"></div>' +
+           '<div class="champ-cliquable" id="promoV2-f-succ-display" onclick="basculerFiltrePromoV2(\'succ\')">Succursales</div>' +
+           '<div id="promoV2-f-succ-menu" class="menu-liste"></div>'
+  }
+};
+
+function construirePanneauxV2() {
+  Object.keys(PANNEAUX_V2).forEach(function(k) {
+    var p = PANNEAUX_V2[k];
+    var el = document.getElementById(p.prefixe + '-filtres');
+    if (!el) return;
+    var html = p.avant || '';
+    html += '<div class="titre-3">Filtrer</div>';
+    p.filtres.forEach(function(f) {
+      html += '<div class="champ-cliquable" id="' + p.prefixe + '-f-' + f[0] + '-display" onclick="' + p.bascule + '(\'' + f[0] + '\')">' + f[1] + '</div>' +
+              '<div id="' + p.prefixe + '-f-' + f[0] + '-menu" class="menu-liste"></div>';
+    });
+    html += p.apres || '';
+    html += '<div class="roundel" onclick="' + p.reinit + '()"><span class="roundel-anneau"></span><span class="roundel-barre">Réinitialiser</span></div>';
+    el.innerHTML = html;
+  });
+}
+document.addEventListener('DOMContentLoaded', construirePanneauxV2);
+
