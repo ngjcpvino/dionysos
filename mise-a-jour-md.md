@@ -178,7 +178,7 @@ Ajouter un accord (catégorie) depuis le menu Accords de la Fiche V2, sans ouvri
 Rangée ouverte : tap sur un **rond occupé** → **grande photo dans un grand rond** (bordure à la couleur du vin), ✕ **au-dessus, à l'extérieur** ; tap sur la photo → fiche (provenance 'emplacements') ; ✕ ou tap sur le fond → ferme, emplacements **tels quels** (pas de re-rendu). Rond libre → scan (intact).
 - **Réutilise `#photoV2Overlay`** avec un mode : classe `photo-ronde` + variables `PHOTO_V2_MODE`/`PHOTO_V2_CB`. Mode fiche 100 % intact (`ouvrirPhotoV2` remet tout à zéro, `onerror` compris).
 - `ouvrirPhotoEmpV2(cb)` (`scripts-fiche-v2.js`) : lit le vin de `ALL_DATA` (aucun appel), pose photo/nom/bordure (`var(--vin-*)` via `couleurClasseV2`). **Sans photo ou lien brisé → nom du vin au centre** (`#photoV2-nom`, caché en mode fiche). `clicPhotoV2` (stopPropagation) / `clicFondPhotoV2` / `fermerPhotoV2` (retire classe + contexte).
-- CSS : bloc `#photoV2Overlay.photo-ronde` (rond `min(80vw, 60vh)`, `object-fit:cover`, ✕ repositionné).
+- CSS : bloc `#photoV2Overlay.photo-ronde` (rond `min(80vw, 60vh)`, `object-fit:cover`, ✕ posé à **2 h juste à l'extérieur du cercle** — réglage fin du 11 juillet 2026).
 - Fermer la fiche → retour emplacements par `fermerFicheV2` ('emplacements' → `ouvrirEmpV2`), la photo ne se rouvre pas.
 
 ## 📦➡️📍 EMPLACEMENTS — BLOC « À RANGER » — ✅ TERMINÉ (11 juillet 2026, testé)
@@ -195,6 +195,10 @@ Les bouteilles sans emplacement apparaissent aux Emplacements comme un pseudo-me
 
 ## 🔍 ACCUEIL — LOUPE RECHERCHE — ✅ TERMINÉ (11 juillet 2026, testé)
 La Recherche se lance par une **loupe dans l'en-tête de l'accueil** (même dessin SVG que les loupes de pages), placée entre le logo SAQ et le burger. `#topNavV2` = ligne flex `justify-content: space-evenly`, les 4 boutons ont perdu `gauche`/`centre`/`droite` (classes intactes pour leurs autres usagers). **RECHERCHE retiré du burger** (ligne HTML + branche `burgerV2Click` supprimées). La loupe appelle `ouvrirRechercheV2()` directement (l'en-tête n'est accessible que de l'accueil).
+
+## 🧩 PANNEAUX DE FILTRES GÉNÉRÉS — ✅ TERMINÉ (11 juillet 2026, testé sur les 5 pages)
+Les 5 panneaux (Cave, Historique, Emplacements, Achat, Promo) ne sont plus copiés dans `index-v2.html` : chaque conteneur `#...V2-filtres` est une **coquille vide**, remplie au chargement par **`construirePanneauxV2()`** (fin de `scripts-scanner-v2.js`, hook `DOMContentLoaded`) à partir de la table **`PANNEAUX_V2`** (préfixe, fonction de bascule, filtres [clé, libellé], blocs `avant`/`apres` propres à la page, Réinitialiser ajouté d'office). **Ids générés IDENTIQUES aux anciens** — aucun autre code n'a changé. ~125 lignes de HTML retirées.
+⚠️ RÈGLE : modifier un panneau = modifier `PANNEAUX_V2` (jamais le HTML) ; nouvelle page à panneau = une entrée dans la table + une coquille `<div id="...-filtres" class="panneau-gauche"></div>` (le voile reste dans le HTML).
 
 ## ✅ MÉNAGE V1→V2 — FAIT le 11 juillet 2026
 - **Supprimés du dépôt (par Chantal, d'un bloc)** : index.html · styles.css · scripts-config.js · scripts-init.js · scripts-inventaire.js · scripts-fiche.js · scripts-scanner.js · scripts-listes.js.
@@ -241,7 +245,7 @@ Rien en attente — tout testé et confirmé le 11 juillet 2026 (ménage, mot de
 
 ## 🐞 En suspens
 - **Découpage des JS** (proposé, non tranché, pas tout de suite) : socle / navigation / scan / actions / pages / fiche — `scripts-scanner-v2.js` est un fourre-tout. **Même exercice voulu pour `Code.gs`** (lecture / écriture / SAQ / historique / utilitaires — incluant le tri des fonctions ex-V1 devenues orphelines).
-- **Panneaux de filtres dupliqués dans le HTML** : le même bloc (Filtrer · Couleurs/Pays/Cépages · Succursale) est copié dans plusieurs pages (achat, promo, variantes Cave/Emp/Histo). À remplacer par UNE fonction JS qui génère le panneau (préfixe en paramètre) — à faire en même temps que le découpage. La duplication coûte en lecture et en tokens à chaque session.
+- ~~Panneaux de filtres dupliqués dans le HTML~~ : réglé le 11 juillet 2026 (générés par `construirePanneauxV2` — voir sa section).
 - ~~Vue emplacements V1 instable~~ : disparue avec la suppression du V1 (11 juillet 2026). La vérif réelle finale à l'Arrivée (`checkLocationAvailable`) reste, elle est toujours utile à 2 téléphones.
 
 ## 📇 Champs d'un vin (référence)
