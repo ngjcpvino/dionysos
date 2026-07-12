@@ -244,6 +244,7 @@ function afficherFicheV2(result) {
     html += '<div id="ficheV2-succursales"></div>';
   }
 
+
   document.getElementById('ficheV2-corps').innerHTML = html;
   chargerPlatsV2(CURRENT_WINE_CODEBARRE);
   verifierPrixV2(CURRENT_WINE_CODEBARRE, wine['Code SAQ']);
