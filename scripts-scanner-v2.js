@@ -687,7 +687,7 @@ function construireBoireV2() {
   rendreEnteteActionV2('boire');
   document.getElementById('boireV2-plat').value = '';
   var codeBoire = (menuActionV2Context.code || '').toString().trim();
-  var itemBoire = (ALL_DATA || []).filter(function(i) { return (i['Code-barres'] || '').toString().trim() === codeBoire; })[0];
+var itemBoire = (ALL_DATA || []).filter(function(i) { return memeCodeV2(i['Code-barres'], codeBoire); })[0];
   BOIRE_V2_NOTE_INITIALE = itemBoire ? decodeHTML((itemBoire['Notes temporaires'] || '').toString()) : '';
   document.getElementById('boireV2-notes').value = BOIRE_V2_NOTE_INITIALE;
   document.getElementById('boireV2-accords-menu').classList.remove('ouvert');
@@ -1865,7 +1865,7 @@ function afficherListeEmpV2(type) {
 function wineResultDepuisMemoireV2(code) {
   var cb = (code || '').toString().trim();
   var items = (ALL_DATA || []).filter(function(i) {
-    return (i['Code-barres'] || '').toString().trim() === cb;
+    return memeCodeV2(i['Code-barres'], cb);
   });
   if (!items.length) return null;
   var w = items[0];
@@ -2090,10 +2090,10 @@ function ouvrirHistoEditV2(row, plat, note, nom, provenance, codeSAQ, codebarre)
     var cb = (codebarre || '').toString().trim();
     w = (ALL_DATA || []).find(function(i) {
       if (saq) return (i['Code SAQ'] || '').toString().trim() === saq;
-      if (cb) return (i['Code-barres'] || '').toString().trim() === cb;
+      if (cb) return memeCodeV2(i['Code-barres'], cb);
       return false;
     }) || null;
-  }
+  }  
   var origineEl = document.getElementById('histoEditV2-origine');
   if (origineEl) origineEl.textContent = w ? [w.Pays, w.Region, w.Appellation].filter(Boolean).map(decodeHTML).join(' • ') : '';
   document.getElementById('histoEditV2-plat').value = plat || '';

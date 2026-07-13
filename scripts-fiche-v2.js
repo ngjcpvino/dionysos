@@ -33,7 +33,7 @@ function ouvrirFicheV2(codebarre, provenance) {
 function ficheDepuisMemoireV2(codebarre) {
   var cb = (codebarre || '').toString().trim();
   var items = (ALL_DATA || []).filter(function(i) {
-    return (i['Code-barres'] || '').toString().trim() === cb;
+    return memeCodeV2(i['Code-barres'], cb);
   });
   if (!items.length) return null;
   var w = items[0];
@@ -330,12 +330,12 @@ function toggleAccordV2(element) {
 function majMemoireVinV2(codebarre, champs) {
   var cb = (codebarre || '').toString().trim();
   (ALL_DATA || []).forEach(function(i) {
-    if ((i['Code-barres'] || '').toString().trim() === cb) {
+    if (memeCodeV2(i['Code-barres'], cb)) {
       Object.keys(champs).forEach(function(k) { i[k] = champs[k]; });
     }
   });
 }
-
+ 
 function setAimeV2(value) {
   var oui = document.getElementById('ficheV2-aime-oui');
   var non = document.getElementById('ficheV2-aime-non');
@@ -424,7 +424,7 @@ function ouvrirPhotoV2(url) {
 
 function ouvrirPhotoEmpV2(cb) {
   var cible = (cb || '').toString().trim();
-  var w = (ALL_DATA || []).filter(function(i) { return (i['Code-barres'] || '').toString().trim() === cible; })[0];
+  var w = (ALL_DATA || []).filter(function(i) { return memeCodeV2(i['Code-barres'], cible); })[0];
   if (!w) return;
   PHOTO_V2_MODE = 'rond';
   PHOTO_V2_CB = cible;

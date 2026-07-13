@@ -144,3 +144,12 @@ function decodeHTML(html) {
   txt.innerHTML = html;
   return txt.value;
 }
+
+
+ 
+
+function memeCodeV2(a, b) {
+  var na = (a || '').toString().replace(/\D/g, '').replace(/^0+/, '');
+  var nb = (b || '').toString().replace(/\D/g, '').replace(/^0+/, '');
+  return na !== '' && na === nb;
+}
