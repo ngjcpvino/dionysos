@@ -100,10 +100,14 @@ function afficherFicheV2(result) {
   }
 
   var nomEl = document.getElementById('ficheV2-nom');
+  nomEl.textContent = decodeHTML(wine.Nom || 'Vin sans nom');
+  var saqEl = document.getElementById('ficheV2-saq');
   if (wine['Code SAQ']) {
-    nomEl.innerHTML = '<a href="saq://products/' + wine['Code SAQ'] + '" class="lien-titre">' + decodeHTML(wine.Nom || 'Vin sans nom') + '</a>';
+    saqEl.style.display = '';
+    saqEl.onclick = function() { window.location.href = 'saq://products/' + wine['Code SAQ']; };
   } else {
-    nomEl.textContent = decodeHTML(wine.Nom || 'Vin sans nom');
+    saqEl.style.display = 'none';
+    saqEl.onclick = null;
   }
 
   var origine = [];
