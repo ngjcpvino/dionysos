@@ -1112,9 +1112,10 @@ function libelleCompteAchatV2(n) {
   var txt = n + ' bouteille' + (n > 1 ? 's' : '');
   var sel = succursalesAchatV2.filter(function(s){ return s.numero === filtresAchatV2.succ; })[0];
   if (sel) {
-    var parts = (sel.nom || '').split(' — ');
-    txt += '<br>Succ. ' + parts[0];
-    if (parts[1]) txt += '<br>' + parts[1];
+    var nom = (sel.nom || '').trim();
+    var m = nom.match(/^(.*?)\s+[—–-]\s+(.*)$/) || nom.match(/^([^,]+),\s*(.*)$/);
+    txt += '<br>Succ. ' + (m ? m[1] : nom);
+    if (m && m[2]) txt += '<br>' + m[2];
   }
   return txt;
 }
