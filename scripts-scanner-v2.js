@@ -289,12 +289,7 @@ function retourAccueilV2() {
 function menuV2Click(action) {
   var nbActives = (menuActionV2Context && menuActionV2Context.wineResult && typeof menuActionV2Context.wineResult.count === 'number') ? menuActionV2Context.wineResult.count : 0;
   if (nbActives === 0 && (action === 'deplacer' || action === 'boire' || action === 'donner')) {
-    afficherMessage('Aucune if (sel) {
-    var nom = (sel.nom || '').trim();
-    var m = nom.match(/^(.*?)\s+[—–-]\s+(.*)$/) || nom.match(/^([^,]+),\s*(.*)$/);
-    txt += '<br>Succ. ' + (m ? m[1] : nom);
-    if (m && m[2]) txt += '<br>' + m[2];
-  } en stock');
+    afficherMessage('Aucune bouteille en stock');
     return;
   }
   if (action === 'visualiser') {
