@@ -1061,8 +1061,8 @@ function afficherCartesAchatV2(liste) {
     return (a.Nom || '').localeCompare(b.Nom || '');
   });
   var div = document.getElementById('achatV2-cartes');
-  document.getElementById('achatV2-compte').textContent = liste.length + ' vin' + (liste.length > 1 ? 's' : '');
-  if (liste.length === 0) { div.innerHTML = '<div class="texte-secondaire">Aucun vin à acheter</div>'; return; }
+  document.getElementById('achatV2-compte').innerHTML = libelleCompteAchatV2(liste.length);
+  if (liste.length === 0) { div.innerHTML = '<div class="texte-secondaire">Aucune bouteille à acheter</div>'; return; }
   var dernierPays = null;
   div.innerHTML = liste.map(function(w){
     var entete = '';
@@ -1108,11 +1108,22 @@ function togglePanierSessionV2(cle, ev) {
   }
 }
 
+function libelleCompteAchatV2(n) {
+  var txt = n + ' bouteille' + (n > 1 ? 's' : '');
+  var sel = succursalesAchatV2.filter(function(s){ return s.numero === filtresAchatV2.succ; })[0];
+  if (sel) {
+    var parts = (sel.nom || '').split(' — ');
+    txt += '<br>Succ. ' + parts[0];
+    if (parts[1]) txt += '<br>' + parts[1];
+  }
+  return txt;
+}
+
 function majCompteAchatV2() {
   var cartes = document.querySelectorAll('#achatV2-cartes .carte');
   var n = 0;
   Array.prototype.forEach.call(cartes, function(c){ if (c.style.display !== 'none') n++; });
-  document.getElementById('achatV2-compte').textContent = n + ' vin' + (n > 1 ? 's' : '');
+  document.getElementById('achatV2-compte').innerHTML = libelleCompteAchatV2(n);
 }
 
 function chargerDispoAchatV2(liste) {
@@ -2458,7 +2469,7 @@ function ajouterBouteilleArrivee(meuble, rangee, espace) {
     if (data) ALL_DATA = data;
     cacherToutesPagesV2();
     menuActionV2Context = null;
-    afficherMessage('Bouteille ajoutée !');
+    afficherMessage('Bouteille ajoutée');
   }).catch(function() {
     retourAccueilV2();
   });
