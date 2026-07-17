@@ -913,15 +913,15 @@ function deplacerDepuisARangerV2(code) {
 }
 
 // ==================== LISTE D'ACHAT V2 ====================
-var filtresAchatV2 = { couleur: '', pays: '', cepage: '', succ: '' };
-var libellesFiltreAchatV2 = { couleur: 'Couleurs', pays: 'Pays', cepage: 'Cépages', succ: 'Succursale' };
+var filtresAchatV2 = { couleur: '', pays: '', cepage: '', pastille: '', succ: '' };
+var libellesFiltreAchatV2 = { couleur: 'Couleurs', pays: 'Pays', cepage: 'Cépages', pastille: 'Pastille de goût', succ: 'Succursale' };
 var succursalesAchatV2 = [];
 
 function ouvrirAchatV2() {
   document.getElementById('achatV2Container').style.display = 'flex';
   remonterScrollV2('achatV2Container');
   panierSessionAchatV2 = {};
-  filtresAchatV2 = { couleur: '', pays: '', cepage: '', succ: '' };
+  filtresAchatV2 = { couleur: '', pays: '', cepage: '', pastille: '', succ: '' };
   if (succursalesAchatV2.length) {
     remplirFiltresAchatV2();
     appliquerFiltresAchatV2();
@@ -963,14 +963,18 @@ function remplirFiltresAchatV2() {
   var forCepage = base.filter(function(i){
     return (!f.couleur || i.Couleur === f.couleur) && (!f.pays || i.Pays === f.pays);
   });
+  var forPastille = forCepage.filter(function(i){
+    return (!f.cepage || contientTexteV2(i.Cepage, f.cepage));
+  });
 
   var listes = {
     couleur: uniqueValeursAchat(forCouleur, 'Couleur'),
     pays: uniqueValeursAchat(forPays, 'Pays'),
-    cepage: uniqueValeursAchat(forCepage, 'Cepage')
+    cepage: uniqueValeursAchat(forCepage, 'Cepage'),
+    pastille: uniqueValeursAchat(forPastille, 'Pastille gout')
   };
 
-  ['couleur','pays','cepage'].forEach(function(cle){
+  ['couleur','pays','cepage','pastille'].forEach(function(cle){
     var cur = f[cle];
     var menu = document.getElementById('achatV2-f-' + cle + '-menu');
     menu.innerHTML = listes[cle].map(function(v){
@@ -1006,7 +1010,7 @@ function uniqueValeursAchat(liste, champ) {
 function basculerFiltreAchatV2(cle) {
   var menu = document.getElementById('achatV2-f-' + cle + '-menu');
   var ouvert = menu.classList.contains('ouvert');
-  ['couleur','pays','cepage','succ'].forEach(function(k){
+  ['couleur','pays','cepage','pastille','succ'].forEach(function(k){
     document.getElementById('achatV2-f-' + k + '-menu').classList.remove('ouvert');
   });
   if (!ouvert) menu.classList.add('ouvert');
@@ -1015,14 +1019,15 @@ function basculerFiltreAchatV2(cle) {
 function choisirFiltreAchatV2(cle, valeur) {
   filtresAchatV2[cle] = valeur;
   document.getElementById('achatV2-f-' + cle + '-menu').classList.remove('ouvert');
-  if (cle === 'couleur') { filtresAchatV2.pays = ''; filtresAchatV2.cepage = ''; }
-  if (cle === 'pays') { filtresAchatV2.cepage = ''; }
+  if (cle === 'couleur') { filtresAchatV2.pays = ''; filtresAchatV2.cepage = ''; filtresAchatV2.pastille = ''; }
+  if (cle === 'pays') { filtresAchatV2.cepage = ''; filtresAchatV2.pastille = ''; }
+  if (cle === 'cepage') { filtresAchatV2.pastille = ''; }
   remplirFiltresAchatV2();
   appliquerFiltresAchatV2();
 }
 
 function reinitialiserFiltresAchatV2() {
-  filtresAchatV2 = { couleur: '', pays: '', cepage: '', succ: '' };
+  filtresAchatV2 = { couleur: '', pays: '', cepage: '', pastille: '', succ: '' };
   remplirFiltresAchatV2();
   appliquerFiltresAchatV2();
   fermerFiltresAchatV2();
@@ -1042,11 +1047,12 @@ function appliquerFiltresAchatV2() {
   var filtered = baseAchatV2().filter(function(i){
     return (!f.couleur || i.Couleur === f.couleur) &&
       (!f.pays || i.Pays === f.pays) &&
-      (!f.cepage || contientTexteV2(i.Cepage, f.cepage));
+      (!f.cepage || contientTexteV2(i.Cepage, f.cepage)) &&
+      (!f.pastille || contientTexteV2(i['Pastille gout'], f.pastille));
   });
   afficherCartesAchatV2(filtered);
   var loupe = document.getElementById('achatV2-loupe');
-  if (loupe) loupe.classList.toggle('actif', !!(f.couleur || f.pays || f.cepage || f.succ));
+  if (loupe) loupe.classList.toggle('actif', !!(f.couleur || f.pays || f.cepage || f.pastille || f.succ));
 }
 
 function cleCartePanierV2(w) {
@@ -2501,7 +2507,7 @@ var PANNEAUX_V2 = {
   },
   achat: {
     prefixe: 'achatV2', bascule: 'basculerFiltreAchatV2', reinit: 'reinitialiserFiltresAchatV2',
-    filtres: [['couleur', 'Couleurs'], ['pays', 'Pays'], ['cepage', 'Cépages']],
+    filtres: [['couleur', 'Couleurs'], ['pays', 'Pays'], ['cepage', 'Cépages'], ['pastille', 'Pastille de goût']],
     apres: '<div class="panneau-separateur"></div>' +
            '<div class="champ-cliquable" id="achatV2-f-succ-display" onclick="basculerFiltreAchatV2(\'succ\')">Succursales</div>' +
            '<div id="achatV2-f-succ-menu" class="menu-liste"></div>'
