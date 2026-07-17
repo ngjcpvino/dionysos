@@ -101,7 +101,7 @@ function afficherFicheV2(result) {
 
   var nomEl = document.getElementById('ficheV2-nom');
   if (wine['Code SAQ']) {
-    nomEl.innerHTML = '<a href="https://www.saq.com/fr/' + wine['Code SAQ'] + '" target="_blank" class="lien-titre">' + decodeHTML(wine.Nom || 'Vin sans nom') + '</a>';
+    nomEl.innerHTML = '<a href="saq://products/' + wine['Code SAQ'] + '" class="lien-titre">' + decodeHTML(wine.Nom || 'Vin sans nom') + '</a>';
   } else {
     nomEl.textContent = decodeHTML(wine.Nom || 'Vin sans nom');
   }
