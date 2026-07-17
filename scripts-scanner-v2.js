@@ -361,12 +361,7 @@ function construireArriveeV2() {
 
   var nbActives = (menuActionV2Context.wineResult && typeof menuActionV2Context.wineResult.count === 'number') ? menuActionV2Context.wineResult.count : 0;
   if (nbActives >= 5) {
-    afficherMessage('Maximum atteint (5 if (sel) {
-    var nom = (sel.nom || '').trim();
-    var m = nom.match(/^(.*?)\s+[—–-]\s+(.*)$/) || nom.match(/^([^,]+),\s*(.*)$/);
-    txt += '<br>Succ. ' + (m ? m[1] : nom);
-    if (m && m[2]) txt += '<br>' + m[2];
-  }s)');
+    afficherMessage('Maximum atteint (5 bouteilles)');
     document.getElementById('arriveeV2Container').style.display = 'none';
     if (menuActionV2Context) ouvrirMenuActionV2(menuActionV2Context.code, menuActionV2Context.wineResult);
     return;
@@ -469,24 +464,14 @@ function choisirEspaceArrivee(espace) {
         menu.classList.add('ouvert');
       });
     }
-    ajouterif (sel) {
-    var nom = (sel.nom || '').trim();
-    var m = nom.match(/^(.*?)\s+[—–-]\s+(.*)$/) || nom.match(/^([^,]+),\s*(.*)$/);
-    txt += '<br>Succ. ' + (m ? m[1] : nom);
-    if (m && m[2]) txt += '<br>' + m[2];
-  }Arrivee(c.meuble, c.rangee, c.espace);
+    ajouterBouteilleArrivee(c.meuble, c.rangee, c.espace);
   }).catch(function(err) {
     afficherMessage('Erreur : ' + err);
   });
 }
 
 function arriveeARangerV2() {
-  ajouterif (sel) {
-    var nom = (sel.nom || '').trim();
-    var m = nom.match(/^(.*?)\s+[—–-]\s+(.*)$/) || nom.match(/^([^,]+),\s*(.*)$/);
-    txt += '<br>Succ. ' + (m ? m[1] : nom);
-    if (m && m[2]) txt += '<br>' + m[2];
-  }Arrivee('', '', '');
+  ajouterBouteilleArrivee('', '', '');
 }
 
 // ==================== DÉPLACER V2 ====================
@@ -516,56 +501,26 @@ function construireDeplacerV2() {
   if (bottles.length === 1) {
     deplacerV2Choix.row = bottles[0].row || rowVin;
     deplacerV2Choix.bottle = bottles[0].bottle;
-    document.getElementById('deplacerV2-choix-if (sel) {
-    var nom = (sel.nom || '').trim();
-    var m = nom.match(/^(.*?)\s+[—–-]\s+(.*)$/) || nom.match(/^([^,]+),\s*(.*)$/);
-    txt += '<br>Succ. ' + (m ? m[1] : nom);
-    if (m && m[2]) txt += '<br>' + m[2];
-  }').style.display = 'none';
+    document.getElementById('deplacerV2-choix-bouteille').style.display = 'none';
     document.getElementById('deplacerV2-destination').style.display = 'block';
     construireMeublesDeplacer();
   } else {
-    var menu = document.getElementById('deplacerV2-if (sel) {
-    var nom = (sel.nom || '').trim();
-    var m = nom.match(/^(.*?)\s+[—–-]\s+(.*)$/) || nom.match(/^([^,]+),\s*(.*)$/);
-    txt += '<br>Succ. ' + (m ? m[1] : nom);
-    if (m && m[2]) txt += '<br>' + m[2];
-  }-menu');
+    var menu = document.getElementById('deplacerV2-bouteille-menu');
     menu.innerHTML = bottles.map(function(b) {
       var emp = (b.meuble && b.rangee && b.espace) ? (b.meuble + '-' + b.rangee + '-' + b.espace) : 'À ranger';
-      return '<div class="item-liste" onclick="choisirif (sel) {
-    var nom = (sel.nom || '').trim();
-    var m = nom.match(/^(.*?)\s+[—–-]\s+(.*)$/) || nom.match(/^([^,]+),\s*(.*)$/);
-    txt += '<br>Succ. ' + (m ? m[1] : nom);
-    if (m && m[2]) txt += '<br>' + m[2];
-  }Deplacer(' + (b.row || rowVin) + ',' + b.bottle + ')">' + emp + '</div>';
+      return '<div class="item-liste" onclick="choisirBouteilleDeplacer(' + (b.row || rowVin) + ',' + b.bottle + ')">' + emp + '</div>';
     }).join('');
-    document.getElementById('deplacerV2-choix-if (sel) {
-    var nom = (sel.nom || '').trim();
-    var m = nom.match(/^(.*?)\s+[—–-]\s+(.*)$/) || nom.match(/^([^,]+),\s*(.*)$/);
-    txt += '<br>Succ. ' + (m ? m[1] : nom);
-    if (m && m[2]) txt += '<br>' + m[2];
-  }').style.display = 'block';
+    document.getElementById('deplacerV2-choix-bouteille').style.display = 'block';
     document.getElementById('deplacerV2-destination').style.display = 'none';
   }
 
   document.getElementById('deplacerV2Container').style.display = 'flex';
 }
 
-function choisirif (sel) {
-    var nom = (sel.nom || '').trim();
-    var m = nom.match(/^(.*?)\s+[—–-]\s+(.*)$/) || nom.match(/^([^,]+),\s*(.*)$/);
-    txt += '<br>Succ. ' + (m ? m[1] : nom);
-    if (m && m[2]) txt += '<br>' + m[2];
-  }Deplacer(row, bottle) {
+function choisirBouteilleDeplacer(row, bottle) {
   deplacerV2Choix.row = row;
   deplacerV2Choix.bottle = bottle;
-  document.getElementById('deplacerV2-choix-if (sel) {
-    var nom = (sel.nom || '').trim();
-    var m = nom.match(/^(.*?)\s+[—–-]\s+(.*)$/) || nom.match(/^([^,]+),\s*(.*)$/);
-    txt += '<br>Succ. ' + (m ? m[1] : nom);
-    if (m && m[2]) txt += '<br>' + m[2];
-  }').style.display = 'none';
+  document.getElementById('deplacerV2-choix-bouteille').style.display = 'none';
   document.getElementById('deplacerV2-destination').style.display = 'block';
   construireMeublesDeplacer();
 }
@@ -646,18 +601,8 @@ function choisirEspaceDeplacer(espace) {
         menu.classList.add('ouvert');
       });
     }
-  appelBackend('actionif (sel) {
-    var nom = (sel.nom || '').trim();
-    var m = nom.match(/^(.*?)\s+[—–-]\s+(.*)$/) || nom.match(/^([^,]+),\s*(.*)$/);
-    txt += '<br>Succ. ' + (m ? m[1] : nom);
-    if (m && m[2]) txt += '<br>' + m[2];
-  }', { row: c.row, action: 'deplacer', bottle: c.bottle, meuble: c.meuble, rangee: c.rangee, espace: c.espace }, { spinner: 'Déplacement' }).then(function() {
-      afficherMessage('if (sel) {
-    var nom = (sel.nom || '').trim();
-    var m = nom.match(/^(.*?)\s+[—–-]\s+(.*)$/) || nom.match(/^([^,]+),\s*(.*)$/);
-    txt += '<br>Succ. ' + (m ? m[1] : nom);
-    if (m && m[2]) txt += '<br>' + m[2];
-  } déplacée');
+  appelBackend('actionBouteille', { row: c.row, action: 'deplacer', bottle: c.bottle, meuble: c.meuble, rangee: c.rangee, espace: c.espace }, { spinner: 'Déplacement' }).then(function() {
+      afficherMessage('Bouteille déplacée');
       return appelBackend('getInventoryData', {}).then(function(data) {
         if (data) ALL_DATA = data;
         return appelBackend('checkWineExists', { codebarre: menuActionV2Context.code }).then(function(result) {
@@ -676,12 +621,7 @@ function choisirEspaceDeplacer(espace) {
 function deplacerARangerV2() {
   var c = deplacerV2Choix;
   appelBackend('mettreBotteilleARanger', { row: c.row, bottle: c.bottle }, { spinner: 'Mise à ranger' }).then(function() {
-    afficherMessage('if (sel) {
-    var nom = (sel.nom || '').trim();
-    var m = nom.match(/^(.*?)\s+[—–-]\s+(.*)$/) || nom.match(/^([^,]+),\s*(.*)$/);
-    txt += '<br>Succ. ' + (m ? m[1] : nom);
-    if (m && m[2]) txt += '<br>' + m[2];
-  } mise à ranger');
+    afficherMessage('Bouteille mise à ranger');
     return appelBackend('getInventoryData', {}).then(function(data) {
       if (data) ALL_DATA = data;
       return appelBackend('checkWineExists', { codebarre: menuActionV2Context.code }).then(function(result) {
