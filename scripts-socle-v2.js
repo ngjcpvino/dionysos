@@ -146,14 +146,16 @@ afunction afficherMessageImage(src) {
   t.style.display = '';
   t.innerHTML = '<img src="' + src + '" alt="" style="width:70%;height:70%;object-fit:contain;">';
   t.classList.add('show');
-  var fermer = function() {
+  var fermer = function(ev) {
+    ev.preventDefault();
+    ev.stopPropagation();
     document.removeEventListener('touchstart', fermer, true);
     document.removeEventListener('click', fermer, true);
     t.classList.remove('show');
     setTimeout(function() { t.style.display = 'none'; }, 400);
   };
   setTimeout(function() {
-    document.addEventListener('touchstart', fermer, true);
+    document.addEventListener('touchstart', fermer, { capture: true, passive: false });
     document.addEventListener('click', fermer, true);
   }, 0);
 }
