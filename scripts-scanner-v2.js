@@ -1056,6 +1056,20 @@ function fermerFiltresAchatV2() {
   document.getElementById('achatV2-filtres').classList.remove('ouvert');
 }
 
+function afficherNePasRacheterV2() {
+  fermerFiltresAchatV2();
+  var grouped = {};
+  (ALL_DATA || []).forEach(function(item) {
+    if ((item.Racheter || '') !== 'Non') return;
+    var key = cleVinV2(item);
+    if (!grouped[key]) grouped[key] = item;
+  });
+  var liste = Object.keys(grouped).map(function(k){ return grouped[k]; });
+  afficherCartesAchatV2(liste);
+  document.getElementById('achatV2-compte').innerHTML = liste.length + ' vin' + (liste.length > 1 ? 's' : '') + ' à ne pas racheter';
+  if (liste.length === 0) document.getElementById('achatV2-cartes').innerHTML = '<div class="texte-secondaire">Aucun vin</div>';
+}
+
 function appliquerFiltresAchatV2() {
   var f = filtresAchatV2;
   var filtered = baseAchatV2().filter(function(i){
@@ -2579,7 +2593,9 @@ var PANNEAUX_V2 = {
     filtres: [['couleur', 'Couleurs'], ['pays', 'Pays'], ['cepage', 'Cépages'], ['pastille', 'Pastille de goût']],
     apres: '<div class="panneau-separateur"></div>' +
            '<div class="champ-cliquable" id="achatV2-f-succ-display" onclick="basculerFiltreAchatV2(\'succ\')">Succursales</div>' +
-           '<div id="achatV2-f-succ-menu" class="menu-liste"></div>'
+           '<div id="achatV2-f-succ-menu" class="menu-liste"></div>' +
+           '<div class="panneau-separateur"></div>' +
+           '<div class="roundel" onclick="afficherNePasRacheterV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Ne pas racheter</span></div>'
   },
   promo: {
     prefixe: 'promoV2', bascule: 'basculerFiltrePromoV2', reinit: 'reinitialiserFiltresPromoV2',
