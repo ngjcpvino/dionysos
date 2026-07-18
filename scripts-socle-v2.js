@@ -138,7 +138,7 @@ function afficherMessage(m) {
   }, 3000);
 }
 
-afunction afficherMessageImage(src) {
+function afficherMessageImage(src) {
   let t = document.getElementById('toast') || document.createElement('div');
   t.id = 'toast';
   t.className = 'toast';
