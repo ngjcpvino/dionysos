@@ -1056,7 +1056,10 @@ function fermerFiltresAchatV2() {
   document.getElementById('achatV2-filtres').classList.remove('ouvert');
 }
 
+var achatV2ModeNepr = false;
+
 function afficherNePasRacheterV2() {
+  achatV2ModeNepr = true;
   fermerFiltresAchatV2();
   var grouped = {};
   (ALL_DATA || []).forEach(function(item) {
@@ -1071,6 +1074,7 @@ function afficherNePasRacheterV2() {
 }
 
 function appliquerFiltresAchatV2() {
+  achatV2ModeNepr = false;
   var f = filtresAchatV2;
   var filtered = baseAchatV2().filter(function(i){
     return (!f.couleur || i.Couleur === f.couleur) &&
