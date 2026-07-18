@@ -504,6 +504,10 @@ function fermerFicheV2() {
   } else if (FICHE_V2_PROVENANCE === 'recherche') {
     document.getElementById('rechercheV2Container').style.display = 'flex';
     remonterScrollV2('rechercheV2Container');
+  } else if (FICHE_V2_PROVENANCE === 'empliste') {
+    document.getElementById('empV2Container').style.display = 'flex';
+    remonterScrollV2('empV2Container');
+    if (empListeV2Type) afficherListeEmpV2(empListeV2Type);
   } else if (FICHE_V2_PROVENANCE === 'emplacements') {
     ouvrirEmpV2();
   }

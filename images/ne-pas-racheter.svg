@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <mask id="coupe">
+      <rect width="200" height="200" fill="#fff"/>
+      <line x1="47" y1="47" x2="153" y2="153" stroke="#000" stroke-width="26" stroke-linecap="butt"/>
+    </mask>
+  </defs>
+
+  <g mask="url(#coupe)" fill="#111">
+    <!-- bouteille -->
+    <path d="M84 48h14v18c0 6 9 12 9 26v50c0 5-3 8-8 8H83c-5 0-8-3-8-8V92c0-14 9-20 9-26V48z"/>
+    <rect x="83" y="40" width="16" height="10" rx="2"/>
+    <!-- verre -->
+    <path d="M104 84h34c0 18-8 27-14 30v29h11v7h-28v-7h11v-29c-6-3-14-12-14-30z"/>
+  </g>
+
+  <!-- anneau + barre -->
+  <circle cx="100" cy="100" r="86" fill="none" stroke="#e02b20" stroke-width="18"/>
+  <line x1="47" y1="47" x2="153" y2="153" stroke="#e02b20" stroke-width="18" stroke-linecap="round"/>
+</svg>
