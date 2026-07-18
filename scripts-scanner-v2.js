@@ -268,7 +268,7 @@ function partagerVinV2() {
   var code = menuActionV2Context ? (menuActionV2Context.code || '').toString().trim() : '';
   var item = (ALL_DATA || []).filter(function(i){ return memeCodeV2(i['Code-barres'], code); })[0];
   var codeSAQ = item ? (item['Code SAQ'] || '').toString().trim() : '';
-  var texte = nom + (codeSAQ ? ' https://www.saq.com/fr/' + codeSAQ : '');
+  var texte = nom + (codeSAQ ? ' saq://products/' + codeSAQ : '');
   window.location.href = 'sms:&body=' + encodeURIComponent(texte);
 }
 
