@@ -496,6 +496,8 @@ function fermerFicheV2() {
   } else if (FICHE_V2_PROVENANCE === 'achat') {
     document.getElementById('achatV2Container').style.display = 'flex';
     remonterScrollV2('achatV2Container');
+    if (achatV2ModeNepr) afficherNePasRacheterV2();
+    else appliquerFiltresAchatV2();
   } else if (FICHE_V2_PROVENANCE === 'histo') {
     ouvrirHistoV2();
   } else if (FICHE_V2_PROVENANCE === 'promo') {
