@@ -138,7 +138,7 @@ function afficherMessage(m) {
   }, 3000);
 }
 
-function afficherMessageImage(src) {
+afunction afficherMessageImage(src) {
   let t = document.getElementById('toast') || document.createElement('div');
   t.id = 'toast';
   t.className = 'toast';
@@ -146,10 +146,16 @@ function afficherMessageImage(src) {
   t.style.display = '';
   t.innerHTML = '<img src="' + src + '" alt="" style="width:70%;height:70%;object-fit:contain;">';
   t.classList.add('show');
-  setTimeout(function() {
+  var fermer = function() {
+    document.removeEventListener('touchstart', fermer, true);
+    document.removeEventListener('click', fermer, true);
     t.classList.remove('show');
     setTimeout(function() { t.style.display = 'none'; }, 400);
-  }, 3000);
+  };
+  setTimeout(function() {
+    document.addEventListener('touchstart', fermer, true);
+    document.addEventListener('click', fermer, true);
+  }, 0);
 }
 
 // ==================== UTILITAIRES ====================
