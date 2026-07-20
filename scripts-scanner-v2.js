@@ -1485,10 +1485,25 @@ function afficherPromoV2() {
       (!f.pays || p.pays === f.pays) &&
       (!f.cepage || contientTexteV2(p.cepage, f.cepage));
   });
-  liste.sort(function(a, b) { return (b.rabais || 0) - (a.rabais || 0); });
+  liste.sort(function(a, b) {
+    var ca = normaliserRechercheV2(cepageDominant({ Cepage: a.cepage }));
+    var cb = normaliserRechercheV2(cepageDominant({ Cepage: b.cepage }));
+    if (ca !== cb) { if (!ca) return 1; if (!cb) return -1; return ca.localeCompare(cb); }
+    if (a.couleur !== b.couleur) return (a.couleur || '').localeCompare(b.couleur || '');
+    if (a.pays !== b.pays) return (a.pays || '').localeCompare(b.pays || '');
+    return (a.nom || '').localeCompare(b.nom || '');
+  });
   compte.textContent = liste.length + ' vin' + (liste.length > 1 ? 's' : '') + ' en promotion';
   if (!liste.length) { div.innerHTML = '<div class="texte-secondaire">Aucune promotion</div>'; return; }
+  var cepPrecedentPromoV2 = null;
   div.innerHTML = liste.map(function(p) {
+    var cep = cepageDominant({ Cepage: p.cepage });
+    var cleCep = normaliserRechercheV2(cep);
+    var titreSection = '';
+    if (cleCep !== cepPrecedentPromoV2) {
+      cepPrecedentPromoV2 = cleCep;
+      titreSection = '<div class="emp-meuble">' + (cep || 'Sans cépage') + '</div>';
+    }
     var sous = [[p.pays, p.region].filter(Boolean).join(' • '), p.cepage].filter(Boolean).join('<br>');
     var photo = p.photo ? '<div class="carte-photo"><img src="' + p.photo + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
     var bonis = p.pointsBonis ? '<br>+' + p.pointsBonis + ' pts' : '';
@@ -1498,7 +1513,7 @@ function afficherPromoV2() {
     if (f.succ === 'TOUTES') onclick = ' onclick="dispoProchesPromoV2(\'' + p.codeSAQ + '\')"';
     else if (promoModeV2 === 'mes' && p.cb) onclick = ' onclick="ouvrirApresTap(function(){ouvrirFicheV2(\'' + p.cb + '\', \'promo\')})"';
     else if (promoModeV2 === 'dec') onclick = ' onclick="window.open(\'https://www.saq.com/fr/' + p.codeSAQ + '\')"';
-    return '<div class="carte ' + couleurClasseV2(p.couleur) + '"' + onclick + '>' + photo +
+    return titreSection + '<div class="carte ' + couleurClasseV2(p.couleur) + '"' + onclick + '>' + photo +
            '<div class="carte-centre"><span class="carte-titre">' + decodeHTML(p.nom) + '</span><span class="carte-sous">' + sous + '</span></div>' +
            '<div class="carte-droite">' + droite + '</div></div>';
   }).join('');
