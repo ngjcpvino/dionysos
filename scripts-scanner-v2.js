@@ -870,7 +870,7 @@ function ouvrirCaveV2() {
   document.getElementById('caveV2Container').style.display = 'flex';
   remonterScrollV2('caveV2Container');
   var dispoBtn = document.getElementById('caveV2-dispo');
-  if (dispoBtn) dispoBtn.classList.toggle('actif', filtresCaveV2.dispo);
+  if (dispoBtn) { dispoBtn.classList.toggle('actif', filtresCaveV2.dispo); dispoBtn.textContent = filtresCaveV2.dispo ? '✓' : '✗'; }
   remplirFiltresCaveV2();
   appliquerFiltresCaveV2();
 }
@@ -2498,7 +2498,7 @@ function choisirFiltreCaveV2(cle, valeur) {
 function toggleDispoCaveV2() {
   filtresCaveV2.dispo = !filtresCaveV2.dispo;
   var btn = document.getElementById('caveV2-dispo');
-  if (btn) btn.classList.toggle('actif', filtresCaveV2.dispo);
+  if (btn) { btn.classList.toggle('actif', filtresCaveV2.dispo); btn.textContent = filtresCaveV2.dispo ? '✓' : '✗'; }
   appliquerFiltresCaveV2();
 }
 
@@ -2536,7 +2536,7 @@ function appliquerFiltresCaveV2() {
 function reinitialiserFiltresCaveV2() {
   filtresCaveV2 = { couleur: '', cepage: '', pays: '', appellation: '', accords: '', pastille: '', acidite: '', dispo: false };
   var dispoBtn = document.getElementById('caveV2-dispo');
-  if (dispoBtn) dispoBtn.classList.remove('actif');
+  if (dispoBtn) { dispoBtn.classList.remove('actif'); dispoBtn.textContent = '✗'; }
   document.getElementById('caveV2-f-nom').value = '';
   ['couleur','cepage','pays','appellation','accords','pastille','acidite'].forEach(function(k) {
     document.getElementById('caveV2-f-' + k + '-menu').classList.remove('ouvert');
@@ -2606,7 +2606,7 @@ var PANNEAUX_V2 = {
   cave: {
     prefixe: 'caveV2', bascule: 'basculerFiltreCaveV2', reinit: 'reinitialiserFiltresCaveV2',
     avant: '<div class="ligne-dispo"><span class="libelle">Disponible</span>' +
-           '<div class="cercle" id="caveV2-dispo" onclick="toggleDispoCaveV2()">✓</div></div>',
+           '<div class="cercle" id="caveV2-dispo" onclick="toggleDispoCaveV2()">✗</div></div>',
     filtres: [['couleur', 'Couleurs'], ['cepage', 'Cépages'], ['pays', 'Pays'], ['appellation', 'Appellations'], ['accords', 'Accords'], ['pastille', 'Pastille de goût'], ['acidite', 'Acidité']],
     apres: '<div class="panneau-separateur"></div>' +
            '<input type="text" id="caveV2-f-nom" class="champ-saisie" placeholder="Rechercher par nom" oninput="appliquerFiltresCaveV2()">'
