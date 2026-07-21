@@ -249,9 +249,9 @@ body::after {
 .ligne-dispo {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-s);
-  margin-bottom: var(--space-s);
+  justify-content: flex-end;
+  gap: var(--space-l);
+  margin: -45px 0 var(--space-l) 0;
 }
 .ligne-dispo .libelle { color: var(--white); font-size: var(--fs-14); }
 
