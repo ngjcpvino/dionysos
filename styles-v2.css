@@ -246,6 +246,12 @@ body::after {
   left: var(--space-s);
   z-index: 10002;
 }
+#caveV2-dispo {
+  position: fixed;
+  top: var(--space-s);
+  right: calc(var(--space-s) + var(--taille-tactile) + var(--space-s));
+  z-index: 10002;
+}
 
 #menuActionV2Overlay { z-index: 10010; }
 #histoEditV2Overlay { z-index: 10010; }
