@@ -2523,9 +2523,9 @@ function appliquerFiltresCaveV2() {
 }
 
 function reinitialiserFiltresCaveV2() {
-  filtresCaveV2 = { couleur: '', cepage: '', pays: '', appellation: '', accords: '', pastille: '' };
+  filtresCaveV2 = { couleur: '', cepage: '', pays: '', appellation: '', accords: '', pastille: '', acidite: '' };
   document.getElementById('caveV2-f-nom').value = '';
-  ['couleur','cepage','pays','appellation','accords','pastille'].forEach(function(k) {
+  ['couleur','cepage','pays','appellation','accords','pastille','acidite'].forEach(function(k) {
     document.getElementById('caveV2-f-' + k + '-menu').classList.remove('ouvert');
   });
   appliquerFiltresCaveV2();
