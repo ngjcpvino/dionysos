@@ -246,12 +246,14 @@ body::after {
   left: var(--space-s);
   z-index: 10002;
 }
-#caveV2-dispo {
-  position: fixed;
-  top: var(--space-s);
-  right: calc(var(--space-s) + var(--taille-tactile) + var(--space-s));
-  z-index: 10002;
+.ligne-dispo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-s);
+  margin-bottom: var(--space-s);
 }
+.ligne-dispo .libelle { color: var(--white); font-size: var(--fs-14); }
 
 #menuActionV2Overlay { z-index: 10010; }
 #histoEditV2Overlay { z-index: 10010; }
