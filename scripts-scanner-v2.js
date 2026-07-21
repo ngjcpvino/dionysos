@@ -2439,8 +2439,8 @@ function fermerFiltresCaveV2() {
   document.getElementById('caveV2-filtres').classList.remove('ouvert');
 }
 
-var filtresCaveV2 = { couleur: '', cepage: '', pays: '', appellation: '', accords: '', pastille: '' };
-var libellesFiltreCaveV2 = { couleur: 'Couleurs', cepage: 'Cépages', pays: 'Pays', appellation: 'Appellations', accords: 'Accords', pastille: 'Pastille de goût' };
+var filtresCaveV2 = { couleur: '', cepage: '', pays: '', appellation: '', accords: '', pastille: '', acidite: '' };
+var libellesFiltreCaveV2 = { couleur: 'Couleurs', cepage: 'Cépages', pays: 'Pays', appellation: 'Appellations', accords: 'Accords', pastille: 'Pastille de goût', acidite: 'Acidité' };
 
 function remplirFiltresCaveV2() {
   var f = filtresCaveV2;
@@ -2452,8 +2452,9 @@ function remplirFiltresCaveV2() {
   var forAppellation = forPays.filter(function(i){ return !f.pays || i.Pays === f.pays; });
   var forAccords = forAppellation.filter(function(i){ return !f.appellation || i.Appellation === f.appellation; });
   var forPastille = forAccords.filter(function(i){ return !f.accords || (i.Accords && i.Accords.indexOf(f.accords) !== -1); });
+  var forAcidite = forPastille.filter(function(i){ return !f.pastille || contientTexteV2(i['Pastille gout'], f.pastille); });
 
-  var sets = { couleur: {}, cepage: {}, pays: {}, appellation: {}, accords: {}, pastille: {} };
+  var sets = { couleur: {}, cepage: {}, pays: {}, appellation: {}, accords: {}, pastille: {}, acidite: {} };
   function retenir(cle, v) { var k = normaliserRechercheV2(v); if (v && !sets[cle][k]) sets[cle][k] = v; }
   forCouleur.forEach(function(i){ retenir('couleur', i.Couleur); });
   forCepage.forEach(function(i){ (i.Cepage || '').split(',').map(function(x){return x.trim();}).filter(Boolean).forEach(function(x){ retenir('cepage', x); }); });
@@ -2461,6 +2462,7 @@ function remplirFiltresCaveV2() {
   forAppellation.forEach(function(i){ retenir('appellation', i.Appellation); });
   forAccords.forEach(function(i){ (i.Accords || '').split(',').map(function(x){return x.trim();}).filter(Boolean).forEach(function(x){ retenir('accords', x); }); });
   forPastille.forEach(function(i){ retenir('pastille', i['Pastille gout']); });
+  forAcidite.forEach(function(i){ retenir('acidite', i['Acidité']); });
 
   Object.keys(sets).forEach(function(cle) {
     var menu = document.getElementById('caveV2-f-' + cle + '-menu');
@@ -2478,7 +2480,7 @@ function remplirFiltresCaveV2() {
 function basculerFiltreCaveV2(cle) {
   var menu = document.getElementById('caveV2-f-' + cle + '-menu');
   var ouvert = menu.classList.contains('ouvert');
-  ['couleur','cepage','pays','appellation','accords','pastille'].forEach(function(k) {
+  ['couleur','cepage','pays','appellation','accords','pastille','acidite'].forEach(function(k) {
     document.getElementById('caveV2-f-' + k + '-menu').classList.remove('ouvert');
   });
   if (!ouvert) menu.classList.add('ouvert');
@@ -2497,6 +2499,7 @@ function appliquerFiltresCaveV2() {
   var app = filtresCaveV2.appellation;
   var a = filtresCaveV2.accords;
   var past = filtresCaveV2.pastille;
+  var acid = filtresCaveV2.acidite;
   var nom = normaliserRechercheV2(document.getElementById('caveV2-f-nom').value.trim());
   var champsExclusCave = { row: 1, bottle: 1, Statut: 1, Meuble: 1, Rangee: 1, Espace: 1, 'Date d\'ajout': 1, 'Date sortie': 1, Source: 1, 'Photo URL': 1 };
 
@@ -2507,6 +2510,7 @@ function appliquerFiltresCaveV2() {
       (!app || i.Appellation === app) &&
       (!a || (i.Accords && i.Accords.indexOf(a) !== -1)) &&
       (!past || contientTexteV2(i['Pastille gout'], past)) &&
+      (!acid || contientTexteV2(i['Acidité'], acid)) &&
       (!nom || Object.keys(i).some(function(k) {
         if (champsExclusCave[k]) return false;
         return normaliserRechercheV2(i[k]).indexOf(nom) !== -1;
@@ -2588,7 +2592,7 @@ function ajouterBouteilleArrivee(meuble, rangee, espace) {
 var PANNEAUX_V2 = {
   cave: {
     prefixe: 'caveV2', bascule: 'basculerFiltreCaveV2', reinit: 'reinitialiserFiltresCaveV2',
-    filtres: [['couleur', 'Couleurs'], ['cepage', 'Cépages'], ['pays', 'Pays'], ['appellation', 'Appellations'], ['accords', 'Accords'], ['pastille', 'Pastille de goût']],
+    filtres: [['couleur', 'Couleurs'], ['cepage', 'Cépages'], ['pays', 'Pays'], ['appellation', 'Appellations'], ['accords', 'Accords'], ['pastille', 'Pastille de goût'], ['acidite', 'Acidité']],
     apres: '<div class="panneau-separateur"></div>' +
            '<input type="text" id="caveV2-f-nom" class="champ-saisie" placeholder="Rechercher par nom" oninput="appliquerFiltresCaveV2()">'
   },
