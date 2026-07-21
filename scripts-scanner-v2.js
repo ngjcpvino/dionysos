@@ -869,8 +869,10 @@ function fermerDonnerV2() {
 function ouvrirCaveV2() {
   document.getElementById('caveV2Container').style.display = 'flex';
   remonterScrollV2('caveV2Container');
+  var dispoBtn = document.getElementById('caveV2-dispo');
+  if (dispoBtn) { dispoBtn.classList.toggle('actif', filtresCaveV2.dispo); dispoBtn.textContent = filtresCaveV2.dispo ? '✓' : ''; }
   remplirFiltresCaveV2();
-  afficherCartesCaveV2(ALL_DATA || []);
+  appliquerFiltresCaveV2();
 }
 
 function fermerCaveV2() {
