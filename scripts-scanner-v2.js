@@ -2408,6 +2408,7 @@ function grouperVinsV2(data) {
 function afficherCartesCaveV2(data) {
   var div = document.getElementById('caveV2-cartes');
   var groups = grouperVinsV2(data);
+  if (filtresCaveV2.dispo) groups = groups.filter(function(g){ return g.count > 0; });
   var totalBtl = groups.reduce(function(t, g){ return t + (g.count || 0); }, 0);
   document.getElementById('caveV2-compte').innerHTML = groups.length + ' vin' + (groups.length > 1 ? 's' : '') + '<br>' + totalBtl + ' bouteille' + (totalBtl > 1 ? 's' : '') + ' en stock';
   if (groups.length === 0) { div.innerHTML = '<div class="texte-secondaire">Aucun vin</div>'; return; }
@@ -2439,7 +2440,7 @@ function fermerFiltresCaveV2() {
   document.getElementById('caveV2-filtres').classList.remove('ouvert');
 }
 
-var filtresCaveV2 = { couleur: '', cepage: '', pays: '', appellation: '', accords: '', pastille: '', acidite: '' };
+var filtresCaveV2 = { couleur: '', cepage: '', pays: '', appellation: '', accords: '', pastille: '', acidite: '', dispo: false };
 var libellesFiltreCaveV2 = { couleur: 'Couleurs', cepage: 'Cépages', pays: 'Pays', appellation: 'Appellations', accords: 'Accords', pastille: 'Pastille de goût', acidite: 'Acidité' };
 
 function remplirFiltresCaveV2() {
@@ -2492,6 +2493,13 @@ function choisirFiltreCaveV2(cle, valeur) {
   appliquerFiltresCaveV2();
 }
 
+function toggleDispoCaveV2() {
+  filtresCaveV2.dispo = !filtresCaveV2.dispo;
+  var btn = document.getElementById('caveV2-dispo');
+  if (btn) { btn.classList.toggle('actif', filtresCaveV2.dispo); btn.textContent = filtresCaveV2.dispo ? '✓' : ''; }
+  appliquerFiltresCaveV2();
+}
+
 function appliquerFiltresCaveV2() {
   var c = filtresCaveV2.couleur;
   var cep = filtresCaveV2.cepage;
@@ -2500,6 +2508,7 @@ function appliquerFiltresCaveV2() {
   var a = filtresCaveV2.accords;
   var past = filtresCaveV2.pastille;
   var acid = filtresCaveV2.acidite;
+  var dispo = filtresCaveV2.dispo;
   var nom = normaliserRechercheV2(document.getElementById('caveV2-f-nom').value.trim());
   var champsExclusCave = { row: 1, bottle: 1, Statut: 1, Meuble: 1, Rangee: 1, Espace: 1, 'Date d\'ajout': 1, 'Date sortie': 1, Source: 1, 'Photo URL': 1 };
 
@@ -2523,7 +2532,9 @@ function appliquerFiltresCaveV2() {
 }
 
 function reinitialiserFiltresCaveV2() {
-  filtresCaveV2 = { couleur: '', cepage: '', pays: '', appellation: '', accords: '', pastille: '', acidite: '' };
+  filtresCaveV2 = { couleur: '', cepage: '', pays: '', appellation: '', accords: '', pastille: '', acidite: '', dispo: false };
+  var dispoBtn = document.getElementById('caveV2-dispo');
+  if (dispoBtn) { dispoBtn.classList.remove('actif'); dispoBtn.textContent = ''; }
   document.getElementById('caveV2-f-nom').value = '';
   ['couleur','cepage','pays','appellation','accords','pastille','acidite'].forEach(function(k) {
     document.getElementById('caveV2-f-' + k + '-menu').classList.remove('ouvert');
