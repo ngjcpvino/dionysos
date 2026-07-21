@@ -2605,7 +2605,7 @@ function ajouterBouteilleArrivee(meuble, rangee, espace) {
 var PANNEAUX_V2 = {
   cave: {
     prefixe: 'caveV2', bascule: 'basculerFiltreCaveV2', reinit: 'reinitialiserFiltresCaveV2',
-    avant: '<div class="ligne-dispo"><span class="libelle">Disponible ?</span>' +
+    avant: '<div class="ligne-dispo"><span class="libelle">Clic pour en cave</span>' +
            '<div class="cercle" id="caveV2-dispo" onclick="toggleDispoCaveV2()">✗</div></div>',
     filtres: [['couleur', 'Couleurs'], ['cepage', 'Cépages'], ['pays', 'Pays'], ['appellation', 'Appellations'], ['accords', 'Accords'], ['pastille', 'Pastille de goût'], ['acidite', 'Acidité']],
     apres: '<div class="panneau-separateur"></div>' +
