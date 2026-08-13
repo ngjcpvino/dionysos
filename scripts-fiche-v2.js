@@ -512,6 +512,9 @@ function fermerFicheV2() {
     if (empListeV2Type) afficherListeEmpV2(empListeV2Type);
   } else if (FICHE_V2_PROVENANCE === 'emplacements') {
     ouvrirEmpV2();
+  } else if (FICHE_V2_PROVENANCE === 'sanscepage') {
+    document.getElementById('sansCepageV2Container').style.display = 'flex';
+    remonterScrollV2('sansCepageV2Container');
   }
   FICHE_V2_PROVENANCE = null;
 }

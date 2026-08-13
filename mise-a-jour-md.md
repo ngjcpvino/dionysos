@@ -78,6 +78,23 @@ App à **2 utilisateurs sur 2 téléphones** ; la vérité partagée = le Sheet.
 - **Rescanner** / **Entrée manuelle** (`validerSaisieManuelleV2`).
 - **`gtinValide` accepte 8, 12, 13 et 14 chiffres** (11 juin 2026 — la SAQ affiche des CUP à 14 chiffres ; un vrai code tapé à 14 était déclaré « invalide »).
 
+## 🔢 ENTRÉE MANUELLE — CODE SAQ — ✅ TERMINÉ (13 août 2026)
+Écran Entrée manuelle : deux champs empilés (Code-barres, Code SAQ), un seul bouton VALIDER.
+- Code-barres rempli → flux normal (validation GTIN).
+- Sinon, Code SAQ rempli → backend `testScrapingSAQ` (exposé dans `doPost`) récupère le Code CUP de la page SAQ, puis relance `traiterResultatScanV2` avec ce code-barres.
+- Aucun des deux rempli → message d'erreur.
+
+## 🍇 MENU — SANS CÉPAGE — ✅ TERMINÉ (13 août 2026)
+Nouvel item de menu burger (à côté de « À RANGER ») : liste tous les vins dont le champ Cépage est vide (groupés par vin, gabarit Cave/À ranger). Clic carte → fiche (provenance 'sanscepage'), retour fiche → cette liste.
+- `sansCepageV2Container` ajouté à `cacherToutesPagesV2()`.
+- `ouvrirSansCepageV2()` / `fermerSansCepageV2()` / `afficherCartesSansCepageV2()` dans `scripts-scanner-v2.js`.
+- `fermerFicheV2()` : branche `FICHE_V2_PROVENANCE === 'sanscepage'` ajoutée.
+
+
+
+
+
+
 ### Arbre des résultats d'un scan (RÉFÉRENCE)
 - **A — Lecture** : caméra indispo → manuel ; rien lu → boutons visibles ; douteux → seuil 3 ; checksum GTIN (8/12/13/14) ✅. Quagga conservé.
 - **B — Vin existe** : stock > 0 → menu complet ; 0 bouteille → Déplacer/Boire/Donner grisés. ✅

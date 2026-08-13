@@ -305,7 +305,7 @@ function fermerMenuActionV2() {
 }
 
 function cacherToutesPagesV2() {
-  ['scannerV2Container', 'saisieManuelleV2Container', 'vinInconnuV2Container', 'menuActionV2Overlay', 'arriveeV2Container', 'deplacerV2Container', 'boireV2Container', 'donnerV2Container', 'caveV2Container', 'aRangerV2Container', 'histoV2Container', 'histoAjoutV2Overlay', 'histoEditV2Overlay', 'empV2Container', 'achatV2Container', 'promoV2Container', 'rechercheV2Container', 'editFicheV2Overlay', 'ficheV2Overlay', 'photoV2Overlay'].forEach(function(id) {
+  ['scannerV2Container', 'saisieManuelleV2Container', 'vinInconnuV2Container', 'menuActionV2Overlay', 'arriveeV2Container', 'deplacerV2Container', 'boireV2Container', 'donnerV2Container', 'caveV2Container', 'aRangerV2Container', 'sansCepageV2Container', 'histoV2Container', 'histoAjoutV2Overlay', 'histoEditV2Overlay', 'empV2Container', 'achatV2Container', 'promoV2Container', 'rechercheV2Container', 'editFicheV2Overlay', 'ficheV2Overlay', 'photoV2Overlay'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.style.display = 'none';
   });
@@ -944,6 +944,40 @@ function deplacerDepuisARangerV2(code) {
   document.getElementById('aRangerV2Container').style.display = 'none';
   menuActionV2Context = { code: code, wineResult: result, retour: 'aranger' };
   ouvrirApresTap(ouvrirDeplacerV2);
+}
+
+// ==================== SANS CÉPAGE V2 ====================
+function ouvrirSansCepageV2() {
+  document.getElementById('sansCepageV2Container').style.display = 'flex';
+  remonterScrollV2('sansCepageV2Container');
+  afficherCartesSansCepageV2();
+}
+
+function fermerSansCepageV2() {
+  document.getElementById('sansCepageV2Container').style.display = 'none';
+}
+
+function afficherCartesSansCepageV2() {
+  var sansCepage = (ALL_DATA || []).filter(function(i) {
+    return !(i.Cepage || '').toString().trim();
+  });
+  var div = document.getElementById('sansCepageV2-cartes');
+  var groups = grouperVinsV2(sansCepage);
+  document.getElementById('sansCepageV2-compte').textContent = groups.length + ' vin' + (groups.length > 1 ? 's' : '');
+  if (groups.length === 0) { div.innerHTML = '<div class="texte-secondaire">Aucun vin sans cépage</div>'; return; }
+  div.innerHTML = groups.map(function(g) {
+    var w = g.wine;
+    var nom = decodeHTML(w.Nom || '—');
+    var pays = w.Pays || '';
+    var region = w.Region || '';
+    var sous = (pays && region) ? (pays + ' • ' + region) : (pays || region);
+    var photo = w['Photo URL'] ? '<div class="carte-photo"><img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
+    var onclick = g.cb ? ' onclick="ouvrirApresTap(function(){ouvrirFicheV2(\'' + g.cb + '\', \'sanscepage\')})"' : '';
+    var vide = g.count === 0 ? ' carte-vide' : '';
+    return '<div class="carte ' + couleurClasseV2(w.Couleur) + vide + '"' + onclick + '>' + photo +
+           '<div class="carte-centre"><span class="carte-titre">' + nom + '</span><span class="carte-sous">' + sous + '</span></div>' +
+           '<div class="carte-droite">' + g.count + ' btl</div></div>';
+  }).join('');
 }
 
 // ==================== LISTE D'ACHAT V2 ====================
@@ -2586,6 +2620,7 @@ function burgerV2Click(cible) {
   }
   if (cible === 'cave') { cacherToutesPagesV2(); ouvrirCaveV2(); return; }
   if (cible === 'aranger') { cacherToutesPagesV2(); ouvrirARangerV2(); return; }
+  if (cible === 'sanscepage') { cacherToutesPagesV2(); ouvrirSansCepageV2(); return; }
   if (cible === 'racheter') { cacherToutesPagesV2(); ouvrirAchatV2(); return; }
   if (cible === 'emplacements') { cacherToutesPagesV2(); ouvrirEmpV2(); return; }
   if (cible === 'historique') { cacherToutesPagesV2(); ouvrirHistoV2(); return; }
