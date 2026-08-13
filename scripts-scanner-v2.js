@@ -1696,6 +1696,7 @@ function remplirFiltresEmpV2() {
   // Cépages doubles : seulement si un meuble est choisi. Cépages manquants : toujours.
   document.getElementById('empV2-btn-cepdoubles').style.display = f.meuble ? 'flex' : 'none';
   document.getElementById('empV2-btn-cepmanquants').style.display = 'flex';
+  document.getElementById('empV2-btn-appmanquante').style.display = 'flex';
 
   // Loupe : OR si un filtre actif
   var loupe = document.getElementById('empV2-loupe');
@@ -2002,6 +2003,61 @@ function afficherListeEmpV2(type) {
     else {
       html = cles2.map(function(cep){
         return '<div class="emp-meuble">' + nomCepageHors[cep] + '</div>' + parCepageHors[cep].map(function(g){
+          return empCarteVinV2(g.wine, g.count + ' btl<br>' + g.emplacements.join(', '), true);
+        }).join('');
+      }).join('');
+    }
+
+  } else if (type === 'appmanquante' && !f.meuble) {
+    // Global : appellations de ma liste de vins absentes du stock actif
+    titre = 'Appellation manquante';
+    var actifsTousApp = (ALL_DATA || []).filter(function(i){ var s = i.Statut || 'En stock'; return i.bottle && i.bottle > 0 && s !== 'Bu' && s !== 'Sorti'; });
+    var appStock = {};
+    actifsTousApp.forEach(function(w){ var a = (w.Appellation || '').toString().trim(); if (a) appStock[normaliserRechercheV2(a)] = true; });
+    var parAppGlobal = {};
+    var nomAppGlobal = {};
+    grouperVinsV2(ALL_DATA || []).forEach(function(g){
+      var app = (g.wine.Appellation || '').toString().trim();
+      if (!app) return;
+      var k = normaliserRechercheV2(app);
+      if (appStock[k]) return;
+      if (!parAppGlobal[k]) { parAppGlobal[k] = []; nomAppGlobal[k] = app; }
+      parAppGlobal[k].push(g);
+    });
+    var clesAG = Object.keys(parAppGlobal).sort(function(a,b){ return a.localeCompare(b); });
+    if (clesAG.length === 0) { html = '<div class="texte-secondaire">Aucune appellation manquante</div>'; }
+    else {
+      html = clesAG.map(function(app){
+        return '<div class="emp-meuble">' + nomAppGlobal[app] + '</div>' + parAppGlobal[app].map(function(g){
+          return empCarteVinV2(g.wine, '0 btl', true);
+        }).join('');
+      }).join('');
+    }
+
+  } else if (type === 'appmanquante') {
+    // Appellation présente dans d'AUTRES meubles (en amont), absente du meuble choisi
+    var dansMeuble3 = tousRanges.filter(function(i){ return String(i.Meuble) === String(f.meuble); });
+    var amontApp = meublesAmontV2(f.meuble);
+    var horsMeubleApp = tousRanges.filter(function(i){
+      return amontApp.some(function(m){ return memeTexteV2(m, i.Meuble); });
+    }).concat(bouteillesARangerEmpV2());
+    var appDansMeuble = {};
+    dansMeuble3.forEach(function(w){ var a = (w.Appellation || '').toString().trim(); if (a) appDansMeuble[normaliserRechercheV2(a)] = true; });
+    var parAppHors = {};
+    var nomAppHors = {};
+    grouperParSaqEmpV2(horsMeubleApp).forEach(function(g){
+      var app = (g.wine.Appellation || '').toString().trim();
+      if (!app || appDansMeuble[normaliserRechercheV2(app)]) return;
+      var k = normaliserRechercheV2(app);
+      if (!parAppHors[k]) { parAppHors[k] = []; nomAppHors[k] = app; }
+      parAppHors[k].push(g);
+    });
+    titre = 'Appellation manquante';
+    var clesA2 = Object.keys(parAppHors).sort(function(a,b){ return a.localeCompare(b); });
+    if (clesA2.length === 0) { html = '<div class="texte-secondaire">Aucune appellation manquante</div>'; }
+    else {
+      html = clesA2.map(function(app){
+        return '<div class="emp-meuble">' + nomAppHors[app] + '</div>' + parAppHors[app].map(function(g){
           return empCarteVinV2(g.wine, g.count + ' btl<br>' + g.emplacements.join(', '), true);
         }).join('');
       }).join('');
@@ -2680,6 +2736,7 @@ var PANNEAUX_V2 = {
            '<div class="roundel" onclick="afficherListeEmpV2(\'doubles\')"><span class="roundel-anneau"></span><span class="roundel-barre">Vins en double</span></div>' +
            '<div id="empV2-btn-cepdoubles" class="roundel" style="display:none;" onclick="afficherListeEmpV2(\'cepdoubles\')"><span class="roundel-anneau"></span><span class="roundel-barre">Cépages doubles</span></div>' +
            '<div id="empV2-btn-cepmanquants" class="roundel" style="display:none;" onclick="afficherListeEmpV2(\'cepmanquants\')"><span class="roundel-anneau"></span><span class="roundel-barre">Cépages manquants</span></div>' +
+           '<div id="empV2-btn-appmanquante" class="roundel" style="display:none;" onclick="afficherListeEmpV2(\'appmanquante\')"><span class="roundel-anneau"></span><span class="roundel-barre">Appellation manquante</span></div>' +
            '<div class="panneau-separateur"></div>'
   },
   achat: {
