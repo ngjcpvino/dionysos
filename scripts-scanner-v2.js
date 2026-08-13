@@ -100,23 +100,20 @@ function entreeManuelleV2() {
 function validerSaisieManuelleV2() {
   var champ = document.getElementById('saisieManuelleV2-champ');
   var code = (champ ? champ.value : '').replace(/\D/g, '').trim();
-  if (!gtinValide(code)) {
-    afficherMessage('Code-barres invalide');
+  if (code) {
+    if (!gtinValide(code)) {
+      afficherMessage('Code-barres invalide');
+      return;
+    }
+    document.getElementById('saisieManuelleV2Container').style.display = 'none';
+    traiterResultatScanV2(code);
     return;
   }
-  document.getElementById('saisieManuelleV2Container').style.display = 'none';
-  traiterResultatScanV2(code);
-}
 
-function fermerSaisieManuelleV2() {
-  document.getElementById('saisieManuelleV2Container').style.display = 'none';
-}
-
-function validerSaisieManuelleParSAQV2() {
-  var champ = document.getElementById('saisieManuelleV2-codesaq');
-  var codeSAQ = (champ ? champ.value : '').replace(/\D/g, '').trim();
+  var champSaq = document.getElementById('saisieManuelleV2-codesaq');
+  var codeSAQ = (champSaq ? champSaq.value : '').replace(/\D/g, '').trim();
   if (!codeSAQ) {
-    afficherMessage('Code SAQ invalide');
+    afficherMessage('Entrez un code-barres ou un code SAQ');
     return;
   }
   appelBackend('testScrapingSAQ', { codeSAQ: codeSAQ }, { spinner: 'Un instant svp' }).then(function(res) {
@@ -130,6 +127,10 @@ function validerSaisieManuelleParSAQV2() {
   }).catch(function() {
     afficherMessage('Erreur, réessayez');
   });
+}
+
+function fermerSaisieManuelleV2() {
+  document.getElementById('saisieManuelleV2Container').style.display = 'none';
 }
 
 function traiterResultatScanV2(code) {
