@@ -133,10 +133,13 @@ function afficherFicheV2(result) {
   html += '<h3 class="titre-2">Information</h3>';
  
   html += ligne('Cépages', wine['Cépage']);
+  html += ligne('Appellation', wine.Appellation);
   html += ligne('Pastille', wine['Pastille gout']);
   html += ligne('Classification', wine.Classification);
   html += ligne('Désignation', wine.Designation);
   html += ligne('Particularité', wine['Particularité']);
+  html += ligne('Code-barres', wine['Code-barres']);
+  html += ligne('Code SAQ', wine['Code SAQ']);
   html += '</div>';
 
   // === DESCRIPTION + PRIX (sans libellé) ===
