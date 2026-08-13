@@ -112,6 +112,26 @@ function fermerSaisieManuelleV2() {
   document.getElementById('saisieManuelleV2Container').style.display = 'none';
 }
 
+function validerSaisieManuelleParSAQV2() {
+  var champ = document.getElementById('saisieManuelleV2-codesaq');
+  var codeSAQ = (champ ? champ.value : '').replace(/\D/g, '').trim();
+  if (!codeSAQ) {
+    afficherMessage('Code SAQ invalide');
+    return;
+  }
+  appelBackend('testScrapingSAQ', { codeSAQ: codeSAQ }, { spinner: 'Un instant svp' }).then(function(res) {
+    var cup = res && res.success && res.data ? (res.data.codeCUP || '').replace(/\D/g, '').trim() : '';
+    if (!cup) {
+      afficherMessage('Code-barres introuvable pour ce code SAQ');
+      return;
+    }
+    document.getElementById('saisieManuelleV2Container').style.display = 'none';
+    traiterResultatScanV2(cup);
+  }).catch(function() {
+    afficherMessage('Erreur, réessayez');
+  });
+}
+
 function traiterResultatScanV2(code) {
   FICHE_V2_ORIGINE = null;
   appelBackend('checkWineExists', { codebarre: code }, { spinner: 'Vérification' }).then(function(result) {
