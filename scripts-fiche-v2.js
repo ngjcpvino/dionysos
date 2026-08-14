@@ -177,6 +177,8 @@ function afficherFicheV2(result) {
   // === NOTES ===
   html += '<div class="section">';
   html += '<h3 class="titre-2">Notes</h3>';
+  html += '<div class="controle"><span class="libelle">Suggestion</span>' +
+          '<div id="ficheV2-recettes-display" class="champ-cliquable" onclick="editerRecettesV2()">' + (wine.Recettes ? decodeHTML(wine.Recettes.toString()) : 'Aucune') + '</div></div>';
   html += '<div class="controle"><span class="libelle">Notes du sommelier</span>' +
           '<div id="ficheV2-notes-display" class="champ-cliquable" onclick="editerNotesSommelierV2()">' + (wine['Notes temporaires'] ? decodeHTML(wine['Notes temporaires'].toString()) : 'Aucune') + '</div></div>';
   var accordsActuels = (wine.Accords || '').split(',').map(function(a) { return a.trim(); }).filter(Boolean);
@@ -206,7 +208,6 @@ function afficherFicheV2(result) {
             '</div>' +
           '</div>';
 
-  html += ligne('Recettes', wine.Recettes);
   html += ligne('Divers', wine.Divers);
   html += '</div>';
 
@@ -555,6 +556,40 @@ function trouverCeVinV2() {
 }
 
 // ==================== NOTES DU SOMMELIER ====================
+function editerRecettesV2() {
+  var disp = document.getElementById('ficheV2-recettes-display');
+  if (!disp) return;
+  var valeur = (CURRENT_WINE_DATA && CURRENT_WINE_DATA['Recettes']) ? decodeHTML(CURRENT_WINE_DATA['Recettes'].toString()) : '';
+  disp.outerHTML = '<textarea id="ficheV2-recettes-champ" class="champ-saisie"></textarea>';
+  var champ = document.getElementById('ficheV2-recettes-champ');
+  champ.value = valeur;
+  champ.onblur = sauverRecettesV2;
+  champ.focus();
+}
+
+function remettreRecettesDisplayV2() {
+  var champ = document.getElementById('ficheV2-recettes-champ');
+  if (!champ) return;
+  var valeur = (CURRENT_WINE_DATA && CURRENT_WINE_DATA['Recettes']) ? decodeHTML(CURRENT_WINE_DATA['Recettes'].toString()) : '';
+  champ.outerHTML = '<div id="ficheV2-recettes-display" class="champ-cliquable" onclick="editerRecettesV2()">' + (valeur || 'Aucune') + '</div>';
+}
+
+function sauverRecettesV2() {
+  var champ = document.getElementById('ficheV2-recettes-champ');
+  if (!champ) return;
+  var valeur = champ.value.trim();
+  var avant = ((CURRENT_WINE_DATA && CURRENT_WINE_DATA['Recettes']) ? decodeHTML(CURRENT_WINE_DATA['Recettes'].toString()) : '').trim();
+  if (valeur === avant) { remettreRecettesDisplayV2(); return; }
+  appelBackend('updateWineField', { codebarre: CURRENT_WINE_CODEBARRE, field: 'Recettes', value: valeur }, { spinner: '' }).then(function() {
+    majMemoireVinV2(CURRENT_WINE_CODEBARRE, { 'Recettes': valeur });
+    if (CURRENT_WINE_DATA) CURRENT_WINE_DATA['Recettes'] = valeur;
+    remettreRecettesDisplayV2();
+    afficherMessage('Suggestion sauvegardée');
+  }).catch(function() {
+    afficherMessage('Erreur de sauvegarde');
+  });
+}
+
 function editerNotesSommelierV2() {
   var disp = document.getElementById('ficheV2-notes-display');
   if (!disp) return;
