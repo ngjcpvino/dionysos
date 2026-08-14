@@ -177,7 +177,7 @@ function afficherFicheV2(result) {
   // === NOTES ===
   html += '<div class="section">';
   html += '<h3 class="titre-2">Notes</h3>';
-  html += '<div class="controle"><span class="libelle">Suggestion</span>' +
+  html += '<div class="controle"><span class="libelle">Suggestions</span>' +
           '<div id="ficheV2-recettes-display" class="champ-cliquable" onclick="editerRecettesV2()">' + (wine.Recettes ? decodeHTML(wine.Recettes.toString()) : 'Aucune') + '</div></div>';
   html += '<div class="controle"><span class="libelle">Notes du sommelier</span>' +
           '<div id="ficheV2-notes-display" class="champ-cliquable" onclick="editerNotesSommelierV2()">' + (wine['Notes temporaires'] ? decodeHTML(wine['Notes temporaires'].toString()) : 'Aucune') + '</div></div>';
