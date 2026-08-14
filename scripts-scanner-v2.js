@@ -123,7 +123,16 @@ function validerSaisieManuelleV2() {
       return;
     }
     document.getElementById('saisieManuelleV2Container').style.display = 'none';
-    traiterResultatScanV2(cup);
+    FICHE_V2_ORIGINE = null;
+    appelBackend('checkWineExists', { codebarre: cup }, { spinner: 'Vérification' }).then(function(result) {
+      if (result.exists) {
+        ouvrirMenuActionV2(cup, result);
+      } else {
+        creerVinSAQV2(cup, codeSAQ);
+      }
+    }).catch(function() {
+      retourAccueilV2();
+    });
   }).catch(function() {
     afficherMessage('Erreur, réessayez');
   });
@@ -305,7 +314,7 @@ function fermerMenuActionV2() {
 }
 
 function cacherToutesPagesV2() {
-  ['scannerV2Container', 'saisieManuelleV2Container', 'vinInconnuV2Container', 'menuActionV2Overlay', 'arriveeV2Container', 'deplacerV2Container', 'boireV2Container', 'donnerV2Container', 'caveV2Container', 'aRangerV2Container', 'sansCepageV2Container', 'histoV2Container', 'histoAjoutV2Overlay', 'histoEditV2Overlay', 'empV2Container', 'achatV2Container', 'promoV2Container', 'rechercheV2Container', 'editFicheV2Overlay', 'ficheV2Overlay', 'photoV2Overlay'].forEach(function(id) {
+  ['scannerV2Container', 'saisieManuelleV2Container', 'vinInconnuV2Container', 'menuActionV2Overlay', 'arriveeV2Container', 'deplacerV2Container', 'boireV2Container', 'donnerV2Container', 'caveV2Container', 'aRangerV2Container', 'sansCepageV2Container', 'suggestionsV2Container', 'histoV2Container', 'histoAjoutV2Overlay', 'histoEditV2Overlay', 'empV2Container', 'achatV2Container', 'promoV2Container', 'rechercheV2Container', 'editFicheV2Overlay', 'ficheV2Overlay', 'photoV2Overlay'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.style.display = 'none';
   });
@@ -359,7 +368,7 @@ function espacesOccupesArrivee(meuble, rangee) {
   var occupes = [];
   (ALL_DATA || []).forEach(function(item) {
     var statut = item.Statut || 'En stock';
-    if (statut === 'Bu' || statut === 'Sorti') return;
+    if (statut === 'Bu' || statut === 'Sorti' || statut === 'Suggestion') return;
     if (String(item.Meuble) === String(meuble) && String(item.Rangee) === String(rangee) && item.Espace) {
       occupes.push(String(item.Espace));
     }
@@ -504,6 +513,26 @@ function choisirEspaceArrivee(espace) {
 
 function arriveeARangerV2() {
   ajouterBouteilleArrivee('', '', '');
+}
+
+function arriveeSuggestionV2() {
+  var code = menuActionV2Context ? menuActionV2Context.code : null;
+  if (!code) { afficherMessage('Vin introuvable'); return; }
+  appelBackend('addBottle', { codebarre: code, meuble: '', rangee: '', espace: '', suggestion: true }, { spinner: 'Ajout' }).then(function(res) {
+    if (res && res.success === false) {
+      afficherMessage(res.message || 'Ajout refusé');
+      return null;
+    }
+    return appelBackend('getInventoryData', {}, { spinner: 'Ajout' });
+  }).then(function(data) {
+    if (data === null) return;
+    if (data) ALL_DATA = data;
+    cacherToutesPagesV2();
+    menuActionV2Context = null;
+    afficherMessage('Ajouté aux suggestions');
+  }).catch(function() {
+    retourAccueilV2();
+  });
 }
 
 // ==================== DÉPLACER V2 ====================
@@ -977,6 +1006,40 @@ function afficherCartesSansCepageV2() {
     return '<div class="carte ' + couleurClasseV2(w.Couleur) + vide + '"' + onclick + '>' + photo +
            '<div class="carte-centre"><span class="carte-titre">' + nom + '</span><span class="carte-sous">' + sous + '</span></div>' +
            '<div class="carte-droite">' + g.count + ' btl</div></div>';
+  }).join('');
+}
+
+// ==================== SUGGESTIONS V2 ====================
+function bouteillesSuggestionsV2() {
+  return (ALL_DATA || []).filter(function(i) { return i.Statut === 'Suggestion'; });
+}
+
+function ouvrirSuggestionsV2() {
+  document.getElementById('suggestionsV2Container').style.display = 'flex';
+  remonterScrollV2('suggestionsV2Container');
+  afficherCartesSuggestionsV2();
+}
+
+function fermerSuggestionsV2() {
+  document.getElementById('suggestionsV2Container').style.display = 'none';
+}
+
+function afficherCartesSuggestionsV2() {
+  var liste = bouteillesSuggestionsV2();
+  var div = document.getElementById('suggestionsV2-cartes');
+  var groups = grouperVinsV2(liste);
+  document.getElementById('suggestionsV2-compte').textContent = groups.length + ' vin' + (groups.length > 1 ? 's' : '');
+  if (groups.length === 0) { div.innerHTML = '<div class="texte-secondaire">Aucune suggestion</div>'; return; }
+  div.innerHTML = groups.map(function(g) {
+    var w = g.wine;
+    var nom = decodeHTML(w.Nom || '—');
+    var pays = w.Pays || '';
+    var region = w.Region || '';
+    var sous = (pays && region) ? (pays + ' • ' + region) : (pays || region);
+    var photo = w['Photo URL'] ? '<div class="carte-photo"><img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
+    var onclick = g.cb ? ' onclick="ouvrirApresTap(function(){ouvrirFicheV2(\'' + g.cb + '\', \'suggestions\')})"' : '';
+    return '<div class="carte ' + couleurClasseV2(w.Couleur) + '"' + onclick + '>' + photo +
+           '<div class="carte-centre"><span class="carte-titre">' + nom + '</span><span class="carte-sous">' + sous + '</span></div></div>';
   }).join('');
 }
 
@@ -2501,7 +2564,7 @@ function grouperVinsV2(data) {
     var key = cleVinV2(item);
     if (!grouped[key]) grouped[key] = { wine: item, cb: cb, count: 0, emplacements: [] };
     var statut = item.Statut || 'En stock';
-    if (statut !== 'Bu' && statut !== 'Sorti') {
+    if (statut !== 'Bu' && statut !== 'Sorti' && statut !== 'Suggestion') {
       grouped[key].count++;
       if (item.Meuble && item.Rangee && item.Espace) {
         grouped[key].emplacements.push(item.Meuble.toString().substring(0, 1).toUpperCase() + '-' + item.Rangee + '-' + item.Espace);
@@ -2677,6 +2740,7 @@ function burgerV2Click(cible) {
   if (cible === 'cave') { cacherToutesPagesV2(); ouvrirCaveV2(); return; }
   if (cible === 'aranger') { cacherToutesPagesV2(); ouvrirARangerV2(); return; }
   if (cible === 'sanscepage') { cacherToutesPagesV2(); ouvrirSansCepageV2(); return; }
+  if (cible === 'suggestions') { cacherToutesPagesV2(); ouvrirSuggestionsV2(); return; }
   if (cible === 'racheter') { cacherToutesPagesV2(); ouvrirAchatV2(); return; }
   if (cible === 'emplacements') { cacherToutesPagesV2(); ouvrirEmpV2(); return; }
   if (cible === 'historique') { cacherToutesPagesV2(); ouvrirHistoV2(); return; }

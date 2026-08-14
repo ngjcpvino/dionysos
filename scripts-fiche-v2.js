@@ -214,7 +214,7 @@ function afficherFicheV2(result) {
   html += '<div class="section" id="ficheV2-plats-section" style="display:none;"><div id="ficheV2-plats"></div></div>';
 
 // === INVENTAIRE (lecture seule) ===
-  var bottlesActives = bottles.filter(function(b) { return b.statut !== 'Bu' && b.statut !== 'Sorti'; });
+  var bottlesActives = bottles.filter(function(b) { return b.statut !== 'Bu' && b.statut !== 'Sorti' && b.statut !== 'Suggestion'; });
   html += '<div class="section">';
   html += '<h3 class="titre-2">Inventaire</h3>';
   if (bottlesActives.length === 0) {
@@ -518,6 +518,9 @@ function fermerFicheV2() {
   } else if (FICHE_V2_PROVENANCE === 'sanscepage') {
     document.getElementById('sansCepageV2Container').style.display = 'flex';
     remonterScrollV2('sansCepageV2Container');
+  } else if (FICHE_V2_PROVENANCE === 'suggestions') {
+    document.getElementById('suggestionsV2Container').style.display = 'flex';
+    remonterScrollV2('suggestionsV2Container');
   }
   FICHE_V2_PROVENANCE = null;
 }
