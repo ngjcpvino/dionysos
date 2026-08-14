@@ -2140,7 +2140,7 @@ function wineResultDepuisMemoireV2(code) {
   var w = items[0];
   var actives = items.filter(function(i) {
     var statut = i.Statut || 'En stock';
-    return i.bottle && i.bottle > 0 && statut !== 'Bu' && statut !== 'Sorti';
+    return i.bottle && i.bottle > 0 && statut !== 'Bu' && statut !== 'Sorti' && statut !== 'Suggestion';
   });
   return {
     exists: true,
