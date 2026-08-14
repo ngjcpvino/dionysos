@@ -138,8 +138,7 @@ function afficherFicheV2(result) {
   html += ligne('Classification', wine.Classification);
   html += ligne('Désignation', wine.Designation);
   html += ligne('Particularité', wine['Particularité']);
-  html += ligne('Code-barres', wine['Code-barres']);
-  html += ligne('Code SAQ', wine['Code SAQ']);
+ 
   html += '</div>';
 
   // === DESCRIPTION + PRIX (sans libellé) ===
