@@ -138,7 +138,7 @@ function afficherFicheV2(result) {
   html += ligne('Classification', wine.Classification);
   html += ligne('Désignation', wine.Designation);
   html += ligne('Particularité', wine['Particularité']);
- 
+  
   html += '</div>';
 
   // === DESCRIPTION + PRIX (sans libellé) ===
@@ -146,10 +146,10 @@ function afficherFicheV2(result) {
     html += '<div class="section">';
     if (wine.Description) html += '<div class="texte">' + decodeHTML(wine.Description) + '</div>';
     if (wine.Prix) html += '<div class="ligne-info"><span id="ficheV2-prix">' + parseFloat(wine.Prix).toFixed(2) + '</span> $</div>';
-	 html += ligne('Code-barres', wine['Code-barres']);
-  html += ligne('Code SAQ', wine['Code SAQ']);
     html += '</div>';
   }
+   html += ligne('Code-barres', wine['Code-barres']);
+  html += ligne('Code SAQ', wine['Code SAQ']);
 
   // === DÉGUSTATION ===
   html += '<div class="section">';
