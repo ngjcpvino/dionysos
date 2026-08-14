@@ -944,7 +944,7 @@ function fermerARangerV2() {
 function afficherCartesARangerV2() {
   var aRanger = (ALL_DATA || []).filter(function(i) {
     var statut = i.Statut || 'En stock';
-    if (statut === 'Bu' || statut === 'Sorti') return false;
+    if (statut === 'Bu' || statut === 'Sorti' || statut === 'Suggestion') return false;
     return !(i.Meuble && i.Rangee && i.Espace);
   });
   var div = document.getElementById('aRangerV2-cartes');
@@ -1727,7 +1727,7 @@ function bouteillesRangeesEmpV2() {
 function bouteillesARangerEmpV2() {
   return (ALL_DATA || []).filter(function(i){
     var statut = i.Statut || 'En stock';
-    if (statut === 'Bu' || statut === 'Sorti') return false;
+    if (statut === 'Bu' || statut === 'Sorti' || statut === 'Suggestion') return false;
     return i.bottle && i.bottle > 0 && !(i.Meuble && i.Rangee && i.Espace);
   });
 }
