@@ -314,7 +314,7 @@ function fermerMenuActionV2() {
 }
 
 function cacherToutesPagesV2() {
-  ['scannerV2Container', 'saisieManuelleV2Container', 'vinInconnuV2Container', 'menuActionV2Overlay', 'arriveeV2Container', 'deplacerV2Container', 'boireV2Container', 'donnerV2Container', 'caveV2Container', 'aRangerV2Container', 'sansCepageV2Container', 'suggestionsV2Container', 'histoV2Container', 'histoAjoutV2Overlay', 'histoEditV2Overlay', 'empV2Container', 'achatV2Container', 'promoV2Container', 'rechercheV2Container', 'editFicheV2Overlay', 'ficheV2Overlay', 'photoV2Overlay'].forEach(function(id) {
+  ['scannerV2Container', 'saisieManuelleV2Container', 'vinInconnuV2Container', 'menuActionV2Overlay', 'arriveeV2Container', 'deplacerV2Container', 'boireV2Container', 'donnerV2Container', 'caveV2Container', 'aRangerV2Container', 'sansCepageV2Container', 'suggestionsV2Container', 'histoV2Container', 'histoAjoutV2Overlay', 'histoEditV2Overlay', 'empV2Container', 'achatV2Container', 'promoV2Container', 'rechercheV2Container', 'editFicheV2Overlay', 'ficheV2Overlay', 'photoV2Overlay', 'recuV2Container', 'recuValidationV2Container'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.style.display = 'none';
   });
@@ -1375,6 +1375,92 @@ function finirGererFavoritesV2() {
   else if (gererFavCibleV2 === 'achatV2') remplirFiltresAchatV2();
   var menu = document.getElementById(gererFavCibleV2 + '-f-succ-menu');
   if (menu) menu.classList.add('ouvert');
+}
+
+// ==================== FACTURE SAQ V2 ====================
+var RECU_V2_ITEMS = [];
+var RECU_V2_INDEX = 0;
+
+function ouvrirRecuV2() {
+  document.getElementById('recuV2-fichier').value = '';
+  document.getElementById('recuV2Container').style.display = 'flex';
+}
+
+function fermerRecuV2() {
+  document.getElementById('recuV2Container').style.display = 'none';
+  document.getElementById('recuValidationV2Container').style.display = 'none';
+  RECU_V2_ITEMS = [];
+  RECU_V2_INDEX = 0;
+}
+
+function traiterPhotoRecuV2(input) {
+  var fichier = input.files && input.files[0];
+  if (!fichier) return;
+  var lecteur = new FileReader();
+  lecteur.onload = function() {
+    var base64 = lecteur.result.split(',')[1];
+    appelBackend('extraireRecuSAQ', { image: base64 }, { spinner: 'Lecture de la facture', timeout: 60000 }).then(function(res) {
+      if (!res || !res.success || !res.items || !res.items.length) {
+        afficherMessage('Aucun vin trouvé sur la facture');
+        fermerRecuV2();
+        return;
+      }
+      RECU_V2_ITEMS = res.items;
+      RECU_V2_INDEX = 0;
+      document.getElementById('recuV2Container').style.display = 'none';
+      document.getElementById('recuValidationV2Container').style.display = 'flex';
+      afficherProchainRecuVinV2();
+    }).catch(function() {
+      afficherMessage('Erreur de lecture de la facture');
+      fermerRecuV2();
+    });
+  };
+  lecteur.readAsDataURL(fichier);
+}
+
+function afficherProchainRecuVinV2() {
+  if (RECU_V2_INDEX >= RECU_V2_ITEMS.length) {
+    fermerRecuV2();
+    afficherMessage('Facture traitée');
+    return;
+  }
+  var item = RECU_V2_ITEMS[RECU_V2_INDEX];
+  document.getElementById('recuValidationV2-compte').textContent = (RECU_V2_INDEX + 1) + ' / ' + RECU_V2_ITEMS.length;
+  document.getElementById('recuValidationV2-nom').value = item.nom || '';
+  document.getElementById('recuValidationV2-codesaq').value = item.codeSAQ || '';
+  document.getElementById('recuValidationV2-statut').textContent = '';
+}
+
+function passerRecuVinV2() {
+  RECU_V2_INDEX++;
+  afficherProchainRecuVinV2();
+}
+
+function confirmerRecuVinV2() {
+  var codeSAQ = document.getElementById('recuValidationV2-codesaq').value.replace(/\D/g, '').trim();
+  var statutEl = document.getElementById('recuValidationV2-statut');
+  if (!codeSAQ) { statutEl.textContent = 'Entrez un code SAQ'; return; }
+
+  appelBackend('testScrapingSAQ', { codeSAQ: codeSAQ }, { spinner: 'Vérification' }).then(function(scrap) {
+    var codeCUP = scrap && scrap.success && scrap.data ? (scrap.data.codeCUP || '').replace(/\D/g, '').trim() : '';
+    if (!codeCUP) {
+      statutEl.textContent = 'Vin introuvable, corrigez le code';
+      return;
+    }
+    return appelBackend('ajouterVinAvecBouteilles', { codebarre: codeCUP, codeSAQ: codeSAQ, note: '', bouteilles: '[{"meuble":"","rangee":"","espace":""}]', nom: '' }, { spinner: 'Ajout' }).then(function(res) {
+      if (!res || !res.success) {
+        statutEl.textContent = (res && res.message) || 'Erreur d\'ajout';
+        return;
+      }
+      return appelBackend('getInventoryData', {}, { spinner: 'Ajout' }).then(function(data) {
+        if (data) ALL_DATA = data;
+        RECU_V2_INDEX++;
+        afficherProchainRecuVinV2();
+      });
+    });
+  }).catch(function() {
+    statutEl.textContent = 'Erreur, réessayez';
+  });
 }
 
 // ==================== RECHERCHE V2 ====================
@@ -2828,6 +2914,7 @@ function burgerV2Click(cible) {
   if (cible === 'emplacements') { cacherToutesPagesV2(); ouvrirEmpV2(); return; }
   if (cible === 'historique') { cacherToutesPagesV2(); ouvrirHistoV2(); return; }
   if (cible === 'promotions') { cacherToutesPagesV2(); ouvrirPromoV2(); return; }
+  if (cible === 'facture') { cacherToutesPagesV2(); ouvrirRecuV2(); return; }
   
   if (cible === 'refresh') {
     appelBackend('getInventoryData', {}, { spinner: 'Synchronisation' }).then(function(data) {
