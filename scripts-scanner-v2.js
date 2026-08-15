@@ -1383,12 +1383,86 @@ function ouvrirRechercheV2() {
   remonterScrollV2('rechercheV2Container');
   var champ = document.getElementById('rechercheV2-champ');
   champ.value = '';
+  filtresRechercheV2 = { couleur: '', cepage: '', pays: '', appellation: '', accords: '', pastille: '' };
+  remplirFiltresRechercheV2();
   document.getElementById('rechercheV2-compte').textContent = '';
   document.getElementById('rechercheV2-cartes').innerHTML = '<div class="texte-secondaire">Tape un mot : agent, producteur, arôme, appellation…</div>';
 }
 
 function fermerRechercheV2() {
+  fermerFiltresRechercheV2();
   document.getElementById('rechercheV2Container').style.display = 'none';
+}
+
+var filtresRechercheV2 = { couleur: '', cepage: '', pays: '', appellation: '', accords: '', pastille: '' };
+var libellesFiltreRechercheV2 = { couleur: 'Couleurs', cepage: 'Cépages', pays: 'Pays', appellation: 'Appellations', accords: 'Accords', pastille: 'Pastille de goût' };
+
+function ouvrirFiltresRechercheV2() {
+  document.getElementById('rechercheV2-filtres-voile').classList.add('ouvert');
+  document.getElementById('rechercheV2-filtres').classList.add('ouvert');
+}
+function fermerFiltresRechercheV2() {
+  document.getElementById('rechercheV2-filtres-voile').classList.remove('ouvert');
+  document.getElementById('rechercheV2-filtres').classList.remove('ouvert');
+}
+
+function remplirFiltresRechercheV2() {
+  var f = filtresRechercheV2;
+  var base = (ALL_DATA || []);
+
+  var forCouleur = base;
+  var forCepage = f.couleur ? base.filter(function(i){ return i.Couleur === f.couleur; }) : base;
+  var forPays = forCepage.filter(function(i){ return !f.cepage || contientTexteV2(i.Cepage, f.cepage); });
+  var forAppellation = forPays.filter(function(i){ return !f.pays || i.Pays === f.pays; });
+  var forAccords = forAppellation.filter(function(i){ return !f.appellation || i.Appellation === f.appellation; });
+  var forPastille = forAccords.filter(function(i){ return !f.accords || (i.Accords && i.Accords.indexOf(f.accords) !== -1); });
+
+  var sets = { couleur: {}, cepage: {}, pays: {}, appellation: {}, accords: {}, pastille: {} };
+  function retenir(cle, v) { var k = normaliserRechercheV2(v); if (v && !sets[cle][k]) sets[cle][k] = v; }
+  forCouleur.forEach(function(i){ retenir('couleur', i.Couleur); });
+  forCepage.forEach(function(i){ (i.Cepage || '').split(',').map(function(x){return x.trim();}).filter(Boolean).forEach(function(x){ retenir('cepage', x); }); });
+  forPays.forEach(function(i){ retenir('pays', i.Pays); });
+  forAppellation.forEach(function(i){ retenir('appellation', i.Appellation); });
+  forAccords.forEach(function(i){ (i.Accords || '').split(',').map(function(x){return x.trim();}).filter(Boolean).forEach(function(x){ retenir('accords', x); }); });
+  forPastille.forEach(function(i){ retenir('pastille', i['Pastille gout']); });
+
+  Object.keys(sets).forEach(function(cle) {
+    var menu = document.getElementById('rechercheV2-f-' + cle + '-menu');
+    if (!menu) return;
+    var opts = Object.keys(sets[cle]).map(function(k){ return sets[cle][k]; }).sort(function(a,b){ return a.localeCompare(b); });
+    var cur = filtresRechercheV2[cle];
+    menu.innerHTML = opts.map(function(v) {
+      return '<div class="item-liste' + (v === cur ? ' actif' : '') + '" onclick="choisirFiltreRechercheV2(\'' + cle + '\', \'' + v.replace(/'/g, "\\'") + '\')">' + v + '</div>';
+    }).join('');
+    var disp = document.getElementById('rechercheV2-f-' + cle + '-display');
+    if (disp) disp.textContent = cur === '' ? libellesFiltreRechercheV2[cle] : cur;
+  });
+}
+
+function basculerFiltreRechercheV2(cle) {
+  var menu = document.getElementById('rechercheV2-f-' + cle + '-menu');
+  var ouvert = menu.classList.contains('ouvert');
+  ['couleur','cepage','pays','appellation','accords','pastille'].forEach(function(k) {
+    document.getElementById('rechercheV2-f-' + k + '-menu').classList.remove('ouvert');
+  });
+  if (!ouvert) menu.classList.add('ouvert');
+}
+
+function choisirFiltreRechercheV2(cle, valeur) {
+  filtresRechercheV2[cle] = valeur;
+  document.getElementById('rechercheV2-f-' + cle + '-menu').classList.remove('ouvert');
+  remplirFiltresRechercheV2();
+  lancerRechercheV2();
+}
+
+function reinitialiserFiltresRechercheV2() {
+  filtresRechercheV2 = { couleur: '', cepage: '', pays: '', appellation: '', accords: '', pastille: '' };
+  ['couleur','cepage','pays','appellation','accords','pastille'].forEach(function(k) {
+    document.getElementById('rechercheV2-f-' + k + '-menu').classList.remove('ouvert');
+  });
+  remplirFiltresRechercheV2();
+  lancerRechercheV2();
+  fermerFiltresRechercheV2();
 }
 
 function normaliserRechercheV2(t) {
@@ -1407,6 +1481,9 @@ function lancerRechercheV2() {
   var terme = normaliserRechercheV2(document.getElementById('rechercheV2-champ').value.trim());
   var compte = document.getElementById('rechercheV2-compte');
   var div = document.getElementById('rechercheV2-cartes');
+  var f = filtresRechercheV2;
+  var loupe = document.getElementById('rechercheV2-loupe');
+  if (loupe) loupe.classList.toggle('actif', !!(f.couleur || f.cepage || f.pays || f.appellation || f.accords || f.pastille));
   if (terme.length < 2) {
     compte.textContent = '';
     div.innerHTML = '<div class="texte-secondaire">Tape un mot : agent, producteur, arôme, appellation…</div>';
@@ -1414,10 +1491,16 @@ function lancerRechercheV2() {
   }
   var champsExclus = { row: 1, bottle: 1, Statut: 1, Meuble: 1, Rangee: 1, Espace: 1, 'Date d\'ajout': 1, 'Date sortie': 1, Source: 1, 'Photo URL': 1 };
   var trouves = (ALL_DATA || []).filter(function(i) {
-    return Object.keys(i).some(function(k) {
-      if (champsExclus[k]) return false;
-      return normaliserRechercheV2(i[k]).indexOf(terme) !== -1;
-    });
+    return (!f.couleur || i.Couleur === f.couleur) &&
+      (!f.cepage || contientTexteV2(i.Cepage, f.cepage)) &&
+      (!f.pays || i.Pays === f.pays) &&
+      (!f.appellation || i.Appellation === f.appellation) &&
+      (!f.accords || (i.Accords && i.Accords.indexOf(f.accords) !== -1)) &&
+      (!f.pastille || contientTexteV2(i['Pastille gout'], f.pastille)) &&
+      Object.keys(i).some(function(k) {
+        if (champsExclus[k]) return false;
+        return normaliserRechercheV2(i[k]).indexOf(terme) !== -1;
+      });
   });
   var groups = grouperVinsV2(trouves);
   compte.textContent = groups.length + ' vin' + (groups.length > 1 ? 's' : '') + ' trouvé' + (groups.length > 1 ? 's' : '');
@@ -2822,6 +2905,10 @@ var PANNEAUX_V2 = {
     apres: '<div class="panneau-separateur"></div>' +
            '<div class="champ-cliquable" id="promoV2-f-succ-display" onclick="basculerFiltrePromoV2(\'succ\')">Succursales</div>' +
            '<div id="promoV2-f-succ-menu" class="menu-liste"></div>'
+  },
+  recherche: {
+    prefixe: 'rechercheV2', bascule: 'basculerFiltreRechercheV2', reinit: 'reinitialiserFiltresRechercheV2',
+    filtres: [['couleur', 'Couleurs'], ['cepage', 'Cépages'], ['pays', 'Pays'], ['appellation', 'Appellations'], ['accords', 'Accords'], ['pastille', 'Pastille de goût']]
   }
 };
 

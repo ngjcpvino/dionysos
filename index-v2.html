@@ -390,12 +390,20 @@
 <!-- ====================== RECHERCHE V2 ====================== -->
 <div id="rechercheV2Container" class="modal-v2-fullscreen" style="display:none;">
   <div class="modal-v2-content modale-haut">
+    <div class="cercle gauche" id="rechercheV2-loupe" onclick="ouvrirFiltresRechercheV2()">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; vertical-align: middle;">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+    </div>
     <div class="btn-fermer" onclick="fermerRechercheV2()">✕</div>
     <h2 class="titre-1">Recherche</h2>
     <input type="text" id="rechercheV2-champ" class="champ-saisie" style="margin-bottom: var(--space-m);" placeholder="Chercher dans tous les champs" oninput="lancerRechercheV2()">
     <div id="rechercheV2-compte" class="texte-secondaire"></div>
     <div id="rechercheV2-cartes" class="contenu"></div>
   </div>
+  <div id="rechercheV2-filtres-voile" class="panneau-voile" onclick="fermerFiltresRechercheV2()"></div>
+  <div id="rechercheV2-filtres" class="panneau-gauche"></div>
 </div>
 
 <!-- ====================== BOIRE V2 ====================== -->
