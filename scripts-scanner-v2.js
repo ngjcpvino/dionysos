@@ -1816,9 +1816,11 @@ function afficherPromoV2() {
     }
     var sous = [[p.pays, p.region].filter(Boolean).join(' • '), p.cepage].filter(Boolean).join('<br>');
     var photo = p.photo ? '<div class="carte-photo"><img src="' + p.photo + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
-    var bonis = p.pointsBonis ? '<br>+' + p.pointsBonis + ' pts' : '';
+    var imgBonis = { 250:'https://res.cloudinary.com/dym93w23h/image/upload/v1786910660/250_hgv2se.png', 500:'https://res.cloudinary.com/dym93w23h/image/upload/v1786910661/500_ko3y8t.png', 750:'https://res.cloudinary.com/dym93w23h/image/upload/v1786910662/750_rscr3d.png', 800:'https://res.cloudinary.com/dym93w23h/image/upload/v1786910663/800_cqr4co.png', 1000:'https://res.cloudinary.com/dym93w23h/image/upload/v1786910664/1000_lunrjq.png', 1250:'https://res.cloudinary.com/dym93w23h/image/upload/v1786910665/1250_yeot7a.png', 1500:'https://res.cloudinary.com/dym93w23h/image/upload/v1786910666/1500_acyruz.png', 1750:'https://res.cloudinary.com/dym93w23h/image/upload/v1786910667/1750_rv32nr.png', 2000:'https://res.cloudinary.com/dym93w23h/image/upload/v1786910667/2000_c7mwzw.png', 2250:'https://res.cloudinary.com/dym93w23h/image/upload/v1786910668/2250_fm1igm.png', 2500:'https://res.cloudinary.com/dym93w23h/image/upload/v1786910669/2500_lygz2e.png', 2750:'https://res.cloudinary.com/dym93w23h/image/upload/v1786910670/2750_lw24g6.png', 3000:'https://res.cloudinary.com/dym93w23h/image/upload/v1786910671/3000_xu2s3l.png' };
+    var bonis = (p.pointsBonis && imgBonis[p.pointsBonis]) ? '<br><img src="' + imgBonis[p.pointsBonis] + '" alt="+' + p.pointsBonis + ' pts" style="height:16px;">' : (p.pointsBonis ? '<br>+' + p.pointsBonis + ' pts' : '');
     var dispo = (f.succ && f.succ !== 'TOUTES') ? '<br><span id="promoV2-dispo-' + p.codeSAQ + '">…</span>' : '';
-    var droite = '<div><span class="prix-barre">' + p.prixRegulier.toFixed(2) + ' $</span><br>' + p.prixFinal.toFixed(2) + ' $' + bonis + dispo + '<span id="promoV2-proches-' + p.codeSAQ + '"></span></div>';
+    var prixBarre = p.rabais > 0.01 ? '<span class="prix-barre">' + p.prixRegulier.toFixed(2) + ' $</span><br>' : '';
+    var droite = '<div>' + prixBarre + p.prixFinal.toFixed(2) + ' $' + bonis + dispo + '<span id="promoV2-proches-' + p.codeSAQ + '"></span></div>';
     var onclick = '';
     if (f.succ === 'TOUTES') onclick = ' onclick="dispoProchesPromoV2(\'' + p.codeSAQ + '\')"';
     else if (promoModeV2 === 'mes' && p.cb) onclick = ' onclick="ouvrirApresTap(function(){ouvrirFicheV2(\'' + p.cb + '\', \'promo\')})"';
