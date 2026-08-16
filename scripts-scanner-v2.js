@@ -1431,9 +1431,25 @@ function afficherProchainRecuVinV2() {
   }
   var item = RECU_V2_ITEMS[RECU_V2_INDEX];
   document.getElementById('recuValidationV2-compte').textContent = (RECU_V2_INDEX + 1) + ' / ' + RECU_V2_ITEMS.length;
-  document.getElementById('recuValidationV2-nom').value = item.nom || '';
   document.getElementById('recuValidationV2-codesaq').value = item.codeSAQ || '';
   document.getElementById('recuValidationV2-statut').textContent = '';
+
+  var codeSAQ = (item.codeSAQ || '').toString().trim();
+  document.getElementById('recuValidationV2-nom').value = codeSAQ ? 'Recherche...' : '';
+  if (!codeSAQ) return;
+
+  var connu = (ALL_DATA || []).filter(function(i) { return (i['Code SAQ'] || '').toString().trim() === codeSAQ; })[0];
+  if (connu) {
+    document.getElementById('recuValidationV2-nom').value = decodeHTML(connu.Nom || '');
+    return;
+  }
+
+  appelBackend('testScrapingSAQ', { codeSAQ: codeSAQ }, { spinner: '' }).then(function(res) {
+    var nom = (res && res.success && res.data) ? (res.data.nom || '') : '';
+    document.getElementById('recuValidationV2-nom').value = nom ? decodeHTML(nom) : 'Vin introuvable, vérifiez le code';
+  }).catch(function() {
+    document.getElementById('recuValidationV2-nom').value = 'Vin introuvable, vérifiez le code';
+  });
 }
 
 function passerRecuVinV2() {
