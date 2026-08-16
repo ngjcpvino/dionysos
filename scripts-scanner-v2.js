@@ -1400,8 +1400,13 @@ function traiterPhotoRecuV2(input) {
   lecteur.onload = function() {
     var base64 = lecteur.result.split(',')[1];
     appelBackend('extraireRecuSAQ', { image: base64 }, { spinner: 'Lecture de la facture', timeout: 60000 }).then(function(res) {
-      if (!res || !res.success || !res.items || !res.items.length) {
-        afficherMessage('Aucun vin trouvé sur la facture');
+      if (!res || !res.success) {
+        afficherMessage('Erreur OCR : ' + ((res && res.error) || 'inconnue'));
+        fermerRecuV2();
+        return;
+      }
+      if (!res.items || !res.items.length) {
+        afficherMessage('Aucun code trouvé sur la facture');
         fermerRecuV2();
         return;
       }
