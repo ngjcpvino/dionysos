@@ -93,6 +93,8 @@ function entreeManuelleV2() {
   stopScannerV2();
   var champ = document.getElementById('saisieManuelleV2-champ');
   if (champ) champ.value = '';
+  var champSaq = document.getElementById('saisieManuelleV2-codesaq');
+  if (champSaq) champSaq.value = '';
   document.getElementById('saisieManuelleV2Container').style.display = 'flex';
   if (champ) champ.focus();
 }
@@ -530,6 +532,7 @@ function arriveeSuggestionV2() {
     cacherToutesPagesV2();
     menuActionV2Context = null;
     afficherMessage('Ajouté aux suggestions');
+    ouvrirApresTap(function() { ouvrirFicheV2(code, 'suggestions'); });
   }).catch(function() {
     retourAccueilV2();
   });
