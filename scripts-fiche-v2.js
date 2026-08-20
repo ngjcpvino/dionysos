@@ -65,6 +65,7 @@ function ficheDepuisMemoireV2(codebarre) {
     'Bouche': w.Bouche || '',
     'Température': w['Température'] || '',
     'Temperature': w['Température'] || '',
+    'Bois': w['Bois'] || '',
     'Description': w.Description || '',
     'Racheter': w.Racheter || 'Oui',
     'Accords': w.Accords || '',
@@ -163,6 +164,7 @@ function afficherFicheV2(result) {
   cartes += carte('Sucre', wine.Sucre);
   cartes += carte('Alcool', wine.Alcool);
   cartes += carte('Température', (wine.Temperature || '').toString().replace(/^De\s+/i, ''));
+  cartes += carte('Bois', wine.Bois);
   if (cartes) html += '<div class="grille-cartes">' + cartes + '</div>';
   html += '</div>';
 
@@ -649,6 +651,7 @@ var EDIT_FICHE_V2_CHAMPS = [
   ['Alcool', 'alcool', 'Alcool'],
   ['Température', 'temperature', 'Temperature'],
   ['Pastille', 'pastille', 'Pastille gout'],
+  ['Bois', 'bois', 'Bois'],
   ['Description', 'description', 'Description'],
   ['Recettes', 'recettes', 'Recettes'],
   ['Notes du sommelier', 'notestemp', 'Notes temporaires'],
