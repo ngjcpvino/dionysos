@@ -649,7 +649,7 @@ var EDIT_FICHE_V2_CHAMPS = [
   ['Bouche', 'bouche', 'Bouche'],
   ['Sucre', 'sucre', 'Sucre'],
   ['Alcool', 'alcool', 'Alcool'],
-  ['Temp', 'temperature', 'Temperature'],
+  ['Servir', 'temperature', 'Temperature'],
   ['Pastille', 'pastille', 'Pastille gout'],
   ['Bois', 'bois', 'Bois'],
   ['Description', 'description', 'Description'],
