@@ -850,13 +850,17 @@ textarea.champ-saisie { resize: none; font-family: inherit; line-height: 1.4; }
   gap: var(--space-s);
   margin: var(--space-l) 0;
 }
-.boire-verre {
-  font-size: 28px;
-  opacity: 0.3;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
+.boire-verre { font-size: 28px; opacity: 0.3; cursor: pointer; -webkit-tap-highlight-color: transparent; border-radius: 50%; }
 .boire-verre.allume { opacity: 1; }
+.boire-verre.allume[data-note="1"] { background: var(--note-1); }
+.boire-verre.allume[data-note="2"] { background: var(--note-2); }
+.boire-verre.allume[data-note="3"] { background: var(--note-3); }
+.boire-verre.allume[data-note="4"] { background: var(--note-4); }
+.boire-verre.allume[data-note="5"] { background: var(--note-5); }
+
+
+
+
 .boire-verres.desactive .boire-verre { pointer-events: none; opacity: 0.15; }
 #ficheV2-aime-oui:not(.actif),
 #ficheV2-aime-non:not(.actif) { color: var(--white-50); border-color: var(--white-15); }
