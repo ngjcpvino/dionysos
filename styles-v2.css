@@ -850,7 +850,18 @@ textarea.champ-saisie { resize: none; font-family: inherit; line-height: 1.4; }
   gap: var(--space-s);
   margin: var(--space-l) 0;
 }
-.boire-verre { font-size: 28px; opacity: 0.3; cursor: pointer; -webkit-tap-highlight-color: transparent; border-radius: 50%; }
+.boire-verre {
+  font-size: 20px;
+  opacity: 0.3;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 .boire-verre.allume { opacity: 1; }
 .boire-verre.allume[data-note="1"] { background: var(--note-1); }
 .boire-verre.allume[data-note="2"] { background: var(--note-2); }
