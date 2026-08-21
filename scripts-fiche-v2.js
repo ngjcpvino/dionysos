@@ -163,7 +163,7 @@ function afficherFicheV2(result) {
   cartes += carte('Bouche', wine.Bouche);
   cartes += carte('Sucre', wine.Sucre);
   cartes += carte('Alcool', wine.Alcool);
-  cartes += carte('Température', (wine.Temperature || '').toString().replace(/^De\s+/i, ''));
+  cartes += carte('Servir', (wine.Temperature || '').toString().replace(/^De\s+/i, ''));
   cartes += carte('Bois', wine.Bois);
   if (cartes) html += '<div class="grille-cartes">' + cartes + '</div>';
   html += '</div>';
