@@ -2914,6 +2914,108 @@ function reinitialiserFiltresCaveV2() {
   appliquerFiltresCaveV2();
   fermerFiltresCaveV2();
 }
+// ==================== ACCORDS METS-VINS V2 ====================
+var ALL_ACCORDS = null;
+var accordsV2Selection = {};
+
+function ouvrirAccordsV2() {
+  document.getElementById('accordsV2Container').style.display = 'flex';
+  remonterScrollV2('accordsV2Container');
+  accordsV2Selection = {};
+  document.getElementById('accordsV2-champ').value = '';
+  document.getElementById('accordsV2-resultats').innerHTML = '';
+  if (ALL_ACCORDS) {
+    afficherIngredientsAccordsV2();
+    return;
+  }
+  appelBackend('getAccords', {}, { spinner: ' ' }).then(function(data) {
+    ALL_ACCORDS = data || [];
+    afficherIngredientsAccordsV2();
+  }).catch(function() { retourAccueilV2(); });
+}
+
+function fermerAccordsV2() {
+  document.getElementById('accordsV2Container').style.display = 'none';
+}
+
+function uniqueAlimentsAccordsV2() {
+  var vus = {};
+  var out = [];
+  (ALL_ACCORDS || []).forEach(function(a) {
+    var k = normaliserRechercheV2(a.aliment);
+    if (a.aliment && !vus[k]) { vus[k] = true; out.push(a.aliment); }
+  });
+  out.sort(function(a, b) { return a.localeCompare(b); });
+  return out;
+}
+
+function afficherIngredientsAccordsV2() {
+  var div = document.getElementById('accordsV2-ingredients');
+  var liste = uniqueAlimentsAccordsV2();
+  div.innerHTML = liste.map(function(a) {
+    var sel = accordsV2Selection[normaliserRechercheV2(a)];
+    return '<div class="item-liste' + (sel ? ' actif' : '') + '" data-aliment="' + a.replace(/"/g, '&quot;') + '" onclick="toggleIngredientAccordsV2(this)">' + a + '</div>';
+  }).join('');
+  majSelectionAccordsV2();
+}
+
+function filtrerIngredientsAccordsV2() {
+  var terme = normaliserRechercheV2(document.getElementById('accordsV2-champ').value.trim());
+  Array.prototype.forEach.call(document.querySelectorAll('#accordsV2-ingredients .item-liste'), function(el) {
+    el.style.display = (!terme || normaliserRechercheV2(el.textContent).indexOf(terme) !== -1) ? '' : 'none';
+  });
+}
+
+function toggleIngredientAccordsV2(el) {
+  var aliment = el.getAttribute('data-aliment');
+  var k = normaliserRechercheV2(aliment);
+  if (accordsV2Selection[k]) delete accordsV2Selection[k];
+  else accordsV2Selection[k] = aliment;
+  el.classList.toggle('actif');
+  majSelectionAccordsV2();
+  calculerResultatsAccordsV2();
+}
+
+function majSelectionAccordsV2() {
+  var noms = Object.values(accordsV2Selection);
+  var div = document.getElementById('accordsV2-selection');
+  div.textContent = noms.length ? noms.join(', ') : 'Aucun ingrédient sélectionné';
+}
+
+function calculerResultatsAccordsV2() {
+  var div = document.getElementById('accordsV2-resultats');
+  var selectionnes = Object.keys(accordsV2Selection);
+  if (!selectionnes.length) { div.innerHTML = ''; return; }
+
+  var scores = {};
+  (ALL_ACCORDS || []).forEach(function(a) {
+    var k = normaliserRechercheV2(a.aliment);
+    if (selectionnes.indexOf(k) === -1) return;
+    var cle = normaliserRechercheV2(a.cepage);
+    if (!scores[cle]) scores[cle] = { cepage: a.cepage, count: 0, aliments: {} };
+    if (!scores[cle].aliments[k]) { scores[cle].aliments[k] = true; scores[cle].count++; }
+  });
+
+  var classement = Object.values(scores).sort(function(a, b) { return b.count - a.count; });
+  if (!classement.length) { div.innerHTML = '<div class="texte-secondaire">Aucun accord trouvé</div>'; return; }
+
+  var html = classement.map(function(s) {
+    var vins = grouperVinsV2((ALL_DATA || []).filter(function(i) {
+      return contientTexteV2(cepageDominant(i), s.cepage);
+    }));
+    var cartesVins = vins.length ? vins.map(function(g) {
+      var w = g.wine;
+      var nom = decodeHTML(w.Nom || '—');
+      var onclick = g.cb ? ' onclick="ouvrirApresTap(function(){fermerAccordsV2();ouvrirFicheV2(\'' + g.cb + '\', \'cave\')})"' : '';
+      var vide = g.count === 0 ? ' carte-vide' : '';
+      return '<div class="carte ' + couleurClasseV2(w.Couleur) + vide + '"' + onclick + '><div class="carte-centre"><span class="carte-titre">' + nom + '</span></div><div class="carte-droite">' + g.count + ' btl</div></div>';
+    }).join('') : '<div class="texte-secondaire">Aucun vin de ce cépage en cave</div>';
+    return '<div class="emp-meuble">' + s.cepage + ' (' + s.count + '/' + selectionnes.length + ')</div>' + cartesVins;
+  }).join('');
+  div.innerHTML = html;
+}
+
+
 
 // ==================== MENU BURGER V2 ====================
 function toggleMenuV2() {
@@ -2941,7 +3043,9 @@ function burgerV2Click(cible) {
   if (cible === 'emplacements') { cacherToutesPagesV2(); ouvrirEmpV2(); return; }
   if (cible === 'historique') { cacherToutesPagesV2(); ouvrirHistoV2(); return; }
   if (cible === 'promotions') { cacherToutesPagesV2(); ouvrirPromoV2(); return; }
-  if (cible === 'facture') { cacherToutesPagesV2(); ouvrirRecuV2(); return; }
+    if (cible === 'facture') { cacherToutesPagesV2(); ouvrirRecuV2(); return; }
+  if (cible === 'accords') { cacherToutesPagesV2(); ouvrirAccordsV2(); return; }
+
   
   if (cible === 'refresh') {
     appelBackend('getInventoryData', {}, { spinner: 'Synchronisation' }).then(function(data) {
