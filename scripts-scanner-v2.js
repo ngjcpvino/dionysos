@@ -3095,13 +3095,14 @@ function choisirCouleurAccordsV2(val) {
 
 function reinitialiserAccordsV2() {
   accordsV2Selection = {};
-  filtresAccordsV2 = { couleur: '' };
+  filtresAccordsV2 = { couleur: '', cepage: '', dispo: false };
   accordsV2CategorieOuverte = null;
   construirePanneauAccordsV2();
   majSelectionAccordsV2();
   calculerResultatsAccordsV2();
   fermerFiltresAccordsV2();
 }
+
 
 function couleurCepageAccordsV2(cepage) {
   var item = (ALL_DATA || []).filter(function(i) { return contientTexteV2(cepageDominant(i), cepage); })[0];
