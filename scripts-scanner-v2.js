@@ -3109,8 +3109,36 @@ function couleurCepageAccordsV2(cepage) {
   return item ? couleurClasseV2(item.Couleur) : null;
 }
 
+function vinsDisponiblesPourCepageV2(cepage) {
+  return (ALL_DATA || []).filter(function(i) {
+    if (!contientTexteV2(cepageDominant(i), cepage)) return false;
+    var statut = i.Statut || 'En stock';
+    return statut !== 'Bu' && statut !== 'Sorti' && statut !== 'Suggestion';
+  }).length > 0;
+}
+
 function calculerResultatsAccordsV2() {
   var div = document.getElementById('accordsV2-resultats');
+
+  if (filtresAccordsV2.cepage) {
+    var cep = filtresAccordsV2.cepage;
+    var aliments = (ALL_ACCORDS || []).filter(function(a) { return memeTexteV2(a.cepage, cep); });
+    if (!aliments.length) { div.innerHTML = '<div class="texte-secondaire">Aucun aliment associé</div>'; return; }
+    var vins = grouperVinsV2((ALL_DATA || []).filter(function(i) { return contientTexteV2(cepageDominant(i), cep); }));
+    var cartesVins = vins.length ? vins.map(function(g) {
+      var w = g.wine;
+      var nom = decodeHTML(w.Nom || '—');
+      var onclick = g.cb ? ' onclick="ouvrirApresTap(function(){fermerAccordsV2();ouvrirFicheV2(\'' + g.cb + '\', \'accords\')})"' : '';
+      var vide = g.count === 0 ? ' carte-vide' : '';
+      return '<div class="carte ' + couleurClasseV2(w.Couleur) + vide + '"' + onclick + '><div class="carte-centre"><span class="carte-titre">' + nom + '</span></div><div class="carte-droite">' + g.count + ' btl</div></div>';
+    }).join('') : '<div class="texte-secondaire">Aucun vin de ce cépage en cave</div>';
+    var listeAliments = aliments.map(function(a) {
+      return '<div class="ligne-info">' + a.aliment + (a.nuance ? ' <span class="libelle">(' + a.nuance + ')</span>' : '') + '</div>';
+    }).join('');
+    div.innerHTML = '<div class="emp-meuble">' + cep + '</div>' + listeAliments + '<div class="panneau-separateur"></div>' + cartesVins;
+    return;
+  }
+
   var selectionnes = Object.keys(accordsV2Selection);
   if (!selectionnes.length) { div.innerHTML = '<div class="texte-secondaire">Sélectionnez des ingrédients dans le filtre</div>'; return; }
 
@@ -3127,6 +3155,9 @@ function calculerResultatsAccordsV2() {
   if (filtresAccordsV2.couleur) {
     classement = classement.filter(function(s) { return couleurCepageAccordsV2(s.cepage) === filtresAccordsV2.couleur; });
   }
+  if (filtresAccordsV2.dispo) {
+    classement = classement.filter(function(s) { return vinsDisponiblesPourCepageV2(s.cepage); });
+  }
   classement.sort(function(a, b) { return b.count - a.count; });
   if (!classement.length) { div.innerHTML = '<div class="texte-secondaire">Aucun accord trouvé</div>'; return; }
 
@@ -3137,7 +3168,7 @@ function calculerResultatsAccordsV2() {
     var cartesVins = vins.length ? vins.map(function(g) {
       var w = g.wine;
       var nom = decodeHTML(w.Nom || '—');
-      var onclick = g.cb ? ' onclick="ouvrirApresTap(function(){fermerAccordsV2();ouvrirFicheV2(\'' + g.cb + '\', \'cave\')})"' : '';
+      var onclick = g.cb ? ' onclick="ouvrirApresTap(function(){fermerAccordsV2();ouvrirFicheV2(\'' + g.cb + '\', \'accords\')})"' : '';
       var vide = g.count === 0 ? ' carte-vide' : '';
       return '<div class="carte ' + couleurClasseV2(w.Couleur) + vide + '"' + onclick + '><div class="carte-centre"><span class="carte-titre">' + nom + '</span></div><div class="carte-droite">' + g.count + ' btl</div></div>';
     }).join('') : '<div class="texte-secondaire">Aucun vin de ce cépage en cave</div>';
@@ -3145,6 +3176,7 @@ function calculerResultatsAccordsV2() {
   }).join('');
   div.innerHTML = html;
 }
+
 
 
 
