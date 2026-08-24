@@ -2919,7 +2919,8 @@ function reinitialiserFiltresCaveV2() {
 var ALL_ACCORDS = null;
 var accordsV2Selection = {};
 var accordsV2CategorieOuverte = null;
-var filtresAccordsV2 = { couleur: '' };
+var filtresAccordsV2 = { couleur: '', cepage: '', dispo: false };
+
 
 var CATEGORIES_ACCORDS_V2 = {
   fruits: ['Abricot','Ananas','Argousier','Avocat','Banane','Bleuet','Canneberge','Cassis','Cerise','Citron','Datte','Figue séchée et fraîche','Fraise','Framboise','Fruit de la passion','Kiwi','Lime','Litchi','Mangue','Melon cantaloup',"Melon d'eau",'Mûre','Orange','Pamplemousse','Papaye','Pêche','Pitaya','Poire','Pomme cuite','Pomme jaune','Pomme rouge','Pomme verte','Prune','Rhubarbe','Sureau (baie de)','Yuzu'],
