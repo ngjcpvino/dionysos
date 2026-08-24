@@ -2975,6 +2975,11 @@ function alimentsDisponiblesAccordsV2(cle) {
 
 function construirePanneauAccordsV2() {
   var html = '';
+  html += '<div class="ligne-dispo"><span class="libelle">Que les disponibles</span>' +
+          '<div class="cercle" id="accordsV2-dispo" onclick="toggleDispoAccordsV2()">' + (filtresAccordsV2.dispo ? '✓' : '✗') + '</div></div>';
+  html += '<div class="champ-cliquable" id="accordsV2-f-cepage-display" onclick="basculerCepageAccordsV2()">Cépage</div>';
+  html += '<div id="accordsV2-f-cepage-menu" class="menu-liste"></div>';
+  html += '<div class="panneau-separateur"></div>';
   Object.keys(LIBELLES_CATEGORIES_ACCORDS_V2).forEach(function(cle) {
     html += '<div class="champ-cliquable" onclick="basculerCategorieAccordsV2(\'' + cle + '\')">' + LIBELLES_CATEGORIES_ACCORDS_V2[cle] + '</div>';
     html += '<div id="accordsV2-cat-' + cle + '" class="menu-liste"></div>';
@@ -2985,7 +2990,49 @@ function construirePanneauAccordsV2() {
   html += '<div class="roundel" onclick="reinitialiserAccordsV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Réinitialiser</span></div>';
   document.getElementById('accordsV2-filtres').innerHTML = html;
   remplirCouleurMenuAccordsV2();
+  remplirCepageMenuAccordsV2();
 }
+
+function uniqueCepagesAccordsV2() {
+  var vus = {};
+  var out = [];
+  (ALL_ACCORDS || []).forEach(function(a) {
+    var k = normaliserRechercheV2(a.cepage);
+    if (a.cepage && !vus[k]) { vus[k] = true; out.push(a.cepage); }
+  });
+  out.sort(function(a, b) { return a.localeCompare(b); });
+  return out;
+}
+
+function remplirCepageMenuAccordsV2() {
+  var menu = document.getElementById('accordsV2-f-cepage-menu');
+  if (!menu) return;
+  var liste = uniqueCepagesAccordsV2();
+  menu.innerHTML = liste.map(function(c) {
+    return '<div class="item-liste' + (filtresAccordsV2.cepage === c ? ' actif' : '') + '" onclick="choisirCepageAccordsV2(\'' + c.replace(/'/g, "\\'") + '\')">' + c + '</div>';
+  }).join('');
+  var disp = document.getElementById('accordsV2-f-cepage-display');
+  if (disp) disp.textContent = filtresAccordsV2.cepage || 'Cépage';
+}
+
+function basculerCepageAccordsV2() {
+  document.getElementById('accordsV2-f-cepage-menu').classList.toggle('ouvert');
+}
+
+function choisirCepageAccordsV2(val) {
+  filtresAccordsV2.cepage = (filtresAccordsV2.cepage === val) ? '' : val;
+  document.getElementById('accordsV2-f-cepage-menu').classList.remove('ouvert');
+  remplirCepageMenuAccordsV2();
+  calculerResultatsAccordsV2();
+}
+
+function toggleDispoAccordsV2() {
+  filtresAccordsV2.dispo = !filtresAccordsV2.dispo;
+  var btn = document.getElementById('accordsV2-dispo');
+  if (btn) { btn.classList.toggle('actif', filtresAccordsV2.dispo); btn.textContent = filtresAccordsV2.dispo ? '✓' : '✗'; }
+  calculerResultatsAccordsV2();
+}
+
 
 function basculerCategorieAccordsV2(cle) {
   var etaitOuverte = accordsV2CategorieOuverte === cle;
