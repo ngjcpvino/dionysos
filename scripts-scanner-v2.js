@@ -2914,56 +2914,95 @@ function reinitialiserFiltresCaveV2() {
   appliquerFiltresCaveV2();
   fermerFiltresCaveV2();
 }
+
 // ==================== ACCORDS METS-VINS V2 ====================
 var ALL_ACCORDS = null;
 var accordsV2Selection = {};
+var accordsV2CategorieOuverte = null;
+var filtresAccordsV2 = { couleur: '' };
+
+var CATEGORIES_ACCORDS_V2 = {
+  fruits: ['Abricot','Ananas','Argousier','Avocat','Banane','Bleuet','Canneberge','Cassis','Cerise','Citron','Datte','Figue séchée et fraîche','Fraise','Framboise','Fruit de la passion','Kiwi','Lime','Litchi','Mangue','Melon cantaloup',"Melon d'eau",'Mûre','Orange','Pamplemousse','Papaye','Pêche','Pitaya','Poire','Pomme cuite','Pomme jaune','Pomme rouge','Pomme verte','Prune','Rhubarbe','Sureau (baie de)','Yuzu'],
+  legumes: ['Ail','Artichaut','Asperge verte','Aubergine','Betterave rouge','Brocoli','Butternut (courge)','Carotte','Céleri','Champignon','Champignon « candy cap »','Chou','Concombre','Courgette','Daïkon','Endive','Épinard','Fenouil','Fève de soya germée','Kale (chou frisé)','Maïs','Oignon','Olive noire','Olive verte','Panais','Patate douce','Petit pois','Poireau','Poivron rouge rôti','Pomme de terre','Radis','Roquette','Tête de violon','Tomate','Topinambour'],
+  epices: ['Ajowan','Aneth','Anis étoilé','Basilic','Camomille','Cannelle','Câpre','Cardamome','Carvi','Chipotle','Citronnelle','Clou de girofle','Comptonie voyageuse','Coriandre fraîche','Coriandre (graines de)','Cumin','Curcuma','Curry','Estragon','Genièvre (baie de)','Gingembre','Herbes de Provence','Hibiscus (fleurs séchées)','Houblon','Jasmin','Laurier','Lavande','Livèche','Mélisse','Menthe','Miso','Moutarde','Muscade','Myrique baumier','Nigelle','Origan','Osmanthus (fleur)',"Paprika/Pimenton/Piment d'Espelette",'Persil','Poivre de Guinée (maniguette)','Poivre du Sichuan','Poivre noir','Poivre rose','Quatre-épices','Raifort','Réglisse','Romarin','Rose (eau de)','Safran','Salsepareille (racinette/root beer)','Sapin et sapin baumier','Sauce soya','Sauge','Shiso','Thé des bois','Thé du Labrador','Thym','Tonka (fève)','Umeboshi','Vanille','Verveine','Vinaigre Balsamique','Wasabi'],
+  fromages: ['Brunost (gjetost)','Comté','Fromage à croûte fleurie','Fromage à croûte lavée','Fromage à pâte persillée','Fromage à pâte pressée','Fromage de chèvre','Fromage en grains','Mozzarella'],
+  viandes: ['Agneau','Bacon','Bœuf','Boudin noir','Canard','Chorizo','Dinde','Foie gras de canard','Jambon','Jambon ibérique/Prosciutto/San Daniele/de Parme/De Bayonne','Porc','Poulet Rôti','Veau','Viande fumée','Viande grillée'],
+  poissons: ['Caviar','Crabe','Crevette','Huître','Langoustine/Homard/Écrevisse','Moule','Oursin','Pétoncle','Pieuvre et calmar','Poisson fumé','Poisson grillé','Sardine','Saumon et truite saumonée'],
+  cereales: ['Amande','Arachide','Graines de citrouille rôties','Graines de pavot','Noisette','Noix de coco','Noix de Grenoble et noix du Brésil','Noix de pin (pignon)','Pacane','Pistache','Quinoa','Riz à grains longs blanc','Riz basmati et autres riz aromatiques','Riz brun','Riz sauvage','Sésame grillé'],
+  autres: ['Café','Cannabis','Caramel','Chocolat blanc','Chocolat noir','Coca-Cola','Fourmi','Guimauve',"Huile d'olive",'Huitlacoche','Kimchi','Miel','Nori (algue)','Œuf',"Pain d'épices",'Parfum Chanel No 5','Parfum Poison de Dior','Pétrichor','Pissenlit (feuilles et fleurs)','Poutine','Sirop de bouleau jaune',"Sirop d'érable",'Truffe']
+};
+var LIBELLES_CATEGORIES_ACCORDS_V2 = { fruits:'Fruits', legumes:'Légumes', epices:'Épices, aromates et condiments', fromages:'Fromages', viandes:'Viandes et charcuteries', poissons:'Poissons et fruits de mer', cereales:'Céréales, noix et graines', autres:'Autres' };
 
 function ouvrirAccordsV2() {
   document.getElementById('accordsV2Container').style.display = 'flex';
   remonterScrollV2('accordsV2Container');
   accordsV2Selection = {};
-  document.getElementById('accordsV2-champ').value = '';
-  document.getElementById('accordsV2-resultats').innerHTML = '';
+  accordsV2CategorieOuverte = null;
+  filtresAccordsV2 = { couleur: '' };
   if (ALL_ACCORDS) {
-    afficherIngredientsAccordsV2();
+    construirePanneauAccordsV2();
+    majSelectionAccordsV2();
+    calculerResultatsAccordsV2();
     return;
   }
   appelBackend('getAccords', {}, { spinner: ' ' }).then(function(data) {
     ALL_ACCORDS = data || [];
-    afficherIngredientsAccordsV2();
+    construirePanneauAccordsV2();
+    majSelectionAccordsV2();
+    calculerResultatsAccordsV2();
   }).catch(function() { retourAccueilV2(); });
 }
 
 function fermerAccordsV2() {
+  fermerFiltresAccordsV2();
   document.getElementById('accordsV2Container').style.display = 'none';
 }
 
-function uniqueAlimentsAccordsV2() {
-  var vus = {};
-  var out = [];
-  (ALL_ACCORDS || []).forEach(function(a) {
-    var k = normaliserRechercheV2(a.aliment);
-    if (a.aliment && !vus[k]) { vus[k] = true; out.push(a.aliment); }
-  });
-  out.sort(function(a, b) { return a.localeCompare(b); });
-  return out;
+function ouvrirFiltresAccordsV2() {
+  document.getElementById('accordsV2-filtres-voile').classList.add('ouvert');
+  document.getElementById('accordsV2-filtres').classList.add('ouvert');
+}
+function fermerFiltresAccordsV2() {
+  document.getElementById('accordsV2-filtres-voile').classList.remove('ouvert');
+  document.getElementById('accordsV2-filtres').classList.remove('ouvert');
 }
 
-function afficherIngredientsAccordsV2() {
-  var div = document.getElementById('accordsV2-ingredients');
-  var liste = uniqueAlimentsAccordsV2();
-  div.innerHTML = liste.map(function(a) {
+function alimentsDisponiblesAccordsV2(cle) {
+  var vus = {};
+  (ALL_ACCORDS || []).forEach(function(a) { if (a.aliment) vus[normaliserRechercheV2(a.aliment)] = true; });
+  return (CATEGORIES_ACCORDS_V2[cle] || []).filter(function(a) { return vus[normaliserRechercheV2(a)]; });
+}
+
+function construirePanneauAccordsV2() {
+  var html = '';
+  Object.keys(LIBELLES_CATEGORIES_ACCORDS_V2).forEach(function(cle) {
+    html += '<div class="champ-cliquable" onclick="basculerCategorieAccordsV2(\'' + cle + '\')">' + LIBELLES_CATEGORIES_ACCORDS_V2[cle] + '</div>';
+    html += '<div id="accordsV2-cat-' + cle + '" class="menu-liste"></div>';
+  });
+  html += '<div class="panneau-separateur"></div>';
+  html += '<div class="champ-cliquable" id="accordsV2-f-couleur-display" onclick="basculerCouleurAccordsV2()">Couleurs</div>';
+  html += '<div id="accordsV2-f-couleur-menu" class="menu-liste"></div>';
+  html += '<div class="roundel" onclick="reinitialiserAccordsV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Réinitialiser</span></div>';
+  document.getElementById('accordsV2-filtres').innerHTML = html;
+  remplirCouleurMenuAccordsV2();
+}
+
+function basculerCategorieAccordsV2(cle) {
+  var etaitOuverte = accordsV2CategorieOuverte === cle;
+  Object.keys(LIBELLES_CATEGORIES_ACCORDS_V2).forEach(function(k) {
+    var d = document.getElementById('accordsV2-cat-' + k);
+    d.classList.remove('ouvert');
+    d.innerHTML = '';
+  });
+  if (etaitOuverte) { accordsV2CategorieOuverte = null; return; }
+  accordsV2CategorieOuverte = cle;
+  var div = document.getElementById('accordsV2-cat-' + cle);
+  var aliments = alimentsDisponiblesAccordsV2(cle);
+  div.innerHTML = aliments.map(function(a) {
     var sel = accordsV2Selection[normaliserRechercheV2(a)];
     return '<div class="item-liste' + (sel ? ' actif' : '') + '" data-aliment="' + a.replace(/"/g, '&quot;') + '" onclick="toggleIngredientAccordsV2(this)">' + a + '</div>';
   }).join('');
-  majSelectionAccordsV2();
-}
-
-function filtrerIngredientsAccordsV2() {
-  var terme = normaliserRechercheV2(document.getElementById('accordsV2-champ').value.trim());
-  Array.prototype.forEach.call(document.querySelectorAll('#accordsV2-ingredients .item-liste'), function(el) {
-    el.style.display = (!terme || normaliserRechercheV2(el.textContent).indexOf(terme) !== -1) ? '' : 'none';
-  });
+  div.classList.add('ouvert');
 }
 
 function toggleIngredientAccordsV2(el) {
@@ -2982,10 +3021,49 @@ function majSelectionAccordsV2() {
   div.textContent = noms.length ? noms.join(', ') : 'Aucun ingrédient sélectionné';
 }
 
+function remplirCouleurMenuAccordsV2() {
+  var couleurs = [['vin-rouge','Rouge'],['vin-blanc','Blanc'],['vin-rose','Rosé'],['vin-bulles','Bulles'],['vin-spiritueux','Spiritueux']];
+  var menu = document.getElementById('accordsV2-f-couleur-menu');
+  menu.innerHTML = couleurs.map(function(c) {
+    return '<div class="item-liste' + (filtresAccordsV2.couleur === c[0] ? ' actif' : '') + '" onclick="choisirCouleurAccordsV2(\'' + c[0] + '\')">' + c[1] + '</div>';
+  }).join('');
+  var disp = document.getElementById('accordsV2-f-couleur-display');
+  if (disp) {
+    var sel = couleurs.filter(function(c) { return c[0] === filtresAccordsV2.couleur; })[0];
+    disp.textContent = sel ? sel[1] : 'Couleurs';
+  }
+}
+
+function basculerCouleurAccordsV2() {
+  document.getElementById('accordsV2-f-couleur-menu').classList.toggle('ouvert');
+}
+
+function choisirCouleurAccordsV2(val) {
+  filtresAccordsV2.couleur = (filtresAccordsV2.couleur === val) ? '' : val;
+  document.getElementById('accordsV2-f-couleur-menu').classList.remove('ouvert');
+  remplirCouleurMenuAccordsV2();
+  calculerResultatsAccordsV2();
+}
+
+function reinitialiserAccordsV2() {
+  accordsV2Selection = {};
+  filtresAccordsV2 = { couleur: '' };
+  accordsV2CategorieOuverte = null;
+  construirePanneauAccordsV2();
+  majSelectionAccordsV2();
+  calculerResultatsAccordsV2();
+  fermerFiltresAccordsV2();
+}
+
+function couleurCepageAccordsV2(cepage) {
+  var item = (ALL_DATA || []).filter(function(i) { return contientTexteV2(cepageDominant(i), cepage); })[0];
+  return item ? couleurClasseV2(item.Couleur) : null;
+}
+
 function calculerResultatsAccordsV2() {
   var div = document.getElementById('accordsV2-resultats');
   var selectionnes = Object.keys(accordsV2Selection);
-  if (!selectionnes.length) { div.innerHTML = ''; return; }
+  if (!selectionnes.length) { div.innerHTML = '<div class="texte-secondaire">Sélectionnez des ingrédients dans le filtre</div>'; return; }
 
   var scores = {};
   (ALL_ACCORDS || []).forEach(function(a) {
@@ -2996,7 +3074,11 @@ function calculerResultatsAccordsV2() {
     if (!scores[cle].aliments[k]) { scores[cle].aliments[k] = true; scores[cle].count++; }
   });
 
-  var classement = Object.values(scores).sort(function(a, b) { return b.count - a.count; });
+  var classement = Object.values(scores);
+  if (filtresAccordsV2.couleur) {
+    classement = classement.filter(function(s) { return couleurCepageAccordsV2(s.cepage) === filtresAccordsV2.couleur; });
+  }
+  classement.sort(function(a, b) { return b.count - a.count; });
   if (!classement.length) { div.innerHTML = '<div class="texte-secondaire">Aucun accord trouvé</div>'; return; }
 
   var html = classement.map(function(s) {
@@ -3014,6 +3096,7 @@ function calculerResultatsAccordsV2() {
   }).join('');
   div.innerHTML = html;
 }
+
 
 
 
