@@ -511,15 +511,19 @@
 <!-- ====================== ACCORDS METS-VINS V2 ====================== -->
 <div id="accordsV2Container" class="modal-v2-fullscreen" style="display:none;">
   <div class="modal-v2-content modale-haut">
-    <button class="btn-fermer" onclick="fermerAccordsV2()">✕</button>
+      <div class="cercle gauche" id="accordsV2-loupe" onclick="ouvrirFiltresAccordsV2()">
+      <img src="https://res.cloudinary.com/dym93w23h/image/upload/v1786985550/entonnoire_lqpv39.png" alt="Filtres" style="width:20px;height:20px;object-fit:contain;">
+    </div>
+
     <h2 class="titre-1">Accords mets-vins</h2>
-    <div class="texte-secondaire">Sélectionnez vos ingrédients</div>
-    <input type="text" id="accordsV2-champ" class="champ-saisie" placeholder="Chercher un ingrédient" oninput="filtrerIngredientsAccordsV2()">
-    <div id="accordsV2-ingredients" class="menu-liste ouvert" style="max-height:200px; overflow-y:auto;"></div>
+    <div class="btn-fermer" onclick="fermerAccordsV2()">✕</div>
     <div id="accordsV2-selection" class="texte-secondaire"></div>
     <div id="accordsV2-resultats" class="contenu"></div>
   </div>
+  <div id="accordsV2-filtres-voile" class="panneau-voile" onclick="fermerFiltresAccordsV2()"></div>
+  <div id="accordsV2-filtres" class="panneau-gauche"></div>
 </div>
+
 
 
 <!-- ====================== PHOTO V2 ====================== -->
