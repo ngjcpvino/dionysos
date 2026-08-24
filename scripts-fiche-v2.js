@@ -522,10 +522,14 @@ function fermerFicheV2() {
   } else if (FICHE_V2_PROVENANCE === 'sanscepage') {
     document.getElementById('sansCepageV2Container').style.display = 'flex';
     remonterScrollV2('sansCepageV2Container');
-  } else if (FICHE_V2_PROVENANCE === 'suggestions') {
+    } else if (FICHE_V2_PROVENANCE === 'suggestions') {
     document.getElementById('suggestionsV2Container').style.display = 'flex';
     remonterScrollV2('suggestionsV2Container');
+  } else if (FICHE_V2_PROVENANCE === 'accords') {
+    document.getElementById('accordsV2Container').style.display = 'flex';
+    remonterScrollV2('accordsV2Container');
   }
+
   FICHE_V2_PROVENANCE = null;
 }
 
