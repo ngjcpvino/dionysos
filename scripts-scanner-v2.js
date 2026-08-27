@@ -991,9 +991,10 @@ function fermerSansCepageV2() {
 }
 
 function afficherCartesSansCepageV2() {
-  var sansCepage = (ALL_DATA || []).filter(function(i) {
-    return !(i.Cepage || '').toString().trim();
+    var sansCepage = (ALL_DATA || []).filter(function(i) {
+    return !(i.Cepage || '').toString().trim() && i.Couleur !== 'Spiritueux';
   });
+
   var div = document.getElementById('sansCepageV2-cartes');
   var groups = grouperVinsV2(sansCepage);
   document.getElementById('sansCepageV2-compte').textContent = groups.length + ' vin' + (groups.length > 1 ? 's' : '');
