@@ -333,7 +333,9 @@ function fermerMenuActionV2() {
 }
 
 function cacherToutesPagesV2() {
-   ['scannerV2Container', 'saisieManuelleV2Container', 'vinInconnuV2Container', 'menuActionV2Overlay', 'arriveeV2Container', 'deplacerV2Container', 'boireV2Container', 'donnerV2Container', 'caveV2Container', 'aRangerV2Container', 'sansCepageV2Container', 'suggestionsV2Container', 'suggestionEditV2Overlay', 'histoV2Container', 'histoAjoutV2Overlay', 'histoEditV2Overlay', 'empV2Container', 'achatV2Container', 'promoV2Container', 'rechercheV2Container', 'editFicheV2Overlay', 'ficheV2Overlay', 'photoV2Overlay', 'recuV2Container', 'recuValidationV2Container', 'accordsV2Container'].forEach(function(id) {
+  ['scannerV2Container', 'saisieManuelleV2Container', 'vinInconnuV2Container', 'menuActionV2Overlay', 'arriveeV2Container', 'deplacerV2Container', 'boireV2Container', 'donnerV2Container', 'caveV2Container', 'aRangerV2Container', 'sansCepageV2Container', 'suggestionsV2Container', 'suggestionEditV2Overlay', 'histoV2Container', 'histoAjoutV2Overlay', 'histoEditV2Overlay', 'empV2Container', 'achatV2Container', 'promoV2Container', 'rechercheV2Container', 'editFicheV2Overlay', 'ficheV2Overlay', 'photoV2Overlay', 'recuV2Container', 'recuValidationV2Container', 'accordsV2Container'].forEach(function(id) {
+
+    var el = document.getElementById(id);
     if (el) el.style.display = 'none';
   });
   fermerMenuBurgerV2();
@@ -987,9 +989,10 @@ function fermerSansCepageV2() {
 }
 
 function afficherCartesSansCepageV2() {
-  var sansCepage = (ALL_DATA || []).filter(function(i) {
-    return !(i.Cepage || '').toString().trim();
+    var sansCepage = (ALL_DATA || []).filter(function(i) {
+    return !(i.Cepage || '').toString().trim() && i.Couleur !== 'Spiritueux';
   });
+
   var div = document.getElementById('sansCepageV2-cartes');
   var groups = grouperVinsV2(sansCepage);
   document.getElementById('sansCepageV2-compte').textContent = groups.length + ' vin' + (groups.length > 1 ? 's' : '');
@@ -3151,6 +3154,272 @@ function reinitialiserFiltresCaveV2() {
   fermerFiltresCaveV2();
 }
 
+// ==================== ACCORDS METS-VINS V2 ====================
+var ALL_ACCORDS = null;
+var accordsV2Selection = {};
+var accordsV2CategorieOuverte = null;
+var filtresAccordsV2 = { couleur: '', cepage: '', dispo: false };
+
+
+var CATEGORIES_ACCORDS_V2 = {
+  fruits: ['Abricot','Ananas','Argousier','Avocat','Banane','Bleuet','Canneberge','Cassis','Cerise','Citron','Datte','Figue séchée et fraîche','Fraise','Framboise','Fruit de la passion','Kiwi','Lime','Litchi','Mangue','Melon cantaloup',"Melon d'eau",'Mûre','Orange','Pamplemousse','Papaye','Pêche','Pitaya','Poire','Pomme cuite','Pomme jaune','Pomme rouge','Pomme verte','Prune','Rhubarbe','Sureau (baie de)','Yuzu'],
+  legumes: ['Ail','Artichaut','Asperge verte','Aubergine','Betterave rouge','Brocoli','Butternut (courge)','Carotte','Céleri','Champignon','Champignon « candy cap »','Chou','Concombre','Courgette','Daïkon','Endive','Épinard','Fenouil','Fève de soya germée','Kale (chou frisé)','Maïs','Oignon','Olive noire','Olive verte','Panais','Patate douce','Petit pois','Poireau','Poivron rouge rôti','Pomme de terre','Radis','Roquette','Tête de violon','Tomate','Topinambour'],
+  epices: ['Ajowan','Aneth','Anis étoilé','Basilic','Camomille','Cannelle','Câpre','Cardamome','Carvi','Chipotle','Citronnelle','Clou de girofle','Comptonie voyageuse','Coriandre fraîche','Coriandre (graines de)','Cumin','Curcuma','Curry','Estragon','Genièvre (baie de)','Gingembre','Herbes de Provence','Hibiscus (fleurs séchées)','Houblon','Jasmin','Laurier','Lavande','Livèche','Mélisse','Menthe','Miso','Moutarde','Muscade','Myrique baumier','Nigelle','Origan','Osmanthus (fleur)',"Paprika/Pimenton/Piment d'Espelette",'Persil','Poivre de Guinée (maniguette)','Poivre du Sichuan','Poivre noir','Poivre rose','Quatre-épices','Raifort','Réglisse','Romarin','Rose (eau de)','Safran','Salsepareille (racinette/root beer)','Sapin et sapin baumier','Sauce soya','Sauge','Shiso','Thé des bois','Thé du Labrador','Thym','Tonka (fève)','Umeboshi','Vanille','Verveine','Vinaigre Balsamique','Wasabi'],
+  fromages: ['Brunost (gjetost)','Comté','Fromage à croûte fleurie','Fromage à croûte lavée','Fromage à pâte persillée','Fromage à pâte pressée','Fromage de chèvre','Fromage en grains','Mozzarella'],
+  viandes: ['Agneau','Bacon','Bœuf','Boudin noir','Canard','Chorizo','Dinde','Foie gras de canard','Jambon','Jambon ibérique/Prosciutto/San Daniele/de Parme/De Bayonne','Porc','Poulet Rôti','Veau','Viande fumée','Viande grillée'],
+  poissons: ['Caviar','Crabe','Crevette','Huître','Langoustine/Homard/Écrevisse','Moule','Oursin','Pétoncle','Pieuvre et calmar','Poisson fumé','Poisson grillé','Sardine','Saumon et truite saumonée'],
+  cereales: ['Amande','Arachide','Graines de citrouille rôties','Graines de pavot','Noisette','Noix de coco','Noix de Grenoble et noix du Brésil','Noix de pin (pignon)','Pacane','Pistache','Quinoa','Riz à grains longs blanc','Riz basmati et autres riz aromatiques','Riz brun','Riz sauvage','Sésame grillé'],
+  autres: ['Café','Cannabis','Caramel','Chocolat blanc','Chocolat noir','Coca-Cola','Fourmi','Guimauve',"Huile d'olive",'Huitlacoche','Kimchi','Miel','Nori (algue)','Œuf',"Pain d'épices",'Parfum Chanel No 5','Parfum Poison de Dior','Pétrichor','Pissenlit (feuilles et fleurs)','Poutine','Sirop de bouleau jaune',"Sirop d'érable",'Truffe']
+};
+var LIBELLES_CATEGORIES_ACCORDS_V2 = { fruits:'Fruits', legumes:'Légumes', epices:'Épices, aromates et condiments', fromages:'Fromages', viandes:'Viandes et charcuteries', poissons:'Poissons et fruits de mer', cereales:'Céréales, noix et graines', autres:'Autres' };
+
+function ouvrirAccordsV2() {
+  document.getElementById('accordsV2Container').style.display = 'flex';
+  remonterScrollV2('accordsV2Container');
+  accordsV2Selection = {};
+  accordsV2CategorieOuverte = null;
+  filtresAccordsV2 = { couleur: '' };
+  if (ALL_ACCORDS) {
+    construirePanneauAccordsV2();
+    majSelectionAccordsV2();
+    calculerResultatsAccordsV2();
+    return;
+  }
+  appelBackend('getAccords', {}, { spinner: ' ' }).then(function(data) {
+    ALL_ACCORDS = data || [];
+    construirePanneauAccordsV2();
+    majSelectionAccordsV2();
+    calculerResultatsAccordsV2();
+  }).catch(function() { retourAccueilV2(); });
+}
+
+function fermerAccordsV2() {
+  fermerFiltresAccordsV2();
+  document.getElementById('accordsV2Container').style.display = 'none';
+}
+
+function ouvrirFiltresAccordsV2() {
+  document.getElementById('accordsV2-filtres-voile').classList.add('ouvert');
+  document.getElementById('accordsV2-filtres').classList.add('ouvert');
+}
+function fermerFiltresAccordsV2() {
+  document.getElementById('accordsV2-filtres-voile').classList.remove('ouvert');
+  document.getElementById('accordsV2-filtres').classList.remove('ouvert');
+}
+
+function alimentsDisponiblesAccordsV2(cle) {
+  var vus = {};
+  (ALL_ACCORDS || []).forEach(function(a) { if (a.aliment) vus[normaliserRechercheV2(a.aliment)] = true; });
+  return (CATEGORIES_ACCORDS_V2[cle] || []).filter(function(a) { return vus[normaliserRechercheV2(a)]; });
+}
+
+function construirePanneauAccordsV2() {
+  var html = '';
+  html += '<div class="ligne-dispo"><span class="libelle">Que les disponibles</span>' +
+          '<div class="cercle" id="accordsV2-dispo" onclick="toggleDispoAccordsV2()">' + (filtresAccordsV2.dispo ? '✓' : '✗') + '</div></div>';
+  html += '<div class="champ-cliquable" id="accordsV2-f-cepage-display" onclick="basculerCepageAccordsV2()">Cépage</div>';
+  html += '<div id="accordsV2-f-cepage-menu" class="menu-liste"></div>';
+  html += '<div class="panneau-separateur"></div>';
+  Object.keys(LIBELLES_CATEGORIES_ACCORDS_V2).forEach(function(cle) {
+    html += '<div class="champ-cliquable" onclick="basculerCategorieAccordsV2(\'' + cle + '\')">' + LIBELLES_CATEGORIES_ACCORDS_V2[cle] + '</div>';
+    html += '<div id="accordsV2-cat-' + cle + '" class="menu-liste"></div>';
+  });
+  html += '<div class="panneau-separateur"></div>';
+  html += '<div class="champ-cliquable" id="accordsV2-f-couleur-display" onclick="basculerCouleurAccordsV2()">Couleurs</div>';
+  html += '<div id="accordsV2-f-couleur-menu" class="menu-liste"></div>';
+  html += '<div class="roundel" onclick="reinitialiserAccordsV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Réinitialiser</span></div>';
+  document.getElementById('accordsV2-filtres').innerHTML = html;
+  remplirCouleurMenuAccordsV2();
+  remplirCepageMenuAccordsV2();
+}
+
+function uniqueCepagesAccordsV2() {
+  var vus = {};
+  var out = [];
+  (ALL_ACCORDS || []).forEach(function(a) {
+    var k = normaliserRechercheV2(a.cepage);
+    if (a.cepage && !vus[k]) { vus[k] = true; out.push(a.cepage); }
+  });
+  out.sort(function(a, b) { return a.localeCompare(b); });
+  return out;
+}
+
+function remplirCepageMenuAccordsV2() {
+  var menu = document.getElementById('accordsV2-f-cepage-menu');
+  if (!menu) return;
+  var liste = uniqueCepagesAccordsV2();
+  menu.innerHTML = liste.map(function(c) {
+    return '<div class="item-liste' + (filtresAccordsV2.cepage === c ? ' actif' : '') + '" onclick="choisirCepageAccordsV2(\'' + c.replace(/'/g, "\\'") + '\')">' + c + '</div>';
+  }).join('');
+  var disp = document.getElementById('accordsV2-f-cepage-display');
+  if (disp) disp.textContent = filtresAccordsV2.cepage || 'Cépage';
+}
+
+function basculerCepageAccordsV2() {
+  document.getElementById('accordsV2-f-cepage-menu').classList.toggle('ouvert');
+}
+
+function choisirCepageAccordsV2(val) {
+  filtresAccordsV2.cepage = (filtresAccordsV2.cepage === val) ? '' : val;
+  document.getElementById('accordsV2-f-cepage-menu').classList.remove('ouvert');
+  remplirCepageMenuAccordsV2();
+  calculerResultatsAccordsV2();
+}
+
+function toggleDispoAccordsV2() {
+  filtresAccordsV2.dispo = !filtresAccordsV2.dispo;
+  var btn = document.getElementById('accordsV2-dispo');
+  if (btn) { btn.classList.toggle('actif', filtresAccordsV2.dispo); btn.textContent = filtresAccordsV2.dispo ? '✓' : '✗'; }
+  calculerResultatsAccordsV2();
+}
+
+
+function basculerCategorieAccordsV2(cle) {
+  var etaitOuverte = accordsV2CategorieOuverte === cle;
+  Object.keys(LIBELLES_CATEGORIES_ACCORDS_V2).forEach(function(k) {
+    var d = document.getElementById('accordsV2-cat-' + k);
+    d.classList.remove('ouvert');
+    d.innerHTML = '';
+  });
+  if (etaitOuverte) { accordsV2CategorieOuverte = null; return; }
+  accordsV2CategorieOuverte = cle;
+  var div = document.getElementById('accordsV2-cat-' + cle);
+  var aliments = alimentsDisponiblesAccordsV2(cle);
+  div.innerHTML = aliments.map(function(a) {
+    var sel = accordsV2Selection[normaliserRechercheV2(a)];
+    return '<div class="item-liste' + (sel ? ' actif' : '') + '" data-aliment="' + a.replace(/"/g, '&quot;') + '" onclick="toggleIngredientAccordsV2(this)">' + a + '</div>';
+  }).join('');
+  div.classList.add('ouvert');
+}
+
+function toggleIngredientAccordsV2(el) {
+  var aliment = el.getAttribute('data-aliment');
+  var k = normaliserRechercheV2(aliment);
+  if (accordsV2Selection[k]) delete accordsV2Selection[k];
+  else accordsV2Selection[k] = aliment;
+  el.classList.toggle('actif');
+  majSelectionAccordsV2();
+  calculerResultatsAccordsV2();
+}
+
+function majSelectionAccordsV2() {
+  var noms = Object.values(accordsV2Selection);
+  var div = document.getElementById('accordsV2-selection');
+  div.textContent = noms.length ? noms.join(', ') : 'Aucun ingrédient sélectionné';
+}
+
+function remplirCouleurMenuAccordsV2() {
+  var couleurs = [['vin-rouge','Rouge'],['vin-blanc','Blanc'],['vin-rose','Rosé'],['vin-bulles','Bulles'],['vin-spiritueux','Spiritueux']];
+  var menu = document.getElementById('accordsV2-f-couleur-menu');
+  menu.innerHTML = couleurs.map(function(c) {
+    return '<div class="item-liste' + (filtresAccordsV2.couleur === c[0] ? ' actif' : '') + '" onclick="choisirCouleurAccordsV2(\'' + c[0] + '\')">' + c[1] + '</div>';
+  }).join('');
+  var disp = document.getElementById('accordsV2-f-couleur-display');
+  if (disp) {
+    var sel = couleurs.filter(function(c) { return c[0] === filtresAccordsV2.couleur; })[0];
+    disp.textContent = sel ? sel[1] : 'Couleurs';
+  }
+}
+
+function basculerCouleurAccordsV2() {
+  document.getElementById('accordsV2-f-couleur-menu').classList.toggle('ouvert');
+}
+
+function choisirCouleurAccordsV2(val) {
+  filtresAccordsV2.couleur = (filtresAccordsV2.couleur === val) ? '' : val;
+  document.getElementById('accordsV2-f-couleur-menu').classList.remove('ouvert');
+  remplirCouleurMenuAccordsV2();
+  calculerResultatsAccordsV2();
+}
+
+function reinitialiserAccordsV2() {
+  accordsV2Selection = {};
+  filtresAccordsV2 = { couleur: '', cepage: '', dispo: false };
+  accordsV2CategorieOuverte = null;
+  construirePanneauAccordsV2();
+  majSelectionAccordsV2();
+  calculerResultatsAccordsV2();
+  fermerFiltresAccordsV2();
+}
+
+
+function couleurCepageAccordsV2(cepage) {
+  var item = (ALL_DATA || []).filter(function(i) { return contientTexteV2(cepageDominant(i), cepage); })[0];
+  return item ? couleurClasseV2(item.Couleur) : null;
+}
+
+function vinsDisponiblesPourCepageV2(cepage) {
+  return (ALL_DATA || []).filter(function(i) {
+    if (!contientTexteV2(cepageDominant(i), cepage)) return false;
+    var statut = i.Statut || 'En stock';
+    return statut !== 'Bu' && statut !== 'Sorti' && statut !== 'Suggestion';
+  }).length > 0;
+}
+
+function calculerResultatsAccordsV2() {
+  var div = document.getElementById('accordsV2-resultats');
+
+  if (filtresAccordsV2.cepage) {
+    var cep = filtresAccordsV2.cepage;
+    var aliments = (ALL_ACCORDS || []).filter(function(a) { return memeTexteV2(a.cepage, cep); });
+    if (!aliments.length) { div.innerHTML = '<div class="texte-secondaire">Aucun aliment associé</div>'; return; }
+    var vins = grouperVinsV2((ALL_DATA || []).filter(function(i) { return contientTexteV2(cepageDominant(i), cep); }));
+    var cartesVins = vins.length ? vins.map(function(g) {
+      var w = g.wine;
+      var nom = decodeHTML(w.Nom || '—');
+      var onclick = g.cb ? ' onclick="ouvrirApresTap(function(){fermerAccordsV2();ouvrirFicheV2(\'' + g.cb + '\', \'accords\')})"' : '';
+      var vide = g.count === 0 ? ' carte-vide' : '';
+      return '<div class="carte ' + couleurClasseV2(w.Couleur) + vide + '"' + onclick + '><div class="carte-centre"><span class="carte-titre">' + nom + '</span></div><div class="carte-droite">' + g.count + ' btl</div></div>';
+    }).join('') : '<div class="texte-secondaire">Aucun vin de ce cépage en cave</div>';
+    var listeAliments = aliments.map(function(a) {
+      return '<div class="ligne-info">' + a.aliment + (a.nuance ? ' <span class="libelle">(' + a.nuance + ')</span>' : '') + '</div>';
+    }).join('');
+    div.innerHTML = '<div class="emp-meuble">' + cep + '</div>' + listeAliments + '<div class="panneau-separateur"></div>' + cartesVins;
+    return;
+  }
+
+  var selectionnes = Object.keys(accordsV2Selection);
+  if (!selectionnes.length) { div.innerHTML = '<div class="texte-secondaire">Sélectionnez des ingrédients dans le filtre</div>'; return; }
+
+  var scores = {};
+  (ALL_ACCORDS || []).forEach(function(a) {
+    var k = normaliserRechercheV2(a.aliment);
+    if (selectionnes.indexOf(k) === -1) return;
+    var cle = normaliserRechercheV2(a.cepage);
+    if (!scores[cle]) scores[cle] = { cepage: a.cepage, count: 0, aliments: {} };
+    if (!scores[cle].aliments[k]) { scores[cle].aliments[k] = true; scores[cle].count++; }
+  });
+
+  var classement = Object.values(scores);
+  if (filtresAccordsV2.couleur) {
+    classement = classement.filter(function(s) { return couleurCepageAccordsV2(s.cepage) === filtresAccordsV2.couleur; });
+  }
+  if (filtresAccordsV2.dispo) {
+    classement = classement.filter(function(s) { return vinsDisponiblesPourCepageV2(s.cepage); });
+  }
+  classement.sort(function(a, b) { return b.count - a.count; });
+  if (!classement.length) { div.innerHTML = '<div class="texte-secondaire">Aucun accord trouvé</div>'; return; }
+
+  var html = classement.map(function(s) {
+    var vins = grouperVinsV2((ALL_DATA || []).filter(function(i) {
+      return contientTexteV2(cepageDominant(i), s.cepage);
+    }));
+    var cartesVins = vins.length ? vins.map(function(g) {
+      var w = g.wine;
+      var nom = decodeHTML(w.Nom || '—');
+      var onclick = g.cb ? ' onclick="ouvrirApresTap(function(){fermerAccordsV2();ouvrirFicheV2(\'' + g.cb + '\', \'accords\')})"' : '';
+      var vide = g.count === 0 ? ' carte-vide' : '';
+      return '<div class="carte ' + couleurClasseV2(w.Couleur) + vide + '"' + onclick + '><div class="carte-centre"><span class="carte-titre">' + nom + '</span></div><div class="carte-droite">' + g.count + ' btl</div></div>';
+    }).join('') : '<div class="texte-secondaire">Aucun vin de ce cépage en cave</div>';
+    return '<div class="emp-meuble">' + s.cepage + ' (' + s.count + '/' + selectionnes.length + ')</div>' + cartesVins;
+  }).join('');
+  div.innerHTML = html;
+}
+
+
+
+
+
 // ==================== MENU BURGER V2 ====================
 function toggleMenuV2() {
   var ouvert = document.getElementById('burgerV2').classList.toggle('ouvert');
@@ -3177,7 +3446,9 @@ function burgerV2Click(cible) {
   if (cible === 'emplacements') { cacherToutesPagesV2(); ouvrirEmpV2(); return; }
   if (cible === 'historique') { cacherToutesPagesV2(); ouvrirHistoV2(); return; }
   if (cible === 'promotions') { cacherToutesPagesV2(); ouvrirPromoV2(); return; }
-  if (cible === 'facture') { cacherToutesPagesV2(); ouvrirRecuV2(); return; }
+    if (cible === 'facture') { cacherToutesPagesV2(); ouvrirRecuV2(); return; }
+  if (cible === 'accords') { cacherToutesPagesV2(); ouvrirAccordsV2(); return; }
+
   
   if (cible === 'refresh') {
     appelBackend('getInventoryData', {}, { spinner: 'Synchronisation' }).then(function(data) {
@@ -3214,7 +3485,7 @@ function ajouterBouteilleArrivee(meuble, rangee, espace) {
 var PANNEAUX_V2 = {
   cave: {
     prefixe: 'caveV2', bascule: 'basculerFiltreCaveV2', reinit: 'reinitialiserFiltresCaveV2',
-    avant: '<div class="ligne-dispo"><span class="libelle">Que les disponibiles</span>' +
+    avant: '<div class="ligne-dispo"><span class="libelle">Que les disponibles</span>' +
            '<div class="cercle" id="caveV2-dispo" onclick="toggleDispoCaveV2()">✗</div></div>',
     filtres: [['couleur', 'Couleurs'], ['cepage', 'Cépages'], ['pays', 'Pays'], ['appellation', 'Appellations'], ['accords', 'Accords'], ['pastille', 'Pastille de goût'], ['acidite', 'Acidité']],
     apres: '<div class="panneau-separateur"></div>' +

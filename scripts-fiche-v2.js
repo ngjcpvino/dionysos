@@ -163,7 +163,7 @@ function afficherFicheV2(result) {
   cartes += carte('Bouche', wine.Bouche);
   cartes += carte('Sucre', wine.Sucre);
   cartes += carte('Alcool', wine.Alcool);
-  cartes += carte('Température', (wine.Temperature || '').toString().replace(/^De\s+/i, ''));
+  cartes += carte('Servir', (wine.Temperature || '').toString().replace(/^De\s+/i, ''));
   cartes += carte('Bois', wine.Bois);
   if (cartes) html += '<div class="grille-cartes">' + cartes + '</div>';
   html += '</div>';
@@ -544,10 +544,14 @@ function fermerFicheV2() {
   } else if (FICHE_V2_PROVENANCE === 'sanscepage') {
     document.getElementById('sansCepageV2Container').style.display = 'flex';
     remonterScrollV2('sansCepageV2Container');
-  } else if (FICHE_V2_PROVENANCE === 'suggestions') {
+    } else if (FICHE_V2_PROVENANCE === 'suggestions') {
     document.getElementById('suggestionsV2Container').style.display = 'flex';
     remonterScrollV2('suggestionsV2Container');
+  } else if (FICHE_V2_PROVENANCE === 'accords') {
+    document.getElementById('accordsV2Container').style.display = 'flex';
+    remonterScrollV2('accordsV2Container');
   }
+
   FICHE_V2_PROVENANCE = null;
 }
 
@@ -671,7 +675,7 @@ var EDIT_FICHE_V2_CHAMPS = [
   ['Bouche', 'bouche', 'Bouche'],
   ['Sucre', 'sucre', 'Sucre'],
   ['Alcool', 'alcool', 'Alcool'],
-  ['Temp', 'temperature', 'Temperature'],
+  ['Servir', 'temperature', 'Temperature'],
   ['Pastille', 'pastille', 'Pastille gout'],
   ['Bois', 'bois', 'Bois'],
   ['Description', 'description', 'Description'],
