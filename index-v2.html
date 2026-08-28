@@ -183,10 +183,7 @@
       <span class="roundel-anneau"></span>
       <span class="roundel-barre">À ranger</span>
     </div>
-    <div class="roundel" onclick="arriveeSuggestionV2()">
-      <span class="roundel-anneau"></span>
-      <span class="roundel-barre">Suggestion</span>
-    </div>
+
   </div>
 </div>
 
@@ -268,11 +265,16 @@
 <!-- ====================== SUGGESTIONS V2 ====================== -->
 <div id="suggestionsV2Container" class="modal-v2-fullscreen" style="display:none;">
   <div class="modal-v2-content modale-haut">
+    <div class="cercle gauche" id="suggestionsV2-loupe" onclick="ouvrirFiltresSuggestionsV2()">
+      <img src="https://res.cloudinary.com/dym93w23h/image/upload/v1786985550/entonnoire_lqpv39.png" alt="Filtres" style="width:20px;height:20px;object-fit:contain;">
+    </div>
     <div class="btn-fermer" onclick="fermerSuggestionsV2()">✕</div>
     <h2 class="titre-1">Suggestions</h2>
     <div id="suggestionsV2-compte" class="texte-secondaire"></div>
     <div id="suggestionsV2-cartes" class="contenu"></div>
   </div>
+  <div id="suggestionsV2-filtres-voile" class="panneau-voile" onclick="fermerFiltresSuggestionsV2()"></div>
+  <div id="suggestionsV2-filtres" class="panneau-gauche"></div>
 </div>
 
 <!-- ====================== HISTORIQUE V2 ====================== -->
@@ -322,6 +324,21 @@
     <textarea id="histoEditV2-plat" class="champ-saisie" rows="2" placeholder="Plat"></textarea>
     <div id="histoEditV2-verres" class="boire-verres"></div>
     <div class="roundel" onclick="sauverHistoEditV2()">
+      <span class="roundel-anneau"></span>
+      <span class="roundel-barre">Enregistrer</span>
+    </div>
+  </div>
+</div>
+
+<!-- ====================== AJOUT/CORRECTION SUGGESTION V2 ====================== -->
+<div id="suggestionEditV2Overlay" class="modal-v2-fullscreen" style="display:none;">
+  <div class="modal-v2-content modale-haut">
+    <button class="btn-fermer" onclick="fermerSuggestionEditV2()">✕</button>
+    <h2 id="suggestionEditV2-titre" class="titre-1">Suggérer</h2>
+    <div class="champ-cliquable" id="suggestionEditV2-sommelier-display" onclick="basculerMenuSommelierSuggestionV2()">Sommelier</div>
+    <div id="suggestionEditV2-sommelier-menu" class="menu-liste"></div>
+    <textarea id="suggestionEditV2-note" class="champ-saisie" rows="3" placeholder="Note"></textarea>
+    <div class="roundel" onclick="confirmerSuggestionEditV2()">
       <span class="roundel-anneau"></span>
       <span class="roundel-barre">Enregistrer</span>
     </div>

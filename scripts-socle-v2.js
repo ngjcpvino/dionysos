@@ -14,6 +14,7 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbxRh6eOQDUy3hXoNNKF6n6g
 let CONFIG = null;
 let ALL_DATA = [];
 let ALL_HISTORIQUE = [];
+let ALL_SUGGESTIONS = [];
 let CURRENT_WINE_CODEBARRE = null;
 let CURRENT_WINE_DATA = null;
 let CURRENT_WINE_BOTTLES = [];
@@ -46,6 +47,9 @@ function demarrerAppV2() {
     return appelBackend('getInventoryData', {}, { spinner: ' ' });
   }).then(function(data) {
     ALL_DATA = data || [];
+    return appelBackend('getSuggestions', {}, { spinner: ' ' });
+  }).then(function(sugg) {
+    ALL_SUGGESTIONS = sugg || [];
   }).catch(function(err) {
     afficherMessage('Erreur de chargement : ' + err);
   });
