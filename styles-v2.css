@@ -1020,3 +1020,5 @@ textarea.champ-saisie { resize: none; font-family: inherit; line-height: 1.4; }
 .dispo-non { color: var(--error); }
 .prix-barre { text-decoration: line-through; color: var(--white-50); }
 .fav-x { float: right; color: var(--error); }
+.etoile-favori { color: var(--white-15); cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.etoile-favori.actif { color: var(--gold-2); }

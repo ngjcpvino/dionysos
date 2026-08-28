@@ -69,7 +69,7 @@ function ficheDepuisMemoireV2(codebarre) {
     'Description': w.Description || '',
     'Racheter': w.Racheter || 'Oui',
     'Accords': w.Accords || '',
-    'Recettes': w.Recettes || '',
+    'Favori': w.Favori || '',
     'Notes temporaires': w['Notes temporaires'] || '',
     'Divers': w.Divers || '',
     'Pastille gout': w['Pastille gout'] || '',
@@ -133,7 +133,8 @@ function afficherFicheV2(result) {
   html += '<div class="section">';
   html += '<h3 class="titre-2">Information</h3>';
  
-  html += ligne('Cépages', wine['Cépage']);
+  var favoriEtoile = '<span class="etoile-favori' + (wine.Favori === 'Oui' ? ' actif' : '') + '" onclick="toggleFavoriV2(\'' + (wine['Code-barres'] || '').toString().trim() + '\', event)">★</span>';
+  html += wine['Cépage'] ? '<div class="ligne-info"><span class="libelle">Cépages : </span>' + decodeHTML(wine['Cépage'].toString()) + ' ' + favoriEtoile + '</div>' : '';
   html += ligne('Appellation', wine.Appellation);
   html += ligne('Pastille', wine['Pastille gout']);
   html += ligne('Classification', wine.Classification);
@@ -357,6 +358,19 @@ function toggleAccordV2(element) {
   appelBackend('updateWineField', { codebarre: CURRENT_WINE_CODEBARRE, field: 'Accords', value: selectionnes.join(', ') }, { spinner: 'Sauvegarde' }).then(function() {
     majMemoireVinV2(CURRENT_WINE_CODEBARRE, { 'Accords': selectionnes.join(', ') });
     if (CURRENT_WINE_DATA) CURRENT_WINE_DATA.Accords = selectionnes.join(', ');
+  }).catch(function(err) { afficherMessage('Erreur: ' + err); });
+}
+
+function toggleFavoriV2(codebarre, event) {
+  if (event) event.stopPropagation();
+  var cb = (codebarre || '').toString().trim();
+  var w = (ALL_DATA || []).filter(function(i) { return memeCodeV2(i['Code-barres'], cb); })[0];
+  var actuel = w ? (w.Favori === 'Oui') : false;
+  var nouveau = actuel ? '' : 'Oui';
+  appelBackend('updateWineField', { codebarre: cb, field: 'Favori', value: nouveau }, { spinner: '' }).then(function() {
+    majMemoireVinV2(cb, { 'Favori': nouveau });
+    if (CURRENT_WINE_DATA && memeCodeV2(CURRENT_WINE_CODEBARRE, cb)) CURRENT_WINE_DATA.Favori = nouveau;
+    if (event && event.target) event.target.classList.toggle('actif', nouveau === 'Oui');
   }).catch(function(err) { afficherMessage('Erreur: ' + err); });
 }
 
@@ -585,40 +599,6 @@ function trouverCeVinV2() {
 }
 
 // ==================== NOTES DU SOMMELIER ====================
-function editerRecettesV2() {
-  var disp = document.getElementById('ficheV2-recettes-display');
-  if (!disp) return;
-  var valeur = (CURRENT_WINE_DATA && CURRENT_WINE_DATA['Recettes']) ? decodeHTML(CURRENT_WINE_DATA['Recettes'].toString()) : '';
-  disp.outerHTML = '<textarea id="ficheV2-recettes-champ" class="champ-saisie"></textarea>';
-  var champ = document.getElementById('ficheV2-recettes-champ');
-  champ.value = valeur;
-  champ.onblur = sauverRecettesV2;
-  champ.focus();
-}
-
-function remettreRecettesDisplayV2() {
-  var champ = document.getElementById('ficheV2-recettes-champ');
-  if (!champ) return;
-  var valeur = (CURRENT_WINE_DATA && CURRENT_WINE_DATA['Recettes']) ? decodeHTML(CURRENT_WINE_DATA['Recettes'].toString()) : '';
-  champ.outerHTML = '<div id="ficheV2-recettes-display" class="champ-cliquable" onclick="editerRecettesV2()">' + (valeur || 'Aucune') + '</div>';
-}
-
-function sauverRecettesV2() {
-  var champ = document.getElementById('ficheV2-recettes-champ');
-  if (!champ) return;
-  var valeur = champ.value.trim();
-  var avant = ((CURRENT_WINE_DATA && CURRENT_WINE_DATA['Recettes']) ? decodeHTML(CURRENT_WINE_DATA['Recettes'].toString()) : '').trim();
-  if (valeur === avant) { remettreRecettesDisplayV2(); return; }
-  appelBackend('updateWineField', { codebarre: CURRENT_WINE_CODEBARRE, field: 'Recettes', value: valeur }, { spinner: '' }).then(function() {
-    majMemoireVinV2(CURRENT_WINE_CODEBARRE, { 'Recettes': valeur });
-    if (CURRENT_WINE_DATA) CURRENT_WINE_DATA['Recettes'] = valeur;
-    remettreRecettesDisplayV2();
-    afficherMessage('Suggestion sauvegardée');
-  }).catch(function() {
-    afficherMessage('Erreur de sauvegarde');
-  });
-}
-
 function editerNotesSommelierV2() {
   var disp = document.getElementById('ficheV2-notes-display');
   if (!disp) return;
@@ -679,7 +659,7 @@ var EDIT_FICHE_V2_CHAMPS = [
   ['Pastille', 'pastille', 'Pastille gout'],
   ['Bois', 'bois', 'Bois'],
   ['Description', 'description', 'Description'],
-  ['Recettes', 'recettes', 'Recettes'],
+
   ['Notes du sommelier', 'notestemp', 'Notes temporaires'],
   ['Divers', 'divers', 'Divers'],
   ['Photo', 'photo', 'Photo URL']

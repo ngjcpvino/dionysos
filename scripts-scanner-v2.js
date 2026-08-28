@@ -3030,7 +3030,8 @@ function afficherCartesCaveV2(data) {
     var region = w.Region || '';
     var paysRegion = (pays && region) ? (pays + ' • ' + region) : (pays || region);
     var cepage = w.Cepage || '';
-    var sous = [paysRegion, cepage].filter(Boolean).join('<br>');
+    var cepageHtml = cepage ? (cepage + ' <span class="etoile-favori' + (w.Favori === 'Oui' ? ' actif' : '') + '" onclick="toggleFavoriV2(\'' + g.cb + '\', event)">★</span>') : '';
+    var sous = [paysRegion, cepageHtml].filter(Boolean).join('<br>');
     var photo = w['Photo URL'] ? '<div class="carte-photo"><img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
     var onclick = g.cb ? ' onclick="ouvrirApresTap(function(){ouvrirFicheV2(\'' + g.cb + '\', \'cave\')})"' : '';
     var vide = g.count === 0 ? ' carte-vide' : '';
