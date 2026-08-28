@@ -257,6 +257,7 @@ body::after {
 
 #menuActionV2Overlay { z-index: 10010; }
 #histoEditV2Overlay { z-index: 10010; }
+#suggestionEditV2Overlay { z-index: 10010; }
 #photoV2Overlay { z-index: 10010; }
 .photo-grande { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
 .photo-grande img { max-width: 90%; max-height: 85%; object-fit: contain; }

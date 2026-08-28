@@ -177,11 +177,21 @@ function afficherFicheV2(result) {
     html += '</div>';
   }
 
-  // === NOTES ===
+  // === NOTES : SUGGÉRER ===
   html += '<div class="section">';
-  html += '<h3 class="titre-2">Notes</h3>';
-  html += '<div class="controle"><span class="libelle">Suggestions</span>' +
-          '<div id="ficheV2-recettes-display" class="champ-cliquable" onclick="editerRecettesV2()">' + (wine.Recettes ? decodeHTML(wine.Recettes.toString()) : 'Aucune') + '</div></div>';
+  html += '<div style="display:flex;align-items:center;justify-content:center;gap:var(--space-s);margin-bottom:var(--space-s);"><h3 class="titre-2" style="margin:0;">Suggérer</h3><div class="cercle" onclick="ouvrirSuggestionAjoutV2(\'' + (wine['Code SAQ'] || '').toString().trim() + '\', \'fiche\')">+</div></div>';
+  html += '<div id="ficheV2-suggestions"></div>';
+  html += '</div>';
+
+  // === NOTES : HISTORIQUE ===
+  html += '<div class="section" id="ficheV2-plats-section" style="display:none;">';
+  html += '<div style="display:flex;align-items:center;justify-content:center;gap:var(--space-s);margin-bottom:var(--space-s);"><h3 class="titre-2" style="margin:0;">Historique</h3><div class="cercle" onclick="ouvrirHistoAjoutDepuisFicheV2()">+</div></div>';
+  html += '<div id="ficheV2-plats"></div>';
+  html += '</div>';
+
+  // === NOTES : APPRÉCIATION ===
+  html += '<div class="section">';
+  html += '<h3 class="titre-2">Appréciation</h3>';
   html += '<div class="controle"><span class="libelle">Notes du sommelier</span>' +
           '<div id="ficheV2-notes-display" class="champ-cliquable" onclick="editerNotesSommelierV2()">' + (wine['Notes temporaires'] ? decodeHTML(wine['Notes temporaires'].toString()) : 'Aucune') + '</div></div>';
   var accordsActuels = (wine.Accords || '').split(',').map(function(a) { return a.trim(); }).filter(Boolean);
@@ -213,9 +223,6 @@ function afficherFicheV2(result) {
 
   html += ligne('Divers', wine.Divers);
   html += '</div>';
-
-  // === HISTORIQUE DES PLATS (bloc séparé, sans titre) ===
-  html += '<div class="section" id="ficheV2-plats-section" style="display:none;"><div id="ficheV2-plats"></div></div>';
 
 // === INVENTAIRE (lecture seule) ===
   var bottlesActives = bottles.filter(function(b) { return b.statut !== 'Bu' && b.statut !== 'Sorti' && b.statut !== 'Suggestion'; });
@@ -258,7 +265,22 @@ function afficherFicheV2(result) {
 
   document.getElementById('ficheV2-corps').innerHTML = html;
   chargerPlatsV2(CURRENT_WINE_CODEBARRE);
+  chargerSuggestionsFicheV2(wine['Code SAQ']);
   verifierPrixV2(CURRENT_WINE_CODEBARRE, wine['Code SAQ']);
+}
+
+function chargerSuggestionsFicheV2(codeSAQ) {
+  var conteneur = document.getElementById('ficheV2-suggestions');
+  if (!conteneur) return;
+  var saq = (codeSAQ || '').toString().trim();
+  var items = (ALL_SUGGESTIONS || []).filter(function(s) { return s.codeSAQ === saq; });
+  if (!items.length) { conteneur.innerHTML = '<div class="texte-secondaire">Aucune suggestion</div>'; return; }
+  var nomEsc = decodeHTML((CURRENT_WINE_DATA && CURRENT_WINE_DATA.Nom) || '').replace(/'/g, "\\'");
+  conteneur.innerHTML = items.map(function(s) {
+    var somEsc = (s.sommelier || '').replace(/'/g, "\\'");
+    var noteEsc = (s.note || '').replace(/'/g, "\\'");
+    return '<div class="carte fiche-mets" onclick="ouvrirApresTap(function(){ouvrirSuggestionEditV2(' + s.row + ', \'' + somEsc + '\', \'' + noteEsc + '\', \'' + nomEsc + '\', \'' + saq + '\', \'fiche\')})"><div class="carte-centre"><span class="carte-titre">' + (s.sommelier || '—') + '</span><span class="carte-sous">' + (s.note || '') + '</span></div><div class="carte-droite">' + (s.date || '') + '</div></div>';
+  }).join('');
 }
 
 function ouvrirActionDepuisFicheV2() {
