@@ -133,8 +133,8 @@ function afficherFicheV2(result) {
   html += '<div class="section">';
   html += '<h3 class="titre-2">Information</h3>';
  
-  var favoriEtoile = '<span class="etoile-favori' + (wine.Favori === 'Oui' ? ' actif' : '') + '" onclick="toggleFavoriV2(\'' + (wine['Code-barres'] || '').toString().trim() + '\', event)">★</span>';
-  html += wine['Cépage'] ? '<div class="ligne-info"><span class="libelle">Cépages : </span>' + decodeHTML(wine['Cépage'].toString()) + ' ' + favoriEtoile + '</div>' : '';
+  var favoriEtoile = wine.Favori === 'Oui' ? '<span class="etoile-favori actif">★</span>' : '';
+  html += wine['Cépage'] ? '<div class="ligne-info"><span class="libelle">Cépages : </span>' + decodeHTML(wine['Cépage'].toString()) + (favoriEtoile ? ' ' + favoriEtoile : '') + '</div>' : '';
   html += ligne('Appellation', wine.Appellation);
   html += ligne('Pastille', wine['Pastille gout']);
   html += ligne('Classification', wine.Classification);
@@ -358,19 +358,6 @@ function toggleAccordV2(element) {
   appelBackend('updateWineField', { codebarre: CURRENT_WINE_CODEBARRE, field: 'Accords', value: selectionnes.join(', ') }, { spinner: 'Sauvegarde' }).then(function() {
     majMemoireVinV2(CURRENT_WINE_CODEBARRE, { 'Accords': selectionnes.join(', ') });
     if (CURRENT_WINE_DATA) CURRENT_WINE_DATA.Accords = selectionnes.join(', ');
-  }).catch(function(err) { afficherMessage('Erreur: ' + err); });
-}
-
-function toggleFavoriV2(codebarre, event) {
-  if (event) event.stopPropagation();
-  var cb = (codebarre || '').toString().trim();
-  var w = (ALL_DATA || []).filter(function(i) { return memeCodeV2(i['Code-barres'], cb); })[0];
-  var actuel = w ? (w.Favori === 'Oui') : false;
-  var nouveau = actuel ? '' : 'Oui';
-  appelBackend('updateWineField', { codebarre: cb, field: 'Favori', value: nouveau }, { spinner: '' }).then(function() {
-    majMemoireVinV2(cb, { 'Favori': nouveau });
-    if (CURRENT_WINE_DATA && memeCodeV2(CURRENT_WINE_CODEBARRE, cb)) CURRENT_WINE_DATA.Favori = nouveau;
-    if (event && event.target) event.target.classList.toggle('actif', nouveau === 'Oui');
   }).catch(function(err) { afficherMessage('Erreur: ' + err); });
 }
 
@@ -672,6 +659,8 @@ function ouvrirEditFicheV2() {
     var valeur = decodeHTML((wine[c[2]] || '').toString()).replace(/"/g, '&quot;');
     return '<div class="titre-3">' + c[0] + '</div><input type="text" id="editV2-' + c[1] + '" class="champ-saisie" value="' + valeur + '">';
   }).join('');
+  html += '<div class="controle"><span class="libelle">Vin pour cépage favori</span>' +
+          '<div class="cercle' + (wine.Favori === 'Oui' ? ' actif' : '') + '" id="editV2-favori" onclick="this.classList.toggle(\'actif\');this.textContent=this.classList.contains(\'actif\')?\'✓\':\'\';">' + (wine.Favori === 'Oui' ? '✓' : '') + '</div></div>';
   html += '<div class="roundel" onclick="photoSAQDepuisEditV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Photo SAQ</span></div>';
   document.getElementById('editFicheV2-corps').innerHTML = html;
   document.getElementById('editFicheV2Overlay').style.display = 'flex';
@@ -700,8 +689,10 @@ function photoSAQDepuisEditV2() {
 }
 
 function sauverEditFicheV2() {
-  var data = { codebarre: CURRENT_WINE_CODEBARRE, aime: (CURRENT_WINE_DATA && CURRENT_WINE_DATA.Racheter) || 'Oui' };
-  var champsMemoire = {};
+  var favoriEl = document.getElementById('editV2-favori');
+  var favoriVal = (favoriEl && favoriEl.classList.contains('actif')) ? 'Oui' : '';
+  var data = { codebarre: CURRENT_WINE_CODEBARRE, aime: (CURRENT_WINE_DATA && CURRENT_WINE_DATA.Racheter) || 'Oui', favori: favoriVal };
+  var champsMemoire = { 'Favori': favoriVal };
   EDIT_FICHE_V2_CHAMPS.forEach(function(c) {
     var el = document.getElementById('editV2-' + c[1]);
     var valeur = el ? el.value : '';
