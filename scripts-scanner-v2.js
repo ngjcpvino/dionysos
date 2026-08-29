@@ -930,6 +930,7 @@ function ouvrirCaveV2() {
 function fermerCaveV2() {
   fermerFiltresCaveV2();
   document.getElementById('caveV2Container').style.display = 'none';
+  reinitialiserFiltresCaveV2();
 }
 
 // ==================== À RANGER V2 ====================
