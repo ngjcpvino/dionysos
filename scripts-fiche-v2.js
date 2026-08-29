@@ -513,7 +513,7 @@ function fermerFicheV2() {
     var origine = FICHE_V2_ORIGINE;
     FICHE_V2_ORIGINE = null;
     FICHE_V2_PROVENANCE = null;
-    if (origine === 'cave') { document.getElementById('caveV2Container').style.display = 'flex'; remonterScrollV2('caveV2Container'); return; }
+    if (origine === 'cave') { document.getElementById('caveV2Container').style.display = 'flex'; remonterScrollV2('caveV2Container'); appliquerFiltresCaveV2(); return; }
     if (origine === 'achat') { ouvrirAchatV2(); return; }
     if (origine === 'histo') { ouvrirHistoV2(); return; }
     return;
