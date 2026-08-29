@@ -520,10 +520,12 @@ function fermerFicheV2() {
   }
   if (FICHE_V2_PROVENANCE === 'menuScan' && menuActionV2Context) {
     ouvrirMenuActionV2(menuActionV2Context.code, menuActionV2Context.wineResult);
-  } else if (FICHE_V2_PROVENANCE === 'cave') {
+    } else if (FICHE_V2_PROVENANCE === 'cave') {
     document.getElementById('caveV2Container').style.display = 'flex';
     remonterScrollV2('caveV2Container');
+    appliquerFiltresCaveV2();
   } else if (FICHE_V2_PROVENANCE === 'achat') {
+
     document.getElementById('achatV2Container').style.display = 'flex';
     remonterScrollV2('achatV2Container');
     if (achatV2ModeNepr) afficherNePasRacheterV2();
