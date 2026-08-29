@@ -659,8 +659,8 @@ function ouvrirEditFicheV2() {
     var valeur = decodeHTML((wine[c[2]] || '').toString()).replace(/"/g, '&quot;');
     return '<div class="titre-3">' + c[0] + '</div><input type="text" id="editV2-' + c[1] + '" class="champ-saisie" value="' + valeur + '">';
   }).join('');
-  html += '<div class="controle"><span class="libelle">Vin pour cépage favori</span>' +
-          '<div class="cercle' + (wine.Favori === 'Oui' ? ' actif' : '') + '" id="editV2-favori" onclick="this.classList.toggle(\'actif\');this.textContent=this.classList.contains(\'actif\')?\'✓\':\'\';">' + (wine.Favori === 'Oui' ? '✓' : '') + '</div></div>';
+  html += '<div class="titre-3">Vin pour cépage favori</div>' +
+          '<div style="margin:var(--space-s) 0 var(--space-m);"><div class="cercle' + (wine.Favori === 'Oui' ? ' actif' : '') + '" id="editV2-favori" onclick="this.classList.toggle(\'actif\');this.textContent=this.classList.contains(\'actif\')?\'✓\':\'\';">' + (wine.Favori === 'Oui' ? '✓' : '') + '</div></div>';
   html += '<div class="roundel" onclick="photoSAQDepuisEditV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Photo SAQ</span></div>';
   document.getElementById('editFicheV2-corps').innerHTML = html;
   document.getElementById('editFicheV2Overlay').style.display = 'flex';
