@@ -2290,10 +2290,11 @@ function afficherEmpV2() {
       } else {
         lignes = '<div class="ligne-ronds">' + ronds.join('') + '</div>';
       }
+      var compteClasse = occ < nb ? ' emp-compte-libre' : '';
       html += '<div class="emp-rangee" data-meuble="' + meuble + '" data-rangee="' + rangee + '">' +
                 '<span class="emp-rangee-nom">Rangée ' + rangee + '</span>' +
                 '<div class="emp-ronds">' + lignes + '</div>' +
-                '<span class="emp-compte">' + occ + '/' + nb + '</span>' +
+                '<span class="emp-compte' + compteClasse + '">' + occ + '/' + nb + '</span>' +
               '</div>';
     });
     html += '</div>';
