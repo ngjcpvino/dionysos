@@ -404,6 +404,7 @@ body::after {
   margin: 0 0 var(--space-l) 0;
 }
 .emp-compte { color: var(--white-50); font-size: var(--fs-11); }
+.emp-compte-libre { color: var(--success); }
 .emp-rangee-nom { color: var(--white-50); font-size: var(--fs-13); }
 .emp-ronds { display: flex; flex-direction: column; align-items: center; }
 
