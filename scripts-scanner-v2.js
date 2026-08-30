@@ -269,9 +269,10 @@ function barcodeDepuisSAQV2(codeSAQ) {
 function ouvrirMenuActionV2(code, wineResult) {
   if (suggestionsV2Attente) {
     suggestionsV2Attente = false;
-    var codeSAQ = codeSAQDepuisBarcodeV2(code);
-    if (codeSAQ) { ouvrirSuggestionAjoutV2(codeSAQ, null); return; }
-    afficherMessage('Ce vin n\'a pas de code SAQ');
+    cacherToutesPagesV2();
+    afficherMessage('Ce vin existe déjà — ouvrez sa fiche pour ajouter une suggestion');
+    ouvrirApresTap(ouvrirSuggestionsV2);
+    return;
   }
   menuActionV2Context = { code: code, wineResult: wineResult };
   const w = (wineResult && wineResult.wine) ? wineResult.wine : {};
@@ -1185,7 +1186,7 @@ function ouvrirSuggestionAjoutV2(codeSAQ, retour) {
   suggestionEditV2 = { row: 0, codeSAQ: codeSAQ, retour: retour || null };
   document.getElementById('suggestionEditV2-titre').textContent = 'Ajouter une suggestion';
   document.getElementById('suggestionEditV2-note').value = '';
-  remplirMenuSommelierSuggestionV2('');
+  remplirMenuSommelierSuggestionV2('', true);
   document.getElementById('suggestionEditV2Overlay').style.display = 'flex';
 }
 
@@ -1193,7 +1194,7 @@ function ouvrirSuggestionEditV2(row, sommelier, note, nomVin, codeSAQ, retour) {
   suggestionEditV2 = { row: row, codeSAQ: codeSAQ, retour: retour || 'liste' };
   document.getElementById('suggestionEditV2-titre').textContent = nomVin || 'Corriger';
   document.getElementById('suggestionEditV2-note').value = note || '';
-  remplirMenuSommelierSuggestionV2(sommelier);
+  remplirMenuSommelierSuggestionV2(sommelier, false);
   document.getElementById('suggestionEditV2Overlay').style.display = 'flex';
 }
 
