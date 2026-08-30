@@ -1201,19 +1201,19 @@ function ouvrirSuggestionEditV2(row, sommelier, note, nomVin, codeSAQ, retour) {
 function remplirMenuSommelierSuggestionV2(actuel, modifiable) {
   var display = document.getElementById('suggestionEditV2-sommelier-display');
   var menu = document.getElementById('suggestionEditV2-sommelier-menu');
-  display.textContent = actuel || 'Sommelier';
+  display.textContent = actuel || '+ Ajouter';
   display.setAttribute('data-valeur', actuel || '');
+  menu.classList.remove('ouvert');
   if (modifiable) {
     var sommeliers = (CONFIG && CONFIG.sommeliers) ? CONFIG.sommeliers : [];
     menu.innerHTML = sommeliers.map(function(s) {
       return '<div class="item-liste' + (s === actuel ? ' actif' : '') + '" onclick="choisirSommelierSuggestionV2(\'' + s.replace(/'/g, "\\'") + '\')">' + s + '</div>';
-    }).join('') + '<div class="item-liste" id="suggestionEditV2-sommelier-ajouter" onclick="ouvrirAjoutSommelierV2()">+ Ajouter</div>';
+    }).join('') + '<div class="item-liste" id="suggestionEditV2-sommelier-ajouter" onclick="ouvrirAjoutSommelierV2()">+ Ajouter un sommelier</div>';
     display.classList.add('champ-cliquable');
     display.classList.remove('ligne-info');
     display.onclick = basculerMenuSommelierSuggestionV2;
   } else {
     menu.innerHTML = '';
-    menu.classList.remove('ouvert');
     display.classList.remove('champ-cliquable');
     display.classList.add('ligne-info');
     display.onclick = null;
