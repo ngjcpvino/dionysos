@@ -43,13 +43,9 @@
   <div class="item-liste" onclick="burgerV2Click('racheter')">LISTE D'ACHAT</div>
   <div class="item-liste" onclick="burgerV2Click('aranger')">À RANGER</div>
   <div class="item-liste" onclick="burgerV2Click('sanscepage')">SANS CÉPAGE</div>
-
-  
-  <div class="item-liste" onclick="burgerV2Click('accords')">SELON CHARTIER</div>
-    <div class="item-liste" onclick="burgerV2Click('suggestions')">SUGGESTIONS</div>
+  <div class="item-liste" onclick="burgerV2Click('suggestions')">SUGGESTIONS</div>
+  <div class="item-liste" onclick="burgerV2Click('facture')">FACTURE SAQ</div>
   <div class="item-liste" onclick="burgerV2Click('promotions')">PROMOTIONS SAQ</div>
-    <div class="item-liste" onclick="burgerV2Click('facture')">FACTURE SAQ</div>
-
  
  <div class="item-liste" onclick="burgerV2Click('refresh')">
     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
@@ -397,13 +393,12 @@
 <!-- ====================== RECHERCHE V2 ====================== -->
 <div id="rechercheV2Container" class="modal-v2-fullscreen" style="display:none;">
   <div class="modal-v2-content modale-haut">
-    
-     <div class="cercle gauche" id="rechercheV2-loupe" onclick="ouvrirFiltresRechercheV2()">
-      <img src="https://res.cloudinary.com/dym93w23h/image/upload/v1786985550/entonnoire_lqpv39.png" alt="Filtres" style="width:20px;height:20px;object-fit:contain;">
+    <div class="cercle gauche" id="rechercheV2-loupe" onclick="ouvrirFiltresRechercheV2()">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; vertical-align: middle;">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
     </div>
-
-    
-    
     <div class="btn-fermer" onclick="fermerRechercheV2()">✕</div>
     <h2 class="titre-1">Recherche</h2>
     <input type="text" id="rechercheV2-champ" class="champ-saisie" style="margin-bottom: var(--space-m);" placeholder="Chercher dans tous les champs" oninput="lancerRechercheV2()">
@@ -524,24 +519,6 @@
     </div>
   </div>
 </div>
-
-<!-- ====================== ACCORDS METS-VINS V2 ====================== -->
-<div id="accordsV2Container" class="modal-v2-fullscreen" style="display:none;">
-  <div class="modal-v2-content modale-haut">
-      <div class="cercle gauche" id="accordsV2-loupe" onclick="ouvrirFiltresAccordsV2()">
-      <img src="https://res.cloudinary.com/dym93w23h/image/upload/v1786985550/entonnoire_lqpv39.png" alt="Filtres" style="width:20px;height:20px;object-fit:contain;">
-    </div>
-
-    <h2 class="titre-1">Accords mets-vins</h2>
-    <div class="btn-fermer" onclick="fermerAccordsV2()">✕</div>
-    <div id="accordsV2-selection" class="texte-secondaire"></div>
-    <div id="accordsV2-resultats" class="contenu"></div>
-  </div>
-  <div id="accordsV2-filtres-voile" class="panneau-voile" onclick="fermerFiltresAccordsV2()"></div>
-  <div id="accordsV2-filtres" class="panneau-gauche"></div>
-</div>
-
-
 
 <!-- ====================== PHOTO V2 ====================== -->
 <div id="photoV2Overlay" class="modal-v2-fullscreen" style="display:none;" onclick="clicFondPhotoV2()">
