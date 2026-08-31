@@ -945,7 +945,7 @@ textarea.champ-saisie { resize: none; font-family: inherit; line-height: 1.4; }
 }
 .histo-groupe {
   margin-bottom: var(--space-xl);
-  border-left: var(--largeur-bordure-3) solid transparent;
+  border-left: var(--largeur-bordure-1) solid transparent;
   padding-left: var(--space-s);
 }
 .histo-groupe.vin-rouge  { border-left-color: var(--vin-rouge); }
