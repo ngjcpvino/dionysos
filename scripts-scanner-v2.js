@@ -1182,7 +1182,7 @@ function afficherSuggestionsV2() {
         '<div class="carte-droite">' + (s.date || '') + '</div></div>';
     }).join('');
 
-    return '<div class="histo-groupe">' + carteVin + cartesSugg + '</div>';
+    return '<div class="histo-groupe ' + couleurClasseV2(w.Couleur) + '">' + carteVin + cartesSugg + '</div>';
   }).join('');
 }
 

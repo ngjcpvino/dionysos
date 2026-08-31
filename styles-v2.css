@@ -943,7 +943,16 @@ textarea.champ-saisie { resize: none; font-family: inherit; line-height: 1.4; }
   text-align: center; 
   border-bottom: 1px solid var(--gold); 
 }
-.histo-groupe { margin-bottom: var(--space-xl); }
+.histo-groupe {
+  margin-bottom: var(--space-xl);
+  border-left: var(--largeur-bordure-3) solid transparent;
+  padding-left: var(--space-s);
+}
+.histo-groupe.vin-rouge  { border-left-color: var(--vin-rouge); }
+.histo-groupe.vin-blanc  { border-left-color: var(--vin-blanc); }
+.histo-groupe.vin-rose   { border-left-color: var(--vin-rose); }
+.histo-groupe.vin-bulles { border-left-color: var(--vin-bulles); }
+.histo-groupe.vin-spiritueux { border-left-color: var(--vin-spiritueux); }
 .histo-vin {
   padding-top: var(--space-s);
 }
