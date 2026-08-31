@@ -1755,8 +1755,8 @@ function fermerRechercheV2() {
   document.getElementById('rechercheV2Container').style.display = 'none';
 }
 
-var filtresRechercheV2 = { couleur: '', cepage: '', pays: '', appellation: '', accords: '', pastille: '' };
-var libellesFiltreRechercheV2 = { couleur: 'Couleurs', cepage: 'Cépages', pays: 'Pays', appellation: 'Appellations', accords: 'Accords', pastille: 'Pastille de goût' };
+var filtresRechercheV2 = { sommelier: '', couleur: '', cepage: '', pays: '', appellation: '', accords: '', pastille: '' };
+var libellesFiltreRechercheV2 = { sommelier: 'Sommelier', couleur: 'Couleurs', cepage: 'Cépages', pays: 'Pays', appellation: 'Appellations', accords: 'Accords', pastille: 'Pastille de goût' };
 
 function ouvrirFiltresRechercheV2() {
   document.getElementById('rechercheV2-filtres-voile').classList.add('ouvert');
@@ -1770,6 +1770,23 @@ function fermerFiltresRechercheV2() {
 function remplirFiltresRechercheV2() {
   var f = filtresRechercheV2;
   var base = (ALL_DATA || []);
+
+  var vusSom = {};
+  var sommeliers = [];
+  (ALL_SUGGESTIONS || []).forEach(function(s) {
+    var v = (s.sommelier || '').toString().trim();
+    var k = normaliserRechercheV2(v);
+    if (v && !vusSom[k]) { vusSom[k] = true; sommeliers.push(v); }
+  });
+  sommeliers.sort(function(a, b) { return a.localeCompare(b); });
+  var menuSom = document.getElementById('rechercheV2-f-sommelier-menu');
+  if (menuSom) {
+    menuSom.innerHTML = sommeliers.map(function(v) {
+      return '<div class="item-liste' + (v === f.sommelier ? ' actif' : '') + '" onclick="choisirFiltreRechercheV2(\'sommelier\', \'' + v.replace(/'/g, "\\'") + '\')">' + v + '</div>';
+    }).join('');
+  }
+  var dispSom = document.getElementById('rechercheV2-f-sommelier-display');
+  if (dispSom) dispSom.textContent = f.sommelier || 'Sommelier';
 
   var forCouleur = base;
   var forCepage = f.couleur ? base.filter(function(i){ return i.Couleur === f.couleur; }) : base;
@@ -1803,7 +1820,7 @@ function remplirFiltresRechercheV2() {
 function basculerFiltreRechercheV2(cle) {
   var menu = document.getElementById('rechercheV2-f-' + cle + '-menu');
   var ouvert = menu.classList.contains('ouvert');
-  ['couleur','cepage','pays','appellation','accords','pastille'].forEach(function(k) {
+  ['sommelier','couleur','cepage','pays','appellation','accords','pastille'].forEach(function(k) {
     document.getElementById('rechercheV2-f-' + k + '-menu').classList.remove('ouvert');
   });
   if (!ouvert) menu.classList.add('ouvert');
@@ -1817,8 +1834,8 @@ function choisirFiltreRechercheV2(cle, valeur) {
 }
 
 function reinitialiserFiltresRechercheV2() {
-  filtresRechercheV2 = { couleur: '', cepage: '', pays: '', appellation: '', accords: '', pastille: '' };
-  ['couleur','cepage','pays','appellation','accords','pastille'].forEach(function(k) {
+  filtresRechercheV2 = { sommelier: '', couleur: '', cepage: '', pays: '', appellation: '', accords: '', pastille: '' };
+  ['sommelier','couleur','cepage','pays','appellation','accords','pastille'].forEach(function(k) {
     document.getElementById('rechercheV2-f-' + k + '-menu').classList.remove('ouvert');
   });
   remplirFiltresRechercheV2();
@@ -1844,24 +1861,32 @@ function lancerRechercheV2() {
   var div = document.getElementById('rechercheV2-cartes');
   var f = filtresRechercheV2;
   var loupe = document.getElementById('rechercheV2-loupe');
-  if (loupe) loupe.classList.toggle('actif', !!(f.couleur || f.cepage || f.pays || f.appellation || f.accords || f.pastille));
-  if (terme.length < 2) {
+  if (loupe) loupe.classList.toggle('actif', !!(f.sommelier || f.couleur || f.cepage || f.pays || f.appellation || f.accords || f.pastille));
+  if (terme.length < 2 && !f.sommelier) {
     compte.textContent = '';
     div.innerHTML = '<div class="texte-secondaire">Tape un mot : agent, producteur, arôme, appellation…</div>';
     return;
   }
+  var saqSommelier = null;
+  if (f.sommelier) {
+    saqSommelier = {};
+    (ALL_SUGGESTIONS || []).forEach(function(s) {
+      if (s.sommelier === f.sommelier) saqSommelier[s.codeSAQ] = true;
+    });
+  }
   var champsExclus = { row: 1, bottle: 1, Statut: 1, Meuble: 1, Rangee: 1, Espace: 1, 'Date d\'ajout': 1, 'Date sortie': 1, Source: 1, 'Photo URL': 1 };
   var trouves = (ALL_DATA || []).filter(function(i) {
-    return (!f.couleur || i.Couleur === f.couleur) &&
+    return (!saqSommelier || saqSommelier[(i['Code SAQ'] || '').toString().trim()]) &&
+      (!f.couleur || i.Couleur === f.couleur) &&
       (!f.cepage || contientTexteV2(i.Cepage, f.cepage)) &&
       (!f.pays || i.Pays === f.pays) &&
       (!f.appellation || i.Appellation === f.appellation) &&
       (!f.accords || (i.Accords && i.Accords.indexOf(f.accords) !== -1)) &&
       (!f.pastille || contientTexteV2(i['Pastille gout'], f.pastille)) &&
-      Object.keys(i).some(function(k) {
+      (terme.length < 2 || Object.keys(i).some(function(k) {
         if (champsExclus[k]) return false;
         return normaliserRechercheV2(i[k]).indexOf(terme) !== -1;
-      });
+      }));
   });
   var groups = grouperVinsV2(trouves);
   compte.textContent = groups.length + ' vin' + (groups.length > 1 ? 's' : '') + ' trouvé' + (groups.length > 1 ? 's' : '');
@@ -3556,7 +3581,7 @@ var PANNEAUX_V2 = {
   },
   recherche: {
     prefixe: 'rechercheV2', bascule: 'basculerFiltreRechercheV2', reinit: 'reinitialiserFiltresRechercheV2',
-    filtres: [['couleur', 'Couleurs'], ['cepage', 'Cépages'], ['pays', 'Pays'], ['appellation', 'Appellations'], ['accords', 'Accords'], ['pastille', 'Pastille de goût']]
+    filtres: [['sommelier', 'Sommelier'], ['couleur', 'Couleurs'], ['cepage', 'Cépages'], ['pays', 'Pays'], ['appellation', 'Appellations'], ['accords', 'Accords'], ['pastille', 'Pastille de goût']]
   },
   suggestions: {
     prefixe: 'suggestionsV2', bascule: 'basculerFiltreSuggestionsV2', reinit: 'reinitialiserFiltresSuggestionsV2',
