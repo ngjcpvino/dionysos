@@ -2836,7 +2836,7 @@ function afficherHistoV2() {
         '<div class="carte-droite">' + (m.date || '') + '</div></div>';
     }).join('');
 
-    return '<div class="histo-groupe">' + carteVin + cartesMets + '</div>';
+    return '<div class="histo-groupe ' + couleurClasseV2(g.couleur) + '">' + carteVin + cartesMets + '</div>';
   }).join('');
 }
 
