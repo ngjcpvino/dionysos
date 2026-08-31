@@ -198,6 +198,13 @@ function creerVinSAQV2(code, codeSAQ) {
 function enchainerMenuApresCreationV2(code) {
   appelBackend('checkWineExists', { codebarre: code }, { spinner: 'Un instant svp' }).then(function(result) {
     document.getElementById('vinInconnuV2Container').style.display = 'none';
+    if (suggestionsV2Attente) {
+      appelBackend('updateWineField', { codebarre: code, field: 'Racheter', value: '' }, { spinner: '' }).then(function() {
+        majMemoireVinV2(code, { 'Racheter': '' });
+        ouvrirMenuActionV2(code, result);
+      });
+      return;
+    }
     ouvrirMenuActionV2(code, result);
   }).catch(function() {
     retourAccueilV2();
@@ -1184,7 +1191,9 @@ var suggestionEditV2 = { row: 0, codeSAQ: '', retour: null };
 
 function ouvrirSuggestionAjoutV2(codeSAQ, retour) {
   suggestionEditV2 = { row: 0, codeSAQ: codeSAQ, retour: retour || null };
-  document.getElementById('suggestionEditV2-titre').textContent = 'Ajouter une suggestion';
+  var w = vinParCodeSAQV2(codeSAQ) || {};
+  document.getElementById('suggestionEditV2-nom').textContent = decodeHTML(w.Nom || 'Vin');
+  document.getElementById('suggestionEditV2-origine').textContent = [w.Pays, w.Region, w.Appellation].filter(Boolean).map(decodeHTML).join(' • ');
   document.getElementById('suggestionEditV2-note').value = '';
   remplirMenuSommelierSuggestionV2('', true);
   document.getElementById('suggestionEditV2Overlay').style.display = 'flex';
@@ -1192,7 +1201,9 @@ function ouvrirSuggestionAjoutV2(codeSAQ, retour) {
 
 function ouvrirSuggestionEditV2(row, sommelier, note, nomVin, codeSAQ, retour) {
   suggestionEditV2 = { row: row, codeSAQ: codeSAQ, retour: retour || 'liste' };
-  document.getElementById('suggestionEditV2-titre').textContent = nomVin || 'Corriger';
+  var w = vinParCodeSAQV2(codeSAQ) || {};
+  document.getElementById('suggestionEditV2-nom').textContent = nomVin || decodeHTML(w.Nom || 'Vin');
+  document.getElementById('suggestionEditV2-origine').textContent = [w.Pays, w.Region, w.Appellation].filter(Boolean).map(decodeHTML).join(' • ');
   document.getElementById('suggestionEditV2-note').value = note || '';
   remplirMenuSommelierSuggestionV2(sommelier, false);
   document.getElementById('suggestionEditV2Overlay').style.display = 'flex';

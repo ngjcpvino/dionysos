@@ -178,18 +178,6 @@ function afficherFicheV2(result) {
     html += '</div>';
   }
 
-  // === NOTES : SUGGÉRER ===
-  html += '<div class="section">';
-  html += '<div style="display:flex;align-items:center;justify-content:flex-start;gap:var(--space-s);margin-bottom:var(--space-s);"><h3 class="titre-2" style="margin:0;">Suggérer</h3><div class="cercle" onclick="ouvrirSuggestionAjoutV2(\'' + (wine['Code SAQ'] || '').toString().trim() + '\', \'fiche\')">+</div></div>';
-  html += '<div id="ficheV2-suggestions"></div>';
-  html += '</div>';
-
-  // === NOTES : HISTORIQUE ===
-  html += '<div class="section" id="ficheV2-plats-section" style="display:none;">';
-  html += '<div style="display:flex;align-items:center;justify-content:flex-start;gap:var(--space-s);margin-bottom:var(--space-s);"><h3 class="titre-2" style="margin:0;">Historique</h3><div class="cercle" onclick="ouvrirHistoAjoutDepuisFicheV2()">+</div></div>';
-  html += '<div id="ficheV2-plats"></div>';
-  html += '</div>';
-
   // === NOTES : APPRÉCIATION ===
   html += '<div class="section">';
   html += '<h3 class="titre-2">Appréciation</h3>';
@@ -223,6 +211,18 @@ function afficherFicheV2(result) {
           '</div>';
 
   html += ligne('Divers', wine.Divers);
+  html += '</div>';
+
+  // === NOTES : HISTORIQUE ===
+  html += '<div class="section" id="ficheV2-plats-section" style="display:none;">';
+  html += '<div style="display:flex;align-items:center;justify-content:flex-start;gap:var(--space-s);margin-bottom:var(--space-s);"><h3 class="titre-2" style="margin:0;">Historique</h3><div class="cercle" onclick="ouvrirHistoAjoutDepuisFicheV2()">+</div></div>';
+  html += '<div id="ficheV2-plats"></div>';
+  html += '</div>';
+
+  // === NOTES : SUGGÉRER ===
+  html += '<div class="section">';
+  html += '<div style="display:flex;align-items:center;justify-content:flex-start;gap:var(--space-s);margin-bottom:var(--space-s);"><h3 class="titre-2" style="margin:0;">Suggérer</h3><div class="cercle" onclick="ouvrirSuggestionAjoutV2(\'' + (wine['Code SAQ'] || '').toString().trim() + '\', \'fiche\')">+</div></div>';
+  html += '<div id="ficheV2-suggestions"></div>';
   html += '</div>';
 
 // === INVENTAIRE (lecture seule) ===

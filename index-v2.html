@@ -334,13 +334,19 @@
 <div id="suggestionEditV2Overlay" class="modal-v2-fullscreen" style="display:none;">
   <div class="modal-v2-content modale-haut">
     <button class="btn-fermer" onclick="fermerSuggestionEditV2()">✕</button>
-    <h2 id="suggestionEditV2-titre" class="titre-1">Suggérer</h2>
-    <div class="champ-cliquable" id="suggestionEditV2-sommelier-display" onclick="basculerMenuSommelierSuggestionV2()">Sommelier</div>
-    <div id="suggestionEditV2-sommelier-menu" class="menu-liste"></div>
-    <textarea id="suggestionEditV2-note" class="champ-saisie" rows="3" placeholder="Note"></textarea>
-    <div class="roundel" onclick="confirmerSuggestionEditV2()">
-      <span class="roundel-anneau"></span>
-      <span class="roundel-barre">Enregistrer</span>
+    <h2 id="suggestionEditV2-nom" class="titre-1"></h2>
+    <div id="suggestionEditV2-origine" class="texte-secondaire"></div>
+    <div class="titre-action">Suggérer</div>
+    <div style="width:100%; max-width:400px;">
+      <div class="titre-3">Sommelier</div>
+      <div class="champ-cliquable" id="suggestionEditV2-sommelier-display" onclick="basculerMenuSommelierSuggestionV2()">Sommelier</div>
+      <div id="suggestionEditV2-sommelier-menu" class="menu-liste"></div>
+      <div class="titre-3">Note</div>
+      <textarea id="suggestionEditV2-note" class="champ-saisie" rows="3" placeholder="Note"></textarea>
+      <div class="roundel" onclick="confirmerSuggestionEditV2()">
+        <span class="roundel-anneau"></span>
+        <span class="roundel-barre">Enregistrer</span>
+      </div>
     </div>
   </div>
 </div>
