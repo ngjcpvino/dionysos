@@ -277,7 +277,7 @@ function ouvrirMenuActionV2(code, wineResult) {
   if (suggestionsV2Attente) {
     suggestionsV2Attente = false;
     cacherToutesPagesV2();
-    afficherMessage('Ce vin existe déjà — ouvrez sa fiche pour ajouter une suggestion');
+    afficherMessage('Ce vin existe déjà, ouvrez sa fiche pour ajouter la suggestion');
     ouvrirApresTap(ouvrirSuggestionsV2);
     return;
   }
