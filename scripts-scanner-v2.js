@@ -1701,11 +1701,10 @@ function traiterPhotoRecuV2(input) {
         return;
       }
       if (!res.items || !res.items.length) {
-        alert(res.texte || 'Texte vide');
+        afficherMessage('Aucun code trouvé sur la facture');
         fermerRecuV2();
         return;
       }
-      alert(res.texte || 'Texte vide');
       RECU_V2_ITEMS = res.items;
       RECU_V2_INDEX = 0;
       document.getElementById('recuV2Container').style.display = 'none';
