@@ -548,6 +548,7 @@ function fermerFicheV2() {
     } else if (FICHE_V2_PROVENANCE === 'suggestions') {
     document.getElementById('suggestionsV2Container').style.display = 'flex';
     remonterScrollV2('suggestionsV2Container');
+    afficherSuggestionsV2();
   } else if (FICHE_V2_PROVENANCE === 'accords') {
     document.getElementById('accordsV2Container').style.display = 'flex';
     remonterScrollV2('accordsV2Container');
