@@ -1701,7 +1701,7 @@ function traiterPhotoRecuV2(input) {
         return;
       }
       if (!res.items || !res.items.length) {
-        alert(res.texte || 'Texte vide');
+        afficherMessage('Aucun code trouvé sur la facture');
         fermerRecuV2();
         return;
       }
