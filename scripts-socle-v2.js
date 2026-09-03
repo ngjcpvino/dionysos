@@ -26,6 +26,15 @@ function ouvrirApresTap(fn) {
   setTimeout(fn, 0);
 }
 
+function ouvrirSAQV2(codeSAQ) {
+  var iOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  if (iOS) {
+    window.location.href = codeSAQ ? 'saq://products/' + codeSAQ : 'saq://';
+  } else {
+    window.open(codeSAQ ? 'https://www.saq.com/fr/' + codeSAQ : 'https://www.saq.com', '_blank');
+  }
+}
+
 function remonterScrollV2(containerId) {
   var c = document.querySelector('#' + containerId + ' .modal-v2-content');
   if (c) c.scrollTop = 0;
