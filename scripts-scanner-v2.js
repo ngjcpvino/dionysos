@@ -23,6 +23,7 @@ function gtinValide(code) {
 }
 
 function startScanFromHomeV2() {
+  suggestionsV2Attente = false;
   startScannerV2();
 }
  
@@ -215,10 +216,10 @@ function creerVinSAQV2(code, codeSAQ) {
     if (res && res.success) {
       enchainerMenuApresCreationV2(code);
     } else {
-      retourAccueilV2();
+      retourAccueilV2((res && res.message) ? res.message : 'Création refusée par le serveur');
     }
-  }).catch(function() {
-    retourAccueilV2();
+  }).catch(function(e) {
+    retourAccueilV2('Création impossible : ' + (e && e.message ? e.message : 'erreur inconnue'));
   });
 }
 
@@ -230,6 +231,10 @@ function enchainerMenuApresCreationV2(code) {
     }).catch(function() { return result; });
   }).then(function(result) {
     document.getElementById('vinInconnuV2Container').style.display = 'none';
+    if (!result || !result.exists) {
+      retourAccueilV2('Le vin ne s\'est pas inscrit dans le Sheet — rien n\'a été créé');
+      return;
+    }
     if (suggestionsV2Attente) {
       appelBackend('updateWineField', { codebarre: code, field: 'Racheter', value: '' }, { spinner: '' }).then(function() {
         majMemoireVinV2(code, { 'Racheter': '' });
@@ -238,8 +243,8 @@ function enchainerMenuApresCreationV2(code) {
       return;
     }
     ouvrirMenuActionV2(code, result);
-  }).catch(function() {
-    retourAccueilV2();
+  }).catch(function(e) {
+    retourAccueilV2('Vérification impossible : ' + (e && e.message ? e.message : 'erreur inconnue'));
   });
 }
 
@@ -299,10 +304,10 @@ function creerVinNomV2(code, nom) {
     if (res && res.success) {
       enchainerMenuApresCreationV2(code);
     } else {
-      retourAccueilV2();
+      retourAccueilV2((res && res.message) ? res.message : 'Création refusée par le serveur');
     }
-  }).catch(function() {
-    retourAccueilV2();
+  }).catch(function(e) {
+    retourAccueilV2('Création impossible : ' + (e && e.message ? e.message : 'erreur inconnue'));
   });
 }
 
@@ -388,17 +393,18 @@ function cacherToutesPagesV2() {
   fermerMenuBurgerV2();
 }
 
-function retourAccueilV2() {
+function retourAccueilV2(message) {
+  var texte = message || 'Un problème est survenu, veuillez recommencer';
   if (suggestionsV2Attente) {
     suggestionsV2Attente = false;
     cacherToutesPagesV2();
-    afficherMessage('Un problème est survenu, veuillez recommencer');
+    afficherMessage(texte);
     ouvrirApresTap(ouvrirSuggestionsV2);
     return;
   }
   cacherToutesPagesV2();
   menuActionV2Context = null;
-  afficherMessage('Un problème est survenu, veuillez recommencer');
+  afficherMessage(texte);
 }
 
 function menuV2Click(action) {
@@ -1790,7 +1796,7 @@ function ouvrirRechercheV2() {
   remonterScrollV2('rechercheV2Container');
   var champ = document.getElementById('rechercheV2-champ');
   champ.value = '';
-  filtresRechercheV2 = { couleur: '', cepage: '', pays: '', appellation: '', accords: '', pastille: '' };
+  filtresRechercheV2 = { sommelier: '', couleur: '', cepage: '', pays: '', appellation: '', accords: '', pastille: '' };
   remplirFiltresRechercheV2();
   document.getElementById('rechercheV2-compte').textContent = '';
   document.getElementById('rechercheV2-cartes').innerHTML = '<div class="texte-secondaire">Tape un mot : agent, producteur, arôme, appellation…</div>';
@@ -3276,7 +3282,7 @@ function ouvrirAccordsV2() {
   remonterScrollV2('accordsV2Container');
   accordsV2Selection = {};
   accordsV2CategorieOuverte = null;
-  filtresAccordsV2 = { couleur: '' };
+  filtresAccordsV2 = { couleur: '', cepage: '', dispo: false };
   if (ALL_ACCORDS) {
     construirePanneauAccordsV2();
     majSelectionAccordsV2();
