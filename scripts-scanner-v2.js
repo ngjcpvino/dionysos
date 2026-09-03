@@ -224,6 +224,11 @@ function creerVinSAQV2(code, codeSAQ) {
 
 function enchainerMenuApresCreationV2(code) {
   appelBackend('checkWineExists', { codebarre: code }, { spinner: 'Un instant svp' }).then(function(result) {
+    return appelBackend('getInventoryData', {}, { spinner: 'Un instant svp' }).then(function(data) {
+      if (data) ALL_DATA = data;
+      return result;
+    }).catch(function() { return result; });
+  }).then(function(result) {
     document.getElementById('vinInconnuV2Container').style.display = 'none';
     if (suggestionsV2Attente) {
       appelBackend('updateWineField', { codebarre: code, field: 'Racheter', value: '' }, { spinner: '' }).then(function() {
