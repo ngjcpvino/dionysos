@@ -223,7 +223,7 @@ function afficherFicheV2(result) {
   // === ACCORDS SELON… ===
   html += '<div class="section">';
   html += '<h3 class="titre-2">Accords selon…</h3>';
-  html += '<div class="menu-liste">';
+  html += '<div class="menu-liste ouvert">';
   html += '<div class="item-liste" id="ficheV2-selon-som-titre" onclick="basculerAccordsSelonV2(\'som\')">Selon les sommeliers</div>';
   html += '<div id="ficheV2-selon-som" style="display:none;">';
   html += '<div style="display:flex;align-items:center;gap:var(--space-s);margin-bottom:var(--space-s);"><div class="cercle" onclick="ouvrirSuggestionAjoutV2(\'' + (wine['Code SAQ'] || '').toString().trim() + '\', \'fiche\')">+</div></div>';
