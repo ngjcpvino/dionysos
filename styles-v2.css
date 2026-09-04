@@ -785,6 +785,8 @@ textarea.champ-saisie { resize: none; font-family: inherit; line-height: 1.4; }
 .item-liste:last-child { margin-bottom: 0; }
 .item-liste.actif { background: var(--gold-30); }
 .panneau-gauche .item-liste { white-space: normal; }
+#ficheV2-recettes .item-liste { margin-left: var(--space-l); white-space: normal; }
+#ficheV2-recettes > div[id^="ficheV2-rec-"] .item-liste { margin-left: calc(var(--space-l) * 2); }
 .panneau-gauche .menu-liste { margin-left: auto; margin-right: 0; }
 
 /* ===== CERCLE — rond générique V2 (bordure or, fond sombre, centré) ===== */
