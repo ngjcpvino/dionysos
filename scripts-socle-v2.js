@@ -27,7 +27,8 @@ function ouvrirApresTap(fn) {
 }
 
 function ouvrirSAQV2(codeSAQ) {
-  var iOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  var iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+            (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   if (iOS) {
     window.location.href = codeSAQ ? 'saq://products/' + codeSAQ : 'saq://';
   } else {

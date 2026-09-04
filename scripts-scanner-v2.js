@@ -385,7 +385,7 @@ function fermerMenuActionV2() {
 }
 
 function cacherToutesPagesV2() {
-  ['scannerV2Container', 'saisieManuelleV2Container', 'vinInconnuV2Container', 'menuActionV2Overlay', 'arriveeV2Container', 'deplacerV2Container', 'boireV2Container', 'donnerV2Container', 'caveV2Container', 'aRangerV2Container', 'sansCepageV2Container', 'suggestionsV2Container', 'suggestionEditV2Overlay', 'histoV2Container', 'histoAjoutV2Overlay', 'histoEditV2Overlay', 'empV2Container', 'achatV2Container', 'promoV2Container', 'rechercheV2Container', 'editFicheV2Overlay', 'ficheV2Overlay', 'photoV2Overlay', 'recuV2Container', 'recuValidationV2Container', 'accordsV2Container'].forEach(function(id) {
+  ['scannerV2Container', 'saisieManuelleV2Container', 'vinInconnuV2Container', 'menuActionV2Overlay', 'arriveeV2Container', 'deplacerV2Container', 'boireV2Container', 'donnerV2Container', 'caveV2Container', 'aRangerV2Container', 'sansCepageV2Container', 'suggestionsV2Container', 'suggestionEditV2Overlay', 'histoV2Container', 'histoAjoutV2Overlay', 'histoEditV2Overlay', 'empV2Container', 'achatV2Container', 'promoV2Container', 'rechercheV2Container', 'editFicheV2Overlay', 'ficheV2Overlay', 'photoV2Overlay', 'recuV2Container', 'recuValidationV2Container', 'accordsV2Container', 'selonSaqV2Container'].forEach(function(id) {
 
     var el = document.getElementById(id);
     if (el) el.style.display = 'none';
@@ -2281,6 +2281,7 @@ function remplirFiltresEmpV2() {
 
   // Cépages doubles : seulement si un meuble est choisi. Cépages manquants : toujours.
   document.getElementById('empV2-btn-cepdoubles').style.display = f.meuble ? 'flex' : 'none';
+  document.getElementById('empV2-btn-listemeuble').style.display = (f.meuble && f.meuble !== 'À ranger') ? 'flex' : 'none';
   document.getElementById('empV2-btn-cepmanquants').style.display = 'flex';
   document.getElementById('empV2-btn-appmanquante').style.display = 'flex';
 
@@ -2381,7 +2382,7 @@ function afficherEmpV2() {
         var photo = (w && w['Photo URL']) ? w['Photo URL'] : '';
         var cb = (w && w['Code-barres']) ? w['Code-barres'].toString().trim().replace(/\s+/g, '') : '';
         var coul = w ? 'var(--' + couleurClasseV2(w.Couleur) + ')' : '';
-        ronds.push('<div class="cercle" data-photo="' + photo + '" data-cb="' + cb + '" data-couleur="' + coul + '"></div>');
+        ronds.push('<div class="cercle" data-photo="' + photo + '" data-cb="' + cb + '" data-row="' + (w ? w.row : '') + '" data-couleur="' + coul + '"></div>');
       });
       // 7 espaces = quinconce réel : bas 1-3-5-7, haut 2-4-6
       var lignes;
@@ -2405,7 +2406,7 @@ function afficherEmpV2() {
       var photo = w['Photo URL'] || '';
       var cb = (w['Code-barres'] || '').toString().trim().replace(/\s+/g, '');
       var coul = 'var(--' + couleurClasseV2(w.Couleur) + ')';
-      return '<div class="cercle" data-photo="' + photo + '" data-cb="' + cb + '" data-couleur="' + coul + '"></div>';
+      return '<div class="cercle" data-photo="' + photo + '" data-cb="' + cb + '" data-row="' + w.row + '" data-couleur="' + coul + '"></div>';
     }).join('');
     html += '<div class="emp-bloc"><div class="emp-meuble">À ranger</div>' +
             '<div class="emp-rangee a-ranger">' +
@@ -2435,9 +2436,11 @@ function brancherTirerRangeesEmpV2() {
           c.style.borderColor = c.getAttribute('data-couleur') || '';
           var cb = c.getAttribute('data-cb');
           if (cb) {
+            var rowRond = c.getAttribute('data-row');
             c.addEventListener('click', function(ev){
               ev.stopPropagation();
-              ouvrirApresTap(function(){ ouvrirPhotoEmpV2(cb); });
+              var liste = el.classList.contains('a-ranger') ? bouteillesARangerEmpV2() : parcoursMeubleEmpV2(el.getAttribute('data-meuble'));
+              ouvrirApresTap(function(){ ouvrirPhotoEmpV2(cb, liste, rowRond); });
             });
           } else {
             c.addEventListener('click', function(ev){
@@ -2449,6 +2452,16 @@ function brancherTirerRangeesEmpV2() {
         });
       }
     });
+  });
+}
+
+// Parcours d'un meuble en ordre physique : rangée puis espace
+function parcoursMeubleEmpV2(meuble) {
+  return bouteillesRangeesEmpV2().filter(function(i){
+    return String(i.Meuble) === String(meuble);
+  }).sort(function(a, b){
+    if (parseInt(a.Rangee) !== parseInt(b.Rangee)) return parseInt(a.Rangee) - parseInt(b.Rangee);
+    return parseInt(a.Espace) - parseInt(b.Espace);
   });
 }
 
@@ -2515,6 +2528,31 @@ function afficherListeEmpV2(type) {
     titre = 'Vins en double';
     if (groupes.length === 0) { html = '<div class="texte-secondaire">Aucun vin en double</div>'; }
     else { html = groupes.map(function(g){ return empCarteVinV2(g.wine, g.count + ' btl<br>' + g.emplacements.join(', ')); }).join(''); }
+
+  } else if (type === 'listemeuble') {
+    // Tout le meuble choisi, en sections par cépage dominant
+    var dansMeubleL = tousRanges.filter(function(i){ return String(i.Meuble) === String(f.meuble); });
+    var parCepL = {};
+    var nomCepL = {};
+    grouperParSaqEmpV2(dansMeubleL).forEach(function(g){
+      var cep = cepageDominant(g.wine) || 'Sans cépage';
+      var k = normaliserRechercheV2(cep);
+      if (!parCepL[k]) { parCepL[k] = []; nomCepL[k] = cep; }
+      parCepL[k].push(g);
+    });
+    titre = 'Liste du meuble';
+    var clesL = Object.keys(parCepL).sort(function(a, b){ return a.localeCompare(b); });
+    if (clesL.length === 0) { html = '<div class="texte-secondaire">Aucun vin dans ce meuble</div>'; }
+    else {
+      html = clesL.map(function(k){
+        var vins = parCepL[k].sort(function(a, b){
+          return normaliserRechercheV2(decodeHTML(a.wine.Nom || '')).localeCompare(normaliserRechercheV2(decodeHTML(b.wine.Nom || '')));
+        });
+        return '<div class="emp-meuble">' + nomCepL[k] + '</div>' + vins.map(function(g){
+          return empCarteVinV2(g.wine, g.count + ' btl<br>' + g.emplacements.join(', '), true);
+        }).join('');
+      }).join('');
+    }
 
   } else if (type === 'cepdoubles') {
     // Cépage dominant présent sur 2+ vins DIFFÉRENTS du meuble choisi
@@ -2737,7 +2775,6 @@ function remplirFiltresHistoV2() {
   var f = filtresHistoV2;
   var base = ALL_HISTORIQUE || [];
 
-  var mets = uniqueHistoV2(base, 'plat');
   var vins = uniqueHistoV2(base, 'nom');
   var accords = [];
   // Accord = catégorie : on prend les accords des vins concernés via ALL_DATA
@@ -2756,20 +2793,19 @@ function remplirFiltresHistoV2() {
   });
   accords.sort(function(a, b){ return a.localeCompare(b); });
 
-  var listes = { mets: mets, vin: vins, accord: accords };
-  ['mets','vin','accord'].forEach(function(cle){
+  var listes = { vin: vins, accord: accords };
+  ['vin','accord'].forEach(function(cle){
     var cur = f[cle];
     var menu = document.getElementById('histoV2-f-' + cle + '-menu');
-    var items = listes[cle].map(function(v){
+    menu.innerHTML = listes[cle].map(function(v){
       return '<div class="item-liste' + (v === cur ? ' actif' : '') + '" onclick="choisirFiltreHistoV2(\'' + cle + '\', \'' + v.replace(/'/g, "\\'") + '\')">' + v + '</div>';
     }).join('');
-    if (cle === 'mets') {
-      items = '<input type="text" id="histoV2-f-mets-recherche" class="champ-saisie" placeholder="Rechercher un mets" oninput="filtrerMenuMetsV2()">' + items;
-    }
-    menu.innerHTML = items;
     var disp = document.getElementById('histoV2-f-' + cle + '-display');
-    if (disp) disp.textContent = cur === '' ? ({mets:'Mets',vin:'Vin',accord:'Accord'})[cle] : cur;
+    if (disp) disp.textContent = cur === '' ? ({vin:'Vin',accord:'Accord'})[cle] : cur;
   });
+
+  var champMets = document.getElementById('histoV2-f-mets');
+  if (champMets) champMets.value = f.mets;
 
   var loupe = document.getElementById('histoV2-loupe');
   if (loupe) loupe.classList.toggle('actif', !!(f.mets || f.vin || f.accord));
@@ -2786,18 +2822,18 @@ function uniqueHistoV2(liste, champ) {
   return out;
 }
 
-function filtrerMenuMetsV2() {
-  var champ = document.getElementById('histoV2-f-mets-recherche');
-  var texte = normaliserRechercheV2(champ ? champ.value.trim() : '');
-  Array.prototype.forEach.call(document.querySelectorAll('#histoV2-f-mets-menu .item-liste'), function(el){
-    el.style.display = (!texte || normaliserRechercheV2(el.textContent).indexOf(texte) !== -1) ? '' : 'none';
-  });
+function filtrerMetsHistoV2() {
+  var champ = document.getElementById('histoV2-f-mets');
+  filtresHistoV2.mets = champ ? champ.value.trim() : '';
+  var loupe = document.getElementById('histoV2-loupe');
+  if (loupe) loupe.classList.toggle('actif', !!(filtresHistoV2.mets || filtresHistoV2.vin || filtresHistoV2.accord));
+  afficherHistoV2();
 }
 
 function basculerFiltreHistoV2(cle) {
   var menu = document.getElementById('histoV2-f-' + cle + '-menu');
   var ouvert = menu.classList.contains('ouvert');
-  ['mets','vin','accord'].forEach(function(k){
+  ['vin','accord'].forEach(function(k){
     document.getElementById('histoV2-f-' + k + '-menu').classList.remove('ouvert');
   });
   if (!ouvert) menu.classList.add('ouvert');
@@ -2812,7 +2848,9 @@ function choisirFiltreHistoV2(cle, valeur) {
 
 function reinitialiserFiltresHistoV2() {
   filtresHistoV2 = { mets: '', vin: '', accord: '' };
-  ['mets','vin','accord'].forEach(function(k) {
+  var champMets = document.getElementById('histoV2-f-mets');
+  if (champMets) champMets.value = '';
+  ['vin','accord'].forEach(function(k) {
     document.getElementById('histoV2-f-' + k + '-menu').classList.remove('ouvert');
   });
   remplirFiltresHistoV2();
@@ -2829,7 +2867,7 @@ function afficherHistoV2() {
   });
 
   var base = (ALL_HISTORIQUE || []).filter(function(h){
-    if (f.mets && (h.plat || '') !== f.mets) return false;
+    if (f.mets && normaliserRechercheV2(h.plat || '').indexOf(normaliserRechercheV2(f.mets)) === -1) return false;
     if (f.vin && (h.nom || '') !== f.vin) return false;
     if (f.accord) {
       var acc = cbAccords[(h.codebarre || '').toString().trim()] || '';
@@ -3524,7 +3562,91 @@ function calculerResultatsAccordsV2() {
 
 
 
-// ==================== MENU BURGER V2 ====================
+// ==================== SELON SAQ — sens inverse : ingrédient → vins ====================
+var selonSaqV2Selection = { ingredients: {}, plats: {} };
+var selonSaqV2Ouverte = null;
+
+function ouvrirSelonSaqV2() {
+  document.getElementById('selonSaqV2Container').style.display = 'flex';
+  remonterScrollV2('selonSaqV2Container');
+  selonSaqV2Selection = { ingredients: {}, plats: {} };
+  selonSaqV2Ouverte = null;
+  if (ALL_RECETTES) { construirePanneauSelonSaqV2(); calculerSelonSaqV2(); return; }
+  appelBackend('getRecettes', {}, { spinner: ' ' }).then(function(data) {
+    ALL_RECETTES = data || [];
+    construirePanneauSelonSaqV2();
+    calculerSelonSaqV2();
+  }).catch(function() { retourAccueilV2(); });
+}
+
+function fermerSelonSaqV2() {
+  fermerFiltresSelonSaqV2();
+  document.getElementById('selonSaqV2Container').style.display = 'none';
+}
+
+function ouvrirFiltresSelonSaqV2() {
+  document.getElementById('selonSaqV2-filtres-voile').classList.add('ouvert');
+  document.getElementById('selonSaqV2-filtres').classList.add('ouvert');
+}
+function fermerFiltresSelonSaqV2() {
+  document.getElementById('selonSaqV2-filtres-voile').classList.remove('ouvert');
+  document.getElementById('selonSaqV2-filtres').classList.remove('ouvert');
+}
+
+// Seules les recettes des familles présentes en cave
+function recettesUtilesSelonSaqV2() {
+  var fams = {};
+  (ALL_DATA || []).forEach(function(i) {
+    var f = (i.Famille || '').toString().trim();
+    if (f) fams[f] = true;
+  });
+  return (ALL_RECETTES || []).filter(function(r) {
+    return (r.familles || []).some(function(f) { return fams[f]; });
+  });
+}
+
+function valeursSelonSaqV2(champ) {
+  var comptes = {};
+  recettesUtilesSelonSaqV2().forEach(function(r) {
+    (r[champ] || []).forEach(function(v) { comptes[v] = (comptes[v] || 0) + 1; });
+  });
+  return Object.keys(comptes).sort(function(a, b) { return a.localeCompare(b); }).map(function(v) {
+    return { valeur: v, compte: comptes[v] };
+  });
+}
+
+function construirePanneauSelonSaqV2() {
+  var html = '';
+  html += '<div class="titre-3">Filtrer</div>';
+  html += '<div class="champ-cliquable" onclick="basculerListeSelonSaqV2(\'ingredients\')">Ingrédients</div>';
+  html += '<div id="selonSaqV2-liste-ingredients" class="menu-liste"></div>';
+  html += '<div class="champ-cliquable" onclick="basculerListeSelonSaqV2(\'plats\')">Types de plats</div>';
+  html += '<div id="selonSaqV2-liste-plats" class="menu-liste"></div>';
+  html += '<div class="roundel" onclick="reinitialiserSelonSaqV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Réinitialiser</span></div>';
+  document.getElementById('selonSaqV2-filtres').innerHTML = html;
+}
+
+function basculerListeSelonSaqV2(cle) {
+  var etaitOuverte = selonSaqV2Ouverte === cle;
+  ['ingredients', 'plats'].forEach(function(k) {
+    var d = document.getElementById('selonSaqV2-liste-' + k);
+    d.classList.remove('ouvert');
+    d.innerHTML = '';
+  });
+  if (etaitOuverte) { selonSaqV2Ouverte = null; return; }
+  selonSaqV2Ouverte = cle;
+  var champ = (cle === 'ingredients') ? 'ingredients' : 'typesPlats';
+  var div = document.getElementById('selonSaqV2-liste-' + cle);
+  div.innerHTML = valeursSelonSaqV2(champ).map(function(v) {
+    var sel = selonSaqV2Selection[cle][v.valeur];
+    return '<div class="item-liste' + (sel ? ' actif' : '') + '" data-valeur="' + v.valeur.replace(/"/g, '&quot;') + '" onclick="toggleSelonSaqV2(this, \'' + cle + '\')">' + v.valeur + ' (' + v.compte + ')</div>';
+  }).join('');
+  div.classList.add('ouvert');
+}
+
+function toggleSelonSaqV2(el, cle) {
+  var v = el.getAttribute('data-valeur');
+  if
 function toggleMenuV2() {
   var ouvert = document.getElementById('burgerV2').classList.toggle('ouvert');
   document.getElementById('burgerV2-voile').classList.toggle('ouvert', ouvert);
@@ -3552,6 +3674,7 @@ function burgerV2Click(cible) {
   if (cible === 'promotions') { cacherToutesPagesV2(); ouvrirPromoV2(); return; }
     if (cible === 'facture') { cacherToutesPagesV2(); ouvrirRecuV2(); return; }
   if (cible === 'accords') { cacherToutesPagesV2(); ouvrirAccordsV2(); return; }
+  if (cible === 'selonsaq') { cacherToutesPagesV2(); ouvrirSelonSaqV2(); return; }
 
   
   if (cible === 'refresh') {
@@ -3597,7 +3720,8 @@ var PANNEAUX_V2 = {
   },
   histo: {
     prefixe: 'histoV2', bascule: 'basculerFiltreHistoV2', reinit: 'reinitialiserFiltresHistoV2',
-    filtres: [['mets', 'Mets'], ['vin', 'Vin'], ['accord', 'Accord']],
+    avant: '<input type="text" id="histoV2-f-mets" class="champ-saisie" placeholder="Rechercher un mets" oninput="filtrerMetsHistoV2()">',
+    filtres: [['vin', 'Vin'], ['accord', 'Accord']],
     apres: '<div class="panneau-separateur"></div>' +
            '<div class="roundel" onclick="ouvrirHistoAjoutV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Ajouter</span></div>'
   },
@@ -3607,6 +3731,7 @@ var PANNEAUX_V2 = {
     apres: '<div class="panneau-separateur"></div>' +
            '<div class="roundel" onclick="afficherListeEmpV2(\'doubles\')"><span class="roundel-anneau"></span><span class="roundel-barre">Vins en double</span></div>' +
            '<div id="empV2-btn-cepdoubles" class="roundel" style="display:none;" onclick="afficherListeEmpV2(\'cepdoubles\')"><span class="roundel-anneau"></span><span class="roundel-barre">Cépages doubles</span></div>' +
+           '<div id="empV2-btn-listemeuble" class="roundel" style="display:none;" onclick="afficherListeEmpV2(\'listemeuble\')"><span class="roundel-anneau"></span><span class="roundel-barre">Liste du meuble</span></div>' +
            '<div id="empV2-btn-cepmanquants" class="roundel" style="display:none;" onclick="afficherListeEmpV2(\'cepmanquants\')"><span class="roundel-anneau"></span><span class="roundel-barre">Cépages manquants</span></div>' +
            '<div id="empV2-btn-appmanquante" class="roundel" style="display:none;" onclick="afficherListeEmpV2(\'appmanquante\')"><span class="roundel-anneau"></span><span class="roundel-barre">Appellation manquante</span></div>' +
            '<div class="panneau-separateur"></div>'
