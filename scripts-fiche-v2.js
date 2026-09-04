@@ -576,9 +576,11 @@ function ouvrirPhotoEmpV2(cb, liste, row) {
   var entete = document.getElementById('photoV2-entete');
   if (entete) {
     var origine = [w.Pays, w.Region, w.Appellation].filter(Boolean).join(' · ');
-    entete.innerHTML = '<div class="photo-entete-nom">' + decodeHTML((w.Nom || '—').toString()) + '</div>' +
-                       (origine ? '<div class="photo-entete-ligne">' + decodeHTML(origine.toString()) + '</div>' : '') +
-                       (w.Cepage ? '<div class="photo-entete-ligne">' + decodeHTML(w.Cepage.toString()) + '</div>' : '');
+    var lignes = [];
+    if (origine) lignes.push(decodeHTML(origine.toString()));
+    if (w.Cepage) lignes.push(decodeHTML(w.Cepage.toString()));
+    entete.innerHTML = '<h2 class="titre-1">' + decodeHTML((w.Nom || '—').toString()) + '</h2>' +
+                       (lignes.length ? '<div class="texte-secondaire">' + lignes.join('<br>') + '</div>' : '');
     entete.style.display = '';
   }
   var photo = w['Photo URL'] || '';
