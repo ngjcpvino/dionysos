@@ -2285,6 +2285,7 @@ function remplirFiltresEmpV2() {
   document.getElementById('empV2-btn-listemeuble').style.display = (f.meuble && f.meuble !== 'À ranger') ? 'flex' : 'none';
   document.getElementById('empV2-btn-cepmanquants').style.display = 'flex';
   document.getElementById('empV2-btn-appmanquante').style.display = 'flex';
+  document.getElementById('empV2-btn-fammanquante').style.display = 'flex';
 
   // Loupe : OR si un filtre actif
   var loupe = document.getElementById('empV2-loupe');
@@ -2629,6 +2630,56 @@ function afficherListeEmpV2(type) {
     else {
       html = cles2.map(function(cep){
         return '<div class="emp-meuble">' + nomCepageHors[cep] + '</div>' + parCepageHors[cep].map(function(g){
+          return empCarteVinV2(g.wine, g.count + ' btl<br>' + g.emplacements.join(', '), true);
+        }).join('');
+      }).join('');
+    }
+
+  } else if (type === 'fammanquante' && !f.meuble) {
+    // Global : familles de ma liste de vins absentes du stock actif
+    titre = 'Familles manquantes';
+    var actifsTousFam = (ALL_DATA || []).filter(function(i){ var s = i.Statut || 'En stock'; return i.bottle && i.bottle > 0 && s !== 'Bu' && s !== 'Sorti'; });
+    var famStock = {};
+    actifsTousFam.forEach(function(w){ var fa = (w.Famille || '').toString().trim(); if (fa) famStock[fa] = true; });
+    var parFamGlobal = {};
+    grouperVinsV2(ALL_DATA || []).forEach(function(g){
+      var fam = (g.wine.Famille || '').toString().trim();
+      if (!fam || famStock[fam]) return;
+      if (!parFamGlobal[fam]) parFamGlobal[fam] = [];
+      parFamGlobal[fam].push(g);
+    });
+    var clesFamG = Object.keys(parFamGlobal).sort(function(a,b){ return a.localeCompare(b); });
+    if (clesFamG.length === 0) { html = '<div class="texte-secondaire">Aucune famille manquante</div>'; }
+    else {
+      html = clesFamG.map(function(fam){
+        return '<div class="emp-meuble">' + fam + '</div>' + parFamGlobal[fam].map(function(g){
+          return empCarteVinV2(g.wine, '0 btl', true);
+        }).join('');
+      }).join('');
+    }
+
+  } else if (type === 'fammanquante') {
+    // Famille présente dans d'AUTRES meubles, absente du meuble choisi
+    var dansMeubleFam = tousRanges.filter(function(i){ return String(i.Meuble) === String(f.meuble); });
+    var amontFam = meublesAmontV2(f.meuble);
+    var horsMeubleFam = tousRanges.filter(function(i){
+      return amontFam.some(function(m){ return memeTexteV2(m, i.Meuble); });
+    }).concat(bouteillesARangerEmpV2());
+    var famDansMeuble = {};
+    dansMeubleFam.forEach(function(w){ var fa = (w.Famille || '').toString().trim(); if (fa) famDansMeuble[fa] = true; });
+    var parFamHors = {};
+    grouperParSaqEmpV2(horsMeubleFam).forEach(function(g){
+      var fam = (g.wine.Famille || '').toString().trim();
+      if (!fam || famDansMeuble[fam]) return;
+      if (!parFamHors[fam]) parFamHors[fam] = [];
+      parFamHors[fam].push(g);
+    });
+    titre = 'Familles manquantes';
+    var clesFam2 = Object.keys(parFamHors).sort(function(a,b){ return a.localeCompare(b); });
+    if (clesFam2.length === 0) { html = '<div class="texte-secondaire">Aucune famille manquante</div>'; }
+    else {
+      html = clesFam2.map(function(fam){
+        return '<div class="emp-meuble">' + fam + '</div>' + parFamHors[fam].map(function(g){
           return empCarteVinV2(g.wine, g.count + ' btl<br>' + g.emplacements.join(', '), true);
         }).join('');
       }).join('');
@@ -3797,6 +3848,7 @@ var PANNEAUX_V2 = {
            '<div id="empV2-btn-listemeuble" class="roundel" style="display:none;" onclick="afficherListeEmpV2(\'listemeuble\')"><span class="roundel-anneau"></span><span class="roundel-barre">Liste du meuble</span></div>' +
            '<div id="empV2-btn-cepmanquants" class="roundel" style="display:none;" onclick="afficherListeEmpV2(\'cepmanquants\')"><span class="roundel-anneau"></span><span class="roundel-barre">Cépages manquants</span></div>' +
            '<div id="empV2-btn-appmanquante" class="roundel" style="display:none;" onclick="afficherListeEmpV2(\'appmanquante\')"><span class="roundel-anneau"></span><span class="roundel-barre">Appellation manquante</span></div>' +
+           '<div id="empV2-btn-fammanquante" class="roundel" style="display:none;" onclick="afficherListeEmpV2(\'fammanquante\')"><span class="roundel-anneau"></span><span class="roundel-barre">Familles manquantes</span></div>' +
            '<div class="panneau-separateur"></div>'
   },
   achat: {

@@ -677,25 +677,15 @@ body::after {
 }
 #photoV2Overlay.photo-ronde .photo-entete {
   position: absolute;
-  top: var(--space-l);
+  top: 60px;
   left: 0;
   right: 0;
   padding: 0 var(--space-l);
   text-align: center;
   pointer-events: none;
 }
-.photo-entete-nom {
-  font-family: var(--police-titre);
-  font-size: var(--fs-16);
-  color: var(--gold);
-  letter-spacing: var(--ls-wide);
-  text-transform: uppercase;
-  margin-bottom: var(--space-xs);
-}
-.photo-entete-ligne {
-  font-size: var(--fs-13);
-  color: var(--white-60);
-  letter-spacing: var(--ls-tight);
+#photoV2Overlay.photo-ronde .photo-entete .texte-secondaire {
+  margin-bottom: 0;
 }
 #photoV2Overlay.photo-ronde .btn-fermer {
   position: absolute;

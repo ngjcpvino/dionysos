@@ -179,7 +179,7 @@ App à 2 utilisateurs sur 2 téléphones, ~100 vins ; la vérité partagée est 
 
 **Photo** — `#photoV2Overlay`, deux modes : « fiche » (grande photo + ✕, la fiche reste dessous) et « rond » (Emplacements : photo dans un grand rond, bordure couleur, ✕ à 2 h à l'extérieur, nom du vin au centre si pas de photo). `ouvrirPhotoV2` remet tout à zéro, `onerror` compris.
 - **En-tête du mode rond** (4 septembre 2026, `#photoV2-entete`) : au-dessus du cercle, **toujours visible** — nom, origine (pays · région · appellation), cépage. Posé en `position:absolute` en haut de l'overlay : le cercle et le ✕ ne bougent pas d'un pixel. Le nom au centre du cercle reste le secours quand la photo manque ou casse. Caché en mode fiche.
-
+- **Au gabarit des pages VIN** (4 septembre 2026) : le nom est un `h2.titre-1`, l'origine et le cépage un seul `.texte-secondaire` séparés par un `<br>` — mêmes classes que le menu d'action, aucun style recopié. Le CSS ne garde que le placement (`top: 60px`, comme le `padding-top` de `.modale-haut`) et l'annulation du `margin-bottom` du sous-titre. Les classes `.photo-entete-nom` et `.photo-entete-ligne` sont supprimées.
 **Panneaux de filtres** — les 5 panneaux (Cave, Historique, Emplacements, Achat, Promo) sont des coquilles vides remplies au chargement par `construirePanneauxV2()` depuis la table `PANNEAUX_V2`. Selon Chartier et Selon SAQ font exception : panneaux bâtis à la main.
 
 ## 🍽️ ACCORDS SAQ — familles et recettes (4 septembre 2026)
