@@ -1951,9 +1951,10 @@ function lancerRechercheV2() {
     var photo = w['Photo URL'] ? '<div class="carte-photo"><img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
     var onclick = g.cb ? ' onclick="ouvrirApresTap(function(){ouvrirFicheV2(\'' + g.cb + '\', \'recherche\')})"' : '';
     var vide = g.count === 0 ? ' carte-vide' : '';
+    var emp = (g.emplacements && g.emplacements.length) ? '<br>' + g.emplacements.join('<br>') : '';
     return '<div class="carte ' + couleurClasseV2(w.Couleur) + vide + '"' + onclick + '>' + photo +
            '<div class="carte-centre"><span class="carte-titre">' + nom + '</span><span class="carte-sous">' + sous + '</span></div>' +
-           '<div class="carte-droite">' + g.count + ' btl</div></div>';
+           '<div class="carte-droite">' + g.count + ' btl' + emp + '</div></div>';
   }).join('');
 }
 
