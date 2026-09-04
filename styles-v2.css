@@ -654,10 +654,15 @@ body::after {
 .carte.vin-spiritueux { border-bottom-color: var(--vin-spiritueux); border-left: none; }
 
 /* ===== Photo V2 — mode rond (Emplacements) ===== */
-#photoV2Overlay.photo-ronde { --rond: min(80vw, 60vh, 100vh - 300px); }
 #photoV2Overlay.photo-ronde .photo-grande {
-  width: var(--rond);
-  height: var(--rond);
+  height: min(80vw, 60vh);
+  width: auto;
+  aspect-ratio: 1;
+  max-height: 100%;
+  max-width: 80vw;
+  flex: 0 1 auto;
+  min-height: 0;
+  margin: auto 0;
   border-radius: 50%;
   overflow: hidden;
   border: 4px solid var(--couleur-bordure-or);
@@ -676,25 +681,23 @@ body::after {
   text-align: center;
   padding: var(--space-3, 16px);
 }
+#photoV2Overlay.photo-ronde .modal-v2-content {
+  justify-content: flex-start;
+  padding-top: 60px;
+}
 #photoV2Overlay.photo-ronde .photo-entete {
-  position: absolute;
-  top: 60px;
-  left: 0;
-  right: 0;
+  width: 100%;
+  height: 110px;
+  overflow: hidden;
   padding: 0 var(--space-l);
   text-align: center;
   pointer-events: none;
+  flex: none;
 }
 #photoV2Overlay.photo-ronde .photo-entete .texte-secondaire {
   margin-bottom: 0;
 }
-#photoV2Overlay.photo-ronde .btn-fermer {
-  position: absolute;
-  top: calc(50% - min(40vw, 30vh) - 30px);
-  left: calc(50% + min(24vw, 18vh));
-  right: auto;
-  transform: translateX(-50%);
-}
+
 .carte.carte-vide { opacity: 0.45; }
 .coche-panier {
   display: inline-flex;
