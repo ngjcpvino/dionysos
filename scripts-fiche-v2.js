@@ -220,16 +220,20 @@ function afficherFicheV2(result) {
   html += '<div id="ficheV2-plats"></div>';
   html += '</div>';
 
-  // === NOTES : SUGGÉRER ===
+  // === ACCORDS SELON… ===
   html += '<div class="section">';
-  html += '<div style="display:flex;align-items:center;justify-content:flex-start;gap:var(--space-s);margin-bottom:var(--space-s);"><h3 class="titre-2" style="margin:0;">Suggérer</h3><div class="cercle" onclick="ouvrirSuggestionAjoutV2(\'' + (wine['Code SAQ'] || '').toString().trim() + '\', \'fiche\')">+</div></div>';
+  html += '<h3 class="titre-2">Accords selon…</h3>';
+  html += '<div class="menu-liste">';
+  html += '<div class="item-liste" id="ficheV2-selon-som-titre" onclick="basculerAccordsSelonV2(\'som\')">Selon les sommeliers</div>';
+  html += '<div id="ficheV2-selon-som" style="display:none;">';
+  html += '<div style="display:flex;align-items:center;gap:var(--space-s);margin-bottom:var(--space-s);"><div class="cercle" onclick="ouvrirSuggestionAjoutV2(\'' + (wine['Code SAQ'] || '').toString().trim() + '\', \'fiche\')">+</div></div>';
   html += '<div id="ficheV2-suggestions"></div>';
   html += '</div>';
-
-  // === ACCORDS SAQ ===
-  html += '<div class="section" id="ficheV2-recettes-section" style="display:none;">';
-  html += '<h3 class="titre-2">Accords SAQ</h3>';
-  html += '<div id="ficheV2-recettes"></div>';
+  html += '<div class="item-liste" id="ficheV2-selon-saq-titre" onclick="basculerAccordsSelonV2(\'saq\')">Selon SAQ</div>';
+  html += '<div id="ficheV2-selon-saq" style="display:none;"><div id="ficheV2-recettes"></div></div>';
+  html += '<div class="item-liste" id="ficheV2-selon-chartier-titre" onclick="basculerAccordsSelonV2(\'chartier\')">Selon Chartier</div>';
+  html += '<div id="ficheV2-selon-chartier" style="display:none;"><div class="texte-secondaire">En développement</div></div>';
+  html += '</div>';
   html += '</div>';
 
 // === INVENTAIRE (lecture seule) ===
@@ -300,26 +304,46 @@ function comptesRecettesV2(recettes, champ) {
   }).map(function(v) { return { valeur: v, compte: comptes[v] }; });
 }
 
+var RECETTES_FICHE_V2 = [];
+
+// Accordéon des types de plats — un seul ouvert, titres cliquables vers saq.com
+function basculerPlatFicheV2(i, type) {
+  var conteneur = document.getElementById('ficheV2-recettes');
+  if (!conteneur) return;
+  var cible = document.getElementById('ficheV2-rec-' + i);
+  var ouvrir = cible && cible.style.display === 'none';
+  Array.prototype.forEach.call(conteneur.querySelectorAll('[id^="ficheV2-rec-"]'), function(v) { v.style.display = 'none'; });
+  Array.prototype.forEach.call(conteneur.querySelectorAll('[id^="ficheV2-typ-"]'), function(t) { t.classList.remove('actif'); });
+  if (!ouvrir) return;
+  cible.innerHTML = RECETTES_FICHE_V2.filter(function(r) {
+    return (r.typesPlats || []).indexOf(type) !== -1;
+  }).map(function(r) {
+    return { nom: decodeHTML(r.nom || ''), sku: (r.sku || '').toString() };
+  }).filter(function(r) { return r.nom && r.sku; })
+    .sort(function(a, b) { return a.nom.localeCompare(b.nom); })
+    .map(function(r) {
+      return '<div class="item-liste" onclick="window.open(\'https://www.saq.com/fr/' + r.sku + '\', \'_blank\')">' + r.nom + '</div>';
+    }).join('');
+  cible.style.display = '';
+  var titre = document.getElementById('ficheV2-typ-' + i);
+  if (titre) titre.classList.add('actif');
+}
+
 function chargerRecettesFicheV2(famille) {
   var fam = (famille || '').toString().trim();
-  var section = document.getElementById('ficheV2-recettes-section');
-  if (!section || !fam) return;
+  var conteneur = document.getElementById('ficheV2-recettes');
+  if (!conteneur) return;
+  RECETTES_FICHE_V2 = [];
+  if (!fam) { conteneur.innerHTML = '<div class="texte-secondaire">Aucun accord SAQ</div>'; return; }
 
   function rendre() {
-    var recettes = recettesDeLaFamilleV2(fam);
-    if (!recettes.length) return;
-    function bloc(titre, liste) {
-      if (!liste.length) return '';
-      return '<div class="ligne-info"><span class="libelle">' + titre + ' : </span>' +
-             liste.map(function(x) { return decodeHTML(x.valeur) + ' (' + x.compte + ')'; }).join(' · ') + '</div>';
-    }
-    var html = '';
-    html += bloc('Types de plats', comptesRecettesV2(recettes, 'typesPlats'));
-    html += bloc('Ingrédients', comptesRecettesV2(recettes, 'ingredients'));
-    var titres = recettes.map(function(r) { return decodeHTML(r.nom || ''); }).filter(Boolean).sort(function(a, b) { return a.localeCompare(b); });
-    html += '<div class="texte">' + titres.join(' · ') + '</div>';
-    document.getElementById('ficheV2-recettes').innerHTML = html;
-    section.style.display = '';
+    RECETTES_FICHE_V2 = recettesDeLaFamilleV2(fam);
+    if (!RECETTES_FICHE_V2.length) { conteneur.innerHTML = '<div class="texte-secondaire">Aucune recette</div>'; return; }
+    conteneur.innerHTML = comptesRecettesV2(RECETTES_FICHE_V2, 'typesPlats').map(function(x, i) {
+      var esc = x.valeur.replace(/'/g, "\\'");
+      return '<div class="item-liste" id="ficheV2-typ-' + i + '" onclick="basculerPlatFicheV2(' + i + ', \'' + esc + '\')">' + decodeHTML(x.valeur) + ' (' + x.compte + ')</div>' +
+             '<div id="ficheV2-rec-' + i + '" style="display:none;"></div>';
+    }).join('');
   }
 
   if (ALL_RECETTES) { rendre(); return; }
@@ -327,6 +351,18 @@ function chargerRecettesFicheV2(famille) {
     ALL_RECETTES = data || [];
     rendre();
   }).catch(function() {});
+}
+
+// Accordéon du bloc « Accords selon… » — un seul volet ouvert
+function basculerAccordsSelonV2(quel) {
+  ['som', 'saq', 'chartier'].forEach(function(k) {
+    var volet = document.getElementById('ficheV2-selon-' + k);
+    var titre = document.getElementById('ficheV2-selon-' + k + '-titre');
+    if (!volet) return;
+    var ouvrir = (k === quel) && volet.style.display === 'none';
+    volet.style.display = ouvrir ? '' : 'none';
+    if (titre) titre.classList.toggle('actif', ouvrir);
+  });
 }
 
 function chargerSuggestionsFicheV2(codeSAQ) {
