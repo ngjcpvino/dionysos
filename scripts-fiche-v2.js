@@ -74,7 +74,8 @@ function ficheDepuisMemoireV2(codebarre) {
     'Divers': w.Divers || '',
     'Pastille gout': w['Pastille gout'] || '',
     'Photo URL': w['Photo URL'] || '',
-    'Panier': w.Panier || ''
+    'Panier': w.Panier || '',
+    'Famille': w.Famille || ''
   };
   var bottles = items.filter(function(i) { return i.bottle && i.bottle > 0; }).map(function(i) {
     return { row: i.row, bottle: i.bottle, meuble: i.Meuble || '', rangee: i.Rangee || '', espace: i.Espace || '', statut: i.Statut || '' };
@@ -225,6 +226,12 @@ function afficherFicheV2(result) {
   html += '<div id="ficheV2-suggestions"></div>';
   html += '</div>';
 
+  // === ACCORDS SAQ ===
+  html += '<div class="section" id="ficheV2-recettes-section" style="display:none;">';
+  html += '<h3 class="titre-2">Accords SAQ</h3>';
+  html += '<div id="ficheV2-recettes"></div>';
+  html += '</div>';
+
 // === INVENTAIRE (lecture seule) ===
   var bottlesActives = bottles.filter(function(b) { return b.statut !== 'Bu' && b.statut !== 'Sorti' && b.statut !== 'Suggestion'; });
   html += '<div class="section">';
@@ -267,7 +274,59 @@ function afficherFicheV2(result) {
   document.getElementById('ficheV2-corps').innerHTML = html;
   chargerPlatsV2(CURRENT_WINE_CODEBARRE);
   chargerSuggestionsFicheV2(wine['Code SAQ']);
+  chargerRecettesFicheV2(wine.Famille);
   verifierPrixV2(CURRENT_WINE_CODEBARRE, wine['Code SAQ']);
+}
+
+var ALL_RECETTES = null;
+
+function recettesDeLaFamilleV2(famille) {
+  var fam = (famille || '').toString().trim();
+  if (!fam) return [];
+  return (ALL_RECETTES || []).filter(function(r) {
+    return r.familles && r.familles.indexOf(fam) !== -1;
+  });
+}
+
+// Comptes décroissants d'un champ multiple sur une liste de recettes
+function comptesRecettesV2(recettes, champ) {
+  var comptes = {};
+  recettes.forEach(function(r) {
+    (r[champ] || []).forEach(function(v) { comptes[v] = (comptes[v] || 0) + 1; });
+  });
+  return Object.keys(comptes).sort(function(a, b) {
+    if (comptes[b] !== comptes[a]) return comptes[b] - comptes[a];
+    return a.localeCompare(b);
+  }).map(function(v) { return { valeur: v, compte: comptes[v] }; });
+}
+
+function chargerRecettesFicheV2(famille) {
+  var fam = (famille || '').toString().trim();
+  var section = document.getElementById('ficheV2-recettes-section');
+  if (!section || !fam) return;
+
+  function rendre() {
+    var recettes = recettesDeLaFamilleV2(fam);
+    if (!recettes.length) return;
+    function bloc(titre, liste) {
+      if (!liste.length) return '';
+      return '<div class="ligne-info"><span class="libelle">' + titre + ' : </span>' +
+             liste.map(function(x) { return decodeHTML(x.valeur) + ' (' + x.compte + ')'; }).join(' · ') + '</div>';
+    }
+    var html = '';
+    html += bloc('Types de plats', comptesRecettesV2(recettes, 'typesPlats'));
+    html += bloc('Ingrédients', comptesRecettesV2(recettes, 'ingredients'));
+    var titres = recettes.map(function(r) { return decodeHTML(r.nom || ''); }).filter(Boolean).sort(function(a, b) { return a.localeCompare(b); });
+    html += '<div class="texte">' + titres.join(' · ') + '</div>';
+    document.getElementById('ficheV2-recettes').innerHTML = html;
+    section.style.display = '';
+  }
+
+  if (ALL_RECETTES) { rendre(); return; }
+  appelBackend('getRecettes', {}, { spinner: '' }).then(function(data) {
+    ALL_RECETTES = data || [];
+    rendre();
+  }).catch(function() {});
 }
 
 function chargerSuggestionsFicheV2(codeSAQ) {
@@ -451,22 +510,41 @@ function ouvrirPhotoV2(url) {
   img.style.display = '';
   img.src = url;
   document.getElementById('photoV2-nom').style.display = 'none';
+  var enteteFiche = document.getElementById('photoV2-entete');
+  if (enteteFiche) enteteFiche.style.display = 'none';
   var pg = document.querySelector('#photoV2Overlay .photo-grande');
   if (pg) pg.style.borderColor = '';
   overlay.style.display = 'flex';
 }
 
-function ouvrirPhotoEmpV2(cb) {
+var PHOTO_V2_LISTE = null;
+var PHOTO_V2_INDEX = -1;
+var PHOTO_V2_TX = 0, PHOTO_V2_TY = 0, PHOTO_V2_GLISSE = false;
+
+function ouvrirPhotoEmpV2(cb, liste, row) {
   var cible = (cb || '').toString().trim();
   var w = (ALL_DATA || []).filter(function(i) { return memeCodeV2(i['Code-barres'], cible); })[0];
   if (!w) return;
   PHOTO_V2_MODE = 'rond';
   PHOTO_V2_CB = cible;
+  PHOTO_V2_LISTE = liste || null;
+  PHOTO_V2_INDEX = -1;
+  if (PHOTO_V2_LISTE) {
+    PHOTO_V2_LISTE.forEach(function(b, i){ if (String(b.row) === String(row)) PHOTO_V2_INDEX = i; });
+  }
   var overlay = document.getElementById('photoV2Overlay');
   overlay.classList.add('photo-ronde');
   var img = document.getElementById('photoV2-img');
   var nom = document.getElementById('photoV2-nom');
   nom.textContent = decodeHTML((w.Nom || '—').toString());
+  var entete = document.getElementById('photoV2-entete');
+  if (entete) {
+    var origine = [w.Pays, w.Region, w.Appellation].filter(Boolean).join(' · ');
+    entete.innerHTML = '<div class="photo-entete-nom">' + decodeHTML((w.Nom || '—').toString()) + '</div>' +
+                       (origine ? '<div class="photo-entete-ligne">' + decodeHTML(origine.toString()) + '</div>' : '') +
+                       (w.Cepage ? '<div class="photo-entete-ligne">' + decodeHTML(w.Cepage.toString()) + '</div>' : '');
+    entete.style.display = '';
+  }
   var photo = w['Photo URL'] || '';
   if (photo) {
     img.style.display = '';
@@ -487,10 +565,44 @@ function ouvrirPhotoEmpV2(cb) {
 function clicPhotoV2(event) {
   if (PHOTO_V2_MODE !== 'rond') return;
   event.stopPropagation();
+  if (PHOTO_V2_GLISSE) { PHOTO_V2_GLISSE = false; return; }
   var cb = PHOTO_V2_CB;
   fermerPhotoV2();
   ouvrirApresTap(function() { ouvrirFicheV2(cb, 'emplacements'); });
 }
+
+// Glissement : gauche = suivante, droite = précédente, bute aux deux bouts
+function glisserPhotoV2(sens) {
+  if (PHOTO_V2_MODE !== 'rond' || !PHOTO_V2_LISTE || PHOTO_V2_INDEX < 0) return;
+  var i = PHOTO_V2_INDEX + sens;
+  if (i < 0 || i >= PHOTO_V2_LISTE.length) return;
+  var b = PHOTO_V2_LISTE[i];
+  ouvrirPhotoEmpV2((b['Code-barres'] || '').toString().trim(), PHOTO_V2_LISTE, b.row);
+}
+
+function brancherGlissementPhotoV2() {
+  var zone = document.querySelector('#photoV2Overlay .photo-grande');
+  if (!zone) return;
+  zone.addEventListener('touchstart', function(ev){
+    PHOTO_V2_GLISSE = false;
+    if (!ev.touches || !ev.touches.length) return;
+    PHOTO_V2_TX = ev.touches[0].clientX;
+    PHOTO_V2_TY = ev.touches[0].clientY;
+  }, { passive: true });
+  zone.addEventListener('touchend', function(ev){
+    if (PHOTO_V2_MODE !== 'rond') return;
+    var t = ev.changedTouches && ev.changedTouches[0];
+    if (!t) return;
+    var dx = t.clientX - PHOTO_V2_TX;
+    var dy = t.clientY - PHOTO_V2_TY;
+    if (Math.abs(dx) < 50 || Math.abs(dx) <= Math.abs(dy)) return;
+    PHOTO_V2_GLISSE = true;
+    ev.preventDefault();
+    ev.stopPropagation();
+    glisserPhotoV2(dx < 0 ? 1 : -1);
+  });
+}
+document.addEventListener('DOMContentLoaded', brancherGlissementPhotoV2);
 
 function clicFondPhotoV2() {
   if (PHOTO_V2_MODE !== 'rond') return;
@@ -552,6 +664,10 @@ function fermerFicheV2() {
   } else if (FICHE_V2_PROVENANCE === 'accords') {
     document.getElementById('accordsV2Container').style.display = 'flex';
     remonterScrollV2('accordsV2Container');
+  } else if (FICHE_V2_PROVENANCE === 'selonsaq') {
+    document.getElementById('selonSaqV2Container').style.display = 'flex';
+    remonterScrollV2('selonSaqV2Container');
+    calculerSelonSaqV2();
   }
 
   FICHE_V2_PROVENANCE = null;
