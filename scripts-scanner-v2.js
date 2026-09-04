@@ -3646,7 +3646,69 @@ function basculerListeSelonSaqV2(cle) {
 
 function toggleSelonSaqV2(el, cle) {
   var v = el.getAttribute('data-valeur');
-  if
+  if (selonSaqV2Selection[cle][v]) delete selonSaqV2Selection[cle][v];
+  else selonSaqV2Selection[cle][v] = true;
+  el.classList.toggle('actif');
+  calculerSelonSaqV2();
+}
+
+function reinitialiserSelonSaqV2() {
+  selonSaqV2Selection = { ingredients: {}, plats: {} };
+  selonSaqV2Ouverte = null;
+  construirePanneauSelonSaqV2();
+  calculerSelonSaqV2();
+  fermerFiltresSelonSaqV2();
+}
+
+// ingrédient → recettes qui le contiennent → familles → mes vins
+function calculerSelonSaqV2() {
+  var div = document.getElementById('selonSaqV2-cartes');
+  var compte = document.getElementById('selonSaqV2-compte');
+  var ingr = Object.keys(selonSaqV2Selection.ingredients);
+  var plats = Object.keys(selonSaqV2Selection.plats);
+  var loupe = document.getElementById('selonSaqV2-loupe');
+  if (loupe) loupe.classList.toggle('actif', !!(ingr.length || plats.length));
+
+  if (!ingr.length && !plats.length) {
+    compte.textContent = '';
+    div.innerHTML = '<div class="texte-secondaire">Choisissez un ingrédient ou un type de plat dans le filtre</div>';
+    return;
+  }
+
+  var recettes = recettesUtilesSelonSaqV2().filter(function(r) {
+    var okI = !ingr.length || (r.ingredients || []).some(function(v) { return ingr.indexOf(v) !== -1; });
+    var okP = !plats.length || (r.typesPlats || []).some(function(v) { return plats.indexOf(v) !== -1; });
+    return okI && okP;
+  });
+
+  var familles = {};
+  recettes.forEach(function(r) { (r.familles || []).forEach(function(f) { familles[f] = true; }); });
+
+  var vins = grouperVinsV2((ALL_DATA || []).filter(function(i) {
+    var f = (i.Famille || '').toString().trim();
+    return f && familles[f];
+  }));
+
+  compte.innerHTML = vins.length + ' vin' + (vins.length > 1 ? 's' : '') + '<br>' + recettes.length + ' recette' + (recettes.length > 1 ? 's' : '');
+  if (!vins.length) { div.innerHTML = '<div class="texte-secondaire">Aucun vin de la cave pour ce choix</div>'; return; }
+
+  div.innerHTML = vins.map(function(g) {
+    var w = g.wine;
+    var nom = decodeHTML(w.Nom || '—');
+    var pays = w.Pays || '';
+    var region = w.Region || '';
+    var paysRegion = (pays && region) ? (pays + ' • ' + region) : (pays || region);
+    var sous = [paysRegion, w.Cepage || ''].filter(Boolean).join('<br>');
+    var photo = w['Photo URL'] ? '<div class="carte-photo"><img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
+    var onclick = g.cb ? ' onclick="ouvrirApresTap(function(){fermerSelonSaqV2();ouvrirFicheV2(\'' + g.cb + '\', \'selonsaq\')})"' : '';
+    var vide = g.count === 0 ? ' carte-vide' : '';
+    return '<div class="carte ' + couleurClasseV2(w.Couleur) + vide + '"' + onclick + '>' + photo +
+           '<div class="carte-centre"><span class="carte-titre">' + nom + '</span><span class="carte-sous">' + sous + '</span></div>' +
+           '<div class="carte-droite">' + g.count + ' btl</div></div>';
+  }).join('');
+}
+
+// ==================== MENU BURGER V2 ====================
 function toggleMenuV2() {
   var ouvert = document.getElementById('burgerV2').classList.toggle('ouvert');
   document.getElementById('burgerV2-voile').classList.toggle('ouvert', ouvert);
