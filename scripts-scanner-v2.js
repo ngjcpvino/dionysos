@@ -1454,7 +1454,7 @@ function remplirFiltresAchatV2() {
   ['couleur','pays','cepage','pastille'].forEach(function(cle){
     var cur = f[cle];
     var menu = document.getElementById('achatV2-f-' + cle + '-menu');
-    menu.innerHTML = listes[cle].map(function(v){
+    menu.innerHTML = '<div class="item-liste' + (cur === '' ? ' actif' : '') + '" onclick="choisirFiltreAchatV2(\'' + cle + '\', \'\')">Tous</div>' + listes[cle].map(function(v){
       return '<div class="item-liste' + (v === cur ? ' actif' : '') + '" onclick="choisirFiltreAchatV2(\'' + cle + '\', \'' + v.replace(/'/g, "\\'") + '\')">' + v + '</div>';
     }).join('');
     var disp = document.getElementById('achatV2-f-' + cle + '-display');
@@ -1882,7 +1882,7 @@ function remplirFiltresRechercheV2() {
   sommeliers.sort(function(a, b) { return a.localeCompare(b); });
   var menuSom = document.getElementById('rechercheV2-f-sommelier-menu');
   if (menuSom) {
-    menuSom.innerHTML = sommeliers.map(function(v) {
+    menuSom.innerHTML = '<div class="item-liste' + (f.sommelier === '' ? ' actif' : '') + '" onclick="choisirFiltreRechercheV2(\'sommelier\', \'\')">Tous</div>' + sommeliers.map(function(v) {
       return '<div class="item-liste' + (v === f.sommelier ? ' actif' : '') + '" onclick="choisirFiltreRechercheV2(\'sommelier\', \'' + v.replace(/'/g, "\\'") + '\')">' + v + '</div>';
     }).join('');
   }
@@ -1910,7 +1910,7 @@ function remplirFiltresRechercheV2() {
     if (!menu) return;
     var opts = Object.keys(sets[cle]).map(function(k){ return sets[cle][k]; }).sort(function(a,b){ return a.localeCompare(b); });
     var cur = filtresRechercheV2[cle];
-    menu.innerHTML = opts.map(function(v) {
+    menu.innerHTML = '<div class="item-liste' + (cur === '' ? ' actif' : '') + '" onclick="choisirFiltreRechercheV2(\'' + cle + '\', \'\')">Tous</div>' + opts.map(function(v) {
       return '<div class="item-liste' + (v === cur ? ' actif' : '') + '" onclick="choisirFiltreRechercheV2(\'' + cle + '\', \'' + v.replace(/'/g, "\\'") + '\')">' + v + '</div>';
     }).join('');
     var disp = document.getElementById('rechercheV2-f-' + cle + '-display');
@@ -2112,7 +2112,7 @@ function remplirFiltresPromoV2() {
   var libelles = { couleur: 'Couleurs', pays: 'Pays', cepage: 'Cépages' };
   ['couleur', 'pays', 'cepage'].forEach(function(cle) {
     var menu = document.getElementById('promoV2-f-' + cle + '-menu');
-    menu.innerHTML = uniqueValeursAchat(base, cle).map(function(v) {
+    menu.innerHTML = '<div class="item-liste' + (f[cle] === '' ? ' actif' : '') + '" onclick="choisirFiltrePromoV2(\'' + cle + '\', \'\')">Tous</div>' + uniqueValeursAchat(base, cle).map(function(v) {
       return '<div class="item-liste' + (String(v) === String(f[cle]) ? ' actif' : '') + '" onclick="choisirFiltrePromoV2(\'' + cle + '\', \'' + String(v).replace(/'/g, "\\'") + '\')">' + v + '</div>';
     }).join('');
     var disp = document.getElementById('promoV2-f-' + cle + '-display');
@@ -2322,7 +2322,7 @@ function remplirFiltresEmpV2() {
   ['meuble','rangee','espace'].forEach(function(cle){
     var cur = f[cle];
     var menu = document.getElementById('empV2-f-' + cle + '-menu');
-    menu.innerHTML = listes[cle].map(function(v){
+    menu.innerHTML = '<div class="item-liste' + (cur === '' ? ' actif' : '') + '" onclick="choisirFiltreEmpV2(\'' + cle + '\', \'\')">Tous</div>' + listes[cle].map(function(v){
       return '<div class="item-liste' + (String(v) === String(cur) ? ' actif' : '') + '" onclick="choisirFiltreEmpV2(\'' + cle + '\', \'' + String(v).replace(/'/g, "\\'") + '\')">' + v + '</div>';
     }).join('');
     var disp = document.getElementById('empV2-f-' + cle + '-display');
@@ -3331,7 +3331,7 @@ function remplirFiltresCaveV2() {
     if (!menu) return;
     var opts = Object.keys(sets[cle]).map(function(k){ return sets[cle][k]; }).sort(function(a,b){ return a.localeCompare(b); });
     var cur = filtresCaveV2[cle];
-    menu.innerHTML = opts.map(function(v) {
+    menu.innerHTML = '<div class="item-liste' + (cur === '' ? ' actif' : '') + '" onclick="choisirFiltreCaveV2(\'' + cle + '\', \'\')">Tous</div>' + opts.map(function(v) {
       return '<div class="item-liste' + (v === cur ? ' actif' : '') + '" onclick="choisirFiltreCaveV2(\'' + cle + '\', \'' + v.replace(/'/g, "\\'") + '\')">' + v + '</div>';
     }).join('');
     var disp = document.getElementById('caveV2-f-' + cle + '-display');
@@ -3498,7 +3498,7 @@ function remplirCepageMenuChartierV2() {
   var menu = document.getElementById('chartierV2-f-cepage-menu');
   if (!menu) return;
   var liste = uniqueCepagesChartierV2();
-  menu.innerHTML = liste.map(function(c) {
+  menu.innerHTML = '<div class="item-liste' + (filtresChartierV2.cepage === '' ? ' actif' : '') + '" onclick="choisirCepageChartierV2(\'\')">Tous</div>' + liste.map(function(c) {
     return '<div class="item-liste' + (filtresChartierV2.cepage === c ? ' actif' : '') + '" onclick="choisirCepageChartierV2(\'' + c.replace(/'/g, "\\'") + '\')">' + c + '</div>';
   }).join('');
   var disp = document.getElementById('chartierV2-f-cepage-display');
@@ -3561,7 +3561,7 @@ function majSelectionChartierV2() {
 function remplirCouleurMenuChartierV2() {
   var couleurs = [['vin-rouge','Rouge'],['vin-blanc','Blanc'],['vin-rose','Rosé'],['vin-bulles','Bulles'],['vin-spiritueux','Spiritueux']];
   var menu = document.getElementById('chartierV2-f-couleur-menu');
-  menu.innerHTML = couleurs.map(function(c) {
+  menu.innerHTML = '<div class="item-liste' + (filtresChartierV2.couleur === '' ? ' actif' : '') + '" onclick="choisirCouleurChartierV2(\'\')">Tous</div>' + couleurs.map(function(c) {
     return '<div class="item-liste' + (filtresChartierV2.couleur === c[0] ? ' actif' : '') + '" onclick="choisirCouleurChartierV2(\'' + c[0] + '\')">' + c[1] + '</div>';
   }).join('');
   var disp = document.getElementById('chartierV2-f-couleur-display');
@@ -3745,11 +3745,18 @@ function basculerListeSelonSaqV2(cle) {
   selonSaqV2Ouverte = cle;
   var champ = (cle === 'ingredients') ? 'ingredients' : 'typesPlats';
   var div = document.getElementById('selonSaqV2-liste-' + cle);
-  div.innerHTML = valeursSelonSaqV2(champ).map(function(v) {
+  div.innerHTML = '<div class="item-liste' + (Object.keys(selonSaqV2Selection[cle]).length === 0 ? ' actif' : '') + '" onclick="tousSelonSaqV2(\'' + cle + '\')">Tous</div>' + valeursSelonSaqV2(champ).map(function(v) {
     var sel = selonSaqV2Selection[cle][v.valeur];
     return '<div class="item-liste' + (sel ? ' actif' : '') + '" data-valeur="' + v.valeur.replace(/"/g, '&quot;') + '" onclick="toggleSelonSaqV2(this, \'' + cle + '\')">' + v.valeur + ' (' + v.compte + ')</div>';
   }).join('');
   div.classList.add('ouvert');
+}
+
+function tousSelonSaqV2(cle) {
+  selonSaqV2Selection[cle] = {};
+  selonSaqV2Ouverte = null;
+  basculerListeSelonSaqV2(cle);
+  calculerSelonSaqV2();
 }
 
 function toggleSelonSaqV2(el, cle) {
