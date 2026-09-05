@@ -67,7 +67,7 @@ function ficheDepuisMemoireV2(codebarre) {
     'Temperature': w['Température'] || '',
     'Bois': w['Bois'] || '',
     'Description': w.Description || '',
-    'Racheter': w.Racheter || 'Oui',
+    'Racheter': w.Racheter || '',
     'Accords': w.Accords || '',
     'Favori': w.Favori || '',
     'Notes temporaires': w['Notes temporaires'] || '',
@@ -135,7 +135,7 @@ function afficherFicheV2(result) {
   html += '<h3 class="titre-2">Information</h3>';
  
   var favoriEtoile = wine.Favori === 'Oui' ? '<span class="etoile-favori actif">★</span>' : '';
-  html += wine['Cépage'] ? '<div class="ligne-info"><span class="libelle">Cépages : </span>' + decodeHTML(wine['Cépage'].toString()) + (favoriEtoile ? ' ' + favoriEtoile : '') + '</div>' : '';
+  html += wine['Cépage'] ? '<div class="ligne-info"><span class="libelle">Cépages : </span><span id="ficheV2-cepages">' + decodeHTML(wine['Cépage'].toString()) + '</span>' + (favoriEtoile ? ' ' + favoriEtoile : '') + '</div>' : '';
   html += ligne('Appellation', wine.Appellation);
   html += ligne('Pastille', wine['Pastille gout']);
   html += ligne('Classification', wine.Classification);
@@ -194,7 +194,7 @@ function afficherFicheV2(result) {
   itemsAccords += '<div class="item-liste" id="ficheV2-accord-ajouter" onclick="ouvrirAjoutAccordV2()">+ Ajouter</div>';
   html += '<div id="ficheV2-accords-menu" class="menu-liste">' + itemsAccords + '</div>';
 
-  var aime = wine.Racheter || 'Oui';
+  var aime = wine.Racheter || '';
   html += '<div class="deux-colonnes">' +
             '<div class="colonne-controle">' +
               '<span class="libelle">Racheter ?</span>' +
@@ -224,14 +224,14 @@ function afficherFicheV2(result) {
   html += '<div class="section">';
   html += '<h3 class="titre-2">Accords selon…</h3>';
   html += '<div class="menu-liste ouvert">';
-  html += '<div class="item-liste" id="ficheV2-selon-som-titre" onclick="basculerAccordsSelonV2(\'som\')">Selon les sommeliers</div>';
+  html += '<div class="item-liste" id="ficheV2-selon-som-titre" onclick="basculerAccordsSelonV2(\'som\')">Les sommeliers</div>';
   html += '<div id="ficheV2-selon-som" style="display:none;">';
   html += '<div style="display:flex;align-items:center;gap:var(--space-s);margin-bottom:var(--space-s);"><div class="cercle" onclick="ouvrirSuggestionAjoutV2(\'' + (wine['Code SAQ'] || '').toString().trim() + '\', \'fiche\')">+</div></div>';
   html += '<div id="ficheV2-suggestions"></div>';
   html += '</div>';
-  html += '<div class="item-liste" id="ficheV2-selon-saq-titre" onclick="basculerAccordsSelonV2(\'saq\')">Selon SAQ</div>';
+  html += '<div class="item-liste" id="ficheV2-selon-saq-titre" onclick="basculerAccordsSelonV2(\'saq\')">SAQ</div>';
   html += '<div id="ficheV2-selon-saq" style="display:none;"><div id="ficheV2-recettes"></div></div>';
-  html += '<div class="item-liste" id="ficheV2-selon-chartier-titre" onclick="basculerAccordsSelonV2(\'chartier\')">Selon Chartier</div>';
+  html += '<div class="item-liste" id="ficheV2-selon-chartier-titre" onclick="basculerAccordsSelonV2(\'chartier\')">Chartier</div>';
   html += '<div id="ficheV2-selon-chartier" style="display:none;"><div class="texte-secondaire">En développement</div></div>';
   html += '</div>';
   html += '</div>';
@@ -495,6 +495,10 @@ function verifierPrixV2(codebarre, codeSAQ) {
     if (res && res.updated) {
       var el = document.getElementById('ficheV2-prix');
       if (el) el.textContent = res.nouveauPrix.toFixed(2);
+    }
+    if (res && res.cepages) {
+      var elCep = document.getElementById('ficheV2-cepages');
+      if (elCep) elCep.textContent = res.cepages;
     }
   }).catch(function() {});
 }

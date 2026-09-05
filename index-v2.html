@@ -41,13 +41,19 @@
   <div class="item-liste" onclick="burgerV2Click('emplacements')">EMPLACEMENTS</div>
   <div class="item-liste" onclick="burgerV2Click('historique')">HISTORIQUE</div>
   <div class="item-liste" onclick="burgerV2Click('racheter')">LISTE D'ACHAT</div>
-  <div class="item-liste" onclick="burgerV2Click('aranger')">À RANGER</div>
-  <div class="item-liste" onclick="burgerV2Click('sanscepage')">SANS CÉPAGE</div>
-  <div class="item-liste" onclick="burgerV2Click('suggestions')">SUGGESTIONS</div>
-  <div class="item-liste" onclick="burgerV2Click('accords')">SELON CHARTIER</div>
-  <div class="item-liste" onclick="burgerV2Click('selonsaq')">SELON SAQ</div>
-  <div class="item-liste" onclick="burgerV2Click('facture')">FACTURE SAQ</div>
-  <div class="item-liste" onclick="burgerV2Click('promotions')">PROMOTIONS SAQ</div>
+  <div class="item-liste" onclick="basculerSousMenuV2('burgerV2-accord')">ACCORD SELON…</div>
+  <div id="burgerV2-accord" style="display:none;">
+    <div class="item-liste" onclick="burgerV2Click('suggestions')">Sommeliers</div>
+    <div class="item-liste" onclick="burgerV2Click('selonsaq')">SAQ</div>
+    <div class="item-liste" onclick="burgerV2Click('accords')">Chartier</div>
+  </div>
+  <div class="item-liste" onclick="basculerSousMenuV2('burgerV2-outils')">OUTILS</div>
+  <div id="burgerV2-outils" style="display:none;">
+    <div class="item-liste" onclick="burgerV2Click('aranger')">À ranger</div>
+    <div class="item-liste" onclick="burgerV2Click('sanscepage')">Sans cépage</div>
+    <div class="item-liste" onclick="burgerV2Click('facture')">Facture SAQ</div>
+    <div class="item-liste" onclick="burgerV2Click('promotions')">Promotions SAQ</div>
+  </div>
  
  <div class="item-liste" onclick="burgerV2Click('refresh')">
     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
@@ -111,22 +117,18 @@
   <div class="modal-v2-content modale-haut">
     <button class="btn-fermer" onclick="fermerVinInconnuV2()">✕</button>
     <h2 class="titre-1">Vin inconnu</h2>
-    <div class="texte-secondaire">Ce vin n'a pas été trouvé sur SAQ</div>
+    <div class="texte-secondaire">Ce vin n'est pas dans ta cave</div>
     <div id="vinInconnuV2-saisie" style="width:100%; max-width:600px;">
       <input type="text" id="vinInconnuV2-codebarre-champ" class="champ-saisie" placeholder="Code-barres" inputmode="numeric">
       <input type="text" id="vinInconnuV2-codesaq" class="champ-saisie" placeholder="Code SAQ" inputmode="numeric">
       <input type="text" id="vinInconnuV2-nom" class="champ-saisie" placeholder="Nom du vin">
+      <div class="ligne-ronds">
+        <div class="cercle" onclick="creerVinManuelV2('achat')">+</div>
+        <div class="cercle" onclick="creerVinManuelV2('suggestion')">💡</div>
+      </div>
       <div class="roundel" onclick="voirSAQVinInconnuV2()">
         <span class="roundel-anneau"></span>
         <span class="roundel-barre">Voir SAQ</span>
-      </div>
-      <div class="roundel" onclick="creerVinManuelV2()">
-        <span class="roundel-anneau"></span>
-        <span class="roundel-barre">Confirmer</span>
-      </div>
-      <div class="roundel" onclick="fermerVinInconnuV2()">
-        <span class="roundel-anneau"></span>
-        <span class="roundel-barre">Annuler</span>
       </div>
     </div>
   </div>
@@ -526,6 +528,22 @@
       <span class="roundel-barre">Passer</span>
     </div>
   </div>
+</div>
+
+<!-- ====================== ACCORDS METS-VINS V2 ====================== -->
+<div id="chartierV2Container" class="modal-v2-fullscreen" style="display:none;">
+  <div class="modal-v2-content modale-haut">
+      <div class="cercle gauche" id="chartierV2-loupe" onclick="ouvrirFiltresChartierV2()">
+      <img src="https://res.cloudinary.com/dym93w23h/image/upload/v1786985550/entonnoire_lqpv39.png" alt="Filtres" style="width:20px;height:20px;object-fit:contain;">
+    </div>
+
+    <h2 class="titre-1">Selon Chartier</h2>
+    <div class="btn-fermer" onclick="fermerChartierV2()">✕</div>
+    <div id="chartierV2-selection" class="texte-secondaire"></div>
+    <div id="chartierV2-resultats" class="contenu"></div>
+  </div>
+  <div id="chartierV2-filtres-voile" class="panneau-voile" onclick="fermerFiltresChartierV2()"></div>
+  <div id="chartierV2-filtres" class="panneau-gauche"></div>
 </div>
 
 <!-- ====================== SELON SAQ V2 ====================== -->
