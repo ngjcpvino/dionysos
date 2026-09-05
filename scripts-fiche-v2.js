@@ -700,8 +700,8 @@ function fermerFicheV2() {
     remonterScrollV2('suggestionsV2Container');
     afficherSuggestionsV2();
   } else if (FICHE_V2_PROVENANCE === 'accords') {
-    document.getElementById('accordsV2Container').style.display = 'flex';
-    remonterScrollV2('accordsV2Container');
+    document.getElementById('chartierV2Container').style.display = 'flex';
+    remonterScrollV2('chartierV2Container');
   } else if (FICHE_V2_PROVENANCE === 'selonsaq') {
     document.getElementById('selonSaqV2Container').style.display = 'flex';
     remonterScrollV2('selonSaqV2Container');
