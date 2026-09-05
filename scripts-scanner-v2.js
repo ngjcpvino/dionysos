@@ -143,8 +143,14 @@ function validerSaisieManuelleV2() {
           return;
         }
         ouvrirMenuActionV2(cup, result);
-      } else {
+      } else if (suggestionsV2Attente) {
         creerVinSAQV2(cup, codeSAQ);
+      } else {
+        vinInconnuV2Code = cup;
+        document.getElementById('vinInconnuV2-codebarre-champ').value = cup;
+        document.getElementById('vinInconnuV2-codesaq').value = codeSAQ;
+        document.getElementById('vinInconnuV2-nom').value = '';
+        document.getElementById('vinInconnuV2Container').style.display = 'flex';
       }
     }).catch(function() {
       retourAccueilV2();
@@ -187,7 +193,14 @@ function ouvrirVinInconnuV2(code) {
   vinInconnuV2Code = code;
   appelBackend('chercherProduitSAQ_GRAPHQL_V1', { codebarre: code }, { spinner: 'Un instant svp' }).then(function(codeSAQ) {
     if (codeSAQ) {
-      creerVinSAQV2(code, codeSAQ);
+      if (suggestionsV2Attente) {
+        creerVinSAQV2(code, codeSAQ);
+      } else {
+        document.getElementById('vinInconnuV2-codebarre-champ').value = code;
+        document.getElementById('vinInconnuV2-codesaq').value = codeSAQ;
+        document.getElementById('vinInconnuV2-nom').value = '';
+        document.getElementById('vinInconnuV2Container').style.display = 'flex';
+      }
     } else {
       document.getElementById('vinInconnuV2-codebarre-champ').value = code;
       document.getElementById('vinInconnuV2-codesaq').value = '';
@@ -211,10 +224,10 @@ function fermerVinInconnuV2() {
   }
 }
 
-function creerVinSAQV2(code, codeSAQ) {
+function creerVinSAQV2(code, codeSAQ, mode) {
   appelBackend('ajouterVinAvecBouteilles', { codebarre: code, codeSAQ: codeSAQ, note: '', bouteilles: '[]', nom: '' }, { spinner: 'Un instant svp' }).then(function(res) {
     if (res && res.success) {
-      enchainerMenuApresCreationV2(code);
+      enchainerMenuApresCreationV2(code, mode);
     } else {
       retourAccueilV2((res && res.message) ? res.message : 'Création refusée par le serveur');
     }
@@ -223,7 +236,7 @@ function creerVinSAQV2(code, codeSAQ) {
   });
 }
 
-function enchainerMenuApresCreationV2(code) {
+function enchainerMenuApresCreationV2(code, mode) {
   appelBackend('checkWineExists', { codebarre: code }, { spinner: 'Un instant svp' }).then(function(result) {
     return appelBackend('getInventoryData', {}, { spinner: 'Un instant svp' }).then(function(data) {
       if (data) ALL_DATA = data;
@@ -235,6 +248,12 @@ function enchainerMenuApresCreationV2(code) {
       retourAccueilV2('Le vin ne s\'est pas inscrit dans le Sheet — rien n\'a été créé');
       return;
     }
+    if (mode === 'achat') {
+      menuActionV2Context = { code: code, wineResult: result };
+      cacherToutesPagesV2();
+      ouvrirApresTap(ouvrirArriveeV2);
+      return;
+    }
     if (suggestionsV2Attente) {
       appelBackend('updateWineField', { codebarre: code, field: 'Racheter', value: '' }, { spinner: '' }).then(function() {
         majMemoireVinV2(code, { 'Racheter': '' });
@@ -242,7 +261,12 @@ function enchainerMenuApresCreationV2(code) {
       });
       return;
     }
-    ouvrirMenuActionV2(code, result);
+    appelBackend('updateWineField', { codebarre: code, field: 'Racheter', value: '' }, { spinner: '' }).then(function() {
+      majMemoireVinV2(code, { 'Racheter': '' });
+      ouvrirMenuActionV2(code, result);
+    }).catch(function() {
+      ouvrirMenuActionV2(code, result);
+    });
   }).catch(function(e) {
     retourAccueilV2('Vérification impossible : ' + (e && e.message ? e.message : 'erreur inconnue'));
   });
@@ -268,7 +292,7 @@ function voirSAQVinInconnuV2() {
   window.open('https://www.saq.com/fr/catalogsearch/result/?q=' + code.padStart(14, '0'), '_blank');
 }
 
-function creerVinManuelV2() {
+function creerVinManuelV2(mode) {
   var code = (document.getElementById('vinInconnuV2-codebarre-champ').value || '').replace(/\D/g, '').trim();
   if (!gtinValide(code)) {
     afficherMessage('Code-barres invalide');
@@ -280,29 +304,29 @@ function creerVinManuelV2() {
 
   if (codeSAQ) {
     document.getElementById('vinInconnuV2Container').style.display = 'none';
-    creerVinSAQV2(code, codeSAQ);
+    creerVinSAQV2(code, codeSAQ, mode);
     return;
   }
 
   appelBackend('chercherProduitSAQ_GRAPHQL_V1', { codebarre: code }, { spinner: 'Un instant svp' }).then(function(codeTrouve) {
     if (codeTrouve) {
       document.getElementById('vinInconnuV2Container').style.display = 'none';
-      creerVinSAQV2(code, codeTrouve);
+      creerVinSAQV2(code, codeTrouve, mode);
       return;
     }
-    if (nom) { creerVinNomV2(code, nom); return; }
+    if (nom) { creerVinNomV2(code, nom, mode); return; }
     afficherMessage('Toujours introuvable — entrez un code SAQ ou un nom');
   }).catch(function() {
-    if (nom) { creerVinNomV2(code, nom); return; }
+    if (nom) { creerVinNomV2(code, nom, mode); return; }
     afficherMessage('Toujours introuvable — entrez un code SAQ ou un nom');
   });
 }
 
-function creerVinNomV2(code, nom) {
+function creerVinNomV2(code, nom, mode) {
   document.getElementById('vinInconnuV2Container').style.display = 'none';
   appelBackend('ajouterVinAvecBouteilles', { codebarre: code, codeSAQ: '', note: '', bouteilles: '[]', nom: nom }, { spinner: 'Un instant svp' }).then(function(res) {
     if (res && res.success) {
-      enchainerMenuApresCreationV2(code);
+      enchainerMenuApresCreationV2(code, mode);
     } else {
       retourAccueilV2((res && res.message) ? res.message : 'Création refusée par le serveur');
     }
@@ -1026,7 +1050,7 @@ function afficherCartesARangerV2() {
     var onclick = g.cb ? ' onclick="deplacerDepuisARangerV2(\'' + g.cb + '\')"' : '';
     return '<div class="carte ' + couleurClasseV2(w.Couleur) + '"' + onclick + '>' + photo +
            '<div class="carte-centre"><span class="carte-titre">' + nom + '</span><span class="carte-sous">' + sous + '</span></div>' +
-           '<div class="carte-droite">' + g.count + ' btl</div></div>';
+           '<div class="carte-droite">' + caseDroiteV2(w, g.count) + '</div></div>';
   }).join('');
 }
 
@@ -1069,7 +1093,7 @@ function afficherCartesSansCepageV2() {
     var vide = g.count === 0 ? ' carte-vide' : '';
     return '<div class="carte ' + couleurClasseV2(w.Couleur) + vide + '"' + onclick + '>' + photo +
            '<div class="carte-centre"><span class="carte-titre">' + nom + '</span><span class="carte-sous">' + sous + '</span></div>' +
-           '<div class="carte-droite">' + g.count + ' btl</div></div>';
+           '<div class="carte-droite">' + caseDroiteV2(w, g.count) + '</div></div>';
   }).join('');
 }
 
@@ -1351,6 +1375,7 @@ function ajouterDepuisSuggestionsV2() {
 
 // ==================== LISTE D'ACHAT V2 ====================
 var filtresAchatV2 = { couleur: '', pays: '', cepage: '', pastille: '', succ: '' };
+var achatV2Mode = 'achat';
 var libellesFiltreAchatV2 = { couleur: 'Couleurs', pays: 'Pays', cepage: 'Cépages', pastille: 'Pastille de goût', succ: 'Succursale' };
 var succursalesAchatV2 = [];
 
@@ -1359,6 +1384,7 @@ function ouvrirAchatV2() {
   remonterScrollV2('achatV2Container');
   panierSessionAchatV2 = {};
   filtresAchatV2 = { couleur: '', pays: '', cepage: '', pastille: '', succ: '' };
+  achatV2Mode = 'achat';
   if (succursalesAchatV2.length) {
     remplirFiltresAchatV2();
     appliquerFiltresAchatV2();
@@ -1392,9 +1418,23 @@ function baseAchatV2() {
   }).map(function(g) { return g.wine; });
 }
 
+function baseSuggestionsAchatV2() {
+  var grouped = {};
+  (ALL_DATA || []).forEach(function(item) {
+    if ((item.Racheter || '').toString().trim() !== '') return;
+    var key = cleVinV2(item);
+    if (!grouped[key]) grouped[key] = item;
+  });
+  return Object.values(grouped);
+}
+
 function remplirFiltresAchatV2() {
   var f = filtresAchatV2;
-  var base = baseAchatV2();
+  var elModeAchat = document.getElementById('achatV2-mode-achat');
+  var elModeSugg = document.getElementById('achatV2-mode-sugg');
+  if (elModeAchat) elModeAchat.classList.toggle('actif', achatV2Mode === 'achat');
+  if (elModeSugg) elModeSugg.classList.toggle('actif', achatV2Mode === 'suggestions');
+  var base = (achatV2Mode === 'suggestions') ? baseSuggestionsAchatV2() : baseAchatV2();
   var forCouleur = base;
   var forPays = f.couleur ? base.filter(function(i){ return i.Couleur === f.couleur; }) : base;
   var forCepage = base.filter(function(i){
@@ -1499,10 +1539,19 @@ function afficherNePasRacheterV2() {
   if (liste.length === 0) document.getElementById('achatV2-cartes').innerHTML = '<div class="texte-secondaire">Aucun vin</div>';
 }
 
+function choisirModeAchatV2(mode) {
+  achatV2Mode = mode;
+  filtresAchatV2 = { couleur: '', pays: '', cepage: '', pastille: '', succ: '' };
+  remplirFiltresAchatV2();
+  appliquerFiltresAchatV2();
+  fermerFiltresAchatV2();
+}
+
 function appliquerFiltresAchatV2() {
   achatV2ModeNepr = false;
   var f = filtresAchatV2;
-  var filtered = baseAchatV2().filter(function(i){
+  var base = (achatV2Mode === 'suggestions') ? baseSuggestionsAchatV2() : baseAchatV2();
+  var filtered = base.filter(function(i){
     return (!f.couleur || i.Couleur === f.couleur) &&
       (!f.pays || i.Pays === f.pays) &&
       (!f.cepage || contientTexteV2(i.Cepage, f.cepage)) &&
@@ -1573,7 +1622,7 @@ function togglePanierSessionV2(cle, ev) {
 }
 
 function libelleCompteAchatV2(n) {
-  var txt = n + ' bouteille' + (n > 1 ? 's' : '');
+  var txt = (achatV2Mode === 'suggestions') ? (n + ' suggestion' + (n > 1 ? 's' : '')) : (n + ' bouteille' + (n > 1 ? 's' : ''));
   var sel = succursalesAchatV2.filter(function(s){ return s.numero === filtresAchatV2.succ; })[0];
   if (sel) {
     var nom = (sel.nom || '').trim();
@@ -1954,7 +2003,7 @@ function lancerRechercheV2() {
     var emp = (g.emplacements && g.emplacements.length) ? '<br>' + g.emplacements.join('<br>') : '';
     return '<div class="carte ' + couleurClasseV2(w.Couleur) + vide + '"' + onclick + '>' + photo +
            '<div class="carte-centre"><span class="carte-titre">' + nom + '</span><span class="carte-sous">' + sous + '</span></div>' +
-           '<div class="carte-droite">' + g.count + ' btl' + emp + '</div></div>';
+           '<div class="carte-droite">' + caseDroiteV2(w, g.count) + emp + '</div></div>';
   }).join('');
 }
 
@@ -2790,13 +2839,13 @@ function deplacerDepuisEmpV2(code) {
 }
 
 // ==================== HISTORIQUE V2 ====================
-var filtresHistoV2 = { mets: '', vin: '', accord: '' };
+var filtresHistoV2 = { mets: '', vin: '', accord: '', couleur: '' };
 var histoEditV2 = { row: 0, note: 0 };
 
 function ouvrirHistoV2() {
   document.getElementById('histoV2Container').style.display = 'flex';
   remonterScrollV2('histoV2Container');
-  filtresHistoV2 = { mets: '', vin: '', accord: '' };
+  filtresHistoV2 = { mets: '', vin: '', accord: '', couleur: '' };
   if (ALL_HISTORIQUE && ALL_HISTORIQUE.length) {
     remplirFiltresHistoV2();
     afficherHistoV2();
@@ -2845,22 +2894,24 @@ function remplirFiltresHistoV2() {
   });
   accords.sort(function(a, b){ return a.localeCompare(b); });
 
-  var listes = { vin: vins, accord: accords };
-  ['vin','accord'].forEach(function(cle){
+  var couleurs = uniqueValeursAchat(ALL_DATA || [], 'Couleur');
+
+  var listes = { vin: vins, accord: accords, couleur: couleurs };
+  ['vin','accord','couleur'].forEach(function(cle){
     var cur = f[cle];
     var menu = document.getElementById('histoV2-f-' + cle + '-menu');
-    menu.innerHTML = listes[cle].map(function(v){
+    menu.innerHTML = '<div class="item-liste' + (cur === '' ? ' actif' : '') + '" onclick="choisirFiltreHistoV2(\'' + cle + '\', \'\')">Tous</div>' + listes[cle].map(function(v){
       return '<div class="item-liste' + (v === cur ? ' actif' : '') + '" onclick="choisirFiltreHistoV2(\'' + cle + '\', \'' + v.replace(/'/g, "\\'") + '\')">' + v + '</div>';
     }).join('');
     var disp = document.getElementById('histoV2-f-' + cle + '-display');
-    if (disp) disp.textContent = cur === '' ? ({vin:'Vin',accord:'Accord'})[cle] : cur;
+    if (disp) disp.textContent = cur === '' ? ({vin:'Vin',accord:'Accord',couleur:'Couleur'})[cle] : cur;
   });
 
   var champMets = document.getElementById('histoV2-f-mets');
   if (champMets) champMets.value = f.mets;
 
   var loupe = document.getElementById('histoV2-loupe');
-  if (loupe) loupe.classList.toggle('actif', !!(f.mets || f.vin || f.accord));
+  if (loupe) loupe.classList.toggle('actif', !!(f.mets || f.vin || f.accord || f.couleur));
 }
 
 function uniqueHistoV2(liste, champ) {
@@ -2878,14 +2929,14 @@ function filtrerMetsHistoV2() {
   var champ = document.getElementById('histoV2-f-mets');
   filtresHistoV2.mets = champ ? champ.value.trim() : '';
   var loupe = document.getElementById('histoV2-loupe');
-  if (loupe) loupe.classList.toggle('actif', !!(filtresHistoV2.mets || filtresHistoV2.vin || filtresHistoV2.accord));
+  if (loupe) loupe.classList.toggle('actif', !!(filtresHistoV2.mets || filtresHistoV2.vin || filtresHistoV2.accord || filtresHistoV2.couleur));
   afficherHistoV2();
 }
 
 function basculerFiltreHistoV2(cle) {
   var menu = document.getElementById('histoV2-f-' + cle + '-menu');
   var ouvert = menu.classList.contains('ouvert');
-  ['vin','accord'].forEach(function(k){
+  ['vin','accord','couleur'].forEach(function(k){
     document.getElementById('histoV2-f-' + k + '-menu').classList.remove('ouvert');
   });
   if (!ouvert) menu.classList.add('ouvert');
@@ -2899,10 +2950,10 @@ function choisirFiltreHistoV2(cle, valeur) {
 }
 
 function reinitialiserFiltresHistoV2() {
-  filtresHistoV2 = { mets: '', vin: '', accord: '' };
+  filtresHistoV2 = { mets: '', vin: '', accord: '', couleur: '' };
   var champMets = document.getElementById('histoV2-f-mets');
   if (champMets) champMets.value = '';
-  ['vin','accord'].forEach(function(k) {
+  ['vin','accord','couleur'].forEach(function(k) {
     document.getElementById('histoV2-f-' + k + '-menu').classList.remove('ouvert');
   });
   remplirFiltresHistoV2();
@@ -2925,6 +2976,7 @@ function afficherHistoV2() {
       var acc = cbAccords[(h.codebarre || '').toString().trim()] || '';
       if (acc.indexOf(f.accord) === -1) return false;
     }
+    if (f.couleur && (h.couleur || '') !== f.couleur) return false;
     return true;
   });
 
@@ -3209,6 +3261,10 @@ function grouperVinsV2(data) {
   });
 }
 
+function caseDroiteV2(w, count) {
+  return (w && !(w.Racheter || '').toString().trim()) ? 'Suggestion' : (count + ' btl');
+}
+
 function afficherCartesCaveV2(data) {
   var div = document.getElementById('caveV2-cartes');
   var groups = grouperVinsV2(data);
@@ -3230,7 +3286,7 @@ function afficherCartesCaveV2(data) {
     var vide = g.count === 0 ? ' carte-vide' : '';
     return '<div class="carte ' + couleurClasseV2(w.Couleur) + vide + '"' + onclick + '>' + photo +
            '<div class="carte-centre"><span class="carte-titre">' + nom + '</span><span class="carte-sous">' + sous + '</span></div>' +
-           '<div class="carte-droite">' + g.count + ' btl' +
+           '<div class="carte-droite">' + caseDroiteV2(w, g.count) +
            (g.emplacements && g.emplacements.length ? '<br>' + g.emplacements.join('<br>') : '') +
            '</div></div>';
   }).join('');
@@ -3563,7 +3619,7 @@ function calculerResultatsChartierV2() {
       var nom = decodeHTML(w.Nom || '—');
       var onclick = g.cb ? ' onclick="ouvrirApresTap(function(){fermerChartierV2();ouvrirFicheV2(\'' + g.cb + '\', \'accords\')})"' : '';
       var vide = g.count === 0 ? ' carte-vide' : '';
-      return '<div class="carte ' + couleurClasseV2(w.Couleur) + vide + '"' + onclick + '><div class="carte-centre"><span class="carte-titre">' + nom + '</span></div><div class="carte-droite">' + g.count + ' btl</div></div>';
+      return '<div class="carte ' + couleurClasseV2(w.Couleur) + vide + '"' + onclick + '><div class="carte-centre"><span class="carte-titre">' + nom + '</span></div><div class="carte-droite">' + caseDroiteV2(w, g.count) + '</div></div>';
     }).join('') : '<div class="texte-secondaire">Aucun vin de ce cépage en cave</div>';
     var listeAliments = aliments.map(function(a) {
       return '<div class="ligne-info">' + a.aliment + (a.nuance ? ' <span class="libelle">(' + a.nuance + ')</span>' : '') + '</div>';
@@ -3603,7 +3659,7 @@ function calculerResultatsChartierV2() {
       var nom = decodeHTML(w.Nom || '—');
       var onclick = g.cb ? ' onclick="ouvrirApresTap(function(){fermerChartierV2();ouvrirFicheV2(\'' + g.cb + '\', \'accords\')})"' : '';
       var vide = g.count === 0 ? ' carte-vide' : '';
-      return '<div class="carte ' + couleurClasseV2(w.Couleur) + vide + '"' + onclick + '><div class="carte-centre"><span class="carte-titre">' + nom + '</span></div><div class="carte-droite">' + g.count + ' btl</div></div>';
+      return '<div class="carte ' + couleurClasseV2(w.Couleur) + vide + '"' + onclick + '><div class="carte-centre"><span class="carte-titre">' + nom + '</span></div><div class="carte-droite">' + caseDroiteV2(w, g.count) + '</div></div>';
     }).join('') : '<div class="texte-secondaire">Aucun vin de ce cépage en cave</div>';
     return '<div class="emp-meuble">' + s.cepage + ' (' + s.count + '/' + selectionnes.length + ')</div>' + cartesVins;
   }).join('');
@@ -3756,7 +3812,7 @@ function calculerSelonSaqV2() {
     var vide = g.count === 0 ? ' carte-vide' : '';
     return '<div class="carte ' + couleurClasseV2(w.Couleur) + vide + '"' + onclick + '>' + photo +
            '<div class="carte-centre"><span class="carte-titre">' + nom + '</span><span class="carte-sous">' + sous + '</span></div>' +
-           '<div class="carte-droite">' + g.count + ' btl</div></div>';
+           '<div class="carte-droite">' + caseDroiteV2(w, g.count) + '</div></div>';
   }).join('');
 }
 
@@ -3769,6 +3825,12 @@ function toggleMenuV2() {
 function fermerMenuBurgerV2() {
   document.getElementById('burgerV2').classList.remove('ouvert');
   document.getElementById('burgerV2-voile').classList.remove('ouvert');
+}
+
+function basculerSousMenuV2(id) {
+  var sm = document.getElementById(id);
+  if (!sm) return;
+  sm.style.display = (sm.style.display === 'block') ? 'none' : 'block';
 }
 
 function burgerV2Click(cible) {
@@ -3835,7 +3897,7 @@ var PANNEAUX_V2 = {
   histo: {
     prefixe: 'histoV2', bascule: 'basculerFiltreHistoV2', reinit: 'reinitialiserFiltresHistoV2',
     avant: '<input type="text" id="histoV2-f-mets" class="champ-saisie" placeholder="Rechercher un mets" oninput="filtrerMetsHistoV2()">',
-    filtres: [['vin', 'Vin'], ['accord', 'Accord']],
+    filtres: [['vin', 'Vin'], ['accord', 'Accord'], ['couleur', 'Couleur']],
     apres: '<div class="panneau-separateur"></div>' +
            '<div class="roundel" onclick="ouvrirHistoAjoutV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Ajouter</span></div>'
   },
@@ -3853,12 +3915,15 @@ var PANNEAUX_V2 = {
   },
   achat: {
     prefixe: 'achatV2', bascule: 'basculerFiltreAchatV2', reinit: 'reinitialiserFiltresAchatV2',
+    avant: '<div class="item-liste" id="achatV2-mode-achat" onclick="choisirModeAchatV2(\'achat\')">Liste d\'achat</div>' +
+           '<div class="item-liste" id="achatV2-mode-sugg" onclick="choisirModeAchatV2(\'suggestions\')">Liste suggestions</div>' +
+           '<div class="panneau-separateur"></div>',
     filtres: [['couleur', 'Couleurs'], ['pays', 'Pays'], ['cepage', 'Cépages'], ['pastille', 'Pastille de goût']],
     apres: '<div class="panneau-separateur"></div>' +
            '<div class="champ-cliquable" id="achatV2-f-succ-display" onclick="basculerFiltreAchatV2(\'succ\')">Succursales</div>' +
            '<div id="achatV2-f-succ-menu" class="menu-liste"></div>' +
-           '<div class="panneau-separateur"></div>' +
-           '<div class="roundel" onclick="afficherNePasRacheterV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Ne pas racheter</span></div>'
+           '<div class="panneau-separateur"></div>',
+    apresReinit: '<div class="roundel" onclick="afficherNePasRacheterV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Ne pas racheter</span></div>'
   },
   promo: {
     prefixe: 'promoV2', bascule: 'basculerFiltrePromoV2', reinit: 'reinitialiserFiltresPromoV2',
@@ -3900,6 +3965,7 @@ function construirePanneauxV2() {
     });
     html += p.apres || '';
     html += '<div class="roundel" onclick="' + p.reinit + '()"><span class="roundel-anneau"></span><span class="roundel-barre">Réinitialiser</span></div>';
+    html += p.apresReinit || '';
     el.innerHTML = html;
   });
 }
