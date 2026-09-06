@@ -323,7 +323,7 @@ function basculerPlatFicheV2(i, type) {
   }).filter(function(r) { return r.nom && r.sku; })
     .sort(function(a, b) { return a.nom.localeCompare(b.nom); })
     .map(function(r) {
-      return '<div class="item-liste" onclick="window.open(\'https://www.saq.com/fr/' + r.sku + '\', \'_blank\')">' + r.nom + '</div>';
+      return '<div class="item-liste accordeon-2" onclick="window.open(\'https://www.saq.com/fr/' + r.sku + '\', \'_blank\')">' + r.nom + '</div>';
     }).join('');
   cible.style.display = '';
   var titre = document.getElementById('ficheV2-typ-' + i);
@@ -342,7 +342,7 @@ function chargerRecettesFicheV2(famille) {
     if (!RECETTES_FICHE_V2.length) { conteneur.innerHTML = '<div class="texte-secondaire">Aucune recette</div>'; return; }
     conteneur.innerHTML = comptesRecettesV2(RECETTES_FICHE_V2, 'typesPlats').map(function(x, i) {
       var esc = x.valeur.replace(/'/g, "\\'");
-      return '<div class="item-liste" id="ficheV2-typ-' + i + '" onclick="basculerPlatFicheV2(' + i + ', \'' + esc + '\')">' + decodeHTML(x.valeur) + ' (' + x.compte + ')</div>' +
+      return '<div class="item-liste accordeon-1" id="ficheV2-typ-' + i + '" onclick="basculerPlatFicheV2(' + i + ', \'' + esc + '\')">' + decodeHTML(x.valeur) + ' (' + x.compte + ')</div>' +
              '<div id="ficheV2-rec-' + i + '" style="display:none;"></div>';
     }).join('');
   }
@@ -389,7 +389,7 @@ function basculerChartierCatFicheV2(cle) {
   Array.prototype.forEach.call(conteneur.querySelectorAll('[id^="ficheV2-chatit-"]'), function(t) { t.classList.remove('actif'); });
   if (!ouvrir) return;
   cible.innerHTML = (CHARTIER_FICHE_V2[cle] || []).slice().sort(function(a, b) { return a.aliment.localeCompare(b.aliment); }).map(function(x) {
-    return '<div class="item-liste">' + x.aliment + (x.nuance ? ' <span class="texte-secondaire">— ' + x.nuance + '</span>' : '') + '</div>';
+    return '<div class="item-liste accordeon-2">' + x.aliment + (x.nuance ? ' <span class="texte-secondaire">— ' + x.nuance + '</span>' : '') + '</div>';
   }).join('');
   cible.style.display = '';
   var titre = document.getElementById('ficheV2-chatit-' + cle);
@@ -435,7 +435,7 @@ function chargerChartierFicheV2(wine) {
     html += Object.keys(LIBELLES_CATEGORIES_CHARTIER_V2).filter(function(cle) {
       return CHARTIER_FICHE_V2[cle] && CHARTIER_FICHE_V2[cle].length;
     }).map(function(cle) {
-      return '<div class="item-liste" id="ficheV2-chatit-' + cle + '" onclick="basculerChartierCatFicheV2(\'' + cle + '\')">' + LIBELLES_CATEGORIES_CHARTIER_V2[cle] + ' (' + CHARTIER_FICHE_V2[cle].length + ')</div>' +
+      return '<div class="item-liste accordeon-1" id="ficheV2-chatit-' + cle + '" onclick="basculerChartierCatFicheV2(\'' + cle + '\')">' + LIBELLES_CATEGORIES_CHARTIER_V2[cle] + ' (' + CHARTIER_FICHE_V2[cle].length + ')</div>' +
              '<div id="ficheV2-chapan-' + cle + '" style="display:none;"></div>';
     }).join('');
     conteneur.innerHTML = html;

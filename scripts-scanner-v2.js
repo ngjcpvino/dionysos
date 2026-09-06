@@ -1828,6 +1828,7 @@ function afficherProchainRecuVinV2() {
   var item = RECU_V2_ITEMS[RECU_V2_INDEX];
   document.getElementById('recuValidationV2-compte').textContent = (RECU_V2_INDEX + 1) + ' / ' + RECU_V2_ITEMS.length;
   document.getElementById('recuValidationV2-codesaq').value = item.codeSAQ || '';
+  document.getElementById('recuValidationV2-qte').value = (item.qte && item.qte > 0) ? item.qte : 1;
   document.getElementById('recuValidationV2-statut').textContent = '';
 
   var codeSAQ = (item.codeSAQ || '').toString().trim();
@@ -1858,13 +1859,18 @@ function confirmerRecuVinV2() {
   var statutEl = document.getElementById('recuValidationV2-statut');
   if (!codeSAQ) { statutEl.textContent = 'Entrez un code SAQ'; return; }
 
+  var qte = parseInt((document.getElementById('recuValidationV2-qte').value || '1'), 10);
+  if (!(qte >= 1 && qte <= 99)) qte = 1;
+  var bouteilles = [];
+  for (var b = 0; b < qte; b++) bouteilles.push({ meuble: '', rangee: '', espace: '' });
+
   testSAQAvecRetryV2(codeSAQ).then(function(scrap) {
     var codeCUP = scrap && scrap.success && scrap.data ? (scrap.data.codeCUP || '').replace(/\D/g, '').trim() : '';
     if (!codeCUP) {
       statutEl.textContent = 'Vin introuvable, corrigez le code';
       return;
     }
-    return appelBackend('ajouterVinAvecBouteilles', { codebarre: codeCUP, codeSAQ: codeSAQ, note: '', bouteilles: '[{"meuble":"","rangee":"","espace":""}]', nom: '' }, { spinner: 'Ajout' }).then(function(res) {
+    return appelBackend('ajouterVinAvecBouteilles', { codebarre: codeCUP, codeSAQ: codeSAQ, note: '', bouteilles: JSON.stringify(bouteilles), nom: '' }, { spinner: 'Ajout' }).then(function(res) {
       if (!res || !res.success) {
         statutEl.textContent = (res && res.message) || 'Erreur d\'ajout';
         return;
