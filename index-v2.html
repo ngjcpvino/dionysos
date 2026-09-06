@@ -43,16 +43,16 @@
   <div class="item-liste" onclick="burgerV2Click('racheter')">LISTE D'ACHAT</div>
   <div class="item-liste" onclick="basculerSousMenuV2('burgerV2-accord')">ACCORD SELON…</div>
   <div id="burgerV2-accord" style="display:none;">
-    <div class="item-liste" onclick="burgerV2Click('suggestions')">Sommeliers</div>
-    <div class="item-liste" onclick="burgerV2Click('selonsaq')">SAQ</div>
-    <div class="item-liste" onclick="burgerV2Click('accords')">Chartier</div>
+    <div class="item-liste accordeon-1" onclick="burgerV2Click('suggestions')">Sommeliers</div>
+    <div class="item-liste accordeon-1" onclick="burgerV2Click('selonsaq')">SAQ</div>
+    <div class="item-liste accordeon-1" onclick="burgerV2Click('accords')">Chartier</div>
   </div>
   <div class="item-liste" onclick="basculerSousMenuV2('burgerV2-outils')">OUTILS</div>
   <div id="burgerV2-outils" style="display:none;">
-    <div class="item-liste" onclick="burgerV2Click('aranger')">À ranger</div>
-    <div class="item-liste" onclick="burgerV2Click('sanscepage')">Sans cépage</div>
-    <div class="item-liste" onclick="burgerV2Click('facture')">Facture SAQ</div>
-    <div class="item-liste" onclick="burgerV2Click('promotions')">Promotions SAQ</div>
+    <div class="item-liste accordeon-1" onclick="burgerV2Click('aranger')">À ranger</div>
+    <div class="item-liste accordeon-1" onclick="burgerV2Click('sanscepage')">Sans cépage</div>
+    <div class="item-liste accordeon-1" onclick="burgerV2Click('facture')">Facture SAQ</div>
+    <div class="item-liste accordeon-1" onclick="burgerV2Click('promotions')">Promotions SAQ</div>
   </div>
  
  <div class="item-liste" onclick="burgerV2Click('refresh')">
@@ -518,6 +518,7 @@
     <div id="recuValidationV2-compte" class="texte-secondaire"></div>
     <input type="text" id="recuValidationV2-nom" class="champ-saisie" placeholder="Nom du vin">
     <input type="text" id="recuValidationV2-codesaq" class="champ-saisie" placeholder="Code SAQ" inputmode="numeric">
+    <input type="number" id="recuValidationV2-qte" class="champ-saisie" placeholder="Quantité" inputmode="numeric" min="1" value="1">
     <div id="recuValidationV2-statut" class="texte-secondaire"></div>
     <div class="roundel" onclick="confirmerRecuVinV2()">
       <span class="roundel-anneau"></span>

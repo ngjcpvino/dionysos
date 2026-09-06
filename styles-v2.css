@@ -114,6 +114,7 @@ html, body {
   --space-m: 15px;
   --space-l: 20px;
   --space-xl: 25px;
+  --espace-accordeon: 7px;
   --taille-tactile: 44px;
   --ls-tight: 1px;
   --ls-normal: 1.5px;
@@ -798,11 +799,12 @@ textarea.champ-saisie { resize: none; font-family: inherit; line-height: 1.4; }
 .item-liste:last-child { margin-bottom: 0; }
 .item-liste.actif { background: var(--gold-30); }
 .panneau-gauche .item-liste { white-space: normal; }
-/* Accordéons de la fiche : sous-niveaux indentés + jamais collés (le dernier item garde sa marge) */
-#ficheV2-recettes .item-liste { margin-left: var(--space-l); margin-bottom: var(--space-s); white-space: normal; }
-#ficheV2-recettes > div[id^="ficheV2-rec-"] .item-liste { margin-left: calc(var(--space-l) * 2); }
-#ficheV2-selon-chartier .item-liste { margin-left: var(--space-l); margin-bottom: var(--space-s); white-space: normal; }
-#ficheV2-selon-chartier > div[id^="ficheV2-chapan-"] .item-liste { margin-left: calc(var(--space-l) * 2); }
+/* Accordéons — indentation et espacement partagés, réutilisables PARTOUT.
+   Un item de sous-niveau porte .accordeon-1 (1er niveau) ou .accordeon-2 (2e niveau).
+   .item-liste.xxx (2 classes) bat .item-liste:last-child → le dernier item garde sa marge, donc rien ne se touche jamais. */
+.item-liste.accordeon-1 { margin-left: var(--space-l); }
+.item-liste.accordeon-2 { margin-left: calc(var(--space-l) * 2); }
+.item-liste.accordeon-1, .item-liste.accordeon-2 { margin-bottom: var(--espace-accordeon); white-space: normal; }
 .panneau-gauche .menu-liste { margin-left: auto; margin-right: 0; }
 
 /* ===== CERCLE — rond générique V2 (bordure or, fond sombre, centré) ===== */
@@ -875,11 +877,7 @@ textarea.champ-saisie { resize: none; font-family: inherit; line-height: 1.4; }
   font-weight: 300;
   letter-spacing: var(--ls-normal);
   text-transform: uppercase;
-  margin-bottom: var(--space-xs);
-}
-#burgerV2-accord .item-liste,
-#burgerV2-outils .item-liste {
-  margin-left: var(--space-l);
+  margin-bottom: var(--espace-accordeon);
 }
 
 .boire-verres {
