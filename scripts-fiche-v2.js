@@ -279,6 +279,7 @@ function afficherFicheV2(result) {
   chargerPlatsV2(CURRENT_WINE_CODEBARRE);
   chargerSuggestionsFicheV2(wine['Code SAQ']);
   chargerRecettesFicheV2(wine.Famille);
+  chargerChartierFicheV2(wine);
   verifierPrixV2(CURRENT_WINE_CODEBARRE, wine['Code SAQ']);
 }
 
@@ -349,6 +350,100 @@ function chargerRecettesFicheV2(famille) {
   if (ALL_RECETTES) { rendre(); return; }
   appelBackend('getRecettes', {}, { spinner: '' }).then(function(data) {
     ALL_RECETTES = data || [];
+    rendre();
+  }).catch(function() {});
+}
+
+// ==================== Selon Chartier — bloc de la fiche (9a) ====================
+var CHARTIER_FICHE_V2 = {};
+
+// aliments (+ nuance) d'un cépage, depuis ALL_ACCORDS → map (aliment normalisé → {aliment, nuance})
+function alimentsCepageChartierV2(cepage) {
+  var out = {};
+  (ALL_ACCORDS || []).forEach(function(a) {
+    if (a.aliment && memeTexteV2(a.cepage, cepage)) {
+      var k = normaliserRechercheV2(a.aliment);
+      if (!out[k]) out[k] = { aliment: a.aliment, nuance: a.nuance || '' };
+    }
+  });
+  return out;
+}
+
+// catégorie d'un aliment (recherche inverse dans CATEGORIES_CHARTIER_V2), défaut 'autres'
+function categorieAlimentChartierV2(aliment) {
+  var k = normaliserRechercheV2(aliment);
+  var trouve = 'autres';
+  Object.keys(CATEGORIES_CHARTIER_V2).forEach(function(cle) {
+    if (CATEGORIES_CHARTIER_V2[cle].some(function(a) { return normaliserRechercheV2(a) === k; })) trouve = cle;
+  });
+  return trouve;
+}
+
+// Accordéon des catégories d'aliments — une seule ouverte
+function basculerChartierCatFicheV2(cle) {
+  var conteneur = document.getElementById('ficheV2-selon-chartier');
+  if (!conteneur) return;
+  var cible = document.getElementById('ficheV2-chapan-' + cle);
+  var ouvrir = cible && cible.style.display === 'none';
+  Array.prototype.forEach.call(conteneur.querySelectorAll('[id^="ficheV2-chapan-"]'), function(v) { v.style.display = 'none'; });
+  Array.prototype.forEach.call(conteneur.querySelectorAll('[id^="ficheV2-chatit-"]'), function(t) { t.classList.remove('actif'); });
+  if (!ouvrir) return;
+  cible.innerHTML = (CHARTIER_FICHE_V2[cle] || []).slice().sort(function(a, b) { return a.aliment.localeCompare(b.aliment); }).map(function(x) {
+    return '<div class="item-liste">' + x.aliment + (x.nuance ? ' <span class="texte-secondaire">— ' + x.nuance + '</span>' : '') + '</div>';
+  }).join('');
+  cible.style.display = '';
+  var titre = document.getElementById('ficheV2-chatit-' + cle);
+  if (titre) titre.classList.add('actif');
+}
+
+// Remplit « Accords selon… → Chartier » : aliments du/des cépage(s), en rubriques repliables
+function chargerChartierFicheV2(wine) {
+  var conteneur = document.getElementById('ficheV2-selon-chartier');
+  if (!conteneur) return;
+  CHARTIER_FICHE_V2 = {};
+  var cepages = (wine['Cépage'] || wine.Cepage || '').toString().split(',').map(function(c) { return c.trim(); }).filter(Boolean);
+  if (!cepages.length) { conteneur.innerHTML = '<div class="texte-secondaire">Aucun cépage</div>'; return; }
+
+  function rendre() {
+    var parCepage = cepages.map(function(c) { return alimentsCepageChartierV2(c); });
+    var base, entete;
+    if (cepages.length === 1) {
+      base = parCepage[0];
+      entete = cepages[0];
+    } else {
+      var inter = {};
+      Object.keys(parCepage[0]).forEach(function(k) {
+        if (parCepage.every(function(m) { return m[k]; })) inter[k] = parCepage[0][k];
+      });
+      if (Object.keys(inter).length) {
+        base = inter;
+        entete = 'Communs à ' + cepages.join(', ');
+      } else {
+        base = parCepage[0];
+        entete = 'Cépage dominant : ' + cepages[0];
+      }
+    }
+    var alims = Object.keys(base).map(function(k) { return base[k]; });
+    if (!alims.length) { conteneur.innerHTML = '<div class="texte-secondaire">Aucun accord Chartier pour ce cépage</div>'; return; }
+    CHARTIER_FICHE_V2 = {};
+    alims.forEach(function(x) {
+      var cat = categorieAlimentChartierV2(x.aliment);
+      if (!CHARTIER_FICHE_V2[cat]) CHARTIER_FICHE_V2[cat] = [];
+      CHARTIER_FICHE_V2[cat].push(x);
+    });
+    var html = '<div class="texte-secondaire">' + entete + '</div>';
+    html += Object.keys(LIBELLES_CATEGORIES_CHARTIER_V2).filter(function(cle) {
+      return CHARTIER_FICHE_V2[cle] && CHARTIER_FICHE_V2[cle].length;
+    }).map(function(cle) {
+      return '<div class="item-liste" id="ficheV2-chatit-' + cle + '" onclick="basculerChartierCatFicheV2(\'' + cle + '\')">' + LIBELLES_CATEGORIES_CHARTIER_V2[cle] + ' (' + CHARTIER_FICHE_V2[cle].length + ')</div>' +
+             '<div id="ficheV2-chapan-' + cle + '" style="display:none;"></div>';
+    }).join('');
+    conteneur.innerHTML = html;
+  }
+
+  if (ALL_ACCORDS) { rendre(); return; }
+  appelBackend('getChartier', {}, { spinner: '' }).then(function(data) {
+    ALL_ACCORDS = data || [];
     rendre();
   }).catch(function() {});
 }
