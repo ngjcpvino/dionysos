@@ -289,11 +289,17 @@ function afficherFicheV2(result) {
 var ALL_RECETTES = null;
 var ALL_CURIEUXBEGIN = null;
 
+// Normalise un code de famille : ignore les zéros de tête (Sheets écrit "009" comme le nombre 9)
+function normFamilleV2(f) {
+  var s = (f == null ? '' : f).toString().trim();
+  return /^\d+$/.test(s) ? String(parseInt(s, 10)) : s;
+}
+
 function recettesDeLaFamilleV2(famille) {
-  var fam = (famille || '').toString().trim();
+  var fam = normFamilleV2(famille);
   if (!fam) return [];
   return (ALL_RECETTES || []).filter(function(r) {
-    return r.familles && r.familles.indexOf(fam) !== -1;
+    return (r.familles || []).some(function(x) { return normFamilleV2(x) === fam; });
   });
 }
 
