@@ -6,7 +6,7 @@
 ## 📁 Architecture
 - **Frontend** : GitHub Pages, dépôt public `ngjcpvino/dionysos`
 - **Backend** : Google Apps Script, projet « Vino 3.0 », `Code.gs` — **hors dépôt** (voir Trous connus)
-- **Base** : Google Sheets « Vino 3.0 » — onglets Vino · Historique · config/CONFIG · Suggestions · Accords · Recettes
+- **Base** : Google Sheets « Vino 3.0 » — onglets Vino · Historique · config/CONFIG · Suggestions · Chartier · Recettes
 - **Adresse** : `.../index-v2.html`. L'adresse de base donne « page introuvable » — assumé, et ce n'est PAS une protection.
 
 ## 📂 Fichiers
@@ -51,7 +51,7 @@
 - Loupe et ✕ d'une page-liste : `position:fixed` (`.gauche` reste `absolute`).
 - Carte avec date à droite : `white-space:nowrap` (exception : items des panneaux, qui replient). Carte indentée pleine largeur : `width: calc(100% - indent)`.
 - Nouvelle couleur de vin : 4 blocs CSS + `couleurClasseV2` + classement fiche (2 endroits) + tri de `grouperVinsV2`.
-- **Modifier un panneau de filtres = modifier `PANNEAUX_V2`, jamais le HTML.** Exception connue : `construirePanneauAccordsV2` fabrique le sien à la main (catégories dépliantes).
+- **Modifier un panneau de filtres = modifier `PANNEAUX_V2`, jamais le HTML.** Exception connue : `construirePanneauChartierV2` fabrique le sien à la main (catégories dépliantes).
 
 **Méthode**
 - Un changement présenté mais sans « ok » reçu N'EST PAS appliqué — ne jamais le marquer fait.
@@ -83,6 +83,16 @@ Mot de passe d'app à chaque appel. Backend : `params.secret` comparé à la Scr
 - Clés Script : `SPREADSHEET_ID`, `APP_SECRET`, `SAQ_API_KEY`, `SAQ_ENV_ID`.
 - **Détection Spiritueux** (`lireFicheSAQ`) : la méta-description de la page SAQ commence par le type exact (« Vodka. Format… »). Type ne commençant pas par « Vin » → Couleur = Spiritueux, cépages vidés, type complet → Appellation. **Le fil d'Ariane n'est PAS fiable, ne pas y revenir.**
 - `testScrapingSAQ` porte un nom de test alors que c'est le lecteur de fiches utilisé partout (cache 5 min).
+
+## 🍇 Selon Chartier — pièges
+
+Accords mets-vins par **cépage** (méthode Chartier), distincte des Accords SAQ (qui passent par le code de famille). Le lien est le **cépage**, pas la famille.
+
+- Données dans l'onglet Sheet **Chartier** (anciennement « Accords », renommé le 5 septembre 2026) : colonnes Cépage · Aliment · Nuance · Source. Lu par `getChartier`, alimenté à la main par `ajouterChartier`.
+- Front : tout est nommé `chartierV2…` (conteneur `chartierV2Container`, moteur `construirePanneauChartierV2` / `calculerResultatsChartierV2`, état `filtresChartierV2` / `chartierV2Selection`). Le mot-clé de navigation reste `'accords'` (`burgerV2Click('accords')`).
+- Le panneau se fabrique à la main (catégories d'ingrédients dépliantes) — **exception** à `PANNEAUX_V2`.
+- Sélection multiple d'ingrédients → cépages qui matchent → mes vins de ces cépages. Filtres Cépage et Couleur en plus.
+- **À ne pas confondre** : le champ **Accords** de la fiche (colonne 28, `REF_COLS.ACCORDS`) et la colonne **Accords** de config gardent ce nom — ils ne sont PAS liés à Chartier.
 
 ## 🍽️ Accords SAQ — pièges
 Mécanique distincte de Chartier : le lien vin → recettes est un **code de famille** de l'API SAQ, pas le cépage. Un vin porte UNE famille (colonne 71), une recette en porte plusieurs — c'est la charnière.

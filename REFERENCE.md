@@ -15,19 +15,15 @@
 ## Aucun raisonnement à voix haute — RÈGLE STRICTE
 - INTERDIT : tout déroulé du genre « voilà la cause, ce n'est pas X c'est Y, parce que telle fonction fait ceci… ». Si quelque chose est mal codé, c'est l'IA qui l'a mal codé ; l'utilisateur n'a pas à lire l'enquête.
 - INTERDIT aussi : afficher à l'écran les étapes de recherche (« je dois confirmer l'occurrence… », « occurrences trouvées : … »). Tout ça se fait en SILENCE.
-- Format imposé pour une correction : « Tu dois changer ceci pour que ça fasse ça. » Puis le Trouve/Remplace. Rien d'autre. Aucune explication de mécanisme, aucune justification.
+- Format imposé pour une correction : « Tu dois changer ceci pour que ça fasse ça. » Puis l'IA applique. Rien d'autre. Aucune explication de mécanisme, aucune justification.
 
 ## Changements de code — LE PLUS IMPORTANT
-- Jamais de code sans OK explicite.
-- **UNE SEULE paire Trouve ceci / Remplace par ceci par message. JAMAIS deux. Point.** Même si elles sont dans le même fichier, même si elles se suivent, même si ça paraît efficace : une seule par message, puis attendre le OK. C'est la règle qui prime sur tout.
-- Si plusieurs lignes à changer SE SUIVENT dans le fichier (contiguës), elles forment UNE SEULE paire (un seul Trouve/Remplace qui couvre tout le bloc contigu). Ne jamais découper un bloc contigu en deux passes.
-- Si les changements ne se suivent PAS, c'est une paire par message, un OK entre chaque.
-- Après chaque bloc, ATTENDRE le **OK** avant le suivant. « OK » = c'est **FAIT** (déjà appliqué chez lui), pas « vas-y ». On enchaîne, l'utilisateur publie une fois à la fin.
-- Le **Trouve ceci** est copié EXACTEMENT depuis le fichier (jamais reconstruit de mémoire), pour que le Rechercher de Notepad++ le trouve à tous les coups. Si le passage exact n'est pas retrouvé, le dire et demander de le coller — ne JAMAIS inventer un bloc approximatif.
-- À l'intérieur d'un même bloc, couvrir TOUT ce qui change au même endroit (ne pas redécouper en micro-bouts ligne par ligne sans raison).
-- **Regrouper dans UN SEUL bloc plusieurs remplacements du même fichier, proches, sans dépendance entre eux** (ex. 3 lignes à modifier dans la même fonction). Ne découper en blocs séparés que si un OK doit confirmer une étape AVANT que la suivante ait du sens. Inutile = aller-retour stupide à éviter.
-- Un bloc = un OK. Mais « un bloc » peut contenir plusieurs paires Trouve/Remplace du même fichier données ensemble.
-- Format : **Trouve ceci** / **Remplace par ceci** (deux blocs dans la conversation, pas d'artefact pour le code). Toujours indiquer le **nom du FICHIER** (pas la fonction).
+- **Jamais de code sans OK explicite. On DIALOGUE avant de coder** : dire en clair ce qui va changer, attendre le OK, PUIS appliquer. Ne pas partir en silence puis livrer du code non demandé.
+- **L'IA modifie les fichiers du dépôt directement** (`index-v2.html`, `scripts-*-v2.js`, `styles-v2.css`) — plus de « Trouve / Remplace » à copier à la main. L'utilisateur relit et publie quand il veut (souvent une seule fois, à la fin d'une série).
+- **`Code.gs` est hors dépôt** (Apps Script). L'IA en garde une copie locale dans le dossier (`Code.gs`, gitignorée) et la modifie ; l'utilisateur fait **un seul copier-coller** de tout le fichier dans Apps Script, puis **redéploie** (Gérer les déploiements → nouvelle version). Ne jamais donner de Trouve/Remplace pour le backend.
+- **Aller vite : regrouper** les changements sans dépendance et les appliquer d'un coup. Ne découper (et attendre un OK au milieu) que si une étape doit être validée AVANT que la suivante ait du sens.
+- Après une série, dire clairement à l'utilisateur ce qu'il doit **publier / redéployer**, et tout **geste manuel** requis (ex. renommer un onglet du Sheet).
+- L'utilisateur ne teste qu'à la fin : **vérifier la syntaxe** des fichiers modifiés avant de livrer (`node --check`), et tracer chaque parcours en silence.
 - Toujours modifier dans le bon fichier : plusieurs classes existent en double entre `styles.css` (V1, figé) et `styles-v2.css` (V2). Toucher uniquement le V2.
 
 ## Format des échanges
@@ -45,7 +41,7 @@
 - Toute décision prise en conversation est écrite dans le `.md` d'état immédiatement.
 
 ## Le `.md` d'état
-- Quand on le met à jour, le sortir en ENTIER (prêt à copier), jamais en fragments — sauf une section précise demandée.
+- L'IA le met à jour directement dans le fichier (comme le code) ; pas besoin de le recopier en entier dans la conversation.
 - Les règles de travail ne vivent QUE dans ce REFERENCE.md, pas dans le `.md` d'état (éviter le doublon).
 
 ## Contexte GLOBAL obligatoire — jamais en vase clos

@@ -1,6 +1,9 @@
-# 🔧 À coder — 14 items
+# ✅ Codé — 14 items (séance du 5 septembre 2026)
 
-> Séance du 5 septembre 2026. **Rien n'est fait** : aucun bloc trouve/remplace envoyé ni appliqué.
+> **Les 14 items sont codés et appliqués aux fichiers** (frontend + `Code.gs`), en attente de test après publication.
+> Détail par item conservé ci-dessous comme trace.
+> Écart notable — item 13 refait en **deux ronds** sur la page « vin inconnu » : **+** (Acheter → crée le vin puis Arrivée) et **💡** (Suggérer → note, Racheter vide).
+> Rappel déploiement : renommer l'onglet Sheet **Accords → Chartier** + redéployer `Code.gs`.
 > Règles de travail : `REFERENCE.md`. État technique : `mise-a-jour.md`.
 
 ## Ordre de codage imposé
