@@ -233,6 +233,8 @@ function afficherFicheV2(result) {
   html += '<div id="ficheV2-selon-saq" style="display:none;"><div id="ficheV2-recettes"></div></div>';
   html += '<div class="item-liste" id="ficheV2-selon-chartier-titre" onclick="basculerAccordsSelonV2(\'chartier\')">Chartier</div>';
   html += '<div id="ficheV2-selon-chartier" style="display:none;"><div class="texte-secondaire">En développement</div></div>';
+  html += '<div class="item-liste" id="ficheV2-selon-cb-titre" onclick="basculerAccordsSelonV2(\'cb\')">Curieux Bégin</div>';
+  html += '<div id="ficheV2-selon-cb" style="display:none;"></div>';
   html += '</div>';
   html += '</div>';
 
@@ -280,10 +282,12 @@ function afficherFicheV2(result) {
   chargerSuggestionsFicheV2(wine['Code SAQ']);
   chargerRecettesFicheV2(wine.Famille);
   chargerChartierFicheV2(wine);
+  chargerCurieuxBeginFicheV2(wine);
   verifierPrixV2(CURRENT_WINE_CODEBARRE, wine['Code SAQ']);
 }
 
 var ALL_RECETTES = null;
+var ALL_CURIEUXBEGIN = null;
 
 function recettesDeLaFamilleV2(famille) {
   var fam = (famille || '').toString().trim();
@@ -448,9 +452,28 @@ function chargerChartierFicheV2(wine) {
   }).catch(function() {});
 }
 
+// « Accords selon… → Curieux Bégin » : plats où ce vin a été proposé sur l'émission (match par Code SAQ)
+function chargerCurieuxBeginFicheV2(wine) {
+  var conteneur = document.getElementById('ficheV2-selon-cb');
+  if (!conteneur) return;
+  var codeSAQ = (wine['Code SAQ'] || wine.codeSAQ || '').toString().trim();
+  function rendre() {
+    if (!codeSAQ) { conteneur.innerHTML = '<div class="texte-secondaire">Aucun code SAQ</div>'; return; }
+    var accords = (ALL_CURIEUXBEGIN || []).filter(function(a) { return (a.codeSAQ || '').toString().trim() === codeSAQ; });
+    if (!accords.length) { conteneur.innerHTML = '<div class="texte-secondaire">Aucun accord Curieux Bégin</div>'; return; }
+    conteneur.innerHTML = accords.map(function(a) {
+      var url = 'https://cuisinez.telequebec.tv/recettes/' + a.recetteId + '/' + a.slug;
+      var sous = a.vin ? ' <span class="texte-secondaire">— ' + decodeHTML(a.vin) + '</span>' : '';
+      return '<div class="item-liste accordeon-1" onclick="window.open(\'' + url + '\', \'_blank\')">' + decodeHTML(a.plat) + sous + '</div>';
+    }).join('');
+  }
+  if (ALL_CURIEUXBEGIN) { rendre(); return; }
+  appelBackend('getCurieuxBegin', {}, { spinner: '' }).then(function(data) { ALL_CURIEUXBEGIN = data || []; rendre(); }).catch(function() {});
+}
+
 // Accordéon du bloc « Accords selon… » — un seul volet ouvert
 function basculerAccordsSelonV2(quel) {
-  ['som', 'saq', 'chartier'].forEach(function(k) {
+  ['som', 'saq', 'chartier', 'cb'].forEach(function(k) {
     var volet = document.getElementById('ficheV2-selon-' + k);
     var titre = document.getElementById('ficheV2-selon-' + k + '-titre');
     if (!volet) return;
