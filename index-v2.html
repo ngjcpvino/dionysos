@@ -46,6 +46,7 @@
     <div class="item-liste accordeon-1" onclick="burgerV2Click('suggestions')">Sommeliers</div>
     <div class="item-liste accordeon-1" onclick="burgerV2Click('selonsaq')">SAQ</div>
     <div class="item-liste accordeon-1" onclick="burgerV2Click('accords')">Chartier</div>
+    <div class="item-liste accordeon-1" onclick="burgerV2Click('curieuxbegin')">Curieux Bégin</div>
   </div>
   <div class="item-liste" onclick="basculerSousMenuV2('burgerV2-outils')">OUTILS</div>
   <div id="burgerV2-outils" style="display:none;">
@@ -560,6 +561,18 @@
   </div>
   <div id="selonSaqV2-filtres-voile" class="panneau-voile" onclick="fermerFiltresSelonSaqV2()"></div>
   <div id="selonSaqV2-filtres" class="panneau-gauche"></div>
+</div>
+
+<!-- ====================== SELON CURIEUX BÉGIN V2 ====================== -->
+<div id="curieuxBeginV2Container" class="modal-v2-fullscreen" style="display:none;">
+  <div class="modal-v2-content modale-haut">
+    <div class="btn-fermer" onclick="fermerCurieuxBeginV2()">✕</div>
+    <h2 class="titre-1">Selon Curieux Bégin</h2>
+    <input type="text" id="curieuxBeginV2-recherche" class="champ-saisie" placeholder="Rechercher un plat ou un vin" oninput="chargerCurieuxBeginV2()">
+    <div class="ligne-dispo"><span class="libelle">Que les vins en cave</span><div class="cercle" id="curieuxBeginV2-cave" onclick="toggleCaveCurieuxBeginV2()">✗</div></div>
+    <div id="curieuxBeginV2-compte" class="texte-secondaire"></div>
+    <div id="curieuxBeginV2-liste" class="contenu"></div>
+  </div>
 </div>
 
 <!-- ====================== PHOTO V2 ====================== -->

@@ -441,7 +441,7 @@ function fermerMenuActionV2() {
 }
 
 function cacherToutesPagesV2() {
-  ['scannerV2Container', 'saisieManuelleV2Container', 'vinInconnuV2Container', 'menuActionV2Overlay', 'arriveeV2Container', 'deplacerV2Container', 'boireV2Container', 'donnerV2Container', 'caveV2Container', 'aRangerV2Container', 'sansCepageV2Container', 'suggestionsV2Container', 'suggestionEditV2Overlay', 'histoV2Container', 'histoAjoutV2Overlay', 'histoEditV2Overlay', 'empV2Container', 'achatV2Container', 'promoV2Container', 'rechercheV2Container', 'editFicheV2Overlay', 'ficheV2Overlay', 'photoV2Overlay', 'recuV2Container', 'recuValidationV2Container', 'chartierV2Container', 'selonSaqV2Container'].forEach(function(id) {
+  ['scannerV2Container', 'saisieManuelleV2Container', 'vinInconnuV2Container', 'menuActionV2Overlay', 'arriveeV2Container', 'deplacerV2Container', 'boireV2Container', 'donnerV2Container', 'caveV2Container', 'aRangerV2Container', 'sansCepageV2Container', 'suggestionsV2Container', 'suggestionEditV2Overlay', 'histoV2Container', 'histoAjoutV2Overlay', 'histoEditV2Overlay', 'empV2Container', 'achatV2Container', 'promoV2Container', 'rechercheV2Container', 'editFicheV2Overlay', 'ficheV2Overlay', 'photoV2Overlay', 'recuV2Container', 'recuValidationV2Container', 'chartierV2Container', 'selonSaqV2Container', 'curieuxBeginV2Container'].forEach(function(id) {
 
     var el = document.getElementById(id);
     if (el) el.style.display = 'none';
@@ -3901,6 +3901,68 @@ function calculerSelonSaqV2() {
   }).join('');
 }
 
+// ==================== SELON CURIEUX BÉGIN V2 ====================
+var curieuxBeginV2Cave = false;
+
+function ouvrirCurieuxBeginV2() {
+  document.getElementById('curieuxBeginV2Container').style.display = 'flex';
+  remonterScrollV2('curieuxBeginV2Container');
+  var champ = document.getElementById('curieuxBeginV2-recherche');
+  if (champ) champ.value = '';
+  curieuxBeginV2Cave = false;
+  var btn = document.getElementById('curieuxBeginV2-cave');
+  if (btn) { btn.classList.remove('actif'); btn.textContent = '✗'; }
+  if (ALL_CURIEUXBEGIN) { chargerCurieuxBeginV2(); return; }
+  appelBackend('getCurieuxBegin', {}, { spinner: ' ' }).then(function(data) {
+    ALL_CURIEUXBEGIN = data || [];
+    chargerCurieuxBeginV2();
+  }).catch(function() { retourAccueilV2(); });
+}
+
+function fermerCurieuxBeginV2() {
+  document.getElementById('curieuxBeginV2Container').style.display = 'none';
+}
+
+function toggleCaveCurieuxBeginV2() {
+  curieuxBeginV2Cave = !curieuxBeginV2Cave;
+  var btn = document.getElementById('curieuxBeginV2-cave');
+  if (btn) { btn.classList.toggle('actif', curieuxBeginV2Cave); btn.textContent = curieuxBeginV2Cave ? '✓' : '✗'; }
+  chargerCurieuxBeginV2();
+}
+
+function chargerCurieuxBeginV2() {
+  var div = document.getElementById('curieuxBeginV2-liste');
+  var compte = document.getElementById('curieuxBeginV2-compte');
+  if (!div) return;
+  // Carte des vins en cave, par code SAQ (pour le filtre et le badge)
+  var enCave = {};
+  grouperVinsV2(ALL_DATA || []).forEach(function(g) {
+    var cs = ((g.wine && g.wine['Code SAQ']) || '').toString().trim();
+    if (cs) enCave[cs] = { count: g.count, cb: g.cb };
+  });
+  var champ = document.getElementById('curieuxBeginV2-recherche');
+  var q = normaliserRechercheV2(champ ? champ.value : '');
+  var liste = (ALL_CURIEUXBEGIN || []).slice();
+  if (q) liste = liste.filter(function(a) { return contientTexteV2(a.plat, q) || contientTexteV2(a.vin, q); });
+  if (curieuxBeginV2Cave) liste = liste.filter(function(a) { var e = enCave[(a.codeSAQ || '').toString().trim()]; return e && e.count > 0; });
+  liste.sort(function(a, b) {
+    var sa = parseInt(a.saison, 10) || 0, sb = parseInt(b.saison, 10) || 0;
+    if (sb !== sa) return sb - sa;
+    return (a.plat || '').localeCompare(b.plat || '');
+  });
+
+  compte.textContent = liste.length + ' accord' + (liste.length > 1 ? 's' : '');
+  if (!liste.length) { div.innerHTML = '<div class="texte-secondaire">Aucun accord</div>'; return; }
+
+  div.innerHTML = liste.map(function(a) {
+    var e = enCave[(a.codeSAQ || '').toString().trim()];
+    var badge = (e && e.count > 0) ? ' <span class="texte-secondaire">• en cave</span>' : '';
+    var url = 'https://cuisinez.telequebec.tv/recettes/' + a.recetteId + '/' + a.slug;
+    var sous = [decodeHTML(a.vin || ''), a.type || ''].filter(Boolean).join(' · ');
+    return '<div class="item-liste" onclick="window.open(\'' + url + '\', \'_blank\')"><strong>' + decodeHTML(a.plat || '') + '</strong>' + badge + '<br><span class="texte-secondaire">' + sous + '</span></div>';
+  }).join('');
+}
+
 // ==================== MENU BURGER V2 ====================
 function toggleMenuV2() {
   var ouvert = document.getElementById('burgerV2').classList.toggle('ouvert');
@@ -3936,6 +3998,7 @@ function burgerV2Click(cible) {
     if (cible === 'facture') { cacherToutesPagesV2(); ouvrirRecuV2(); return; }
   if (cible === 'accords') { cacherToutesPagesV2(); ouvrirChartierV2(); return; }
   if (cible === 'selonsaq') { cacherToutesPagesV2(); ouvrirSelonSaqV2(); return; }
+  if (cible === 'curieuxbegin') { cacherToutesPagesV2(); ouvrirCurieuxBeginV2(); return; }
 
   
   if (cible === 'refresh') {
