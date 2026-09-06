@@ -116,8 +116,8 @@
 <div id="vinInconnuV2Container" class="modal-v2-fullscreen" style="display:none;">
   <div class="modal-v2-content modale-haut">
     <button class="btn-fermer" onclick="fermerVinInconnuV2()">✕</button>
-    <h2 class="titre-1">Vin inconnu</h2>
-    <div class="texte-secondaire">Ce vin n'est pas dans ta cave</div>
+    <h2 class="titre-1" id="vinInconnuV2-titre">Vin inconnu</h2>
+    <div class="texte-secondaire" id="vinInconnuV2-soustitre">Ce vin n'est pas dans ta cave</div>
     <div id="vinInconnuV2-saisie" style="width:100%; max-width:600px;">
       <input type="text" id="vinInconnuV2-codebarre-champ" class="champ-saisie" placeholder="Code-barres" inputmode="numeric">
       <input type="text" id="vinInconnuV2-codesaq" class="champ-saisie" placeholder="Code SAQ" inputmode="numeric">
@@ -567,6 +567,7 @@
     <button class="btn-fermer" onclick="fermerPhotoV2()">✕</button>
     <div id="photoV2-entete" class="photo-entete" style="display:none;"></div>
     <div class="photo-grande" onclick="clicPhotoV2(event)"><img id="photoV2-img" src="" alt=""><div id="photoV2-nom" class="titre-1" style="display:none;"></div></div>
+    <div id="photoV2-emplacement" class="texte-secondaire" style="display:none;text-align:center;"></div>
   </div>
 </div>
 
