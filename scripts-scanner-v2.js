@@ -109,6 +109,17 @@ function entreeManuelleV2() {
   if (champ) champ.focus();
 }
 
+// Code SAQ tapé : ré-essai automatique si le 1er appel échoue (démarrage à froid / latence SAQ)
+function testSAQAvecRetryV2(codeSAQ) {
+  function essai() { return appelBackend('testScrapingSAQ', { codeSAQ: codeSAQ }, { spinner: 'Un instant svp' }); }
+  function valide(res) { return res && res.success && res.data && (res.data.codeCUP || '').replace(/\D/g, '').trim(); }
+  return essai().then(function(res) {
+    return valide(res) ? res : essai();
+  }).catch(function() {
+    return essai();
+  });
+}
+
 function validerSaisieManuelleV2() {
   var champ = document.getElementById('saisieManuelleV2-champ');
   var code = (champ ? champ.value : '').replace(/\D/g, '').trim();
@@ -128,7 +139,7 @@ function validerSaisieManuelleV2() {
     afficherMessage('Entrez un code-barres ou un code SAQ');
     return;
   }
-  appelBackend('testScrapingSAQ', { codeSAQ: codeSAQ }, { spinner: 'Un instant svp' }).then(function(res) {
+  testSAQAvecRetryV2(codeSAQ).then(function(res) {
     var cup = res && res.success && res.data ? (res.data.codeCUP || '').replace(/\D/g, '').trim() : '';
     if (!cup) {
       afficherMessage('Code-barres introuvable pour ce code SAQ');
@@ -150,6 +161,7 @@ function validerSaisieManuelleV2() {
         document.getElementById('vinInconnuV2-codebarre-champ').value = cup;
         document.getElementById('vinInconnuV2-codesaq').value = codeSAQ;
         document.getElementById('vinInconnuV2-nom').value = '';
+        remplirEnteteVinInconnuV2(codeSAQ);
         document.getElementById('vinInconnuV2Container').style.display = 'flex';
       }
     }).catch(function() {
@@ -189,6 +201,22 @@ function traiterResultatScanV2(code) {
 
 var vinInconnuV2Code = null;
 
+// Remplit l'en-tête de la page « Vin inconnu » avec ce que dit la SAQ (nom + origine)
+function remplirEnteteVinInconnuV2(codeSAQ) {
+  var titre = document.getElementById('vinInconnuV2-titre');
+  var sous = document.getElementById('vinInconnuV2-soustitre');
+  if (!titre || !sous) return;
+  if (!codeSAQ) { titre.textContent = 'Vin inconnu'; sous.textContent = "Ce vin n'est pas dans ta cave"; return; }
+  appelBackend('testScrapingSAQ', { codeSAQ: codeSAQ }, { spinner: '' }).then(function(res) {
+    if (res && res.success && res.data) {
+      var d = res.data;
+      titre.textContent = decodeHTML((d.nom || 'Vin inconnu').toString());
+      var org = [d.pays, d.region, d.appellation, d.cepages].filter(Boolean).map(function(x) { return decodeHTML(x.toString()); }).join(' · ');
+      sous.textContent = org || "Ce vin n'est pas dans ta cave";
+    }
+  }).catch(function() {});
+}
+
 function ouvrirVinInconnuV2(code) {
   vinInconnuV2Code = code;
   appelBackend('chercherProduitSAQ_GRAPHQL_V1', { codebarre: code }, { spinner: 'Un instant svp' }).then(function(codeSAQ) {
@@ -199,12 +227,14 @@ function ouvrirVinInconnuV2(code) {
         document.getElementById('vinInconnuV2-codebarre-champ').value = code;
         document.getElementById('vinInconnuV2-codesaq').value = codeSAQ;
         document.getElementById('vinInconnuV2-nom').value = '';
+        remplirEnteteVinInconnuV2(codeSAQ);
         document.getElementById('vinInconnuV2Container').style.display = 'flex';
       }
     } else {
       document.getElementById('vinInconnuV2-codebarre-champ').value = code;
       document.getElementById('vinInconnuV2-codesaq').value = '';
       document.getElementById('vinInconnuV2-nom').value = '';
+      remplirEnteteVinInconnuV2('');
       document.getElementById('vinInconnuV2Container').style.display = 'flex';
     }
   }).catch(function() {
@@ -1209,6 +1239,15 @@ function bouteillesEnCaveParSAQV2(codeSAQ) {
   });
 }
 
+// Vrai si le vin (par code-barres) a au moins une bouteille active en cave
+function vinEnCaveV2(codebarre) {
+  var cb = (codebarre || '').toString().trim();
+  return (ALL_DATA || []).some(function(i) {
+    var statut = i.Statut || 'En stock';
+    return memeCodeV2(i['Code-barres'], cb) && i.bottle && i.bottle > 0 && statut !== 'Bu' && statut !== 'Sorti';
+  });
+}
+
 function afficherSuggestionsV2() {
   var f = filtresSuggestionsV2;
   var champTexte = document.getElementById('suggestionsV2-f-texte');
@@ -1817,7 +1856,7 @@ function confirmerRecuVinV2() {
   var statutEl = document.getElementById('recuValidationV2-statut');
   if (!codeSAQ) { statutEl.textContent = 'Entrez un code SAQ'; return; }
 
-  appelBackend('testScrapingSAQ', { codeSAQ: codeSAQ }, { spinner: 'Vérification' }).then(function(scrap) {
+  testSAQAvecRetryV2(codeSAQ).then(function(scrap) {
     var codeCUP = scrap && scrap.success && scrap.data ? (scrap.data.codeCUP || '').replace(/\D/g, '').trim() : '';
     if (!codeCUP) {
       statutEl.textContent = 'Vin introuvable, corrigez le code';
@@ -1845,7 +1884,7 @@ function ouvrirRechercheV2() {
   remonterScrollV2('rechercheV2Container');
   var champ = document.getElementById('rechercheV2-champ');
   champ.value = '';
-  filtresRechercheV2 = { sommelier: '', couleur: '', cepage: '', pays: '', appellation: '', accords: '', pastille: '' };
+  filtresRechercheV2 = { sommelier: '', couleur: '', cepage: '', pays: '', appellation: '', accords: '', pastille: '', cave: false };
   remplirFiltresRechercheV2();
   document.getElementById('rechercheV2-compte').textContent = '';
   document.getElementById('rechercheV2-cartes').innerHTML = '<div class="texte-secondaire">Tape un mot : agent, producteur, arôme, appellation…</div>';
@@ -1856,7 +1895,7 @@ function fermerRechercheV2() {
   document.getElementById('rechercheV2Container').style.display = 'none';
 }
 
-var filtresRechercheV2 = { sommelier: '', couleur: '', cepage: '', pays: '', appellation: '', accords: '', pastille: '' };
+var filtresRechercheV2 = { sommelier: '', couleur: '', cepage: '', pays: '', appellation: '', accords: '', pastille: '', cave: false };
 var libellesFiltreRechercheV2 = { sommelier: 'Sommelier', couleur: 'Couleurs', cepage: 'Cépages', pays: 'Pays', appellation: 'Appellations', accords: 'Accords', pastille: 'Pastille de goût' };
 
 function ouvrirFiltresRechercheV2() {
@@ -1870,6 +1909,8 @@ function fermerFiltresRechercheV2() {
 
 function remplirFiltresRechercheV2() {
   var f = filtresRechercheV2;
+  var caveBtn = document.getElementById('rechercheV2-cave');
+  if (caveBtn) { caveBtn.classList.toggle('actif', f.cave); caveBtn.textContent = f.cave ? '✓' : '✗'; }
   var base = (ALL_DATA || []);
 
   var vusSom = {};
@@ -1935,7 +1976,7 @@ function choisirFiltreRechercheV2(cle, valeur) {
 }
 
 function reinitialiserFiltresRechercheV2() {
-  filtresRechercheV2 = { sommelier: '', couleur: '', cepage: '', pays: '', appellation: '', accords: '', pastille: '' };
+  filtresRechercheV2 = { sommelier: '', couleur: '', cepage: '', pays: '', appellation: '', accords: '', pastille: '', cave: false };
   ['sommelier','couleur','cepage','pays','appellation','accords','pastille'].forEach(function(k) {
     document.getElementById('rechercheV2-f-' + k + '-menu').classList.remove('ouvert');
   });
@@ -1956,13 +1997,19 @@ function contientTexteV2(texte, morceau) {
   return normaliserRechercheV2(texte).indexOf(normaliserRechercheV2(morceau)) !== -1;
 }
 
+function toggleCaveRechercheV2() {
+  filtresRechercheV2.cave = !filtresRechercheV2.cave;
+  remplirFiltresRechercheV2();
+  lancerRechercheV2();
+}
+
 function lancerRechercheV2() {
   var terme = normaliserRechercheV2(document.getElementById('rechercheV2-champ').value.trim());
   var compte = document.getElementById('rechercheV2-compte');
   var div = document.getElementById('rechercheV2-cartes');
   var f = filtresRechercheV2;
   var loupe = document.getElementById('rechercheV2-loupe');
-  if (loupe) loupe.classList.toggle('actif', !!(f.sommelier || f.couleur || f.cepage || f.pays || f.appellation || f.accords || f.pastille));
+  if (loupe) loupe.classList.toggle('actif', !!(f.sommelier || f.couleur || f.cepage || f.pays || f.appellation || f.accords || f.pastille || f.cave));
   if (terme.length < 2 && !f.sommelier) {
     compte.textContent = '';
     div.innerHTML = '<div class="texte-secondaire">Tape un mot : agent, producteur, arôme, appellation…</div>';
@@ -1990,6 +2037,7 @@ function lancerRechercheV2() {
       }));
   });
   var groups = grouperVinsV2(trouves);
+  if (f.cave) groups = groups.filter(function(g) { return g.count > 0; });
   compte.textContent = groups.length + ' vin' + (groups.length > 1 ? 's' : '') + ' trouvé' + (groups.length > 1 ? 's' : '');
   if (!groups.length) { div.innerHTML = '<div class="texte-secondaire">Aucun résultat</div>'; return; }
   div.innerHTML = groups.map(function(g) {
@@ -2839,13 +2887,13 @@ function deplacerDepuisEmpV2(code) {
 }
 
 // ==================== HISTORIQUE V2 ====================
-var filtresHistoV2 = { mets: '', vin: '', accord: '', couleur: '' };
+var filtresHistoV2 = { mets: '', vin: '', accord: '', couleur: '', cave: false };
 var histoEditV2 = { row: 0, note: 0 };
 
 function ouvrirHistoV2() {
   document.getElementById('histoV2Container').style.display = 'flex';
   remonterScrollV2('histoV2Container');
-  filtresHistoV2 = { mets: '', vin: '', accord: '', couleur: '' };
+  filtresHistoV2 = { mets: '', vin: '', accord: '', couleur: '', cave: false };
   if (ALL_HISTORIQUE && ALL_HISTORIQUE.length) {
     remplirFiltresHistoV2();
     afficherHistoV2();
@@ -2911,7 +2959,9 @@ function remplirFiltresHistoV2() {
   if (champMets) champMets.value = f.mets;
 
   var loupe = document.getElementById('histoV2-loupe');
-  if (loupe) loupe.classList.toggle('actif', !!(f.mets || f.vin || f.accord || f.couleur));
+  if (loupe) loupe.classList.toggle('actif', !!(f.mets || f.vin || f.accord || f.couleur || f.cave));
+  var caveBtn = document.getElementById('histoV2-cave');
+  if (caveBtn) { caveBtn.classList.toggle('actif', f.cave); caveBtn.textContent = f.cave ? '✓' : '✗'; }
 }
 
 function uniqueHistoV2(liste, champ) {
@@ -2929,7 +2979,7 @@ function filtrerMetsHistoV2() {
   var champ = document.getElementById('histoV2-f-mets');
   filtresHistoV2.mets = champ ? champ.value.trim() : '';
   var loupe = document.getElementById('histoV2-loupe');
-  if (loupe) loupe.classList.toggle('actif', !!(filtresHistoV2.mets || filtresHistoV2.vin || filtresHistoV2.accord || filtresHistoV2.couleur));
+  if (loupe) loupe.classList.toggle('actif', !!(filtresHistoV2.mets || filtresHistoV2.vin || filtresHistoV2.accord || filtresHistoV2.couleur || filtresHistoV2.cave));
   afficherHistoV2();
 }
 
@@ -2950,7 +3000,7 @@ function choisirFiltreHistoV2(cle, valeur) {
 }
 
 function reinitialiserFiltresHistoV2() {
-  filtresHistoV2 = { mets: '', vin: '', accord: '', couleur: '' };
+  filtresHistoV2 = { mets: '', vin: '', accord: '', couleur: '', cave: false };
   var champMets = document.getElementById('histoV2-f-mets');
   if (champMets) champMets.value = '';
   ['vin','accord','couleur'].forEach(function(k) {
@@ -2959,6 +3009,12 @@ function reinitialiserFiltresHistoV2() {
   remplirFiltresHistoV2();
   afficherHistoV2();
   fermerFiltresHistoV2();
+}
+
+function toggleCaveHistoV2() {
+  filtresHistoV2.cave = !filtresHistoV2.cave;
+  remplirFiltresHistoV2();
+  afficherHistoV2();
 }
 
 function afficherHistoV2() {
@@ -2977,6 +3033,7 @@ function afficherHistoV2() {
       if (acc.indexOf(f.accord) === -1) return false;
     }
     if (f.couleur && (h.couleur || '') !== f.couleur) return false;
+    if (f.cave && !vinEnCaveV2(h.codebarre)) return false;
     return true;
   });
 
@@ -3673,12 +3730,14 @@ function calculerResultatsChartierV2() {
 // ==================== SELON SAQ — sens inverse : ingrédient → vins ====================
 var selonSaqV2Selection = { ingredients: {}, plats: {} };
 var selonSaqV2Ouverte = null;
+var selonSaqV2Cave = false;
 
 function ouvrirSelonSaqV2() {
   document.getElementById('selonSaqV2Container').style.display = 'flex';
   remonterScrollV2('selonSaqV2Container');
   selonSaqV2Selection = { ingredients: {}, plats: {} };
   selonSaqV2Ouverte = null;
+  selonSaqV2Cave = false;
   if (ALL_RECETTES) { construirePanneauSelonSaqV2(); calculerSelonSaqV2(); return; }
   appelBackend('getRecettes', {}, { spinner: ' ' }).then(function(data) {
     ALL_RECETTES = data || [];
@@ -3725,6 +3784,8 @@ function valeursSelonSaqV2(champ) {
 
 function construirePanneauSelonSaqV2() {
   var html = '';
+  html += '<div class="ligne-dispo"><span class="libelle">Que les vins en cave</span><div class="cercle' + (selonSaqV2Cave ? ' actif' : '') + '" id="selonSaqV2-cave" onclick="toggleCaveSelonSaqV2()">' + (selonSaqV2Cave ? '✓' : '✗') + '</div></div>';
+  html += '<div class="panneau-separateur"></div>';
   html += '<div class="titre-3">Filtrer</div>';
   html += '<div class="champ-cliquable" onclick="basculerListeSelonSaqV2(\'ingredients\')">Ingrédients</div>';
   html += '<div id="selonSaqV2-liste-ingredients" class="menu-liste"></div>';
@@ -3770,9 +3831,17 @@ function toggleSelonSaqV2(el, cle) {
 function reinitialiserSelonSaqV2() {
   selonSaqV2Selection = { ingredients: {}, plats: {} };
   selonSaqV2Ouverte = null;
+  selonSaqV2Cave = false;
   construirePanneauSelonSaqV2();
   calculerSelonSaqV2();
   fermerFiltresSelonSaqV2();
+}
+
+function toggleCaveSelonSaqV2() {
+  selonSaqV2Cave = !selonSaqV2Cave;
+  var btn = document.getElementById('selonSaqV2-cave');
+  if (btn) { btn.classList.toggle('actif', selonSaqV2Cave); btn.textContent = selonSaqV2Cave ? '✓' : '✗'; }
+  calculerSelonSaqV2();
 }
 
 // ingrédient → recettes qui le contiennent → familles → mes vins
@@ -3803,6 +3872,7 @@ function calculerSelonSaqV2() {
     var f = (i.Famille || '').toString().trim();
     return f && familles[f];
   }));
+  if (selonSaqV2Cave) vins = vins.filter(function(g) { return g.count > 0; });
 
   compte.innerHTML = vins.length + ' vin' + (vins.length > 1 ? 's' : '') + '<br>' + recettes.length + ' recette' + (recettes.length > 1 ? 's' : '');
   if (!vins.length) { div.innerHTML = '<div class="texte-secondaire">Aucun vin de la cave pour ce choix</div>'; return; }
@@ -3903,7 +3973,9 @@ var PANNEAUX_V2 = {
   },
   histo: {
     prefixe: 'histoV2', bascule: 'basculerFiltreHistoV2', reinit: 'reinitialiserFiltresHistoV2',
-    avant: '<input type="text" id="histoV2-f-mets" class="champ-saisie" placeholder="Rechercher un mets" oninput="filtrerMetsHistoV2()">',
+    avant: '<div class="ligne-dispo"><span class="libelle">Que les vins en cave</span><div class="cercle" id="histoV2-cave" onclick="toggleCaveHistoV2()">✗</div></div>' +
+           '<div class="panneau-separateur"></div>' +
+           '<input type="text" id="histoV2-f-mets" class="champ-saisie" placeholder="Rechercher un mets" oninput="filtrerMetsHistoV2()">',
     filtres: [['vin', 'Vin'], ['accord', 'Accord'], ['couleur', 'Couleur']],
     apres: '<div class="panneau-separateur"></div>' +
            '<div class="roundel" onclick="ouvrirHistoAjoutV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Ajouter</span></div>'
@@ -3945,6 +4017,8 @@ var PANNEAUX_V2 = {
   },
   recherche: {
     prefixe: 'rechercheV2', bascule: 'basculerFiltreRechercheV2', reinit: 'reinitialiserFiltresRechercheV2',
+    avant: '<div class="ligne-dispo"><span class="libelle">Que les vins en cave</span><div class="cercle" id="rechercheV2-cave" onclick="toggleCaveRechercheV2()">✗</div></div>' +
+           '<div class="panneau-separateur"></div>',
     filtres: [['sommelier', 'Sommelier'], ['couleur', 'Couleurs'], ['cepage', 'Cépages'], ['pays', 'Pays'], ['appellation', 'Appellations'], ['accords', 'Accords'], ['pastille', 'Pastille de goût']]
   },
   suggestions: {

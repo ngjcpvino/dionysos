@@ -205,7 +205,8 @@ body::after {
   width: 100%;
   max-width: 700px;
   margin: 0 auto;
-  height: 60px;
+  min-height: 60px;
+  padding-top: env(safe-area-inset-top, 0px);
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -369,7 +370,8 @@ body::after {
 }
 .ligne-ronds:last-child { margin-bottom: 0; }
 
-#menuActionV2Overlay .ligne-ronds .cercle {
+#menuActionV2Overlay .ligne-ronds .cercle,
+#vinInconnuV2Container .ligne-ronds .cercle {
   width: 90px; height: 90px;
   font-size: 32px;
 }
@@ -862,7 +864,11 @@ textarea.champ-saisie { resize: none; font-family: inherit; line-height: 1.4; }
   font-weight: 300;
   letter-spacing: var(--ls-normal);
   text-transform: uppercase;
-  margin-bottom: 0;
+  margin-bottom: var(--space-xs);
+}
+#burgerV2-accord .item-liste,
+#burgerV2-outils .item-liste {
+  margin-left: var(--space-l);
 }
 
 .boire-verres {

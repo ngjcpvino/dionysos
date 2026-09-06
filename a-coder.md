@@ -1,7 +1,13 @@
-# 🔧 À coder — souhaits et corrections (à coder demain)
+# 🔧 À coder — souhaits et corrections
 
-> Liste montée le soir du 5 septembre 2026, à coder le lendemain. **Rien n'est fait.**
+> Liste montée le 5 septembre 2026, codée le 6 septembre.
 > Règles de travail : `REFERENCE.md`. État technique : `mise-a-jour.md`.
+
+## ✅ État (6 septembre)
+**Codés, à tester après publication :** 1 · 2 · 3 · 4 · 5 · 6 · 7 · 8 · 9a · 10.
+- Best-effort à confirmer sur l'appareil : **5** (accueil / zone sûre iOS), **7** (facture d'un vin neuf — code revu, déjà correct + ré-essai ajouté).
+- **9b** (page Chartier autonome) : conçu, PAS codé — à faire ensemble.
+- Aucun changement à `Code.gs` cette séance (celui déjà envoyé reste bon).
 
 ---
 

@@ -226,8 +226,8 @@ function afficherFicheV2(result) {
   html += '<div class="menu-liste ouvert">';
   html += '<div class="item-liste" id="ficheV2-selon-som-titre" onclick="basculerAccordsSelonV2(\'som\')">Les sommeliers</div>';
   html += '<div id="ficheV2-selon-som" style="display:none;">';
-  html += '<div style="display:flex;align-items:center;gap:var(--space-s);margin-bottom:var(--space-s);"><div class="cercle" onclick="ouvrirSuggestionAjoutV2(\'' + (wine['Code SAQ'] || '').toString().trim() + '\', \'fiche\')">+</div></div>';
   html += '<div id="ficheV2-suggestions"></div>';
+  html += '<div style="display:flex;align-items:center;gap:var(--space-s);margin-top:var(--space-s);"><div class="cercle" onclick="ouvrirSuggestionAjoutV2(\'' + (wine['Code SAQ'] || '').toString().trim() + '\', \'fiche\')">+</div></div>';
   html += '</div>';
   html += '<div class="item-liste" id="ficheV2-selon-saq-titre" onclick="basculerAccordsSelonV2(\'saq\')">SAQ</div>';
   html += '<div id="ficheV2-selon-saq" style="display:none;"><div id="ficheV2-recettes"></div></div>';
@@ -584,6 +584,18 @@ function togglePanierV2() {
   }).catch(function(err) { afficherMessage('Erreur: ' + err); });
 }
 
+// Garde TOUS les cépages affichés et ajoute le % de la SAQ là où il est disponible
+// (ex. « Merlot, Cabernet » + bruts « Merlot 60 %... » → « Merlot 60 %, Cabernet »)
+function fusionnerCepagesPourcentV2(actuel, bruts) {
+  var liste = (actuel || '').split(',').map(function(c) { return c.trim(); }).filter(Boolean);
+  if (!liste.length) return (bruts || '').toString();
+  return liste.map(function(cep) {
+    var re = new RegExp(cep.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*(\\d+)\\s*%');
+    var m = (bruts || '').toString().match(re);
+    return m ? (cep + ' ' + m[1] + ' %') : cep;
+  }).join(', ');
+}
+
 function verifierPrixV2(codebarre, codeSAQ) {
   if (!codebarre || !codeSAQ) return;
   appelBackend('verifierEtMettreAJourPrixSAQ', { codebarre: codebarre, codeSAQ: codeSAQ }, { spinner: '' }).then(function(res) {
@@ -593,7 +605,7 @@ function verifierPrixV2(codebarre, codeSAQ) {
     }
     if (res && res.cepages) {
       var elCep = document.getElementById('ficheV2-cepages');
-      if (elCep) elCep.textContent = res.cepages;
+      if (elCep) elCep.textContent = fusionnerCepagesPourcentV2(elCep.textContent, res.cepages);
     }
   }).catch(function() {});
 }
@@ -647,6 +659,8 @@ function ouvrirPhotoV2(url) {
   document.getElementById('photoV2-nom').style.display = 'none';
   var enteteFiche = document.getElementById('photoV2-entete');
   if (enteteFiche) enteteFiche.style.display = 'none';
+  var empFiche = document.getElementById('photoV2-emplacement');
+  if (empFiche) empFiche.style.display = 'none';
   var pg = document.querySelector('#photoV2Overlay .photo-grande');
   if (pg) pg.style.borderColor = '';
   overlay.style.display = 'flex';
@@ -696,6 +710,19 @@ function ouvrirPhotoEmpV2(cb, liste, row) {
   }
   var pg = document.querySelector('#photoV2Overlay .photo-grande');
   if (pg) pg.style.borderColor = 'var(--' + couleurClasseV2(w.Couleur) + ')';
+  var emp = document.getElementById('photoV2-emplacement');
+  if (emp) {
+    var bc = (PHOTO_V2_LISTE && PHOTO_V2_INDEX >= 0) ? PHOTO_V2_LISTE[PHOTO_V2_INDEX] : null;
+    if (bc && bc.Meuble && bc.Rangee && bc.Espace) {
+      emp.textContent = bc.Meuble + '-' + bc.Rangee + '-' + bc.Espace;
+      emp.style.display = '';
+    } else if (bc) {
+      emp.textContent = 'À ranger';
+      emp.style.display = '';
+    } else {
+      emp.style.display = 'none';
+    }
+  }
   overlay.style.display = 'flex';
 }
 
