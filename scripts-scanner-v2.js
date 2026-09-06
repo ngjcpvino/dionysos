@@ -3772,11 +3772,11 @@ function fermerFiltresSelonSaqV2() {
 function recettesUtilesSelonSaqV2() {
   var fams = {};
   (ALL_DATA || []).forEach(function(i) {
-    var f = (i.Famille || '').toString().trim();
+    var f = normFamilleV2(i.Famille);
     if (f) fams[f] = true;
   });
   return (ALL_RECETTES || []).filter(function(r) {
-    return (r.familles || []).some(function(f) { return fams[f]; });
+    return (r.familles || []).some(function(f) { return fams[normFamilleV2(f)]; });
   });
 }
 
