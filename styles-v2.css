@@ -375,6 +375,14 @@ body::after {
   width: 90px; height: 90px;
   font-size: 32px;
 }
+#vinInconnuV2-saisie {
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-s);
+}
+#vinInconnuV2Container .ligne-ronds { margin-top: var(--space-l); }
 
 /* ===== Emplacements : meuble graphique ===== */
 .emp-bloc {
@@ -790,8 +798,11 @@ textarea.champ-saisie { resize: none; font-family: inherit; line-height: 1.4; }
 .item-liste:last-child { margin-bottom: 0; }
 .item-liste.actif { background: var(--gold-30); }
 .panneau-gauche .item-liste { white-space: normal; }
-#ficheV2-recettes .item-liste { margin-left: var(--space-l); white-space: normal; }
+/* Accordéons de la fiche : sous-niveaux indentés + jamais collés (le dernier item garde sa marge) */
+#ficheV2-recettes .item-liste { margin-left: var(--space-l); margin-bottom: var(--space-s); white-space: normal; }
 #ficheV2-recettes > div[id^="ficheV2-rec-"] .item-liste { margin-left: calc(var(--space-l) * 2); }
+#ficheV2-selon-chartier .item-liste { margin-left: var(--space-l); margin-bottom: var(--space-s); white-space: normal; }
+#ficheV2-selon-chartier > div[id^="ficheV2-chapan-"] .item-liste { margin-left: calc(var(--space-l) * 2); }
 .panneau-gauche .menu-liste { margin-left: auto; margin-right: 0; }
 
 /* ===== CERCLE — rond générique V2 (bordure or, fond sombre, centré) ===== */

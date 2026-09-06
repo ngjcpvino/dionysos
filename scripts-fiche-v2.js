@@ -227,7 +227,7 @@ function afficherFicheV2(result) {
   html += '<div class="item-liste" id="ficheV2-selon-som-titre" onclick="basculerAccordsSelonV2(\'som\')">Les sommeliers</div>';
   html += '<div id="ficheV2-selon-som" style="display:none;">';
   html += '<div id="ficheV2-suggestions"></div>';
-  html += '<div style="display:flex;align-items:center;gap:var(--space-s);margin-top:var(--space-s);"><div class="cercle" onclick="ouvrirSuggestionAjoutV2(\'' + (wine['Code SAQ'] || '').toString().trim() + '\', \'fiche\')">+</div></div>';
+  html += '<div style="display:flex;align-items:center;gap:var(--space-s);margin-top:var(--space-s);margin-bottom:var(--space-s);"><div class="cercle" onclick="ouvrirSuggestionAjoutV2(\'' + (wine['Code SAQ'] || '').toString().trim() + '\', \'fiche\')">+</div></div>';
   html += '</div>';
   html += '<div class="item-liste" id="ficheV2-selon-saq-titre" onclick="basculerAccordsSelonV2(\'saq\')">SAQ</div>';
   html += '<div id="ficheV2-selon-saq" style="display:none;"><div id="ficheV2-recettes"></div></div>';
