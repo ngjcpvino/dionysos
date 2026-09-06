@@ -257,6 +257,8 @@ body::after {
   margin: -45px 0 var(--space-l) 0;
 }
 .ligne-dispo .libelle { color: var(--white); font-size: var(--fs-14); }
+/* Toggle « en cave » sous la recherche (annule le calage -45px prévu pour le coin d'une page) */
+#curieuxBeginV2Container .ligne-dispo { margin: 0 auto var(--space-l); justify-content: space-between; width: 100%; max-width: 400px; }
 
 #menuActionV2Overlay { z-index: 10010; }
 #histoEditV2Overlay { z-index: 10010; }

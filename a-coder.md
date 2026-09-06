@@ -3,11 +3,18 @@
 > Liste montée le 5 septembre 2026, codée le 6 septembre.
 > Règles de travail : `REFERENCE.md`. État technique : `mise-a-jour.md`.
 
-## ✅ État (6 septembre)
-**Codés, à tester après publication :** 1 · 2 · 3 · 4 · 5 · 6 · 7 · 8 · 9a · 10.
-- Best-effort à confirmer sur l'appareil : **5** (accueil / zone sûre iOS), **7** (facture d'un vin neuf — code revu, déjà correct + ré-essai ajouté).
-- **9b** (page Chartier autonome) : conçu, PAS codé — à faire ensemble.
-- Aucun changement à `Code.gs` cette séance (celui déjà envoyé reste bon).
+## ✅ État (6 septembre — mis à jour en fin de séance)
+**Items 1 à 10 codés**, plus raffinés/testés en direct :
+- **6 (Vin inconnu)** : rectangles centrés, champ « Nom » caché quand la SAQ trouve le vin, boutons décollés ; le 💡 ouvre le choix du sommelier puis la fiche.
+- **7 (Facture SAQ)** : testé pour de vrai (vin neuf OK). 2 bugs trouvés et réglés — (a) 1er vin sauté → détection du code robuste + caissette ignorée ; (b) quantité → champ Quantité pré-rempli depuis la facture + ajout de N bouteilles (et un vin **déjà en cave** reçoit enfin N bouteilles, plus une seule).
+- **8 / 9a / 2** : ok. Le style d'accordéon est maintenant **partagé** (`.accordeon-1/2`, jeton `--espace-accordeon`).
+
+**Bug SAQ corrigé (6 sept.)** — famille unique écrite « 9 » au lieu de « 009 » par Sheets → plus d'accords SAQ. Réglé : normalisation `normFamilleV2` (marche avec les données déjà là) + écriture en texte + `reconstruireRecettes()`. Détails : `mise-a-jour.md`.
+
+**NOUVEAU — « Selon Curieux Bégin »** : accords vin de l'émission reliés à la cave par **code SAQ**. Les 3 morceaux codés (moteur `Code.gs` → onglet CurieuxBegin, 106 accords ; volet fiche ; page autonome). Détails : `mise-a-jour.md` (section 📺). Recherche d'origine : `recherche-cuisinez.md`.
+
+- **9b** (page Chartier autonome, sens plat → vin) : toujours conçu, PAS codé.
+- **`Code.gs`** : modifié cette séance (facture + famille + Curieux Bégin) — bien **redéployer**.
 
 ---
 

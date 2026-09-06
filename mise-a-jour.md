@@ -6,7 +6,7 @@
 ## 📁 Architecture
 - **Frontend** : GitHub Pages, dépôt public `ngjcpvino/dionysos`
 - **Backend** : Google Apps Script, projet « Vino 3.0 », `Code.gs` — **hors dépôt** (voir Trous connus)
-- **Base** : Google Sheets « Vino 3.0 » — onglets Vino · Historique · config/CONFIG · Suggestions · Chartier · Recettes
+- **Base** : Google Sheets « Vino 3.0 » — onglets Vino · Historique · config/CONFIG · Suggestions · Chartier · Recettes · CurieuxBegin
 - **Adresse** : `.../index-v2.html`. L'adresse de base donne « page introuvable » — assumé, et ce n'est PAS une protection.
 
 ## 📂 Fichiers
@@ -47,6 +47,7 @@
 
 **CSS**
 - Une valeur = un seul endroit (`:root`), nommée par sa valeur (`--ls-9`), jamais par son usage. Réutiliser `.roundel`, `.champ-saisie`, `.menu-liste`/`.item-liste`, `.controle`, `.titre-1`, `.titre-action` avant de créer du neuf. Jamais de style en dur dans le JS.
+- **Accordéons** : indentation + espacement partagés via `.accordeon-1` (1er niveau) / `.accordeon-2` (2e niveau) + jeton `--espace-accordeon: 7px`. UN seul style réutilisé partout (menu burger, recettes SAQ, Chartier, Curieux Bégin). Un nouvel accordéon pose ces classes sur ses `.item-liste`, pas de nouveau CSS par cas (règle posée le 6 septembre 2026).
 - Jamais `100vh` : toujours `height:100%` (iOS recadre le fond). Fond de page toujours OPAQUE.
 - Loupe et ✕ d'une page-liste : `position:fixed` (`.gauche` reste `absolute`).
 - Carte avec date à droite : `white-space:nowrap` (exception : items des panneaux, qui replient). Carte indentée pleine largeur : `width: calc(100% - indent)`.
@@ -98,12 +99,25 @@ Accords mets-vins par **cépage** (méthode Chartier), distincte des Accords SAQ
 Mécanique distincte de Chartier : le lien vin → recettes est un **code de famille** de l'API SAQ, pas le cépage. Un vin porte UNE famille (colonne 71), une recette en porte plusieurs — c'est la charnière.
 
 - Le code de famille s'écrit avec une **apostrophe de tête** (`'023`) pour garder le zéro.
+- **Piège des familles uniques (6 sept. 2026)** : quand une recette n'a QU'UNE famille, `majRecettesSAQ` écrit `"009"` et Sheets la convertit en **nombre 9** (zéros perdus) → plus d'association avec le vin (« 009 »). Deux parades : (1) l'écriture préfixe désormais la famille d'une apostrophe (`"'" + r.familles`) ; (2) surtout, la comparaison passe des deux côtés par **`normFamilleV2`** (ignore les zéros de tête), donc ça marche même avec les « 9 » déjà écrits. `normFamilleV2` est utilisée dans `recettesDeLaFamilleV2` (fiche) et `recettesUtilesSelonSaqV2` (page Selon SAQ).
 - Des **fromages du Québec** sortent en `catalog_type: 3` comme les recettes (Raclette de Compton, Valbert…) — d'où la colonne Type de l'onglet.
 - Le classement SAQ est parfois bancal (« Hachis parmentier » en Volaille) : **les ingrédients principaux sont plus fiables que les types de plats.**
 - Un appel API par famille suffit, aucune pagination. Pas de photo de recette dans l'API, contrairement au site.
 - `robots.txt` interdit `/recettes` sur saq.com — les fiches produits, elles, sont permises.
-- Alimentation à la main depuis l'éditeur : `majFamillesAccordsVins()` (autant de passages que nécessaire) puis `majRecettesSAQ()`, qui ne réécrit jamais une ligne existante.
-- Décidé : titres de recettes en texte seul, **pas de liens cliquables**.
+- Alimentation à la main depuis l'éditeur : `majFamillesAccordsVins()` (autant de passages que nécessaire) puis `majRecettesSAQ()`, qui ne réécrit jamais une ligne existante. `reconstruireRecettes()` vide et rebâtit tout l'onglet (utile pour corriger les vieilles familles « 9 » → « 009 »).
+- Titres de recettes SAQ : cliquables, ouvrent la fiche produit `saq.com/fr/{sku}`.
+
+## 📺 Selon Curieux Bégin — pièges (ajouté 6 septembre 2026)
+
+Accords vin des recettes de l'émission **Curieux Bégin** (site cuisinez.telequebec.tv). 3e mécanique d'accord, distincte de Chartier (cépage) et des Accords SAQ (famille) : le lien est le **code SAQ** du vin proposé dans la recette. Sommelière principale Michèle Bouffard (pas la seule, et **jamais nommée dans les données** → la fonctionnalité s'appelle « Curieux Bégin »).
+
+- **Données** : onglet Sheet **CurieuxBegin** — Code SAQ · Vin · Type · Prix · Plat · Recette ID · Slug · Saison · Episode · Date diffusion · Date maj. Une ligne par vin proposé. Lu par `getCurieuxBegin`.
+- **Synchro** (`majCurieuxBegin`) : va chercher sur cuisinez.telequebec.tv. **Incrémentale** — curseur `CB_LAST_DATE` en Script Property, ne retraite que les épisodes diffusés depuis. Dédoublonnage sur (Recette ID | Code SAQ), donc relançable sans risque. `UrlFetchApp.fetchAll` pour la vitesse ; garde-fou 5 min (renvoie `termine:false` → relancer). Premier remplissage : lancer depuis l'éditeur (96 épisodes → 106 accords au 6 sept.). `resetCurieuxBegin()` remet à zéro.
+- **Site (Next.js), pièges** : le `BUILD_ID` change à chaque déploiement du site → relu dans le HTML d'accueil par `getBuildIdCuisinez_` (`"buildId":"..."`). Émission Curieux Bégin = **id 3**. Deux endpoints : `/_next/data/{BUILD_ID}/emissions/3/curieux-begin.json` (96 épisodes + ~356 recettes id+slug, avec `dateDiffusion`) et `/_next/data/{BUILD_ID}/recettes/{id}/{slug}.json` (→ `pageProps.data.boissons[]` : `nom`, `typeProduit`, `prix`, `urlSAQ`). Le code SAQ est extrait de `urlSAQ` (`saq.com/fr/{code}`, via `codeSAQDepuisUrl_`) — certaines urlSAQ ont un autre format et sont ignorées. Environ 1 recette sur 3 a un accord, concentré sur les saisons récentes (16-18). Le `id` d'épisode n'est PAS chronologique → curseur par **date**, jamais par id.
+- **Front** : global `ALL_CURIEUXBEGIN` (chargé par `getCurieuxBegin`, comme `ALL_ACCORDS`/`ALL_RECETTES`).
+  - Fiche : 4e volet « Curieux Bégin » dans « Accords selon… » (`chargerCurieuxBeginFicheV2`, ajouté à `basculerAccordsSelonV2` sous la clé `'cb'`). Match par code SAQ → plats **cliquables** vers `cuisinez.telequebec.tv/recettes/{id}/{slug}`.
+  - Page autonome `#curieuxBeginV2Container` (« Selon Curieux Bégin ») : `ouvrirCurieuxBeginV2` / `chargerCurieuxBeginV2` / `toggleCaveCurieuxBeginV2` (var `curieuxBeginV2Cave`). Recherche plat/vin + filtre « en cave » (badge via `grouperVinsV2(ALL_DATA)`). Route burger `'curieuxbegin'`, sous-item de « Accord selon… ». Ajoutée à `cacherToutesPagesV2`.
+- **Suites possibles, non faites** : bouton « Mettre à jour Curieux Bégin » dans l'app (via doPost `majCurieuxBegin`) au lieu de l'éditeur ; « bingo » à la création d'un vin. Recherche d'origine : `recherche-cuisinez.md`.
 
 ## 🕳️ Trous connus
 - **`Code.gs` n'est pas dans le dépôt** : aucun historique, aucun retour arrière, sauf les versions internes d'Apps Script. Dépôt privé séparé envisagé, non tranché (dépôt public refusé le 3 septembre 2026).

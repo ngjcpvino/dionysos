@@ -3,6 +3,8 @@
 > Recherche exploratoire, aucune décision d'architecture prise, aucun code écrit.
 > Objectif : évaluer si/comment intégrer cuisinez.telequebec.tv comme source d'info, sur le modèle de l'intégration SAQ existante (voir `archives/seance-accords-saq.md`).
 
+> **✅ IMPLÉMENTÉ le 6 septembre 2026 — fonctionnalité « Selon Curieux Bégin ».** Ce document reste l'historique de la recherche. Le fonctionnement retenu et les pièges sont maintenant dans `mise-a-jour.md` (section 📺 Selon Curieux Bégin). Points débloqués depuis : le **BUILD_ID** se relit dans le HTML d'accueil (`getBuildIdCuisinez_`) ; la **liste des recettes** d'une émission s'obtient en 1 appel (`/_next/data/{BUILD_ID}/emissions/3/curieux-begin.json`, avec `dateDiffusion` par épisode → curseur incrémental). Le pont vers la cave = `boissons[].urlSAQ` → code SAQ.
+
 ---
 
 ## Endpoint trouvé
