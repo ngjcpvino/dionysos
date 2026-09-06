@@ -205,8 +205,15 @@ var vinInconnuV2Code = null;
 function remplirEnteteVinInconnuV2(codeSAQ) {
   var titre = document.getElementById('vinInconnuV2-titre');
   var sous = document.getElementById('vinInconnuV2-soustitre');
+  var nomInput = document.getElementById('vinInconnuV2-nom');
   if (!titre || !sous) return;
-  if (!codeSAQ) { titre.textContent = 'Vin inconnu'; sous.textContent = "Ce vin n'est pas dans ta cave"; return; }
+  if (!codeSAQ) {
+    titre.textContent = 'Vin inconnu';
+    sous.textContent = "Ce vin n'est pas dans ta cave";
+    if (nomInput) nomInput.style.display = '';
+    return;
+  }
+  if (nomInput) nomInput.style.display = 'none';
   appelBackend('testScrapingSAQ', { codeSAQ: codeSAQ }, { spinner: '' }).then(function(res) {
     if (res && res.success && res.data) {
       var d = res.data;
@@ -241,6 +248,7 @@ function ouvrirVinInconnuV2(code) {
     document.getElementById('vinInconnuV2-codebarre-champ').value = code;
     document.getElementById('vinInconnuV2-codesaq').value = '';
     document.getElementById('vinInconnuV2-nom').value = '';
+    remplirEnteteVinInconnuV2('');
     document.getElementById('vinInconnuV2Container').style.display = 'flex';
   });
 }
@@ -284,18 +292,12 @@ function enchainerMenuApresCreationV2(code, mode) {
       ouvrirApresTap(ouvrirArriveeV2);
       return;
     }
-    if (suggestionsV2Attente) {
-      appelBackend('updateWineField', { codebarre: code, field: 'Racheter', value: '' }, { spinner: '' }).then(function() {
-        majMemoireVinV2(code, { 'Racheter': '' });
-        terminerAjoutSuggestionV2(code, result);
-      });
-      return;
-    }
+    // mode « suggestion » : vin non acheté → ouvrir la fiche + le choix du sommelier et sa note
     appelBackend('updateWineField', { codebarre: code, field: 'Racheter', value: '' }, { spinner: '' }).then(function() {
       majMemoireVinV2(code, { 'Racheter': '' });
-      ouvrirMenuActionV2(code, result);
+      terminerAjoutSuggestionV2(code, result);
     }).catch(function() {
-      ouvrirMenuActionV2(code, result);
+      terminerAjoutSuggestionV2(code, result);
     });
   }).catch(function(e) {
     retourAccueilV2('Vérification impossible : ' + (e && e.message ? e.message : 'erreur inconnue'));
