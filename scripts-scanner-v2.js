@@ -3902,64 +3902,172 @@ function calculerSelonSaqV2() {
 }
 
 // ==================== SELON CURIEUX BÉGIN V2 ====================
-var curieuxBeginV2Cave = false;
+// Page façon « Suggestions » : groupée par vin (carte du vin → sa fiche), puis les recettes dessous (→ la recette).
+var filtresCurieuxBeginV2 = { couleur: '', cave: false, horsCave: false };
 
 function ouvrirCurieuxBeginV2() {
   document.getElementById('curieuxBeginV2Container').style.display = 'flex';
   remonterScrollV2('curieuxBeginV2Container');
-  var champ = document.getElementById('curieuxBeginV2-recherche');
+  filtresCurieuxBeginV2 = { couleur: '', cave: false, horsCave: false };
+  var champ = document.getElementById('curieuxBeginV2-f-texte');
   if (champ) champ.value = '';
-  curieuxBeginV2Cave = false;
-  var btn = document.getElementById('curieuxBeginV2-cave');
-  if (btn) { btn.classList.remove('actif'); btn.textContent = '✗'; }
-  if (ALL_CURIEUXBEGIN) { chargerCurieuxBeginV2(); return; }
+  if (ALL_CURIEUXBEGIN) { remplirFiltresCurieuxBeginV2(); chargerCurieuxBeginV2(); return; }
   appelBackend('getCurieuxBegin', {}, { spinner: ' ' }).then(function(data) {
     ALL_CURIEUXBEGIN = data || [];
+    remplirFiltresCurieuxBeginV2();
     chargerCurieuxBeginV2();
   }).catch(function() { retourAccueilV2(); });
 }
 
 function fermerCurieuxBeginV2() {
+  fermerFiltresCurieuxBeginV2();
   document.getElementById('curieuxBeginV2Container').style.display = 'none';
 }
 
-function toggleCaveCurieuxBeginV2() {
-  curieuxBeginV2Cave = !curieuxBeginV2Cave;
-  var btn = document.getElementById('curieuxBeginV2-cave');
-  if (btn) { btn.classList.toggle('actif', curieuxBeginV2Cave); btn.textContent = curieuxBeginV2Cave ? '✓' : '✗'; }
+function ouvrirFiltresCurieuxBeginV2() {
+  document.getElementById('curieuxBeginV2-filtres-voile').classList.add('ouvert');
+  document.getElementById('curieuxBeginV2-filtres').classList.add('ouvert');
+}
+function fermerFiltresCurieuxBeginV2() {
+  document.getElementById('curieuxBeginV2-filtres-voile').classList.remove('ouvert');
+  document.getElementById('curieuxBeginV2-filtres').classList.remove('ouvert');
+}
+
+function remplirFiltresCurieuxBeginV2() {
+  var f = filtresCurieuxBeginV2;
+  var couleurs = uniqueValeursAchat(ALL_DATA || [], 'Couleur');
+  var menuCoul = document.getElementById('curieuxBeginV2-f-couleur-menu');
+  if (menuCoul) {
+    menuCoul.innerHTML = couleurs.map(function(v) {
+      return '<div class="item-liste' + (v === f.couleur ? ' actif' : '') + '" onclick="choisirFiltreCurieuxBeginV2(\'couleur\', \'' + v.replace(/'/g, "\\'") + '\')">' + v + '</div>';
+    }).join('');
+  }
+  var dispCoul = document.getElementById('curieuxBeginV2-f-couleur-display');
+  if (dispCoul) dispCoul.textContent = f.couleur || 'Couleurs';
+  var btnCave = document.getElementById('curieuxBeginV2-cave');
+  if (btnCave) { btnCave.classList.toggle('actif', f.cave); btnCave.textContent = f.cave ? '✓' : '✗'; }
+  var elHC = document.getElementById('curieuxBeginV2-horscave');
+  if (elHC) { elHC.textContent = 'Montrer les vins que je n\'ai pas : ' + (f.horsCave ? 'oui' : 'non'); elHC.classList.toggle('actif', f.horsCave); }
+}
+
+function toggleHorsCaveCurieuxBeginV2() {
+  filtresCurieuxBeginV2.horsCave = !filtresCurieuxBeginV2.horsCave;
+  remplirFiltresCurieuxBeginV2();
   chargerCurieuxBeginV2();
+}
+
+function basculerFiltreCurieuxBeginV2(cle) {
+  var menu = document.getElementById('curieuxBeginV2-f-' + cle + '-menu');
+  var ouvert = menu.classList.contains('ouvert');
+  ['couleur'].forEach(function(k) {
+    document.getElementById('curieuxBeginV2-f-' + k + '-menu').classList.remove('ouvert');
+  });
+  if (!ouvert) menu.classList.add('ouvert');
+}
+
+function choisirFiltreCurieuxBeginV2(cle, valeur) {
+  filtresCurieuxBeginV2[cle] = valeur;
+  document.getElementById('curieuxBeginV2-f-' + cle + '-menu').classList.remove('ouvert');
+  remplirFiltresCurieuxBeginV2();
+  chargerCurieuxBeginV2();
+}
+
+function toggleCaveCurieuxBeginV2() {
+  filtresCurieuxBeginV2.cave = !filtresCurieuxBeginV2.cave;
+  remplirFiltresCurieuxBeginV2();
+  chargerCurieuxBeginV2();
+}
+
+function reinitialiserFiltresCurieuxBeginV2() {
+  filtresCurieuxBeginV2 = { couleur: '', cave: false, horsCave: false };
+  var champ = document.getElementById('curieuxBeginV2-f-texte');
+  if (champ) champ.value = '';
+  var menu = document.getElementById('curieuxBeginV2-f-couleur-menu');
+  if (menu) menu.classList.remove('ouvert');
+  remplirFiltresCurieuxBeginV2();
+  chargerCurieuxBeginV2();
+  fermerFiltresCurieuxBeginV2();
 }
 
 function chargerCurieuxBeginV2() {
   var div = document.getElementById('curieuxBeginV2-liste');
   var compte = document.getElementById('curieuxBeginV2-compte');
   if (!div) return;
-  // Carte des vins en cave, par code SAQ (pour le filtre et le badge)
-  var enCave = {};
-  grouperVinsV2(ALL_DATA || []).forEach(function(g) {
-    var cs = ((g.wine && g.wine['Code SAQ']) || '').toString().trim();
-    if (cs) enCave[cs] = { count: g.count, cb: g.cb };
-  });
-  var champ = document.getElementById('curieuxBeginV2-recherche');
-  var q = normaliserRechercheV2(champ ? champ.value : '');
-  var liste = (ALL_CURIEUXBEGIN || []).slice();
-  if (q) liste = liste.filter(function(a) { return contientTexteV2(a.plat, q) || contientTexteV2(a.vin, q); });
-  if (curieuxBeginV2Cave) liste = liste.filter(function(a) { var e = enCave[(a.codeSAQ || '').toString().trim()]; return e && e.count > 0; });
-  liste.sort(function(a, b) {
-    var sa = parseInt(a.saison, 10) || 0, sb = parseInt(b.saison, 10) || 0;
-    if (sb !== sa) return sb - sa;
-    return (a.plat || '').localeCompare(b.plat || '');
+  var f = filtresCurieuxBeginV2;
+  var infos = saqInfosV2();
+  var champ = document.getElementById('curieuxBeginV2-f-texte');
+  var q = normaliserRechercheV2(champ ? champ.value.trim() : '');
+
+  var cibleCoul = f.couleur ? couleurClasseV2(f.couleur) : '';
+  var base = (ALL_CURIEUXBEGIN || []).filter(function(a) {
+    var cs = (a.codeSAQ || '').toString().trim();
+    var w = infos[cs];
+    var possede = !!w;
+    if (!possede && !f.horsCave) return false;            // vins non possédés : seulement si le toggle est activé
+    if (f.cave && (!possede || !bouteillesEnCaveParSAQV2(cs))) return false;
+    if (cibleCoul) {
+      var cc = possede ? couleurClasseV2(w.Couleur) : couleurClasseV2(a.type);
+      if (cc !== cibleCoul) return false;
+    }
+    if (q) {
+      var nomRech = possede ? (w.Nom || '') : (a.vin || '');
+      if (normaliserRechercheV2(a.plat).indexOf(q) === -1 && normaliserRechercheV2(nomRech).indexOf(q) === -1) return false;
+    }
+    return true;
   });
 
-  compte.textContent = liste.length + ' accord' + (liste.length > 1 ? 's' : '');
-  if (!liste.length) { div.innerHTML = '<div class="texte-secondaire">Aucun accord</div>'; return; }
+  var grouped = {};
+  base.forEach(function(a) {
+    var cs = (a.codeSAQ || '').toString().trim();
+    if (!grouped[cs]) grouped[cs] = { codeSAQ: cs, wine: infos[cs] || null, ref: a, items: [] };
+    grouped[cs].items.push(a);
+  });
+  var groupes = Object.keys(grouped).map(function(k) { return grouped[k]; });
+  groupes.sort(function(a, b) {
+    var na = a.wine ? decodeHTML(a.wine.Nom || '') : decodeHTML(a.ref.vin || '');
+    var nb = b.wine ? decodeHTML(b.wine.Nom || '') : decodeHTML(b.ref.vin || '');
+    return na.localeCompare(nb);
+  });
 
-  div.innerHTML = liste.map(function(a) {
-    var e = enCave[(a.codeSAQ || '').toString().trim()];
-    var badge = (e && e.count > 0) ? ' <span class="texte-secondaire">• en cave</span>' : '';
-    var url = 'https://cuisinez.telequebec.tv/recettes/' + a.recetteId + '/' + a.slug;
-    var sous = [decodeHTML(a.vin || ''), a.type || ''].filter(Boolean).join(' · ');
-    return '<div class="item-liste" onclick="window.open(\'' + url + '\', \'_blank\')"><strong>' + decodeHTML(a.plat || '') + '</strong>' + badge + '<br><span class="texte-secondaire">' + sous + '</span></div>';
+  var loupe = document.getElementById('curieuxBeginV2-loupe');
+  if (loupe) loupe.classList.toggle('actif', !!(f.couleur || f.cave || f.horsCave || q));
+
+  compte.textContent = groupes.length + ' vin' + (groupes.length > 1 ? 's' : '');
+  if (!groupes.length) { div.innerHTML = '<div class="texte-secondaire">Aucun accord</div>'; return; }
+
+  div.innerHTML = groupes.map(function(g) {
+    var carteVin, classeCoul;
+    if (g.wine) {
+      var w = g.wine;
+      var cb = (w['Code-barres'] || '').toString().trim();
+      classeCoul = couleurClasseV2(w.Couleur);
+      var nom = decodeHTML(w.Nom || '—');
+      var paysRegion = (w.Pays && w.Region) ? (w.Pays + ' • ' + w.Region) : (w.Pays || w.Region || '');
+      var sous = [paysRegion, w.Cepage || ''].filter(Boolean).join('<br>');
+      var photo = w['Photo URL'] ? '<div class="carte-photo"><img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
+      var onclick = cb ? ' onclick="ouvrirApresTap(function(){ouvrirFicheV2(\'' + cb + '\', \'curieuxbegin\')})"' : '';
+      carteVin = '<div class="carte histo-vin ' + classeCoul + '"' + onclick + '>' + photo +
+        '<div class="carte-centre"><span class="carte-titre">' + nom + '</span><span class="carte-sous">' + sous + '</span></div></div>';
+    } else {
+      var a0 = g.ref;
+      classeCoul = couleurClasseV2(a0.type);
+      var nomV = decodeHTML(a0.vin || '—');
+      var prixNum = parseFloat((a0.prix || '').toString().replace(',', '.'));
+      var prix = isFinite(prixNum) ? (prixNum.toFixed(2).replace('.', ',') + ' $') : '';
+      var sousV = [a0.type || '', prix, "je ne l'ai pas — voir SAQ"].filter(Boolean).join(' · ');
+      carteVin = '<div class="carte histo-vin ' + classeCoul + '" onclick="window.open(\'https://www.saq.com/fr/' + g.codeSAQ + '\', \'_blank\')">' +
+        '<div class="carte-centre"><span class="carte-titre">' + nomV + '</span><span class="carte-sous">' + sousV + '</span></div></div>';
+    }
+
+    var cartesPlats = g.items.map(function(a) {
+      var url = 'https://cuisinez.telequebec.tv/recettes/' + a.recetteId + '/' + a.slug;
+      var saison = a.saison ? 'Saison ' + a.saison + (a.episode ? '-' + a.episode : '') : '';
+      return '<div class="carte histo-mets" onclick="window.open(\'' + url + '\', \'_blank\')">' +
+        '<div class="carte-centre"><span class="carte-titre">' + decodeHTML(a.plat || '') + '</span><span class="carte-sous">Curieux Bégin</span></div>' +
+        '<div class="carte-droite">' + saison + '</div></div>';
+    }).join('');
+
+    return '<div class="histo-groupe ' + classeCoul + '">' + carteVin + cartesPlats + '</div>';
   }).join('');
 }
 
@@ -4101,6 +4209,14 @@ var PANNEAUX_V2 = {
            '<input type="text" id="suggestionsV2-f-texte" class="champ-saisie" placeholder="Chercher dans les notes" oninput="afficherSuggestionsV2()">' +
            '<div class="panneau-separateur"></div>' +
            '<div class="roundel" onclick="ajouterDepuisSuggestionsV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Ajouter</span></div>'
+  },
+  curieuxbegin: {
+    prefixe: 'curieuxBeginV2', bascule: 'basculerFiltreCurieuxBeginV2', reinit: 'reinitialiserFiltresCurieuxBeginV2',
+    avant: '<div class="ligne-dispo"><span class="libelle">Que les vins en cave</span>' +
+           '<div class="cercle" id="curieuxBeginV2-cave" onclick="toggleCaveCurieuxBeginV2()">✗</div></div>',
+    filtres: [['couleur', 'Couleurs']],
+    apres: '<div class="panneau-separateur"></div>' +
+           '<input type="text" id="curieuxBeginV2-f-texte" class="champ-saisie" placeholder="Chercher un plat ou un vin" oninput="chargerCurieuxBeginV2()">'
   }
 };
 

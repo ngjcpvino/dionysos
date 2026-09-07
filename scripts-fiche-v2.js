@@ -469,8 +469,8 @@ function chargerCurieuxBeginFicheV2(wine) {
     if (!accords.length) { conteneur.innerHTML = '<div class="texte-secondaire">Aucun accord Curieux Bégin</div>'; return; }
     conteneur.innerHTML = accords.map(function(a) {
       var url = 'https://cuisinez.telequebec.tv/recettes/' + a.recetteId + '/' + a.slug;
-      var sous = a.vin ? ' <span class="texte-secondaire">— ' + decodeHTML(a.vin) + '</span>' : '';
-      return '<div class="item-liste accordeon-1" onclick="window.open(\'' + url + '\', \'_blank\')">' + decodeHTML(a.plat) + sous + '</div>';
+      var saison = a.saison ? 'Saison ' + a.saison + (a.episode ? '-' + a.episode : '') : '';
+      return '<div class="carte fiche-mets" onclick="window.open(\'' + url + '\', \'_blank\')"><div class="carte-centre"><span class="carte-titre">' + decodeHTML(a.plat || '') + '</span><span class="carte-sous">Curieux Bégin</span></div><div class="carte-droite">' + saison + '</div></div>';
     }).join('');
   }
   if (ALL_CURIEUXBEGIN) { rendre(); return; }
@@ -861,6 +861,10 @@ function fermerFicheV2() {
     document.getElementById('selonSaqV2Container').style.display = 'flex';
     remonterScrollV2('selonSaqV2Container');
     calculerSelonSaqV2();
+  } else if (FICHE_V2_PROVENANCE === 'curieuxbegin') {
+    document.getElementById('curieuxBeginV2Container').style.display = 'flex';
+    remonterScrollV2('curieuxBeginV2Container');
+    chargerCurieuxBeginV2();
   }
 
   FICHE_V2_PROVENANCE = null;
