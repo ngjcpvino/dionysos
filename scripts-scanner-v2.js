@@ -1148,10 +1148,7 @@ function fermerSuggestionsV2() {
   document.getElementById('suggestionsV2Container').style.display = 'none';
 }
 
-function ouvrirFiltresSuggestionsV2() {
-  document.getElementById('suggestionsV2-filtres-voile').classList.add('ouvert');
-  document.getElementById('suggestionsV2-filtres').classList.add('ouvert');
-}
+function ouvrirFiltresSuggestionsV2() { clicLoupeV2('suggestionsV2', reinitialiserFiltresSuggestionsV2); }
 function fermerFiltresSuggestionsV2() {
   document.getElementById('suggestionsV2-filtres-voile').classList.remove('ouvert');
   document.getElementById('suggestionsV2-filtres').classList.remove('ouvert');
@@ -1557,10 +1554,7 @@ function reinitialiserFiltresAchatV2() {
   fermerFiltresAchatV2();
 }
 
-function ouvrirFiltresAchatV2() {
-  document.getElementById('achatV2-filtres-voile').classList.add('ouvert');
-  document.getElementById('achatV2-filtres').classList.add('ouvert');
-}
+function ouvrirFiltresAchatV2() { clicLoupeV2('achatV2', reinitialiserFiltresAchatV2); }
 function fermerFiltresAchatV2() {
   document.getElementById('achatV2-filtres-voile').classList.remove('ouvert');
   document.getElementById('achatV2-filtres').classList.remove('ouvert');
@@ -1909,10 +1903,7 @@ function fermerRechercheV2() {
 var filtresRechercheV2 = { sommelier: '', couleur: '', cepage: '', pays: '', appellation: '', accords: '', pastille: '', cave: false };
 var libellesFiltreRechercheV2 = { sommelier: 'Sommelier', couleur: 'Couleurs', cepage: 'Cépages', pays: 'Pays', appellation: 'Appellations', accords: 'Accords', pastille: 'Pastille de goût' };
 
-function ouvrirFiltresRechercheV2() {
-  document.getElementById('rechercheV2-filtres-voile').classList.add('ouvert');
-  document.getElementById('rechercheV2-filtres').classList.add('ouvert');
-}
+function ouvrirFiltresRechercheV2() { clicLoupeV2('rechercheV2', reinitialiserFiltresRechercheV2); }
 function fermerFiltresRechercheV2() {
   document.getElementById('rechercheV2-filtres-voile').classList.remove('ouvert');
   document.getElementById('rechercheV2-filtres').classList.remove('ouvert');
@@ -2124,10 +2115,7 @@ function fermerPromoV2() {
   document.getElementById('promoV2Container').style.display = 'none';
 }
 
-function ouvrirFiltresPromoV2() {
-  document.getElementById('promoV2-filtres-voile').classList.add('ouvert');
-  document.getElementById('promoV2-filtres').classList.add('ouvert');
-}
+function ouvrirFiltresPromoV2() { clicLoupeV2('promoV2', reinitialiserFiltresPromoV2); }
 function fermerFiltresPromoV2() {
   document.getElementById('promoV2-filtres-voile').classList.remove('ouvert');
   document.getElementById('promoV2-filtres').classList.remove('ouvert');
@@ -2337,10 +2325,7 @@ function fermerEmpV2() {
   document.getElementById('empV2Container').style.display = 'none';
 }
 
-function ouvrirFiltresEmpV2() {
-  document.getElementById('empV2-filtres-voile').classList.add('ouvert');
-  document.getElementById('empV2-filtres').classList.add('ouvert');
-}
+function ouvrirFiltresEmpV2() { clicLoupeV2('empV2', reinitialiserFiltresEmpV2); }
 function fermerFiltresEmpV2() {
   document.getElementById('empV2-filtres-voile').classList.remove('ouvert');
   document.getElementById('empV2-filtres').classList.remove('ouvert');
@@ -2922,10 +2907,7 @@ function fermerHistoV2() {
   document.getElementById('histoV2Container').style.display = 'none';
 }
 
-function ouvrirFiltresHistoV2() {
-  document.getElementById('histoV2-filtres-voile').classList.add('ouvert');
-  document.getElementById('histoV2-filtres').classList.add('ouvert');
-}
+function ouvrirFiltresHistoV2() { clicLoupeV2('histoV2', reinitialiserFiltresHistoV2); }
 function fermerFiltresHistoV2() {
   document.getElementById('histoV2-filtres-voile').classList.remove('ouvert');
   document.getElementById('histoV2-filtres').classList.remove('ouvert');
@@ -3360,10 +3342,7 @@ function afficherCartesCaveV2(data) {
   }).join('');
 }
 
-function ouvrirFiltresCaveV2() {
-  document.getElementById('caveV2-filtres-voile').classList.add('ouvert');
-  document.getElementById('caveV2-filtres').classList.add('ouvert');
-}
+function ouvrirFiltresCaveV2() { clicLoupeV2('caveV2', reinitialiserFiltresCaveV2); }
 function fermerFiltresCaveV2() {
   document.getElementById('caveV2-filtres-voile').classList.remove('ouvert');
   document.getElementById('caveV2-filtres').classList.remove('ouvert');
@@ -3516,10 +3495,7 @@ function fermerChartierV2() {
   document.getElementById('chartierV2Container').style.display = 'none';
 }
 
-function ouvrirFiltresChartierV2() {
-  document.getElementById('chartierV2-filtres-voile').classList.add('ouvert');
-  document.getElementById('chartierV2-filtres').classList.add('ouvert');
-}
+function ouvrirFiltresChartierV2() { clicLoupeV2('chartierV2', reinitialiserChartierV2); }
 function fermerFiltresChartierV2() {
   document.getElementById('chartierV2-filtres-voile').classList.remove('ouvert');
   document.getElementById('chartierV2-filtres').classList.remove('ouvert');
@@ -3547,7 +3523,6 @@ function construirePanneauChartierV2() {
   html += '<div class="panneau-separateur"></div>';
   html += '<div class="champ-cliquable" id="chartierV2-f-couleur-display" onclick="basculerCouleurChartierV2()">Couleurs</div>';
   html += '<div id="chartierV2-f-couleur-menu" class="menu-liste"></div>';
-  html += '<div class="roundel" onclick="reinitialiserChartierV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Réinitialiser</span></div>';
   document.getElementById('chartierV2-filtres').innerHTML = html;
   remplirCouleurMenuChartierV2();
   remplirCepageMenuChartierV2();
@@ -3766,10 +3741,7 @@ function fermerSelonSaqV2() {
   document.getElementById('selonSaqV2Container').style.display = 'none';
 }
 
-function ouvrirFiltresSelonSaqV2() {
-  document.getElementById('selonSaqV2-filtres-voile').classList.add('ouvert');
-  document.getElementById('selonSaqV2-filtres').classList.add('ouvert');
-}
+function ouvrirFiltresSelonSaqV2() { clicLoupeV2('selonSaqV2', reinitialiserSelonSaqV2); }
 function fermerFiltresSelonSaqV2() {
   document.getElementById('selonSaqV2-filtres-voile').classList.remove('ouvert');
   document.getElementById('selonSaqV2-filtres').classList.remove('ouvert');
@@ -3806,7 +3778,6 @@ function construirePanneauSelonSaqV2() {
   html += '<div id="selonSaqV2-liste-ingredients" class="menu-liste"></div>';
   html += '<div class="champ-cliquable" onclick="basculerListeSelonSaqV2(\'plats\')">Types de plats</div>';
   html += '<div id="selonSaqV2-liste-plats" class="menu-liste"></div>';
-  html += '<div class="roundel" onclick="reinitialiserSelonSaqV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Réinitialiser</span></div>';
   document.getElementById('selonSaqV2-filtres').innerHTML = html;
 }
 
@@ -3926,10 +3897,7 @@ function fermerCurieuxBeginV2() {
   document.getElementById('curieuxBeginV2Container').style.display = 'none';
 }
 
-function ouvrirFiltresCurieuxBeginV2() {
-  document.getElementById('curieuxBeginV2-filtres-voile').classList.add('ouvert');
-  document.getElementById('curieuxBeginV2-filtres').classList.add('ouvert');
-}
+function ouvrirFiltresCurieuxBeginV2() { clicLoupeV2('curieuxBeginV2', reinitialiserFiltresCurieuxBeginV2); }
 function fermerFiltresCurieuxBeginV2() {
   document.getElementById('curieuxBeginV2-filtres-voile').classList.remove('ouvert');
   document.getElementById('curieuxBeginV2-filtres').classList.remove('ouvert');
@@ -4231,6 +4199,16 @@ var PANNEAUX_V2 = {
   }
 };
 
+// Clic sur la loupe d'un panneau : si elle est dorée (un filtre est actif) → défiltre ; sinon → ouvre le panneau.
+function clicLoupeV2(prefixe, reinitFn) {
+  var loupe = document.getElementById(prefixe + '-loupe');
+  if (loupe && loupe.classList.contains('actif')) { if (reinitFn) reinitFn(); return; }
+  var voile = document.getElementById(prefixe + '-filtres-voile');
+  var panneau = document.getElementById(prefixe + '-filtres');
+  if (voile) voile.classList.add('ouvert');
+  if (panneau) panneau.classList.add('ouvert');
+}
+
 function construirePanneauxV2() {
   Object.keys(PANNEAUX_V2).forEach(function(k) {
     var p = PANNEAUX_V2[k];
@@ -4243,7 +4221,6 @@ function construirePanneauxV2() {
               '<div id="' + p.prefixe + '-f-' + f[0] + '-menu" class="menu-liste"></div>';
     });
     html += p.apres || '';
-    html += '<div class="roundel" onclick="' + p.reinit + '()"><span class="roundel-anneau"></span><span class="roundel-barre">Réinitialiser</span></div>';
     html += p.apresReinit || '';
     el.innerHTML = html;
   });
