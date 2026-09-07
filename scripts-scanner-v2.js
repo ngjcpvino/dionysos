@@ -3535,6 +3535,8 @@ function construirePanneauChartierV2() {
   var html = '';
   html += '<div class="ligne-dispo"><span class="libelle">Que les disponibles</span>' +
           '<div class="cercle" id="chartierV2-dispo" onclick="toggleDispoChartierV2()">' + (filtresChartierV2.dispo ? '✓' : '✗') + '</div></div>';
+  html += '<div class="panneau-separateur"></div>';
+  html += '<div class="titre-3">Filtrer</div>';
   html += '<div class="champ-cliquable" id="chartierV2-f-cepage-display" onclick="basculerCepageChartierV2()">Cépage</div>';
   html += '<div id="chartierV2-f-cepage-menu" class="menu-liste"></div>';
   html += '<div class="panneau-separateur"></div>';
@@ -3676,6 +3678,8 @@ function vinsDisponiblesPourCepageV2(cepage) {
 
 function calculerResultatsChartierV2() {
   var div = document.getElementById('chartierV2-resultats');
+  var loupe = document.getElementById('chartierV2-loupe');
+  if (loupe) loupe.classList.toggle('actif', !!(filtresChartierV2.dispo || filtresChartierV2.cepage || filtresChartierV2.couleur || Object.keys(chartierV2Selection).length));
 
   if (filtresChartierV2.cepage) {
     var cep = filtresChartierV2.cepage;
@@ -3862,14 +3866,9 @@ function calculerSelonSaqV2() {
   var ingr = Object.keys(selonSaqV2Selection.ingredients);
   var plats = Object.keys(selonSaqV2Selection.plats);
   var loupe = document.getElementById('selonSaqV2-loupe');
-  if (loupe) loupe.classList.toggle('actif', !!(ingr.length || plats.length));
+  if (loupe) loupe.classList.toggle('actif', !!(ingr.length || plats.length || selonSaqV2Cave));
 
-  if (!ingr.length && !plats.length) {
-    compte.textContent = '';
-    div.innerHTML = '<div class="texte-secondaire">Choisissez un ingrédient ou un type de plat dans le filtre</div>';
-    return;
-  }
-
+  // Montre tout par défaut (tous les vins ayant un accord SAQ) ; les filtres réduisent
   var recettes = recettesUtilesSelonSaqV2().filter(function(r) {
     var okI = !ingr.length || (r.ingredients || []).some(function(v) { return ingr.indexOf(v) !== -1; });
     var okP = !plats.length || (r.typesPlats || []).some(function(v) { return plats.indexOf(v) !== -1; });
@@ -3877,10 +3876,10 @@ function calculerSelonSaqV2() {
   });
 
   var familles = {};
-  recettes.forEach(function(r) { (r.familles || []).forEach(function(f) { familles[f] = true; }); });
+  recettes.forEach(function(r) { (r.familles || []).forEach(function(f) { familles[normFamilleV2(f)] = true; }); });
 
   var vins = grouperVinsV2((ALL_DATA || []).filter(function(i) {
-    var f = (i.Famille || '').toString().trim();
+    var f = normFamilleV2(i.Famille);
     return f && familles[f];
   }));
   if (selonSaqV2Cave) vins = vins.filter(function(g) { return g.count > 0; });
