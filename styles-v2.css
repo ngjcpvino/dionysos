@@ -761,7 +761,7 @@ body::after {
   font-size: var(--fs-14);
   cursor: pointer;
 }
-.panneau-gauche .champ-cliquable { flex: none; margin-bottom: var(--space-s); }
+.panneau-gauche .champ-cliquable { flex: none; }
 
 .champ-saisie {
   width: 100%;
@@ -800,6 +800,8 @@ textarea.champ-saisie { resize: none; font-family: inherit; line-height: 1.4; }
 .item-liste:last-child { margin-bottom: 0; }
 .item-liste.actif { background: var(--gold-30); }
 .panneau-gauche .item-liste { white-space: normal; }
+/* Enfants directs du panneau (onglets de mode) : espacés par le gap du panneau, pas de marge en double */
+.panneau-gauche > .item-liste { margin-bottom: 0; }
 /* Accordéons — indentation et espacement partagés, réutilisables PARTOUT.
    Un item de sous-niveau porte .accordeon-1 (1er niveau) ou .accordeon-2 (2e niveau).
    .item-liste.xxx (2 classes) bat .item-liste:last-child → le dernier item garde sa marge, donc rien ne se touche jamais. */
