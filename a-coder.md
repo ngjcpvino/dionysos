@@ -1,6 +1,6 @@
 # 🔧 À coder — souhaits et corrections
 
-> Liste montée le 5 septembre 2026, codée le 6 septembre.
+> Liste montée le 5 septembre 2026, codée le 6 septembre. 
 > Règles de travail : `REFERENCE.md`. État technique : `mise-a-jour.md`.
 
 ## ✅ État (6 septembre — mis à jour en fin de séance)
