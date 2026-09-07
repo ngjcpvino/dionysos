@@ -3533,7 +3533,7 @@ function alimentsDisponiblesChartierV2(cle) {
 
 function construirePanneauChartierV2() {
   var html = '';
-  html += '<div class="ligne-dispo"><span class="libelle">Que les disponibles</span>' +
+  html += '<div class="ligne-dispo"><span class="libelle">Que les vins en cave</span>' +
           '<div class="cercle" id="chartierV2-dispo" onclick="toggleDispoChartierV2()">' + (filtresChartierV2.dispo ? '✓' : '✗') + '</div></div>';
   html += '<div class="panneau-separateur"></div>';
   html += '<div class="titre-3">Filtrer</div>';
@@ -4152,7 +4152,7 @@ function ajouterBouteilleArrivee(meuble, rangee, espace) {
 var PANNEAUX_V2 = {
   cave: {
     prefixe: 'caveV2', bascule: 'basculerFiltreCaveV2', reinit: 'reinitialiserFiltresCaveV2',
-    avant: '<div class="ligne-dispo"><span class="libelle">Que les disponibles</span>' +
+    avant: '<div class="ligne-dispo"><span class="libelle">Que les vins en cave</span>' +
            '<div class="cercle" id="caveV2-dispo" onclick="toggleDispoCaveV2()">✗</div></div>',
     filtres: [['couleur', 'Couleurs'], ['cepage', 'Cépages'], ['pays', 'Pays'], ['appellation', 'Appellations'], ['accords', 'Accords'], ['pastille', 'Pastille de goût'], ['acidite', 'Acidité']],
     apres: '<div class="panneau-separateur"></div>' +
