@@ -257,7 +257,6 @@ body::after {
   margin: -45px 0 var(--space-l) 0;
 }
 .ligne-dispo .libelle { color: var(--white); font-size: var(--fs-14); }
-#curieuxBeginV2-filtres .ligne-dispo { margin-top: 0; }
 
 #menuActionV2Overlay { z-index: 10010; }
 #histoEditV2Overlay { z-index: 10010; }
@@ -761,7 +760,7 @@ body::after {
   font-size: var(--fs-14);
   cursor: pointer;
 }
-.panneau-gauche .champ-cliquable { flex: none; }
+.panneau-gauche .champ-cliquable { flex: none; margin-bottom: var(--space-s); }
 
 .champ-saisie {
   width: 100%;
