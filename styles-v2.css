@@ -257,6 +257,7 @@ body::after {
   margin: -45px 0 var(--space-l) 0;
 }
 .ligne-dispo .libelle { color: var(--white); font-size: var(--fs-14); }
+#curieuxBeginV2-filtres .ligne-dispo { margin-top: 0; }
 
 #menuActionV2Overlay { z-index: 10010; }
 #histoEditV2Overlay { z-index: 10010; }
