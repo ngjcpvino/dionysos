@@ -566,13 +566,16 @@
 <!-- ====================== SELON CURIEUX BÉGIN V2 ====================== -->
 <div id="curieuxBeginV2Container" class="modal-v2-fullscreen" style="display:none;">
   <div class="modal-v2-content modale-haut">
+    <div class="cercle gauche" id="curieuxBeginV2-loupe" onclick="ouvrirFiltresCurieuxBeginV2()">
+      <img src="https://res.cloudinary.com/dym93w23h/image/upload/v1786985550/entonnoire_lqpv39.png" alt="Filtres" style="width:20px;height:20px;object-fit:contain;">
+    </div>
     <div class="btn-fermer" onclick="fermerCurieuxBeginV2()">✕</div>
     <h2 class="titre-1">Selon Curieux Bégin</h2>
-    <input type="text" id="curieuxBeginV2-recherche" class="champ-saisie" placeholder="Rechercher un plat ou un vin" oninput="chargerCurieuxBeginV2()">
-    <div class="ligne-dispo"><span class="libelle">Que les vins en cave</span><div class="cercle" id="curieuxBeginV2-cave" onclick="toggleCaveCurieuxBeginV2()">✗</div></div>
     <div id="curieuxBeginV2-compte" class="texte-secondaire"></div>
     <div id="curieuxBeginV2-liste" class="contenu"></div>
   </div>
+  <div id="curieuxBeginV2-filtres-voile" class="panneau-voile" onclick="fermerFiltresCurieuxBeginV2()"></div>
+  <div id="curieuxBeginV2-filtres" class="panneau-gauche"></div>
 </div>
 
 <!-- ====================== PHOTO V2 ====================== -->
