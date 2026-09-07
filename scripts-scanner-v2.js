@@ -4202,9 +4202,17 @@ var PANNEAUX_V2 = {
 // Clic sur la loupe d'un panneau : si elle est dorée (un filtre est actif) → défiltre ; sinon → ouvre le panneau.
 function clicLoupeV2(prefixe, reinitFn) {
   var loupe = document.getElementById(prefixe + '-loupe');
-  if (loupe && loupe.classList.contains('actif')) { if (reinitFn) reinitFn(); return; }
   var voile = document.getElementById(prefixe + '-filtres-voile');
   var panneau = document.getElementById(prefixe + '-filtres');
+  if (loupe && loupe.classList.contains('actif')) {
+    var etaitOuvert = panneau && panneau.classList.contains('ouvert');
+    if (reinitFn) reinitFn();                 // remet à zéro (la fonction referme le panneau au passage)
+    if (etaitOuvert) {                        // s'il était ouvert, on le garde ouvert
+      if (voile) voile.classList.add('ouvert');
+      if (panneau) panneau.classList.add('ouvert');
+    }
+    return;
+  }
   if (voile) voile.classList.add('ouvert');
   if (panneau) panneau.classList.add('ouvert');
 }
