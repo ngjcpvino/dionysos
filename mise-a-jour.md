@@ -52,7 +52,8 @@
 - Loupe et ✕ d'une page-liste : `position:fixed` (`.gauche` reste `absolute`).
 - Carte avec date à droite : `white-space:nowrap` (exception : items des panneaux, qui replient). Carte indentée pleine largeur : `width: calc(100% - indent)`.
 - Nouvelle couleur de vin : 4 blocs CSS + `couleurClasseV2` + classement fiche (2 endroits) + tri de `grouperVinsV2`.
-- **Modifier un panneau de filtres = modifier `PANNEAUX_V2`, jamais le HTML.** Exception connue : `construirePanneauChartierV2` fabrique le sien à la main (catégories dépliantes).
+- **Modifier un panneau de filtres = modifier `PANNEAUX_V2`, jamais le HTML.** Exceptions : `construirePanneauChartierV2` et `construirePanneauSelonSaqV2` fabriquent le leur à la main (contrôles par catégories/ingrédients) — mais ils suivent **le même standard**.
+- **Standard des panneaux de filtres (7 sept. 2026)**, dans cet ordre : (1) toggle « Que les vins en cave / disponibles » s'il y a lieu ; (2) titre **« Afficher »** + onglets de mode (`.item-liste`) s'il y a lieu ; (3) titre **« Filtrer »** + les menus (`.champ-cliquable`) + la recherche texte ; (4) **Réinitialiser** puis autres boutons (`apresReinit`). L'**entonnoir** (`#xxx-loupe`) est doré (`.actif`) dès qu'un vrai **filtre** est actif (PAS le mode) — chaque fonction de rendu fait `loupe.classList.toggle('actif', …)`. Les pages « à partir d'un aliment » (**Selon SAQ**, plus tard Chartier) montrent **tout par défaut** puis filtrent, comme les autres.
 
 **Méthode**
 - Un changement présenté mais sans « ok » reçu N'EST PAS appliqué — ne jamais le marquer fait.
