@@ -1256,6 +1256,9 @@ function afficherSuggestionsV2() {
   var texte = normaliserRechercheV2(champTexte ? champTexte.value.trim() : '');
   var infos = saqInfosV2();
 
+  var loupeS = document.getElementById('suggestionsV2-loupe');
+  if (loupeS) loupeS.classList.toggle('actif', !!(f.sommelier || f.couleur || f.cave || texte));
+
   var base = (ALL_SUGGESTIONS || []).filter(function(s) {
     if (f.sommelier && s.sommelier !== f.sommelier) return false;
     if (texte && normaliserRechercheV2(s.note).indexOf(texte) === -1) return false;
@@ -4034,7 +4037,7 @@ function chargerCurieuxBeginV2() {
   });
 
   var loupe = document.getElementById('curieuxBeginV2-loupe');
-  if (loupe) loupe.classList.toggle('actif', !!(f.couleur || f.cave || f.mode === 'horscave' || q));
+  if (loupe) loupe.classList.toggle('actif', !!(f.couleur || f.cave || q));
 
   compte.textContent = groupes.length + ' vin' + (groupes.length > 1 ? 's' : '');
   if (!groupes.length) { div.innerHTML = '<div class="texte-secondaire">Aucun accord</div>'; return; }
@@ -4158,17 +4161,16 @@ var PANNEAUX_V2 = {
   },
   histo: {
     prefixe: 'histoV2', bascule: 'basculerFiltreHistoV2', reinit: 'reinitialiserFiltresHistoV2',
-    avant: '<div class="ligne-dispo"><span class="libelle">Que les vins en cave</span><div class="cercle" id="histoV2-cave" onclick="toggleCaveHistoV2()">✗</div></div>' +
-           '<div class="panneau-separateur"></div>' +
-           '<input type="text" id="histoV2-f-mets" class="champ-saisie" placeholder="Rechercher un mets" oninput="filtrerMetsHistoV2()">',
+    avant: '<div class="ligne-dispo"><span class="libelle">Que les vins en cave</span><div class="cercle" id="histoV2-cave" onclick="toggleCaveHistoV2()">✗</div></div>',
     filtres: [['vin', 'Vin'], ['accord', 'Accord'], ['couleur', 'Couleur']],
     apres: '<div class="panneau-separateur"></div>' +
-           '<div class="roundel" onclick="ouvrirHistoAjoutV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Ajouter</span></div>'
+           '<input type="text" id="histoV2-f-mets" class="champ-saisie" placeholder="Rechercher un mets" oninput="filtrerMetsHistoV2()">',
+    apresReinit: '<div class="roundel" onclick="ouvrirHistoAjoutV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Ajouter</span></div>'
   },
   emp: {
     prefixe: 'empV2', bascule: 'basculerFiltreEmpV2', reinit: 'reinitialiserFiltresEmpV2',
     filtres: [['meuble', 'Meuble'], ['rangee', 'Rangée'], ['espace', 'Espace']],
-    apres: '<div class="panneau-separateur"></div>' +
+    apresReinit: '<div class="panneau-separateur"></div>' +
            '<div class="roundel" onclick="afficherListeEmpV2(\'doubles\')"><span class="roundel-anneau"></span><span class="roundel-barre">Vins en double</span></div>' +
            '<div id="empV2-btn-cepdoubles" class="roundel" style="display:none;" onclick="afficherListeEmpV2(\'cepdoubles\')"><span class="roundel-anneau"></span><span class="roundel-barre">Cépages doubles</span></div>' +
            '<div id="empV2-btn-listemeuble" class="roundel" style="display:none;" onclick="afficherListeEmpV2(\'listemeuble\')"><span class="roundel-anneau"></span><span class="roundel-barre">Liste du meuble</span></div>' +
@@ -4179,7 +4181,8 @@ var PANNEAUX_V2 = {
   },
   achat: {
     prefixe: 'achatV2', bascule: 'basculerFiltreAchatV2', reinit: 'reinitialiserFiltresAchatV2',
-    avant: '<div class="item-liste" id="achatV2-mode-achat" onclick="choisirModeAchatV2(\'achat\')">Liste d\'achat</div>' +
+    avant: '<div class="titre-3">Afficher</div>' +
+           '<div class="item-liste" id="achatV2-mode-achat" onclick="choisirModeAchatV2(\'achat\')">Liste d\'achat</div>' +
            '<div class="item-liste" id="achatV2-mode-sugg" onclick="choisirModeAchatV2(\'suggestions\')">Liste suggestions</div>' +
            '<div class="panneau-separateur"></div>',
     filtres: [['couleur', 'Couleurs'], ['pays', 'Pays'], ['cepage', 'Cépages'], ['pastille', 'Pastille de goût']],
@@ -4212,17 +4215,17 @@ var PANNEAUX_V2 = {
            '<div class="cercle" id="suggestionsV2-cave" onclick="toggleCaveSuggestionsV2()">✗</div></div>',
     filtres: [['sommelier', 'Sommelier'], ['couleur', 'Couleurs']],
     apres: '<div class="panneau-separateur"></div>' +
-           '<input type="text" id="suggestionsV2-f-texte" class="champ-saisie" placeholder="Chercher dans les notes" oninput="afficherSuggestionsV2()">' +
-           '<div class="panneau-separateur"></div>' +
-           '<div class="roundel" onclick="ajouterDepuisSuggestionsV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Ajouter</span></div>'
+           '<input type="text" id="suggestionsV2-f-texte" class="champ-saisie" placeholder="Chercher dans les notes" oninput="afficherSuggestionsV2()">',
+    apresReinit: '<div class="roundel" onclick="ajouterDepuisSuggestionsV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Ajouter</span></div>'
   },
   curieuxbegin: {
     prefixe: 'curieuxBeginV2', bascule: 'basculerFiltreCurieuxBeginV2', reinit: 'reinitialiserFiltresCurieuxBeginV2',
-    avant: '<div class="item-liste" id="curieuxBeginV2-mode-mesvins" onclick="choisirModeCurieuxBeginV2(\'mesvins\')">Mes vins</div>' +
+    avant: '<div class="ligne-dispo"><span class="libelle">Que les vins en cave</span>' +
+           '<div class="cercle" id="curieuxBeginV2-cave" onclick="toggleCaveCurieuxBeginV2()">✗</div></div>' +
+           '<div class="titre-3">Afficher</div>' +
+           '<div class="item-liste" id="curieuxBeginV2-mode-mesvins" onclick="choisirModeCurieuxBeginV2(\'mesvins\')">Mes vins</div>' +
            '<div class="item-liste" id="curieuxBeginV2-mode-horscave" onclick="choisirModeCurieuxBeginV2(\'horscave\')">Vins que je n\'ai pas</div>' +
-           '<div class="panneau-separateur"></div>' +
-           '<div class="ligne-dispo"><span class="libelle">Que les vins en cave</span>' +
-           '<div class="cercle" id="curieuxBeginV2-cave" onclick="toggleCaveCurieuxBeginV2()">✗</div></div>',
+           '<div class="panneau-separateur"></div>',
     filtres: [['couleur', 'Couleurs']],
     apres: '<div class="panneau-separateur"></div>' +
            '<input type="text" id="curieuxBeginV2-f-texte" class="champ-saisie" placeholder="Chercher un plat ou un vin" oninput="chargerCurieuxBeginV2()">'
