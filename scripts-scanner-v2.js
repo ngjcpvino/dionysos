@@ -4051,6 +4051,10 @@ function chargerCurieuxBeginV2() {
 function toggleMenuV2() {
   var ouvert = document.getElementById('burgerV2').classList.toggle('ouvert');
   document.getElementById('burgerV2-voile').classList.toggle('ouvert', ouvert);
+  if (ouvert) {  // à l'ouverture, replier les accordéons (Accord selon… / Outils)
+    var acc = document.getElementById('burgerV2-accord'); if (acc) acc.style.display = 'none';
+    var out = document.getElementById('burgerV2-outils'); if (out) out.style.display = 'none';
+  }
 }
 
 function fermerMenuBurgerV2() {
