@@ -3839,21 +3839,38 @@ function calculerSelonSaqV2() {
   var loupe = document.getElementById('selonSaqV2-loupe');
   if (loupe) loupe.classList.toggle('actif', !!(ingr.length || plats.length || selonSaqV2Cave));
 
-  // Montre tout par défaut (tous les vins ayant un accord SAQ) ; les filtres réduisent
-  var recettes = recettesUtilesSelonSaqV2().filter(function(r) {
-    var okI = !ingr.length || (r.ingredients || []).some(function(v) { return ingr.indexOf(v) !== -1; });
-    var okP = !plats.length || (r.typesPlats || []).some(function(v) { return plats.indexOf(v) !== -1; });
-    return okI && okP;
-  });
-
-  var familles = {};
-  recettes.forEach(function(r) { (r.familles || []).forEach(function(f) { familles[normFamilleV2(f)] = true; }); });
+  // Montre tout par défaut (tous les vins ayant un accord SAQ). Chaque ingrédient/plat choisi RÉDUIT :
+  // on garde les familles présentes pour CHAQUE choix (intersection) → les vins bons pour TOUS les choix.
+  var utiles = recettesUtilesSelonSaqV2();
+  var familles = null; // familles retenues ; null tant qu'aucun choix
+  function contraindreSelonSaqV2(champ, valeur) {
+    var s = {};
+    utiles.forEach(function(r) {
+      if ((r[champ] || []).indexOf(valeur) !== -1) (r.familles || []).forEach(function(f) { s[normFamilleV2(f)] = true; });
+    });
+    if (familles === null) { familles = s; return; }
+    Object.keys(familles).forEach(function(f) { if (!s[f]) delete familles[f]; });
+  }
+  ingr.forEach(function(v) { contraindreSelonSaqV2('ingredients', v); });
+  plats.forEach(function(v) { contraindreSelonSaqV2('typesPlats', v); });
+  if (familles === null) { // aucun choix : toutes les familles ayant un accord
+    familles = {};
+    utiles.forEach(function(r) { (r.familles || []).forEach(function(f) { familles[normFamilleV2(f)] = true; }); });
+  }
 
   var vins = grouperVinsV2((ALL_DATA || []).filter(function(i) {
     var f = normFamilleV2(i.Famille);
     return f && familles[f];
   }));
   if (selonSaqV2Cave) vins = vins.filter(function(g) { return g.count > 0; });
+
+  var choix = ingr.length || plats.length;
+  var recettes = utiles.filter(function(r) {
+    if (!(r.familles || []).some(function(f) { return familles[normFamilleV2(f)]; })) return false;
+    if (!choix) return true;
+    return (r.ingredients || []).some(function(v) { return ingr.indexOf(v) !== -1; }) ||
+           (r.typesPlats || []).some(function(v) { return plats.indexOf(v) !== -1; });
+  });
 
   compte.innerHTML = vins.length + ' vin' + (vins.length > 1 ? 's' : '') + '<br>' + recettes.length + ' recette' + (recettes.length > 1 ? 's' : '');
   if (!vins.length) { div.innerHTML = '<div class="texte-secondaire">Aucun vin de la cave pour ce choix</div>'; return; }
