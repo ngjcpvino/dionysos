@@ -3814,9 +3814,23 @@ function tousSelonSaqV2(cle) {
 function toggleSelonSaqV2(el, cle) {
   selonSaqV2RecettesDe = null;
   var v = el.getAttribute('data-valeur');
-  if (selonSaqV2Selection[cle][v]) delete selonSaqV2Selection[cle][v];
-  else selonSaqV2Selection[cle][v] = true;
-  el.classList.toggle('actif');
+  var champ = (cle === 'ingredients') ? 'ingredients' : 'typesPlats';
+  if (selonSaqV2Selection[cle][v]) {
+    delete selonSaqV2Selection[cle][v];
+    el.classList.remove('actif');
+    var suiv = el.nextElementSibling; // retirer la sous-ligne « les recettes » qui suit
+    if (suiv && suiv.classList.contains('accordeon-1')) suiv.remove();
+  } else {
+    selonSaqV2Selection[cle][v] = true;
+    el.classList.add('actif');
+    var ligne = document.createElement('div'); // ajouter « les recettes » juste sous la valeur, au clic
+    ligne.className = 'item-liste accordeon-1';
+    ligne.setAttribute('data-champ', champ);
+    ligne.setAttribute('data-valeur', v);
+    ligne.setAttribute('onclick', 'voirRecettesSelonSaqV2(this)');
+    ligne.textContent = 'les recettes';
+    el.parentNode.insertBefore(ligne, el.nextSibling);
+  }
   calculerSelonSaqV2();
 }
 
