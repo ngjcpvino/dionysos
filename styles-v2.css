@@ -114,6 +114,7 @@ html, body {
   --space-m: 15px;
   --space-l: 20px;
   --space-xl: 25px;
+  --space-8: 8px;
   --espace-accordeon: 7px;
   --taille-tactile: 44px;
   --ls-tight: 1px;
@@ -808,6 +809,8 @@ textarea.champ-saisie { resize: none; font-family: inherit; line-height: 1.4; }
 .item-liste.accordeon-1 { margin-left: var(--space-l); }
 .item-liste.accordeon-2 { margin-left: calc(var(--space-l) * 2); }
 .item-liste.accordeon-1, .item-liste.accordeon-2 { margin-bottom: var(--espace-accordeon); white-space: normal; }
+/* Icône devant le libellé d'un item de menu (Curieux Bégin, Données) — partagée, pas de style en ligne */
+.item-icone { display: inline-block; vertical-align: middle; margin-right: var(--space-8); }
 .panneau-gauche .menu-liste { margin-left: auto; margin-right: 0; }
 
 /* ===== CERCLE — rond générique V2 (bordure or, fond sombre, centré) ===== */

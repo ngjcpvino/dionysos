@@ -4085,6 +4085,7 @@ function burgerV2Click(cible) {
   if (cible === 'curieuxbegin') { cacherToutesPagesV2(); ouvrirCurieuxBeginV2(); return; }
 
   
+  if (cible === 'majcurieux') { majCurieuxBeginBoucleV2(0); return; }
   if (cible === 'refresh') {
     appelBackend('getInventoryData', {}, { spinner: 'Synchronisation' }).then(function(data) {
       ALL_DATA = data || [];
@@ -4094,6 +4095,17 @@ function burgerV2Click(cible) {
     return;
   }
   afficherMessage('À venir');
+}
+
+// Mise à jour Curieux Bégin — relance automatique tant que le backend n'a pas fini (garde-fou 5 min côté serveur)
+function majCurieuxBeginBoucleV2(ajoutsCumul) {
+  appelBackend('majCurieuxBegin', {}, { spinner: 'Mise à jour Curieux Bégin', timeout: 330000 }).then(function(res) {
+    if (!res || res.success === false) { afficherMessage('Erreur de mise à jour'); return; }
+    var ajouts = ajoutsCumul + (res.ajoutees || 0);
+    if (!res.termine) { majCurieuxBeginBoucleV2(ajouts); return; }
+    ALL_CURIEUXBEGIN = null;
+    afficherMessage('✓ Curieux Bégin à jour (' + ajouts + ' ajout' + (ajouts > 1 ? 's' : '') + ')');
+  }).catch(function() { afficherMessage('Erreur de mise à jour'); });
 }
 
 function ajouterBouteilleArrivee(meuble, rangee, espace) {
