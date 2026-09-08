@@ -251,6 +251,16 @@ body::after {
   left: var(--space-s);
   z-index: 10002;
 }
+/* Filtres actifs + panneau FERMÉ : l'entonnoir doré devient une flèche « rouvrir » (les choix sont gardés).
+   Panneau ouvert → l'entonnoir revient (clic = réinitialiser). Une seule règle pour toutes les loupes. */
+[id$="Container"]:not(:has([id$="-filtres"].ouvert)) [id$="-loupe"].actif img { display: none; }
+[id$="Container"]:not(:has([id$="-filtres"].ouvert)) [id$="-loupe"].actif::after {
+  content: '\2192';
+  color: var(--white);
+  font-size: var(--fs-22);
+  font-weight: var(--fw-bold);
+  line-height: 1;
+}
 .ligne-dispo {
   display: flex;
   align-items: center;
