@@ -333,7 +333,11 @@ function basculerPlatFicheV2(i, type) {
   }).filter(function(r) { return r.nom && r.sku; })
     .sort(function(a, b) { return a.nom.localeCompare(b.nom); })
     .map(function(r) {
-      return '<div class="item-liste accordeon-2" onclick="window.open(\'https://www.saq.com/fr/' + r.sku + '\', \'_blank\')">' + r.nom + '</div>';
+      var skuEsc = r.sku.replace(/'/g, "\\'");
+      return '<div class="item-liste accordeon-2 corriger-ligne">' +
+               '<span class="corriger-nom" onclick="window.open(\'https://www.saq.com/fr/' + r.sku + '\', \'_blank\')">' + r.nom + '</span>' +
+               '<span class="corriger-crayon" onclick="event.stopPropagation();ouvrirApresTap(function(){ouvrirCorrigerRecetteV2(\'' + skuEsc + '\')})">✎</span>' +
+             '</div>';
     }).join('');
   cible.style.display = '';
   var titre = document.getElementById('ficheV2-typ-' + i);
@@ -362,6 +366,106 @@ function chargerRecettesFicheV2(famille) {
     ALL_RECETTES = data || [];
     rendre();
   }).catch(function() {});
+}
+
+// ==================== Corriger une recette SAQ (depuis la fiche) ====================
+var corrigerRecetteV2Etat = null; // { sku, typesPlats:[], ingredients:[] } — copie de travail
+
+// Valeurs déjà connues d'un champ (types de plats / ingrédients), toutes recettes confondues
+function valeursConnuesRecettesV2(champ) {
+  var set = {};
+  (ALL_RECETTES || []).forEach(function(r) { (r[champ] || []).forEach(function(v) { set[v] = true; }); });
+  return Object.keys(set).sort(function(a, b) { return a.localeCompare(b); });
+}
+
+function ouvrirCorrigerRecetteV2(sku) {
+  var r = (ALL_RECETTES || []).filter(function(x) { return (x.sku || '').toString() === sku.toString(); })[0];
+  if (!r) { afficherMessage('Recette introuvable'); return; }
+  corrigerRecetteV2Etat = { sku: r.sku.toString(), typesPlats: (r.typesPlats || []).slice(), ingredients: (r.ingredients || []).slice() };
+  document.getElementById('corrigerRecetteV2-nom').value = decodeHTML(r.nom || '');
+  ['typesPlats', 'ingredients'].forEach(function(champ) {
+    var menu = document.getElementById('corrigerRecetteV2-' + champ + '-menu');
+    menu.classList.remove('ouvert'); menu.innerHTML = '';
+    rendreChipsCorrigerV2(champ);
+  });
+  document.getElementById('corrigerRecetteV2Overlay').style.display = 'flex';
+  remonterScrollV2('corrigerRecetteV2Overlay');
+}
+
+function fermerCorrigerRecetteV2() {
+  document.getElementById('corrigerRecetteV2Overlay').style.display = 'none';
+  corrigerRecetteV2Etat = null;
+}
+
+function rendreChipsCorrigerV2(champ) {
+  var div = document.getElementById('corrigerRecetteV2-' + champ + '-chips');
+  var vals = corrigerRecetteV2Etat ? corrigerRecetteV2Etat[champ] : [];
+  if (!vals.length) { div.innerHTML = '<div class="texte-secondaire">Aucun</div>'; return; }
+  div.innerHTML = vals.map(function(v) {
+    var esc = v.replace(/'/g, "\\'");
+    return '<div class="item-liste" onclick="retirerCorrigerV2(\'' + champ + '\', \'' + esc + '\')">' + decodeHTML(v) + '<span class="fav-x">✗</span></div>';
+  }).join('');
+}
+
+function retirerCorrigerV2(champ, valeur) {
+  if (!corrigerRecetteV2Etat) return;
+  corrigerRecetteV2Etat[champ] = corrigerRecetteV2Etat[champ].filter(function(v) { return v !== valeur; });
+  rendreChipsCorrigerV2(champ);
+}
+
+function basculerAjoutCorrigerV2(champ) {
+  if (!corrigerRecetteV2Etat) return;
+  var menu = document.getElementById('corrigerRecetteV2-' + champ + '-menu');
+  var etaitOuvert = menu.classList.contains('ouvert');
+  ['typesPlats', 'ingredients'].forEach(function(k) {
+    var m = document.getElementById('corrigerRecetteV2-' + k + '-menu');
+    m.classList.remove('ouvert'); m.innerHTML = '';
+  });
+  if (etaitOuvert) return;
+  var deja = {};
+  corrigerRecetteV2Etat[champ].forEach(function(v) { deja[v] = true; });
+  var html = '<input type="text" id="corrigerRecetteV2-' + champ + '-nouveau" class="champ-saisie" placeholder="Nouveau…" onkeydown="if(event.key===\'Enter\'){event.preventDefault();ajouterNouveauCorrigerV2(\'' + champ + '\');}">';
+  html += valeursConnuesRecettesV2(champ).filter(function(v) { return !deja[v]; }).map(function(v) {
+    var esc = v.replace(/'/g, "\\'");
+    return '<div class="item-liste" onclick="ajouterCorrigerV2(\'' + champ + '\', \'' + esc + '\')">' + decodeHTML(v) + '</div>';
+  }).join('');
+  menu.innerHTML = html;
+  menu.classList.add('ouvert');
+}
+
+function ajouterCorrigerV2(champ, valeur) {
+  if (!corrigerRecetteV2Etat) return;
+  if (corrigerRecetteV2Etat[champ].indexOf(valeur) === -1) corrigerRecetteV2Etat[champ].push(valeur);
+  var menu = document.getElementById('corrigerRecetteV2-' + champ + '-menu');
+  menu.classList.remove('ouvert'); menu.innerHTML = '';
+  rendreChipsCorrigerV2(champ);
+}
+
+function ajouterNouveauCorrigerV2(champ) {
+  var inp = document.getElementById('corrigerRecetteV2-' + champ + '-nouveau');
+  if (!inp) return;
+  var v = (inp.value || '').trim();
+  if (v) ajouterCorrigerV2(champ, v);
+}
+
+function sauverCorrigerRecetteV2() {
+  if (!corrigerRecetteV2Etat) return;
+  var etat = corrigerRecetteV2Etat;
+  var nom = (document.getElementById('corrigerRecetteV2-nom').value || '').trim();
+  appelBackend('corrigerRecetteSAQ', {
+    sku: etat.sku, nom: nom,
+    typesPlats: etat.typesPlats.join(';;'),
+    ingredients: etat.ingredients.join(';;')
+  }, { spinner: 'Enregistrement' }).then(function(res) {
+    if (!res || res.success === false || res.error) { afficherMessage((res && (res.message || res.error)) ? (res.message || res.error) : 'Correction refusée'); return undefined; }
+    return appelBackend('getRecettes', {}, { spinner: 'Enregistrement' });
+  }).then(function(data) {
+    if (data === undefined) return; // échec déjà signalé
+    ALL_RECETTES = data || [];
+    fermerCorrigerRecetteV2();
+    if (CURRENT_WINE_DATA) chargerRecettesFicheV2(CURRENT_WINE_DATA.Famille);
+    afficherMessage('Recette corrigée');
+  }).catch(function() { afficherMessage('Erreur d\'enregistrement'); });
 }
 
 // ==================== Selon Chartier — bloc de la fiche (9a) ====================

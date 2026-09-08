@@ -441,7 +441,7 @@ function fermerMenuActionV2() {
 }
 
 function cacherToutesPagesV2() {
-  ['scannerV2Container', 'saisieManuelleV2Container', 'vinInconnuV2Container', 'menuActionV2Overlay', 'arriveeV2Container', 'deplacerV2Container', 'boireV2Container', 'donnerV2Container', 'caveV2Container', 'aRangerV2Container', 'sansCepageV2Container', 'suggestionsV2Container', 'suggestionEditV2Overlay', 'histoV2Container', 'histoAjoutV2Overlay', 'histoEditV2Overlay', 'empV2Container', 'achatV2Container', 'promoV2Container', 'rechercheV2Container', 'editFicheV2Overlay', 'ficheV2Overlay', 'photoV2Overlay', 'recuV2Container', 'recuValidationV2Container', 'chartierV2Container', 'selonSaqV2Container', 'curieuxBeginV2Container'].forEach(function(id) {
+  ['scannerV2Container', 'saisieManuelleV2Container', 'vinInconnuV2Container', 'menuActionV2Overlay', 'arriveeV2Container', 'deplacerV2Container', 'boireV2Container', 'donnerV2Container', 'caveV2Container', 'aRangerV2Container', 'sansCepageV2Container', 'suggestionsV2Container', 'suggestionEditV2Overlay', 'histoV2Container', 'histoAjoutV2Overlay', 'histoEditV2Overlay', 'empV2Container', 'achatV2Container', 'promoV2Container', 'rechercheV2Container', 'editFicheV2Overlay', 'ficheV2Overlay', 'photoV2Overlay', 'corrigerRecetteV2Overlay', 'recuV2Container', 'recuValidationV2Container', 'chartierV2Container', 'selonSaqV2Container', 'curieuxBeginV2Container'].forEach(function(id) {
 
     var el = document.getElementById(id);
     if (el) el.style.display = 'none';

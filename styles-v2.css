@@ -274,6 +274,7 @@ body::after {
 #histoEditV2Overlay { z-index: 10010; }
 #suggestionEditV2Overlay { z-index: 10010; }
 #photoV2Overlay { z-index: 10010; }
+#corrigerRecetteV2Overlay { z-index: 10010; }
 .photo-grande { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
 .photo-grande img { max-width: 90%; max-height: 85%; object-fit: contain; }
 
@@ -1080,5 +1081,9 @@ textarea.champ-saisie { resize: none; font-family: inherit; line-height: 1.4; }
 .dispo-non { color: var(--error); }
 .prix-barre { text-decoration: line-through; color: var(--white-50); }
 .fav-x { float: right; color: var(--error); }
+/* Recette corrigeable (fiche SAQ) : le nom ouvre la fiche SAQ, le crayon ouvre la correction */
+.corriger-ligne { display: flex; align-items: center; justify-content: space-between; gap: var(--space-s); }
+.corriger-nom { flex: 1; cursor: pointer; }
+.corriger-crayon { flex: none; cursor: pointer; color: var(--gold-2); padding-left: var(--space-s); }
 .etoile-favori { color: var(--white-15); cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .etoile-favori.actif { color: var(--gold-2); }
