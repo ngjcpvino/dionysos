@@ -2477,7 +2477,7 @@ function afficherEmpV2() {
         var photo = (w && w['Photo URL']) ? w['Photo URL'] : '';
         var cb = (w && w['Code-barres']) ? w['Code-barres'].toString().trim().replace(/\s+/g, '') : '';
         var coul = w ? 'var(--' + couleurClasseV2(w.Couleur) + ')' : '';
-        ronds.push('<div class="cercle" data-photo="' + photo + '" data-cb="' + cb + '" data-row="' + (w ? w.row : '') + '" data-couleur="' + coul + '"></div>');
+        ronds.push('<div class="emp-espace"><div class="cercle" data-photo="' + photo + '" data-cb="' + cb + '" data-row="' + (w ? w.row : '') + '" data-couleur="' + coul + '"></div><span class="emp-espace-num">' + esp + '</span></div>');
       });
       // 7 espaces = quinconce réel : bas 1-3-5-7, haut 2-4-6
       var lignes;

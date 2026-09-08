@@ -459,6 +459,14 @@ body::after {
 .emp-rangee.ouvert .ligne-ronds.haut { margin-bottom: var(--space-s); }
 .emp-rangee.ouvert .cercle img { width: 100%; height: 100%; object-fit: cover; object-position: center 90%; border-radius: 50%; }
 .emp-ronds .ligne-ronds.haut { display: flex; }
+/* Numéro d'espace en exposant (coin haut-droit, à 2 h) — visible seulement quand la rangée est ouverte */
+.emp-espace { position: relative; display: inline-flex; }
+.emp-espace-num {
+  position: absolute; top: -5px; right: -5px;
+  color: var(--white-50); font-size: var(--fs-11); line-height: 1;
+  text-shadow: 0 0 3px var(--black); pointer-events: none;
+}
+.emp-rangee:not(.ouvert) .emp-espace-num { display: none; }
 
 
 .cercle:active {
