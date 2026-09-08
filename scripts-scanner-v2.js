@@ -3721,6 +3721,7 @@ function calculerResultatsChartierV2() {
 var selonSaqV2Selection = { ingredients: {}, plats: {} };
 var selonSaqV2Ouverte = null;
 var selonSaqV2Cave = false;
+var selonSaqV2RecettesDe = null; // { champ, valeur } quand on affiche « les recettes » d'une valeur ; null = liste des vins
 
 function ouvrirSelonSaqV2() {
   document.getElementById('selonSaqV2Container').style.display = 'flex';
@@ -3728,6 +3729,7 @@ function ouvrirSelonSaqV2() {
   selonSaqV2Selection = { ingredients: {}, plats: {} };
   selonSaqV2Ouverte = null;
   selonSaqV2Cave = false;
+  selonSaqV2RecettesDe = null;
   if (ALL_RECETTES) { construirePanneauSelonSaqV2(); calculerSelonSaqV2(); return; }
   appelBackend('getRecettes', {}, { spinner: ' ' }).then(function(data) {
     ALL_RECETTES = data || [];
@@ -3794,12 +3796,15 @@ function basculerListeSelonSaqV2(cle) {
   var div = document.getElementById('selonSaqV2-liste-' + cle);
   div.innerHTML = '<div class="item-liste' + (Object.keys(selonSaqV2Selection[cle]).length === 0 ? ' actif' : '') + '" onclick="tousSelonSaqV2(\'' + cle + '\')">Tous</div>' + valeursSelonSaqV2(champ).map(function(v) {
     var sel = selonSaqV2Selection[cle][v.valeur];
-    return '<div class="item-liste' + (sel ? ' actif' : '') + '" data-valeur="' + v.valeur.replace(/"/g, '&quot;') + '" onclick="toggleSelonSaqV2(this, \'' + cle + '\')">' + v.valeur + ' (' + v.compte + ')</div>';
+    var vEsc = v.valeur.replace(/"/g, '&quot;');
+    return '<div class="item-liste' + (sel ? ' actif' : '') + '" data-valeur="' + vEsc + '" onclick="toggleSelonSaqV2(this, \'' + cle + '\')">' + v.valeur + '</div>' +
+           (sel ? '<div class="item-liste accordeon-1" data-champ="' + champ + '" data-valeur="' + vEsc + '" onclick="voirRecettesSelonSaqV2(this)">les recettes</div>' : '');
   }).join('');
   div.classList.add('ouvert');
 }
 
 function tousSelonSaqV2(cle) {
+  selonSaqV2RecettesDe = null;
   selonSaqV2Selection[cle] = {};
   selonSaqV2Ouverte = null;
   basculerListeSelonSaqV2(cle);
@@ -3807,6 +3812,7 @@ function tousSelonSaqV2(cle) {
 }
 
 function toggleSelonSaqV2(el, cle) {
+  selonSaqV2RecettesDe = null;
   var v = el.getAttribute('data-valeur');
   if (selonSaqV2Selection[cle][v]) delete selonSaqV2Selection[cle][v];
   else selonSaqV2Selection[cle][v] = true;
@@ -3818,12 +3824,14 @@ function reinitialiserSelonSaqV2() {
   selonSaqV2Selection = { ingredients: {}, plats: {} };
   selonSaqV2Ouverte = null;
   selonSaqV2Cave = false;
+  selonSaqV2RecettesDe = null;
   construirePanneauSelonSaqV2();
   calculerSelonSaqV2();
   fermerFiltresSelonSaqV2();
 }
 
 function toggleCaveSelonSaqV2() {
+  selonSaqV2RecettesDe = null;
   selonSaqV2Cave = !selonSaqV2Cave;
   var btn = document.getElementById('selonSaqV2-cave');
   if (btn) { btn.classList.toggle('actif', selonSaqV2Cave); btn.textContent = selonSaqV2Cave ? '✓' : '✗'; }
@@ -3838,6 +3846,27 @@ function calculerSelonSaqV2() {
   var plats = Object.keys(selonSaqV2Selection.plats);
   var loupe = document.getElementById('selonSaqV2-loupe');
   if (loupe) loupe.classList.toggle('actif', !!(ingr.length || plats.length || selonSaqV2Cave));
+
+  // Volet « les recettes » d'une valeur (agneau, viande blanche…) : liste des recettes de cette valeur,
+  // en lecture seule (correction seulement sur la fiche). Le filtre des vins reste actif ; « ← Retour aux vins » revient.
+  if (selonSaqV2RecettesDe) {
+    var champD = selonSaqV2RecettesDe.champ, valD = selonSaqV2RecettesDe.valeur;
+    var recs = recettesUtilesSelonSaqV2().filter(function(r) { return (r[champD] || []).indexOf(valD) !== -1; })
+      .sort(function(a, b) { return decodeHTML(a.nom || '').localeCompare(decodeHTML(b.nom || '')); });
+    compte.innerHTML = recs.length + ' recette' + (recs.length > 1 ? 's' : '') + ' — ' + decodeHTML(valD);
+    var entete = '<div class="item-liste" onclick="retourVinsSelonSaqV2()">← Retour aux vins</div>';
+    if (!recs.length) { div.innerHTML = entete + '<div class="texte-secondaire">Aucune recette</div>'; return; }
+    div.innerHTML = entete + recs.map(function(r) {
+      var nomR = decodeHTML(r.nom || '—');
+      var cls = (r.typesPlats || []).map(function(x) { return decodeHTML(x); }).join(' · ');
+      var ing = (r.ingredients || []).map(function(x) { return decodeHTML(x); }).join(', ');
+      var sous = [cls, ing].filter(Boolean).join('<br>');
+      var sku = (r.sku || '').toString();
+      var oc = sku ? ' onclick="window.open(\'https://www.saq.com/fr/' + sku + '\', \'_blank\')"' : '';
+      return '<div class="carte fiche-mets"' + oc + '><div class="carte-centre"><span class="carte-titre">' + nomR + '</span><span class="carte-sous">' + sous + '</span></div></div>';
+    }).join('');
+    return;
+  }
 
   // Montre tout par défaut (tous les vins ayant un accord SAQ). Chaque ingrédient/plat choisi RÉDUIT :
   // on garde les familles présentes pour CHAQUE choix (intersection) → les vins bons pour TOUS les choix.
@@ -3889,6 +3918,20 @@ function calculerSelonSaqV2() {
            '<div class="carte-centre"><span class="carte-titre">' + nom + '</span><span class="carte-sous">' + sous + '</span></div>' +
            '<div class="carte-droite">' + caseDroiteV2(w, g.count) + '</div></div>';
   }).join('');
+}
+
+// Ouvre le volet « les recettes » d'une valeur (depuis la ligne sous une valeur sélectionnée)
+function voirRecettesSelonSaqV2(el) {
+  selonSaqV2RecettesDe = { champ: el.getAttribute('data-champ'), valeur: el.getAttribute('data-valeur') };
+  fermerFiltresSelonSaqV2();
+  calculerSelonSaqV2();
+  remonterScrollV2('selonSaqV2Container');
+}
+
+function retourVinsSelonSaqV2() {
+  selonSaqV2RecettesDe = null;
+  calculerSelonSaqV2();
+  remonterScrollV2('selonSaqV2Container');
 }
 
 // ==================== SELON CURIEUX BÉGIN V2 ====================
