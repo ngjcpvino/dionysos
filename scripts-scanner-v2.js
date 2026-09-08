@@ -4097,15 +4097,19 @@ function burgerV2Click(cible) {
   afficherMessage('À venir');
 }
 
-// Mise à jour Curieux Bégin — relance automatique tant que le backend n'a pas fini (garde-fou 5 min côté serveur)
+// Mise à jour Curieux Bégin — relance automatique tant que le backend n'a pas fini (garde-fou 5 min côté serveur).
+// Affiche le VRAI message d'erreur (utile sans console) et s'arrête si l'action n'est pas déployée (res.error).
 function majCurieuxBeginBoucleV2(ajoutsCumul) {
   appelBackend('majCurieuxBegin', {}, { spinner: 'Mise à jour Curieux Bégin', timeout: 330000 }).then(function(res) {
-    if (!res || res.success === false) { afficherMessage('Erreur de mise à jour'); return; }
+    if (!res || res.success === false || res.error) {
+      afficherMessage('Curieux Bégin : ' + ((res && res.error) ? res.error : 'réponse inattendue'));
+      return;
+    }
     var ajouts = ajoutsCumul + (res.ajoutees || 0);
     if (!res.termine) { majCurieuxBeginBoucleV2(ajouts); return; }
     ALL_CURIEUXBEGIN = null;
     afficherMessage('✓ Curieux Bégin à jour (' + ajouts + ' ajout' + (ajouts > 1 ? 's' : '') + ')');
-  }).catch(function() { afficherMessage('Erreur de mise à jour'); });
+  }).catch(function(e) { afficherMessage('Curieux Bégin : ' + (e && e.message ? e.message : 'erreur inconnue')); });
 }
 
 function ajouterBouteilleArrivee(meuble, rangee, espace) {
