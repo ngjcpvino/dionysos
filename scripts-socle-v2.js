@@ -51,7 +51,8 @@ window.onload = function() {
   demarrerAppV2();
 };
 
-function demarrerAppV2() {
+function demarrerAppV2(essai) {
+  essai = essai || 1;
   appelBackend('getConfig', {}, { spinner: ' ' }).then(function(cfg) {
     CONFIG = cfg;
     return appelBackend('getInventoryData', {}, { spinner: ' ' });
@@ -61,7 +62,12 @@ function demarrerAppV2() {
   }).then(function(sugg) {
     ALL_SUGGESTIONS = sugg || [];
   }).catch(function(err) {
-    afficherMessage('Erreur de chargement : ' + err);
+    var msg = (err && err.message) ? err.message : String(err);
+    // Mot de passe : appelBackend a déjà rouvert l'écran du mot de passe → ne pas réessayer.
+    if (msg === 'Mot de passe incorrect') return;
+    // Réseau/serveur momentané (« Failed to fetch », « Le serveur ne répond pas ») : réessayer avant d'abandonner.
+    if (essai < 3) { setTimeout(function() { demarrerAppV2(essai + 1); }, 1500); return; }
+    afficherMessage('Connexion au serveur impossible (' + msg + '). Vérifiez le réseau, puis rechargez.');
   });
 }
 
