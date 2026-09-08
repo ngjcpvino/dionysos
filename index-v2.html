@@ -367,6 +367,30 @@
   </div>
 </div>
 
+<!-- ====================== CORRIGER RECETTE SAQ V2 ====================== -->
+<div id="corrigerRecetteV2Overlay" class="modal-v2-fullscreen" style="display:none;">
+  <div class="modal-v2-content modale-haut">
+    <button class="btn-fermer" onclick="fermerCorrigerRecetteV2()">✕</button>
+    <h2 class="titre-1">Corriger la recette</h2>
+    <div style="width:100%; max-width:400px;">
+      <div class="titre-3">Nom</div>
+      <input type="text" id="corrigerRecetteV2-nom" class="champ-saisie" placeholder="Nom de la recette">
+      <div class="titre-3">Types de plats</div>
+      <div id="corrigerRecetteV2-typesPlats-chips"></div>
+      <div class="champ-cliquable" onclick="basculerAjoutCorrigerV2('typesPlats')">+ Ajouter un type de plat</div>
+      <div id="corrigerRecetteV2-typesPlats-menu" class="menu-liste"></div>
+      <div class="titre-3">Ingrédients</div>
+      <div id="corrigerRecetteV2-ingredients-chips"></div>
+      <div class="champ-cliquable" onclick="basculerAjoutCorrigerV2('ingredients')">+ Ajouter un ingrédient</div>
+      <div id="corrigerRecetteV2-ingredients-menu" class="menu-liste"></div>
+      <div class="roundel" onclick="sauverCorrigerRecetteV2()">
+        <span class="roundel-anneau"></span>
+        <span class="roundel-barre">Enregistrer</span>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ====================== EMPLACEMENTS V2 ====================== -->
 <div id="empV2Container" class="modal-v2-fullscreen" style="display:none;">
   <div class="modal-v2-content modale-haut">
