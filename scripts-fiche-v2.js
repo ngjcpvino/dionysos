@@ -229,12 +229,12 @@ function afficherFicheV2(result) {
   html += '<div id="ficheV2-suggestions"></div>';
   html += '<div style="display:flex;align-items:center;gap:var(--space-s);margin-top:var(--space-s);margin-bottom:var(--space-s);"><div class="cercle" onclick="ouvrirSuggestionAjoutV2(\'' + (wine['Code SAQ'] || '').toString().trim() + '\', \'fiche\')">+</div></div>';
   html += '</div>';
-  html += '<div class="item-liste" id="ficheV2-selon-saq-titre" onclick="basculerAccordsSelonV2(\'saq\')">SAQ</div>';
-  html += '<div id="ficheV2-selon-saq" style="display:none;"><div id="ficheV2-recettes"></div></div>';
-  html += '<div class="item-liste" id="ficheV2-selon-chartier-titre" onclick="basculerAccordsSelonV2(\'chartier\')">Chartier</div>';
-  html += '<div id="ficheV2-selon-chartier" style="display:none;"><div class="texte-secondaire">En développement</div></div>';
   html += '<div class="item-liste" id="ficheV2-selon-cb-titre" onclick="basculerAccordsSelonV2(\'cb\')">Curieux Bégin</div>';
   html += '<div id="ficheV2-selon-cb" style="display:none;"></div>';
+  html += '<div class="item-liste" id="ficheV2-selon-chartier-titre" onclick="basculerAccordsSelonV2(\'chartier\')">Chartier</div>';
+  html += '<div id="ficheV2-selon-chartier" style="display:none;"><div class="texte-secondaire">En développement</div></div>';
+  html += '<div class="item-liste" id="ficheV2-selon-saq-titre" onclick="basculerAccordsSelonV2(\'saq\')">SAQ</div>';
+  html += '<div id="ficheV2-selon-saq" style="display:none;"><div id="ficheV2-recettes"></div></div>';
   html += '</div>';
   html += '</div>';
 
@@ -479,7 +479,7 @@ function chargerCurieuxBeginFicheV2(wine) {
 
 // Accordéon du bloc « Accords selon… » — un seul volet ouvert
 function basculerAccordsSelonV2(quel) {
-  ['som', 'saq', 'chartier', 'cb'].forEach(function(k) {
+  ['som', 'cb', 'chartier', 'saq'].forEach(function(k) {
     var volet = document.getElementById('ficheV2-selon-' + k);
     var titre = document.getElementById('ficheV2-selon-' + k + '-titre');
     if (!volet) return;
