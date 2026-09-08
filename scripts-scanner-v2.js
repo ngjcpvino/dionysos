@@ -4089,6 +4089,7 @@ function burgerV2Click(cible) {
   if (cible === 'curieuxbegin') { cacherToutesPagesV2(); ouvrirCurieuxBeginV2(); return; }
 
   
+  if (cible === 'majaccordssaq') { majAccordsSaqBoucleV2(0); return; }
   if (cible === 'majcurieux') { majCurieuxBeginBoucleV2(0); return; }
   if (cible === 'refresh') {
     appelBackend('getInventoryData', {}, { spinner: 'Synchronisation' }).then(function(data) {
@@ -4114,6 +4115,25 @@ function majCurieuxBeginBoucleV2(ajoutsCumul) {
     ALL_CURIEUXBEGIN = null;
     afficherMessage('✓ Curieux Bégin à jour (' + ajouts + ' ajout' + (ajouts > 1 ? 's' : '') + ')');
   }).catch(function(e) { afficherMessage('Curieux Bégin : ' + (e && e.message ? e.message : 'erreur inconnue')); });
+}
+
+// Mise à jour Accords SAQ — remplit les familles des vins (relance auto s'il en reste) puis les recettes,
+// enfin resynchronise les données (les familles s'écrivent sur les vins). Affiche le vrai message d'erreur.
+function majAccordsSaqBoucleV2(faitsCumul) {
+  appelBackend('majAccordsSAQ', {}, { spinner: 'Mise à jour Accords SAQ', timeout: 330000 }).then(function(res) {
+    if (!res || res.success === false || res.error) {
+      afficherMessage('Accords SAQ : ' + ((res && res.error) ? res.error : 'réponse inattendue'));
+      return;
+    }
+    var faits = faitsCumul + (res.faits || 0);
+    if (!res.termine) { majAccordsSaqBoucleV2(faits); return; }
+    ALL_RECETTES = null;
+    appelBackend('getInventoryData', {}, { spinner: 'Mise à jour Accords SAQ' }).then(function(data) {
+      ALL_DATA = data || [];
+      ALL_HISTORIQUE = [];
+      afficherMessage('✓ Accords SAQ à jour (' + (res.ajoutees || 0) + ' recette' + ((res.ajoutees > 1) ? 's' : '') + ')');
+    }).catch(function() { afficherMessage('✓ Accords SAQ à jour'); });
+  }).catch(function(e) { afficherMessage('Accords SAQ : ' + (e && e.message ? e.message : 'erreur inconnue')); });
 }
 
 function ajouterBouteilleArrivee(meuble, rangee, espace) {
