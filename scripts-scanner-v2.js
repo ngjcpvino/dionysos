@@ -1760,6 +1760,17 @@ function blocPrixAchatV2(w) {
   return prix ? '<div class="achat-prix">' + prix + '</div>' : '';
 }
 
+// Cépages PRINCIPAUX déjà eus dans la cave (tout ALL_DATA, sauf les propositions) — pour marquer les cépages nouveaux en Découvertes
+function cepagesPrincipauxCaveV2() {
+  var s = {};
+  (ALL_DATA || []).forEach(function(w){
+    if ((w.Statut || '') === 'Suggestion') return;
+    var c = normaliserRechercheV2(cepageDominant(w));
+    if (c) s[c] = true;
+  });
+  return s;
+}
+
 function afficherCartesAchatV2(liste) {
   var parCepage = (achatV2Mode === 'decouvertes');
   liste.sort(function(a, b){
@@ -1779,6 +1790,7 @@ function afficherCartesAchatV2(liste) {
   if (liste.length === 0) { div.innerHTML = '<div class="texte-secondaire">' + (parCepage ? 'Aucune promotion' : 'Aucune bouteille') + '</div>'; return; }
   var f = filtresAchatV2;
   var derniereSection = null;
+  var cavePrincipaux = parCepage ? cepagesPrincipauxCaveV2() : null;
   div.innerHTML = liste.map(function(w){
     var entete = '';
     var sectionCle, sectionTexte;
@@ -1792,7 +1804,8 @@ function afficherCartesAchatV2(liste) {
     }
     if (sectionCle !== derniereSection) {
       derniereSection = sectionCle;
-      entete = '<div class="emp-meuble">' + sectionTexte + '</div>';
+      var marque = (parCepage && cep && !cavePrincipaux[sectionCle]) ? ' <span class="cepage-nouveau">🍇</span>' : '';
+      entete = '<div class="emp-meuble">' + sectionTexte + marque + '</div>';
     }
     var cle = cleCartePanierV2(w);
     var coche = !!panierSessionAchatV2[cle];
