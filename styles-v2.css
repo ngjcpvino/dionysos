@@ -254,8 +254,8 @@ body::after {
 /* Égaliser la hauteur VISIBLE des 4 icônes (~33px), selon le remplissage propre à chaque média */
 .bouton-navigation img[alt="SAQ"] { width: 37px; height: 37px; }
 .bouton-navigation img[alt="Scanner"] { width: 41px; height: 41px; }
-.bouton-navigation svg { width: 39px; height: 39px; }
-.bouton-navigation:nth-child(4) { font-size: 46px; }
+.bouton-navigation svg { width: 37px; height: 37px; }
+.bouton-navigation:nth-child(4) { font-size: 50px; }
 
 /* ===== Position générique (parent en position:relative) ===== */
 .gauche { position: absolute; top: var(--space-s); left: var(--space-s); }
