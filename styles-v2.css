@@ -1124,7 +1124,9 @@ textarea.champ-saisie { resize: none; font-family: inherit; line-height: 1.4; }
 #achatV2-compte .achat-succ-nom { color: var(--gold); }
 #achatV2-cartes .achat-bonis { height: 48px; margin-top: var(--space-s); }
 /* Rond « En promo » centré en haut de la Liste d'achat, aligné avec l'entonnoir et le ✕ (visible quand le panneau de filtre est ouvert) */
-#achatV2-promo-haut {
+/* Rond d'interrupteur « en haut » (En promo / En cave), centré et aligné avec l'entonnoir et le ✕.
+   Sorti du panneau (fixe, centré écran), montré seulement quand SON panneau est ouvert. */
+.filtre-toggle-haut {
   display: none;
   position: fixed;
   top: var(--space-s);
@@ -1132,8 +1134,8 @@ textarea.champ-saisie { resize: none; font-family: inherit; line-height: 1.4; }
   transform: translateX(-50%);
   z-index: 10002;
 }
-#achatV2-promo-haut.montre { display: flex; }
-#achatV2-promo-haut .achat-promo-libelle {
+.panneau-gauche.ouvert ~ .filtre-toggle-haut { display: flex; }
+.filtre-toggle-haut .libelle-haut {
   position: absolute;
   right: calc(100% + var(--space-s));
   top: 50%;
