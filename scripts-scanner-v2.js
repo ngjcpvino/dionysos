@@ -1417,7 +1417,7 @@ function ajouterDepuisSuggestionsV2() {
 
 // ==================== LISTE D'ACHAT V2 (promotions intégrées) ====================
 // Modes AFFICHER : favoris | achat | suggestions | decouvertes | nepasracheter
-var filtresAchatV2 = { couleur: '', pays: '', cepage: '', appellation: '', pastille: '', succ: '' };
+var filtresAchatV2 = { couleur: '', pays: '', cepage: '', appellation: '', pastille: '', succ: '', sommelier: '' };
 var achatV2Mode = 'achat';
 var achatV2PromoSeul = false; // interrupteur « Que les vins en promotion »
 var libellesFiltreAchatV2 = { couleur: 'Couleurs', pays: 'Pays', cepage: 'Cépages', appellation: 'Appellations', pastille: 'Pastille de goût', succ: 'Succursale' };
@@ -1488,7 +1488,7 @@ function ouvrirAchatV2() {
   document.getElementById('achatV2Container').style.display = 'flex';
   remonterScrollV2('achatV2Container');
   panierSessionAchatV2 = {};
-  filtresAchatV2 = { couleur: '', pays: '', cepage: '', appellation: '', pastille: '', succ: '' };
+  filtresAchatV2 = { couleur: '', pays: '', cepage: '', appellation: '', pastille: '', succ: '', sommelier: '' };
   achatV2Mode = 'achat';
   achatV2PromoSeul = false;
   if (!succursalesAchatV2.length) {
@@ -1530,7 +1530,11 @@ function baseAchatV2() {
   if (achatV2Mode === 'favoris') {
     out = arr.filter(function(g) { return (g.wine.Favori || '') === 'Oui'; });
   } else if (achatV2Mode === 'suggestions') {
-    out = arr.filter(function(g) { return (g.wine.Racheter || '').toString().trim() === ''; });
+    out = arr.filter(function(g) {
+      if ((g.wine.Racheter || '').toString().trim() !== '') return false;
+      if (filtresAchatV2.sommelier && sommeliersDuVinV2((g.wine['Code SAQ'] || '').toString().trim()).indexOf(filtresAchatV2.sommelier) === -1) return false;
+      return true;
+    });
   } else if (achatV2Mode === 'nepasracheter') {
     out = arr.filter(function(g) { return (g.wine.Racheter || '') === 'Non'; });
   } else {
@@ -1606,6 +1610,24 @@ function remplirFiltresAchatV2() {
       }
     }
   }
+
+  var choixSom = document.getElementById('achatV2-sommelier-choix');
+  if (choixSom) choixSom.style.display = (achatV2Mode === 'suggestions') ? 'block' : 'none';
+  var menuSom = document.getElementById('achatV2-f-sommelier-menu');
+  if (menuSom) {
+    var vusSom = {}, sommeliers = [];
+    (ALL_SUGGESTIONS || []).forEach(function(s){
+      var v = (s.sommelier || '').toString().trim();
+      var k = normaliserRechercheV2(v);
+      if (v && !vusSom[k]) { vusSom[k] = true; sommeliers.push(v); }
+    });
+    sommeliers.sort(function(a, b){ return a.localeCompare(b); });
+    menuSom.innerHTML = '<div class="item-liste' + (f.sommelier === '' ? ' actif' : '') + '" onclick="choisirFiltreAchatV2(\'sommelier\', \'\')">Tous</div>' + sommeliers.map(function(v){
+      return '<div class="item-liste' + (v === f.sommelier ? ' actif' : '') + '" onclick="choisirFiltreAchatV2(\'sommelier\', \'' + v.replace(/'/g, "\\'") + '\')">' + v + '</div>';
+    }).join('');
+    var dispSom = document.getElementById('achatV2-f-sommelier-display');
+    if (dispSom) dispSom.textContent = f.sommelier || 'Sommelier';
+  }
 }
 
 function uniqueValeursAchat(liste, champ) {
@@ -1630,7 +1652,7 @@ function toggleAchatPromoSeulV2() {
 function basculerFiltreAchatV2(cle) {
   var menu = document.getElementById('achatV2-f-' + cle + '-menu');
   var ouvert = menu.classList.contains('ouvert');
-  ['couleur','pays','cepage','appellation','pastille','succ'].forEach(function(k){
+  ['couleur','pays','cepage','appellation','pastille','succ','sommelier'].forEach(function(k){
     var m = document.getElementById('achatV2-f-' + k + '-menu');
     if (m) m.classList.remove('ouvert');
   });
@@ -1650,9 +1672,9 @@ function choisirFiltreAchatV2(cle, valeur) {
 }
 
 function reinitialiserFiltresAchatV2() {
-  filtresAchatV2 = { couleur: '', pays: '', cepage: '', appellation: '', pastille: '', succ: '' };
+  filtresAchatV2 = { couleur: '', pays: '', cepage: '', appellation: '', pastille: '', succ: '', sommelier: '' };
   achatV2PromoSeul = false;
-  ['couleur','pays','cepage','appellation','pastille','succ'].forEach(function(k) {
+  ['couleur','pays','cepage','appellation','pastille','succ','sommelier'].forEach(function(k) {
     var m = document.getElementById('achatV2-f-' + k + '-menu');
     if (m) m.classList.remove('ouvert');
   });
@@ -1669,7 +1691,7 @@ function fermerFiltresAchatV2() {
 
 function choisirModeAchatV2(mode) {
   achatV2Mode = mode;
-  filtresAchatV2.couleur = ''; filtresAchatV2.pays = ''; filtresAchatV2.cepage = ''; filtresAchatV2.appellation = ''; filtresAchatV2.pastille = '';
+  filtresAchatV2.couleur = ''; filtresAchatV2.pays = ''; filtresAchatV2.cepage = ''; filtresAchatV2.appellation = ''; filtresAchatV2.pastille = ''; filtresAchatV2.sommelier = '';
   if (mode === 'decouvertes' && !promosDecV2) chargerDecouvertesV2();
   remplirFiltresAchatV2();
   appliquerFiltresAchatV2();
@@ -1679,7 +1701,7 @@ function choisirModeAchatV2(mode) {
 function majEntonnoirAchatV2() {
   var f = filtresAchatV2;
   var loupe = document.getElementById('achatV2-loupe');
-  if (loupe) loupe.classList.toggle('actif', !!(achatV2PromoSeul || f.couleur || f.pays || f.cepage || f.appellation || f.pastille || f.succ));
+  if (loupe) loupe.classList.toggle('actif', !!(achatV2PromoSeul || f.couleur || f.pays || f.cepage || f.appellation || f.pastille || f.succ || f.sommelier));
 }
 
 function appliquerFiltresAchatV2() {
@@ -4216,9 +4238,13 @@ var PANNEAUX_V2 = {
            '<div id="achatV2-f-succ-menu" class="menu-liste"></div>' +
            '<div class="panneau-separateur"></div>' +
            '<div class="titre-3">Afficher</div>' +
-           '<div class="item-liste" id="achatV2-mode-favoris" onclick="choisirModeAchatV2(\'favoris\')">Liste favoris</div>' +
            '<div class="item-liste" id="achatV2-mode-achat" onclick="choisirModeAchatV2(\'achat\')">Liste d\'achat</div>' +
+           '<div class="item-liste" id="achatV2-mode-favoris" onclick="choisirModeAchatV2(\'favoris\')">Liste favoris</div>' +
            '<div class="item-liste" id="achatV2-mode-suggestions" onclick="choisirModeAchatV2(\'suggestions\')">Liste propositions</div>' +
+           '<div id="achatV2-sommelier-choix">' +
+           '<div class="champ-cliquable" id="achatV2-f-sommelier-display" onclick="basculerFiltreAchatV2(\'sommelier\')">Sommelier</div>' +
+           '<div id="achatV2-f-sommelier-menu" class="menu-liste"></div>' +
+           '</div>' +
            '<div class="item-liste" id="achatV2-mode-decouvertes" onclick="choisirModeAchatV2(\'decouvertes\')">Liste découvertes</div>' +
            '<div class="item-liste" id="achatV2-mode-nepasracheter" onclick="choisirModeAchatV2(\'nepasracheter\')">Liste ne pas racheter</div>' +
            '<div class="panneau-separateur"></div>',
