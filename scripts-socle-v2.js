@@ -1,4 +1,5 @@
 /* ============================================================
+   © 2026 Dionysos — Tous droits réservés
    SCRIPTS-SOCLE-V2.JS
    Fondation du site V2 autonome :
    - constantes + appelBackend + spinner
