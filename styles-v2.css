@@ -1119,12 +1119,13 @@ textarea.champ-saisie { resize: none; font-family: inherit; line-height: 1.4; }
   left: 50%;
   transform: translateX(-50%);
   z-index: 10002;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
 }
 #achatV2-promo-haut.montre { display: flex; }
 #achatV2-promo-haut .achat-promo-libelle {
+  position: absolute;
+  right: calc(100% + var(--space-s));
+  top: 50%;
+  transform: translateY(-50%);
   color: var(--white);
   font-size: var(--fs-11);
   white-space: nowrap;
