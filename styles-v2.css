@@ -1086,7 +1086,7 @@ textarea.champ-saisie { resize: none; font-family: inherit; line-height: 1.4; }
 #achatV2-cartes .achat-prix { color: var(--white); font-size: var(--fs-12); }
 #achatV2-cartes .achat-btl { color: var(--white-60); font-size: var(--fs-12); }
 #achatV2-cartes .achat-sommelier { color: var(--gold); }
-#achatV2-cartes .achat-bonis { height: 48px; }
+#achatV2-cartes .achat-bonis { height: 48px; margin-top: var(--space-s); }
 /* Recette corrigeable (fiche SAQ) : le nom ouvre la fiche SAQ, le crayon ouvre la correction */
 .corriger-ligne { display: flex; align-items: center; justify-content: space-between; gap: var(--space-s); }
 .corriger-nom { flex: 1; cursor: pointer; }
