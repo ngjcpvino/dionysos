@@ -216,18 +216,6 @@ body::after {
   justify-content: space-evenly;
 }
 
-/* TEMPORAIRE — petites lignes au-dessus et au-dessous des 4 boutons de l'accueil */
-#topNavV2::before, #topNavV2::after {
-  content: "";
-  position: absolute;
-  left: 5%;
-  right: 5%;
-  height: 1px;
-  background: var(--gold);
-}
-#topNavV2::before { top: env(safe-area-inset-top, 0px); }
-#topNavV2::after { bottom: 0; }
-
 .bouton-navigation {
   width: 40px;
   height: 40px;
