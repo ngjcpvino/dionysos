@@ -304,6 +304,28 @@ body::after {
   margin: 0 auto;
 }
 
+/* Pied de page de l'accueil — ligne dorée (assise) + droit d'auteur */
+#accueilV2-pied {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  text-align: center;
+  padding-bottom: calc(var(--space-l) + env(safe-area-inset-bottom, 0px));
+  pointer-events: none;
+}
+#accueilV2-pied .pied-ligne {
+  width: 90%;
+  height: 1px;
+  margin: 0 auto var(--space-m);
+  background: var(--gold);
+}
+#accueilV2-pied .pied-texte {
+  color: var(--white-60);
+  font-size: var(--fs-11);
+}
+
 /* =========================================
    SPINNER — verre de vin (appelBackend)
    ========================================= */
