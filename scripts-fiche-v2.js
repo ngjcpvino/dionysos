@@ -599,7 +599,7 @@ function chargerSuggestionsFicheV2(codeSAQ) {
   if (!conteneur) return;
   var saq = (codeSAQ || '').toString().trim();
   var items = (ALL_SUGGESTIONS || []).filter(function(s) { return s.codeSAQ === saq; });
-  if (!items.length) { conteneur.innerHTML = '<div class="texte-secondaire">Aucune suggestion</div>'; return; }
+  if (!items.length) { conteneur.innerHTML = '<div class="texte-secondaire">Aucune proposition</div>'; return; }
   var nomEsc = decodeHTML((CURRENT_WINE_DATA && CURRENT_WINE_DATA.Nom) || '').replace(/'/g, "\\'");
   conteneur.innerHTML = items.map(function(s) {
     var somEsc = (s.sommelier || '').replace(/'/g, "\\'");

@@ -314,7 +314,7 @@ function terminerAjoutSuggestionV2(code, wineResult) {
     if (codeSAQ) {
       ouvrirSuggestionAjoutV2(codeSAQ, 'fiche');
     } else {
-      afficherMessage('Aucun code SAQ : suggestion non ajoutée');
+      afficherMessage('Aucun code SAQ : proposition non ajoutée');
     }
   });
 }
@@ -1275,7 +1275,7 @@ function afficherSuggestionsV2() {
 
   var div = document.getElementById('suggestionsV2-cartes');
   document.getElementById('suggestionsV2-compte').textContent = groupes.length + ' vin' + (groupes.length > 1 ? 's' : '');
-  if (groupes.length === 0) { div.innerHTML = '<div class="texte-secondaire">Aucune suggestion</div>'; return; }
+  if (groupes.length === 0) { div.innerHTML = '<div class="texte-secondaire">Aucune proposition</div>'; return; }
 
   div.innerHTML = groupes.map(function(g) {
     var w = g.wine;
@@ -1819,7 +1819,7 @@ function togglePanierSessionV2(cle, ev) {
 function libelleCompteAchatV2(n) {
   var txt;
   if (achatV2Mode === 'decouvertes') txt = n + ' vin' + (n > 1 ? 's' : '') + ' en promotion';
-  else if (achatV2Mode === 'suggestions') txt = n + ' suggestion' + (n > 1 ? 's' : '');
+  else if (achatV2Mode === 'suggestions') txt = n + ' proposition' + (n > 1 ? 's' : '');
   else if (achatV2Mode === 'nepasracheter') txt = n + ' vin' + (n > 1 ? 's' : '') + ' à ne pas racheter';
   else if (achatV2Mode === 'favoris') txt = n + ' vin' + (n > 1 ? 's' : '');
   else txt = n + ' bouteille' + (n > 1 ? 's' : '');
@@ -3268,7 +3268,7 @@ function grouperVinsV2(data) {
 }
 
 function caseDroiteV2(w, count) {
-  return (w && !(w.Racheter || '').toString().trim()) ? 'Suggestion' : (count + ' btl');
+  return (w && !(w.Racheter || '').toString().trim()) ? 'Proposition' : (count + ' btl');
 }
 
 function afficherCartesCaveV2(data) {
@@ -4218,7 +4218,7 @@ var PANNEAUX_V2 = {
            '<div class="titre-3">Afficher</div>' +
            '<div class="item-liste" id="achatV2-mode-favoris" onclick="choisirModeAchatV2(\'favoris\')">Liste favoris</div>' +
            '<div class="item-liste" id="achatV2-mode-achat" onclick="choisirModeAchatV2(\'achat\')">Liste d\'achat</div>' +
-           '<div class="item-liste" id="achatV2-mode-suggestions" onclick="choisirModeAchatV2(\'suggestions\')">Liste suggestions</div>' +
+           '<div class="item-liste" id="achatV2-mode-suggestions" onclick="choisirModeAchatV2(\'suggestions\')">Liste propositions</div>' +
            '<div class="item-liste" id="achatV2-mode-decouvertes" onclick="choisirModeAchatV2(\'decouvertes\')">Liste découvertes</div>' +
            '<div class="item-liste" id="achatV2-mode-nepasracheter" onclick="choisirModeAchatV2(\'nepasracheter\')">Liste ne pas racheter</div>' +
            '<div class="panneau-separateur"></div>',

@@ -30,6 +30,9 @@
 - **Exceptions fraîches** (voulues) : `checkWineExists` au scan ; `checkLocationAvailable` au choix d'un espace ; bouton RAFRAÎCHIR.
 - **Nouvelle donnée = nouvelle colonne EN FIN de `Vino`**, jamais un recyclage : `Bois` (70), `Famille accords` (71). L'ancienne colonne « Recettes » est devenue `REF_COLS.FAVORI` — ne jamais la réutiliser pour autre chose.
 
+**Nommage**
+- **« Suggestions » → « Propositions » à l'écran (11 sept. 2026)** : tout le texte VISIBLE dit « Proposition(s) » (titre de page, item de menu — l'ancien « Sommeliers » compris —, onglet « Liste propositions » de la Liste d'achat, compteurs, « Aucune proposition », statut « Proposition » des cartes, toast). **Le code, les données et le backend gardent « suggestion »** : ids/fonctions `*Suggestion*V2`, `ALL_SUGGESTIONS`, la valeur de Statut `'Suggestion'` (comparée partout), les routes `getSuggestions`/`ajouterSuggestion`/`corrigerSuggestion`, la route burger `'suggestions'`. Ne PAS renommer ces derniers. Le mot **sommelier** (la personne) reste tel quel : filtre « Sommelier », « Ajouter un sommelier », volet « Les sommeliers » de la fiche.
+
 **Comparaisons**
 - Texte utilisateur (cépages, accords, noms) → `normaliserRechercheV2` / `memeTexteV2` / `contientTexteV2`.
 - Codes-barres ET codes SAQ au backend → `memeCodeBarre` / `listeContientCode` (zéros de tête). Le front compare via `memeCodeV2` (même corps, autre fichier : corriger l'un = corriger l'autre).
