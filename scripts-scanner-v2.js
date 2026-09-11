@@ -1828,10 +1828,11 @@ function libelleCompteAchatV2(n) {
   if (sel) {
     var nom = (sel.nom || '').trim();
     var m = nom.match(/^(.*?)\s+[—–-]\s+(.*)$/) || nom.match(/^([^,]+),\s*(.*)$/);
-    txt += '<br>Succ. ' + (m ? m[1] : nom);
-    if (m && m[2]) txt += '<br>' + m[2];
-  } else if (f.succ === 'FAV') txt += '<br>Mes favorites';
-  else if (f.succ === 'TOUTES') txt += '<br>Toutes les succursales';
+    var lignes = 'Succ. ' + (m ? m[1] : nom);
+    if (m && m[2]) lignes += '<br>' + m[2];
+    txt += '<br><span class="achat-succ-nom">' + lignes + '</span>';
+  } else if (f.succ === 'FAV') txt += '<br><span class="achat-succ-nom">Mes favorites</span>';
+  else if (f.succ === 'TOUTES') txt += '<br><span class="achat-succ-nom">Toutes les succursales</span>';
   return txt;
 }
 
