@@ -1661,10 +1661,17 @@ function reinitialiserFiltresAchatV2() {
   fermerFiltresAchatV2();
 }
 
-function ouvrirFiltresAchatV2() { clicLoupeV2('achatV2', reinitialiserFiltresAchatV2); }
+function ouvrirFiltresAchatV2() {
+  clicLoupeV2('achatV2', reinitialiserFiltresAchatV2);
+  var pan = document.getElementById('achatV2-filtres');
+  var tg = document.getElementById('achatV2-promo-haut');
+  if (tg) tg.classList.toggle('montre', !!(pan && pan.classList.contains('ouvert')));
+}
 function fermerFiltresAchatV2() {
   document.getElementById('achatV2-filtres-voile').classList.remove('ouvert');
   document.getElementById('achatV2-filtres').classList.remove('ouvert');
+  var tg = document.getElementById('achatV2-promo-haut');
+  if (tg) tg.classList.remove('montre');
 }
 
 function choisirModeAchatV2(mode) {
@@ -4217,9 +4224,7 @@ var PANNEAUX_V2 = {
   },
   achat: {
     prefixe: 'achatV2', bascule: 'basculerFiltreAchatV2', reinit: 'reinitialiserFiltresAchatV2',
-    avant: '<div class="ligne-dispo"><span class="libelle">En promo</span>' +
-           '<div class="cercle" id="achatV2-promo" onclick="toggleAchatPromoSeulV2()">✗</div></div>' +
-           '<div class="titre-3">Succursale</div>' +
+    avant: '<div class="titre-3">Succursale</div>' +
            '<div class="champ-cliquable" id="achatV2-f-succ-display" onclick="basculerFiltreAchatV2(\'succ\')">Succursale</div>' +
            '<div id="achatV2-f-succ-menu" class="menu-liste"></div>' +
            '<div class="panneau-separateur"></div>' +

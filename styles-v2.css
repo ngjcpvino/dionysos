@@ -1111,6 +1111,24 @@ textarea.champ-saisie { resize: none; font-family: inherit; line-height: 1.4; }
 #achatV2-cartes .achat-sommelier { color: var(--gold); }
 #achatV2-compte .achat-succ-nom { color: var(--gold); }
 #achatV2-cartes .achat-bonis { height: 48px; margin-top: var(--space-s); }
+/* Rond « En promo » centré en haut de la Liste d'achat, aligné avec l'entonnoir et le ✕ (visible quand le panneau de filtre est ouvert) */
+#achatV2-promo-haut {
+  display: none;
+  position: fixed;
+  top: var(--space-s);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10002;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+#achatV2-promo-haut.montre { display: flex; }
+#achatV2-promo-haut .achat-promo-libelle {
+  color: var(--white);
+  font-size: var(--fs-11);
+  white-space: nowrap;
+}
 /* Recette corrigeable (fiche SAQ) : le nom ouvre la fiche SAQ, le crayon ouvre la correction */
 .corriger-ligne { display: flex; align-items: center; justify-content: space-between; gap: var(--space-s); }
 .corriger-nom { flex: 1; cursor: pointer; }
