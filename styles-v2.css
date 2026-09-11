@@ -255,7 +255,7 @@ body::after {
 .bouton-navigation img[alt="SAQ"] { width: 37px; height: 37px; }
 .bouton-navigation img[alt="Scanner"] { width: 41px; height: 41px; }
 .bouton-navigation svg { width: 37px; height: 37px; }
-.bouton-navigation:nth-child(4) { font-size: 50px; }
+.bouton-navigation:nth-child(4) svg { width: 43px; height: 43px; }
 
 /* ===== Position générique (parent en position:relative) ===== */
 .gauche { position: absolute; top: var(--space-s); left: var(--space-s); }
