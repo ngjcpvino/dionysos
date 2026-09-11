@@ -935,13 +935,9 @@ function fermerFicheV2() {
   } else if (FICHE_V2_PROVENANCE === 'achat') {
     document.getElementById('achatV2Container').style.display = 'flex';
     remonterScrollV2('achatV2Container');
-    if (achatV2ModeNepr) afficherNePasRacheterV2();
-    else appliquerFiltresAchatV2();
+    appliquerFiltresAchatV2();
   } else if (FICHE_V2_PROVENANCE === 'histo') {
     ouvrirHistoV2();
-  } else if (FICHE_V2_PROVENANCE === 'promo') {
-    document.getElementById('promoV2Container').style.display = 'flex';
-    remonterScrollV2('promoV2Container');
   } else if (FICHE_V2_PROVENANCE === 'recherche') {
     document.getElementById('rechercheV2Container').style.display = 'flex';
     remonterScrollV2('rechercheV2Container');
