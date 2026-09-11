@@ -1,4 +1,5 @@
 /* ============================================================
+   © 2026 Dionysos — Tous droits réservés
    SCRIPTS-FICHE-V2.JS
    Fiche vin V2 — consultation seule, plein écran
 ============================================================ */

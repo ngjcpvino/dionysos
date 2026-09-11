@@ -1,4 +1,5 @@
 /* ============================================================
+   © 2026 Dionysos — Tous droits réservés
    SCRIPTS-SCANNER-V2.JS
    Refonte du scan — V2 en parallèle de la V1
 ============================================================ */
