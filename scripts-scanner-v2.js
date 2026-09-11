@@ -1661,17 +1661,10 @@ function reinitialiserFiltresAchatV2() {
   fermerFiltresAchatV2();
 }
 
-function ouvrirFiltresAchatV2() {
-  clicLoupeV2('achatV2', reinitialiserFiltresAchatV2);
-  var pan = document.getElementById('achatV2-filtres');
-  var tg = document.getElementById('achatV2-promo-haut');
-  if (tg) tg.classList.toggle('montre', !!(pan && pan.classList.contains('ouvert')));
-}
+function ouvrirFiltresAchatV2() { clicLoupeV2('achatV2', reinitialiserFiltresAchatV2); }
 function fermerFiltresAchatV2() {
   document.getElementById('achatV2-filtres-voile').classList.remove('ouvert');
   document.getElementById('achatV2-filtres').classList.remove('ouvert');
-  var tg = document.getElementById('achatV2-promo-haut');
-  if (tg) tg.classList.remove('montre');
 }
 
 function choisirModeAchatV2(mode) {
@@ -3472,9 +3465,7 @@ function alimentsDisponiblesChartierV2(cle) {
 
 function construirePanneauChartierV2() {
   var html = '';
-  html += '<div class="ligne-dispo"><span class="libelle">Que les vins en cave</span>' +
-          '<div class="cercle" id="chartierV2-dispo" onclick="toggleDispoChartierV2()">' + (filtresChartierV2.dispo ? '✓' : '✗') + '</div></div>';
-  html += '<div class="panneau-separateur"></div>';
+  majToggleHautV2('chartierV2-dispo', filtresChartierV2.dispo);
   html += '<div class="titre-3">Filtrer</div>';
   html += '<div class="champ-cliquable" id="chartierV2-f-cepage-display" onclick="basculerCepageChartierV2()">Cépage</div>';
   html += '<div id="chartierV2-f-cepage-menu" class="menu-liste"></div>';
@@ -3736,8 +3727,7 @@ function valeursSelonSaqV2(champ) {
 
 function construirePanneauSelonSaqV2() {
   var html = '';
-  html += '<div class="ligne-dispo"><span class="libelle">Que les vins en cave</span><div class="cercle' + (selonSaqV2Cave ? ' actif' : '') + '" id="selonSaqV2-cave" onclick="toggleCaveSelonSaqV2()">' + (selonSaqV2Cave ? '✓' : '✗') + '</div></div>';
-  html += '<div class="panneau-separateur"></div>';
+  majToggleHautV2('selonSaqV2-cave', selonSaqV2Cave);
   html += '<div class="titre-3">Filtrer</div>';
   html += '<div class="champ-cliquable" onclick="basculerListeSelonSaqV2(\'ingredients\')">Ingrédients</div>';
   html += '<div id="selonSaqV2-liste-ingredients" class="menu-liste"></div>';
@@ -4196,15 +4186,12 @@ function ajouterBouteilleArrivee(meuble, rangee, espace) {
 var PANNEAUX_V2 = {
   cave: {
     prefixe: 'caveV2', bascule: 'basculerFiltreCaveV2', reinit: 'reinitialiserFiltresCaveV2',
-    avant: '<div class="ligne-dispo"><span class="libelle">Que les vins en cave</span>' +
-           '<div class="cercle" id="caveV2-dispo" onclick="toggleDispoCaveV2()">✗</div></div>',
     filtres: [['couleur', 'Couleurs'], ['cepage', 'Cépages'], ['pays', 'Pays'], ['appellation', 'Appellations'], ['accords', 'Accords'], ['pastille', 'Pastille de goût'], ['acidite', 'Acidité']],
     apres: '<div class="panneau-separateur"></div>' +
            '<input type="text" id="caveV2-f-nom" class="champ-saisie" placeholder="Rechercher par nom" oninput="appliquerFiltresCaveV2()">'
   },
   histo: {
     prefixe: 'histoV2', bascule: 'basculerFiltreHistoV2', reinit: 'reinitialiserFiltresHistoV2',
-    avant: '<div class="ligne-dispo"><span class="libelle">Que les vins en cave</span><div class="cercle" id="histoV2-cave" onclick="toggleCaveHistoV2()">✗</div></div>',
     filtres: [['vin', 'Vin'], ['accord', 'Accord'], ['couleur', 'Couleur']],
     apres: '<div class="panneau-separateur"></div>' +
            '<input type="text" id="histoV2-f-mets" class="champ-saisie" placeholder="Rechercher un mets" oninput="filtrerMetsHistoV2()">',
@@ -4239,14 +4226,10 @@ var PANNEAUX_V2 = {
   },
   recherche: {
     prefixe: 'rechercheV2', bascule: 'basculerFiltreRechercheV2', reinit: 'reinitialiserFiltresRechercheV2',
-    avant: '<div class="ligne-dispo"><span class="libelle">Que les vins en cave</span><div class="cercle" id="rechercheV2-cave" onclick="toggleCaveRechercheV2()">✗</div></div>' +
-           '<div class="panneau-separateur"></div>',
     filtres: [['sommelier', 'Sommelier'], ['couleur', 'Couleurs'], ['cepage', 'Cépages'], ['pays', 'Pays'], ['appellation', 'Appellations'], ['accords', 'Accords'], ['pastille', 'Pastille de goût']]
   },
   suggestions: {
     prefixe: 'suggestionsV2', bascule: 'basculerFiltreSuggestionsV2', reinit: 'reinitialiserFiltresSuggestionsV2',
-    avant: '<div class="ligne-dispo"><span class="libelle">Que les vins en cave</span>' +
-           '<div class="cercle" id="suggestionsV2-cave" onclick="toggleCaveSuggestionsV2()">✗</div></div>',
     filtres: [['sommelier', 'Sommelier'], ['couleur', 'Couleurs']],
     apres: '<div class="panneau-separateur"></div>' +
            '<input type="text" id="suggestionsV2-f-texte" class="champ-saisie" placeholder="Chercher dans les notes" oninput="afficherSuggestionsV2()">',
@@ -4254,9 +4237,7 @@ var PANNEAUX_V2 = {
   },
   curieuxbegin: {
     prefixe: 'curieuxBeginV2', bascule: 'basculerFiltreCurieuxBeginV2', reinit: 'reinitialiserFiltresCurieuxBeginV2',
-    avant: '<div class="ligne-dispo"><span class="libelle">Que les vins en cave</span>' +
-           '<div class="cercle" id="curieuxBeginV2-cave" onclick="toggleCaveCurieuxBeginV2()">✗</div></div>' +
-           '<div class="titre-3">Afficher</div>' +
+    avant: '<div class="titre-3">Afficher</div>' +
            '<div class="item-liste" id="curieuxBeginV2-mode-mesvins" onclick="choisirModeCurieuxBeginV2(\'mesvins\')">Mes vins</div>' +
            '<div class="item-liste" id="curieuxBeginV2-mode-horscave" onclick="choisirModeCurieuxBeginV2(\'horscave\')">Vins que je n\'ai pas</div>' +
            '<div class="panneau-separateur"></div>',
@@ -4269,6 +4250,12 @@ var PANNEAUX_V2 = {
 // Clic sur la loupe d'un panneau :
 //  - panneau OUVERT + filtres actifs (entonnoir doré) → réinitialise (le reinit referme le panneau) ;
 //  - panneau FERMÉ → ouvre en gardant les choix (la loupe montre une flèche « rouvrir » si des filtres sont actifs).
+// Synchronise l'état ✓/✗ d'un rond « en haut » (interrupteur sorti du panneau)
+function majToggleHautV2(id, actif) {
+  var el = document.getElementById(id);
+  if (el) { el.classList.toggle('actif', !!actif); el.textContent = actif ? '✓' : '✗'; }
+}
+
 function clicLoupeV2(prefixe, reinitFn) {
   var loupe = document.getElementById(prefixe + '-loupe');
   var voile = document.getElementById(prefixe + '-filtres-voile');
