@@ -1127,6 +1127,8 @@ textarea.champ-saisie { resize: none; font-family: inherit; line-height: 1.4; }
   z-index: 10002;
 }
 .panneau-gauche.ouvert ~ .filtre-toggle-haut { display: flex; }
+/* Choix du sommelier, sous « Liste propositions » (visible seulement dans ce mode) */
+#achatV2-sommelier-choix { display: none; margin-left: var(--space-l); }
 .filtre-toggle-haut .libelle-haut {
   position: absolute;
   left: calc(100% + var(--space-s));
