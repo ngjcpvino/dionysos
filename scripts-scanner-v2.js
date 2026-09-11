@@ -1780,7 +1780,7 @@ function afficherCartesAchatV2(liste) {
     var sousLignes = [paysRegion, w.Cepage || ''];
     if (achatV2Mode === 'suggestions') {
       var soms = sommeliersDuVinV2(codeSAQ);
-      if (soms.length) sousLignes.push(soms.join(', '));
+      if (soms.length) sousLignes.push('<span class="achat-sommelier">' + soms.join(', ') + '</span>');
     }
     var sous = sousLignes.filter(Boolean).join('<br>');
     var photo = w['Photo URL'] ? '<div class="carte-photo"><img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
