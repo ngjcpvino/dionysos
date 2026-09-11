@@ -1840,6 +1840,25 @@ function majCompteAchatV2() {
   var n = 0;
   Array.prototype.forEach.call(cartes, function(c){ if (c.style.display !== 'none') n++; });
   document.getElementById('achatV2-compte').innerHTML = libelleCompteAchatV2(n);
+  majEntetesAchatV2();
+}
+
+// Masque un en-tête de section (pays/cépage) qui n'a plus aucune carte visible sous lui
+function majEntetesAchatV2() {
+  var div = document.getElementById('achatV2-cartes');
+  if (!div) return;
+  var entete = null;
+  var aVisible = false;
+  Array.prototype.forEach.call(div.children, function(el){
+    if (el.classList.contains('emp-meuble')) {
+      if (entete) entete.style.display = aVisible ? '' : 'none';
+      entete = el;
+      aVisible = false;
+    } else if (el.classList.contains('carte') && el.style.display !== 'none') {
+      aVisible = true;
+    }
+  });
+  if (entete) entete.style.display = aVisible ? '' : 'none';
 }
 
 function chargerDispoAchatV2(liste) {
