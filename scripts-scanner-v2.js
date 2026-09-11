@@ -1539,7 +1539,7 @@ function baseAchatV2() {
       return (racheter && g.count === 0) || panier;
     });
   }
-  var vins = out.map(function(g) { return g.wine; });
+  var vins = out.map(function(g) { g.wine.__count = g.count; return g.wine; });
   if (achatV2PromoSeul) vins = vins.filter(function(w) { return !!promoDuVinV2(w); });
   return vins;
 }
@@ -1706,6 +1706,19 @@ function cleCartePanierV2(w) {
   return ((w['Code-barres'] || w['Code SAQ'] || w.Nom || '') + '').toString().trim().replace(/\s+/g, '');
 }
 
+function sommeliersDuVinV2(codeSAQ) {
+  var c = (codeSAQ || '').toString().trim();
+  if (!c) return [];
+  var vus = {}, out = [];
+  (ALL_SUGGESTIONS || []).forEach(function(s) {
+    if ((s.codeSAQ || '').toString().trim() !== c) return;
+    var nom = (s.sommelier || '').toString().trim();
+    var k = normaliserRechercheV2(nom);
+    if (nom && !vus[k]) { vus[k] = true; out.push(nom); }
+  });
+  return out;
+}
+
 var imgBonisAchatV2 = { 250:'https://res.cloudinary.com/dym93w23h/image/upload/v1786910660/250_hgv2se.png', 500:'https://res.cloudinary.com/dym93w23h/image/upload/v1786910661/500_ko3y8t.png', 750:'https://res.cloudinary.com/dym93w23h/image/upload/v1786910662/750_rscr3d.png', 800:'https://res.cloudinary.com/dym93w23h/image/upload/v1786910663/800_cqr4co.png', 1000:'https://res.cloudinary.com/dym93w23h/image/upload/v1786910664/1000_lunrjq.png', 1250:'https://res.cloudinary.com/dym93w23h/image/upload/v1786910665/1250_yeot7a.png', 1500:'https://res.cloudinary.com/dym93w23h/image/upload/v1786910666/1500_acyruz.png', 1750:'https://res.cloudinary.com/dym93w23h/image/upload/v1786910667/1750_rv32nr.png', 2000:'https://res.cloudinary.com/dym93w23h/image/upload/v1786910667/2000_c7mwzw.png', 2250:'https://res.cloudinary.com/dym93w23h/image/upload/v1786910668/2250_fm1igm.png', 2500:'https://res.cloudinary.com/dym93w23h/image/upload/v1786910669/2500_lygz2e.png', 2750:'https://res.cloudinary.com/dym93w23h/image/upload/v1786910670/2750_lw24g6.png', 3000:'https://res.cloudinary.com/dym93w23h/image/upload/v1786910671/3000_xu2s3l.png' };
 
 function boisPointsAchatV2(pts) {
@@ -1764,7 +1777,12 @@ function afficherCartesAchatV2(liste) {
     var codeSAQ = (w['Code SAQ'] || '').toString().trim();
     var nom = decodeHTML(w.Nom || '—');
     var paysRegion = (w.Pays && w.Region) ? (w.Pays + ' • ' + w.Region) : (w.Pays || w.Region || '');
-    var sous = [paysRegion, w.Cepage || ''].filter(Boolean).join('<br>');
+    var sousLignes = [paysRegion, w.Cepage || ''];
+    if (achatV2Mode === 'suggestions') {
+      var soms = sommeliersDuVinV2(codeSAQ);
+      if (soms.length) sousLignes.push(soms.join(', '));
+    }
+    var sous = sousLignes.filter(Boolean).join('<br>');
     var photo = w['Photo URL'] ? '<div class="carte-photo"><img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
     var onclick = '';
     if (f.succ === 'TOUTES' && codeSAQ) onclick = ' onclick="dispoProchesAchatV2(\'' + codeSAQ + '\')"';
@@ -1772,11 +1790,12 @@ function afficherCartesAchatV2(liste) {
     else if (cb) onclick = ' onclick="ouvrirApresTap(function(){ouvrirFicheV2(\'' + cb + '\', \'achat\')})"';
     var cocheHtml = '<span class="coche-panier' + (coche ? ' actif' : '') + '" onclick="togglePanierSessionV2(\'' + cle.replace(/'/g, "\\'") + '\', event)"></span>';
     var prixHtml = blocPrixAchatV2(w);
+    var btl = (achatV2Mode === 'favoris' && typeof w.__count === 'number') ? '<div class="achat-btl">' + w.__count + ' btl</div>' : '';
     var dispo = (f.succ && f.succ !== 'TOUTES' && codeSAQ) ? '<div id="achatV2-dispo-' + codeSAQ + '">…</div>' : '';
     var proches = codeSAQ ? '<span id="achatV2-proches-' + codeSAQ + '"></span>' : '';
     return entete + '<div class="carte ' + couleurClasseV2(w.Couleur) + (coche ? ' carte-vide' : '') + '"' + onclick + '>' + photo +
            '<div class="carte-centre"><span class="carte-titre">' + nom + '</span><span class="carte-sous">' + sous + '</span></div>' +
-           '<div class="carte-droite">' + cocheHtml + prixHtml + dispo + proches + '</div></div>';
+           '<div class="carte-droite">' + cocheHtml + prixHtml + btl + dispo + proches + '</div></div>';
   }).join('');
 
   if (f.succ) chargerDispoAchatV2(liste);
@@ -1816,6 +1835,13 @@ function libelleCompteAchatV2(n) {
   return txt;
 }
 
+function majCompteAchatV2() {
+  var cartes = document.querySelectorAll('#achatV2-cartes .carte');
+  var n = 0;
+  Array.prototype.forEach.call(cartes, function(c){ if (c.style.display !== 'none') n++; });
+  document.getElementById('achatV2-compte').innerHTML = libelleCompteAchatV2(n);
+}
+
 function chargerDispoAchatV2(liste) {
   var f = filtresAchatV2;
   if (!f.succ || f.succ === 'TOUTES') return;
@@ -1834,8 +1860,13 @@ function chargerDispoAchatV2(liste) {
     } else {
       appelBackend('verifierDispoSAQ_GRAPHQL_V1', { codeSAQ: codeSAQ, succursale: f.succ }, { spinner: '' }).then(function(res){
         var e = el(); if (!e) return;
-        if (res && res.disponible) e.innerHTML = '<span class="dispo-oui">' + (res.quantite ? res.quantite + ' btl' : '✓') + '</span>';
-        else e.innerHTML = '<span class="dispo-non">✗</span>';
+        if (res && res.disponible) {
+          e.innerHTML = '<span class="dispo-oui">' + (res.quantite ? res.quantite + ' btl' : '✓') + '</span>';
+        } else {
+          var carte = e.closest('.carte');
+          if (carte) carte.style.display = 'none';
+          majCompteAchatV2();
+        }
       }).catch(function(){ var e = el(); if (e) e.textContent = '—'; });
     }
   });
@@ -4165,7 +4196,7 @@ var PANNEAUX_V2 = {
   },
   achat: {
     prefixe: 'achatV2', bascule: 'basculerFiltreAchatV2', reinit: 'reinitialiserFiltresAchatV2',
-    avant: '<div class="ligne-dispo"><span class="libelle">Que les vins en promotion</span>' +
+    avant: '<div class="ligne-dispo"><span class="libelle">En promo</span>' +
            '<div class="cercle" id="achatV2-promo" onclick="toggleAchatPromoSeulV2()">✗</div></div>' +
            '<div class="titre-3">Succursale</div>' +
            '<div class="champ-cliquable" id="achatV2-f-succ-display" onclick="basculerFiltreAchatV2(\'succ\')">Succursale</div>' +
