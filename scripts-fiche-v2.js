@@ -216,7 +216,7 @@ function afficherFicheV2(result) {
   html += '</div>';
 
   // === NOTES : HISTORIQUE ===
-  html += '<div class="section" id="ficheV2-plats-section" style="display:none;">';
+  html += '<div class="section" id="ficheV2-plats-section">';
   html += '<div class="ligne-ajout"><h3 class="titre-2">Historique</h3><div class="cercle" onclick="ouvrirHistoAjoutDepuisFicheV2()">+</div></div>';
   html += '<div id="ficheV2-plats"></div>';
   html += '</div>';
@@ -753,9 +753,7 @@ function chargerPlatsV2(codebarre) {
     var mets = (historique || []).filter(function(h) {
       return (h.codebarre || '').toString().trim() === cb;
     });
-    var sectionPlats = document.getElementById('ficheV2-plats-section');
-    if (mets.length === 0) { conteneur.innerHTML = ''; if (sectionPlats) sectionPlats.style.display = 'none'; return; }
-    if (sectionPlats) sectionPlats.style.display = '';
+    if (mets.length === 0) { conteneur.innerHTML = ''; return; }
     mets.sort(function(a, b) {
       return (parseInt(b.bonAccord) || 0) - (parseInt(a.bonAccord) || 0);
     });
