@@ -1824,8 +1824,9 @@ function afficherCartesAchatV2(liste) {
     var btl = (achatV2Mode === 'favoris' && typeof w.__count === 'number') ? '<div class="achat-btl">' + w.__count + ' btl</div>' : '';
     var dispo = (f.succ && f.succ !== 'TOUTES' && codeSAQ) ? '<div id="achatV2-dispo-' + codeSAQ + '">…</div>' : '';
     var proches = codeSAQ ? '<span id="achatV2-proches-' + codeSAQ + '"></span>' : '';
+    var cellier = (w.Cellier === 'Oui') ? ' <span class="achat-cellier">Cellier</span>' : '';
     return entete + '<div class="carte ' + couleurClasseV2(w.Couleur) + (coche ? ' carte-vide' : '') + '"' + onclick + '>' + photo +
-           '<div class="carte-centre"><span class="carte-titre">' + nom + '</span><span class="carte-sous">' + sous + '</span></div>' +
+           '<div class="carte-centre"><span class="carte-titre">' + nom + cellier + '</span><span class="carte-sous">' + sous + '</span></div>' +
            '<div class="carte-droite">' + cocheHtml + prixHtml + btl + dispo + proches + '</div></div>';
   }).join('');
 
