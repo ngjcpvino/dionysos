@@ -165,7 +165,7 @@ function afficherMessageImage(src) {
   t.className = 'toast';
   document.body.appendChild(t);
   t.style.display = '';
-  t.innerHTML = '<img src="' + src + '" alt="" style="width:70%;height:70%;object-fit:contain;">';
+  t.innerHTML = '<img src="' + src + '" alt="" class="toast-img">';
   t.classList.add('show');
   var fermer = function(ev) {
     ev.preventDefault();

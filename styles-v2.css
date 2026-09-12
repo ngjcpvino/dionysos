@@ -811,6 +811,13 @@ body::after {
 }
 .panneau-gauche .champ-cliquable { flex: none; }
 
+/* Petites briques réutilisables (décor sorti du style en dur dans le JS) */
+.ligne-ajout { display: flex; align-items: center; gap: var(--space-s); margin: var(--space-s) 0; }
+.ligne-ajout .titre-2 { margin: 0; }
+.bloc-favori { margin: var(--space-s) 0 var(--space-m); }
+.toast-img { width: 70%; height: 70%; object-fit: contain; }
+.icone-loupe { width: 20px; height: 20px; object-fit: contain; }
+
 .champ-saisie {
   width: 100%;
   max-width: 400px;

@@ -217,7 +217,7 @@ function afficherFicheV2(result) {
 
   // === NOTES : HISTORIQUE ===
   html += '<div class="section" id="ficheV2-plats-section" style="display:none;">';
-  html += '<div style="display:flex;align-items:center;justify-content:flex-start;gap:var(--space-s);margin-bottom:var(--space-s);"><h3 class="titre-2" style="margin:0;">Historique</h3><div class="cercle" onclick="ouvrirHistoAjoutDepuisFicheV2()">+</div></div>';
+  html += '<div class="ligne-ajout"><h3 class="titre-2">Historique</h3><div class="cercle" onclick="ouvrirHistoAjoutDepuisFicheV2()">+</div></div>';
   html += '<div id="ficheV2-plats"></div>';
   html += '</div>';
 
@@ -228,7 +228,7 @@ function afficherFicheV2(result) {
   html += '<div class="item-liste" id="ficheV2-selon-som-titre" onclick="basculerAccordsSelonV2(\'som\')">Les sommeliers</div>';
   html += '<div id="ficheV2-selon-som" style="display:none;">';
   html += '<div id="ficheV2-suggestions"></div>';
-  html += '<div style="display:flex;align-items:center;gap:var(--space-s);margin-top:var(--space-s);margin-bottom:var(--space-s);"><div class="cercle" onclick="ouvrirSuggestionAjoutV2(\'' + (wine['Code SAQ'] || '').toString().trim() + '\', \'fiche\')">+</div></div>';
+  html += '<div class="ligne-ajout"><div class="cercle" onclick="ouvrirSuggestionAjoutV2(\'' + (wine['Code SAQ'] || '').toString().trim() + '\', \'fiche\')">+</div></div>';
   html += '</div>';
   html += '<div class="item-liste" id="ficheV2-selon-cb-titre" onclick="basculerAccordsSelonV2(\'cb\')">Curieux Bégin</div>';
   html += '<div id="ficheV2-selon-cb" style="display:none;"></div>';
@@ -1075,7 +1075,7 @@ function ouvrirEditFicheV2() {
     return '<div class="titre-3">' + c[0] + '</div><input type="text" id="editV2-' + c[1] + '" class="champ-saisie" value="' + valeur + '">';
   }).join('');
   html += '<div class="titre-3">Vin pour cépage favori</div>' +
-          '<div style="margin:var(--space-s) 0 var(--space-m);"><div class="cercle' + (wine.Favori === 'Oui' ? ' actif' : '') + '" id="editV2-favori" onclick="this.classList.toggle(\'actif\');this.textContent=this.classList.contains(\'actif\')?\'✓\':\'\';">' + (wine.Favori === 'Oui' ? '✓' : '') + '</div></div>';
+          '<div class="bloc-favori"><div class="cercle' + (wine.Favori === 'Oui' ? ' actif' : '') + '" id="editV2-favori" onclick="this.classList.toggle(\'actif\');this.textContent=this.classList.contains(\'actif\')?\'✓\':\'\';">' + (wine.Favori === 'Oui' ? '✓' : '') + '</div></div>';
   html += '<div class="roundel" onclick="photoSAQDepuisEditV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Photo SAQ</span></div>';
   document.getElementById('editFicheV2-corps').innerHTML = html;
   document.getElementById('editFicheV2Overlay').style.display = 'flex';
