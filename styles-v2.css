@@ -1121,6 +1121,7 @@ textarea.champ-saisie { resize: none; font-family: inherit; line-height: 1.4; }
 #achatV2-cartes .achat-prix { color: var(--white); font-size: var(--fs-12); }
 #achatV2-cartes .achat-btl { color: var(--white-60); font-size: var(--fs-12); }
 #achatV2-cartes .achat-sommelier { color: var(--gold); }
+#achatV2-cartes .achat-cellier { color: var(--gold); font-size: var(--fs-11); }
 #achatV2-compte .achat-succ-nom { color: var(--gold); }
 #achatV2-cartes .achat-bonis { height: 48px; margin-top: var(--space-s); }
 /* Rond « En promo » centré en haut de la Liste d'achat, aligné avec l'entonnoir et le ✕ (visible quand le panneau de filtre est ouvert) */
