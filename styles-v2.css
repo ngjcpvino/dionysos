@@ -276,11 +276,7 @@ body::after {
 }
 .ligne-dispo .libelle { color: var(--white); font-size: var(--fs-14); }
 
-#menuActionV2Overlay { z-index: 10010; }
-#histoEditV2Overlay { z-index: 10010; }
-#suggestionEditV2Overlay { z-index: 10010; }
-#photoV2Overlay { z-index: 10010; }
-#corrigerRecetteV2Overlay { z-index: 10010; }
+/* Passe par-dessus les autres modales : classe .modal-v2-avant (définie sous .modal-v2-fullscreen) */
 .photo-grande { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
 .photo-grande img { max-width: 90%; max-height: 85%; object-fit: contain; }
 
@@ -389,6 +385,8 @@ body::after {
   background: linear-gradient(var(--voile-standard), var(--voile-standard)),
               var(--image-fond) center center / cover no-repeat;
 }
+/* Modale qui doit couvrir une autre modale déjà ouverte (édition, photo, correction). Réutilisable. */
+.modal-v2-avant { z-index: 10010; }
 
 .modal-v2-content {
   width: 100%; height: 100%;
@@ -412,19 +410,8 @@ body::after {
 }
 .ligne-ronds:last-child { margin-bottom: 0; }
 
-#menuActionV2Overlay .ligne-ronds .cercle,
-#vinInconnuV2Container .ligne-ronds .cercle {
-  width: 90px; height: 90px;
-  font-size: 32px;
-}
-#vinInconnuV2-saisie {
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-s);
-}
-#vinInconnuV2Container .ligne-ronds { margin-top: var(--space-l); }
+/* Rangée de ronds « grande » (menu d'action, vin inconnu) — même rond, taille plus grande. Réutilisable. */
+.ligne-ronds.grande .cercle { width: 90px; height: 90px; font-size: 32px; }
 
 /* ===== Emplacements : meuble graphique ===== */
 .emp-bloc {
@@ -543,6 +530,18 @@ body::after {
 }
 .btn-fermer:active { background: var(--gold-20); }
 
+/* Bouton icône en haut à droite (Partager), au-dessus de la modale. Réutilisable. */
+.btn-partager {
+  position: fixed;
+  top: var(--space-s); right: var(--space-s);
+  width: var(--taille-tactile); height: var(--taille-tactile);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 10011;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-partager img { width: 28px; height: 28px; }
+
 .titre-1 {
   color: var(--white);
   font-size: var(--fs-20);
@@ -589,6 +588,10 @@ body::after {
   max-width: 600px;
   color: var(--white);
 }
+/* Bloc de formulaire étroit, réutilisable (remplace les width:100%/max-width:400px en ligne) */
+.bloc-form { width: 100%; max-width: 400px; }
+/* Colonne centrée avec espacement, réutilisable */
+.colonne-centree { display: flex; flex-direction: column; align-items: center; gap: var(--space-s); }
 
 .ligne-info {
   color: var(--white);
@@ -817,6 +820,7 @@ body::after {
 .bloc-favori { margin: var(--space-s) 0 var(--space-m); }
 .toast-img { width: 70%; height: 70%; object-fit: contain; }
 .icone-loupe { width: 20px; height: 20px; object-fit: contain; }
+.icone-blanche { filter: brightness(0) invert(1); }
 
 .champ-saisie {
   width: 100%;
@@ -838,7 +842,7 @@ textarea.champ-saisie { resize: none; font-family: inherit; line-height: 1.4; }
 .menu-liste {
   display: none;
   width: 80%;
-  margin: 0 auto var(--space-s);
+  margin: var(--space-s) auto;
   background: transparent;
 }
 .menu-liste::-webkit-scrollbar { display: none; }
@@ -865,7 +869,7 @@ textarea.champ-saisie { resize: none; font-family: inherit; line-height: 1.4; }
 .item-liste.accordeon-1, .item-liste.accordeon-2 { margin-bottom: var(--espace-accordeon); white-space: normal; }
 /* Icône devant le libellé d'un item de menu (Curieux Bégin, Données) — partagée, pas de style en ligne */
 .item-icone { display: inline-block; vertical-align: middle; margin-right: var(--space-8); }
-.panneau-gauche .menu-liste { margin-left: auto; margin-right: 0; }
+.panneau-gauche .menu-liste { margin-left: auto; margin-right: 0; margin-top: 0; } /* l'espace du haut vient déjà du gap du panneau : on ne le double pas */
 
 /* ===== CERCLE — rond générique V2 (bordure or, fond sombre, centré) ===== */
 .cercle {
@@ -885,6 +889,8 @@ textarea.champ-saisie { resize: none; font-family: inherit; line-height: 1.4; }
   -webkit-tap-highlight-color: transparent;
 }
 .cercle.actif { background: var(--gold); border-color: var(--gold); }
+/* Rond de choix (J'aime / J'aime pas…) : atténué tant qu'il n'est pas actif. Réutilisable. */
+.cercle-choix:not(.actif) { color: var(--white-50); border-color: var(--white-15); }
 
 .panneau-voile {
   display: none;
@@ -971,8 +977,6 @@ textarea.champ-saisie { resize: none; font-family: inherit; line-height: 1.4; }
 
 
 .boire-verres.desactive .boire-verre { pointer-events: none; opacity: 0.15; }
-#ficheV2-aime-oui:not(.actif),
-#ficheV2-aime-non:not(.actif) { color: var(--white-50); border-color: var(--white-15); }
 
 
 
@@ -1112,18 +1116,15 @@ textarea.champ-saisie { resize: none; font-family: inherit; line-height: 1.4; }
 .color-white    { color: var(--white); }
 .color-muted    { color: var(--white-60); }
 .color-error    { color: var(--error); }
+.fs-11 { font-size: var(--fs-11); }
+.fs-12 { font-size: var(--fs-12); }
 .dispo-oui { color: var(--success); }
 .dispo-non { color: var(--error); }
 .prix-barre { text-decoration: line-through; color: var(--white-50); }
 .fav-x { float: right; color: var(--error); }
-/* Liste d'achat — zone de droite empilée : rond à cocher (haut), prix, dispo */
-#achatV2-cartes .carte-droite { flex-direction: column; align-items: flex-end; justify-content: center; gap: var(--space-xs); }
-#achatV2-cartes .achat-prix { color: var(--white); font-size: var(--fs-12); }
-#achatV2-cartes .achat-btl { color: var(--white-60); font-size: var(--fs-12); }
-#achatV2-cartes .achat-sommelier { color: var(--gold); }
-#achatV2-cartes .achat-cellier { color: var(--gold); font-size: var(--fs-11); }
-#achatV2-compte .achat-succ-nom { color: var(--gold); }
-#achatV2-cartes .achat-bonis { height: 48px; margin-top: var(--space-s); }
+/* Liste d'achat — zone de droite empilée (rond à cocher, prix, dispo). Réutilisable (couleurs via .color-*, tailles via .fs-*). */
+.carte-droite-empilee { flex-direction: column; align-items: flex-end; justify-content: center; gap: var(--space-xs); }
+.achat-bonis { height: 48px; margin-top: var(--space-s); }
 /* Rond « En promo » centré en haut de la Liste d'achat, aligné avec l'entonnoir et le ✕ (visible quand le panneau de filtre est ouvert) */
 /* Rond d'interrupteur « en haut » (En promo / En cave), centré et aligné avec l'entonnoir et le ✕.
    Sorti du panneau (fixe, centré écran), montré seulement quand SON panneau est ouvert. */

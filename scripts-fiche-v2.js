@@ -200,8 +200,8 @@ function afficherFicheV2(result) {
             '<div class="colonne-controle">' +
               '<span class="libelle">Racheter ?</span>' +
               '<div class="colonne-ronds">' +
-                '<div id="ficheV2-aime-oui" class="cercle' + (aime === 'Oui' ? ' actif' : '') + '" onclick="setAimeV2(\'Oui\')">✓</div>' +
-                '<div id="ficheV2-aime-non" class="cercle' + (aime === 'Non' ? ' actif' : '') + '" onclick="setAimeV2(\'Non\')">✗</div>' +
+                '<div id="ficheV2-aime-oui" class="cercle cercle-choix' + (aime === 'Oui' ? ' actif' : '') + '" onclick="setAimeV2(\'Oui\')">✓</div>' +
+                '<div id="ficheV2-aime-non" class="cercle cercle-choix' + (aime === 'Non' ? ' actif' : '') + '" onclick="setAimeV2(\'Non\')">✗</div>' +
               '</div>' +
             '</div>' +
             '<div class="colonne-controle">' +
