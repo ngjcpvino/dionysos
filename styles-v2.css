@@ -591,7 +591,7 @@ body::after {
 /* Bloc de formulaire étroit, réutilisable (remplace les width:100%/max-width:400px en ligne) */
 .bloc-form { width: 100%; max-width: 400px; }
 /* Colonne centrée avec espacement, réutilisable */
-.colonne-centree { display: flex; flex-direction: column; align-items: center; gap: var(--space-s); }
+.colonne-centree { display: flex; flex-direction: column; align-items: center; }
 
 .ligne-info {
   color: var(--white);
@@ -833,6 +833,7 @@ body::after {
   text-align: left;
   letter-spacing: var(--ls-tight);
   outline: none;
+  margin-bottom: var(--space-s);
 }
 .champ-saisie::placeholder { color: var(--white-50); }
 #histoV2-f-mets-recherche { margin-bottom: var(--space-s); }
