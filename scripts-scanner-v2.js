@@ -1749,10 +1749,10 @@ function blocPrixAchatV2(w) {
   if (promo) {
     var barre = (promo.rabais > 0.01 && promo.prixRegulier != null) ? '<span class="prix-barre">' + Number(promo.prixRegulier).toFixed(2) + ' $</span><br>' : '';
     var fin = (promo.prixFinal != null) ? Number(promo.prixFinal).toFixed(2) + ' $' : '';
-    return '<div class="achat-prix">' + barre + fin + boisPointsAchatV2(promo.pointsBonis) + '</div>';
+    return '<div class="fs-12 color-white">' + barre + fin + boisPointsAchatV2(promo.pointsBonis) + '</div>';
   }
   var prix = (w.Prix !== '' && w.Prix != null && !isNaN(parseFloat(w.Prix))) ? parseFloat(w.Prix).toFixed(2) + ' $' : '';
-  return prix ? '<div class="achat-prix">' + prix + '</div>' : '';
+  return prix ? '<div class="fs-12 color-white">' + prix + '</div>' : '';
 }
 
 // Cépages PRINCIPAUX déjà eus dans la cave (tout ALL_DATA, sauf les propositions) — pour marquer les cépages nouveaux en Découvertes
@@ -1811,7 +1811,7 @@ function afficherCartesAchatV2(liste) {
     var sousLignes = [paysRegion, w.Cepage || ''];
     if (achatV2Mode === 'suggestions') {
       var soms = sommeliersDuVinV2(codeSAQ);
-      if (soms.length) sousLignes.push('<span class="achat-sommelier">' + soms.join(', ') + '</span>');
+      if (soms.length) sousLignes.push('<span class="color-primary">' + soms.join(', ') + '</span>');
     }
     var sous = sousLignes.filter(Boolean).join('<br>');
     var photo = w['Photo URL'] ? '<div class="carte-photo"><img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
@@ -1821,13 +1821,13 @@ function afficherCartesAchatV2(liste) {
     else if (cb) onclick = ' onclick="ouvrirApresTap(function(){ouvrirFicheV2(\'' + cb + '\', \'achat\')})"';
     var cocheHtml = '<span class="coche-panier' + (coche ? ' actif' : '') + '" onclick="togglePanierSessionV2(\'' + cle.replace(/'/g, "\\'") + '\', event)"></span>';
     var prixHtml = blocPrixAchatV2(w);
-    var btl = (achatV2Mode === 'favoris' && typeof w.__count === 'number') ? '<div class="achat-btl">' + w.__count + ' btl</div>' : '';
+    var btl = (achatV2Mode === 'favoris' && typeof w.__count === 'number') ? '<div class="fs-12">' + w.__count + ' btl</div>' : '';
     var dispo = (f.succ && f.succ !== 'TOUTES' && codeSAQ) ? '<div id="achatV2-dispo-' + codeSAQ + '">…</div>' : '';
     var proches = codeSAQ ? '<span id="achatV2-proches-' + codeSAQ + '"></span>' : '';
-    var cellier = (w.Cellier === 'Oui') ? ' <span class="achat-cellier">Cellier</span>' : '';
+    var cellier = (w.Cellier === 'Oui') ? ' <span class="color-primary fs-11">Cellier</span>' : '';
     return entete + '<div class="carte ' + couleurClasseV2(w.Couleur) + (coche ? ' carte-vide' : '') + '"' + onclick + '>' + photo +
            '<div class="carte-centre"><span class="carte-titre">' + nom + cellier + '</span><span class="carte-sous">' + sous + '</span></div>' +
-           '<div class="carte-droite">' + cocheHtml + prixHtml + btl + dispo + proches + '</div></div>';
+           '<div class="carte-droite carte-droite-empilee">' + cocheHtml + prixHtml + btl + dispo + proches + '</div></div>';
   }).join('');
 
   if (f.succ) chargerDispoAchatV2(liste);
@@ -1862,9 +1862,9 @@ function libelleCompteAchatV2(n) {
     var m = nom.match(/^(.*?)\s+[—–-]\s+(.*)$/) || nom.match(/^([^,]+),\s*(.*)$/);
     var lignes = 'Succ. ' + (m ? m[1] : nom);
     if (m && m[2]) lignes += '<br>' + m[2];
-    txt += '<br><span class="achat-succ-nom">' + lignes + '</span>';
-  } else if (f.succ === 'FAV') txt += '<br><span class="achat-succ-nom">Mes favorites</span>';
-  else if (f.succ === 'TOUTES') txt += '<br><span class="achat-succ-nom">Toutes les succursales</span>';
+    txt += '<br><span class="color-primary">' + lignes + '</span>';
+  } else if (f.succ === 'FAV') txt += '<br><span class="color-primary">Mes favorites</span>';
+  else if (f.succ === 'TOUTES') txt += '<br><span class="color-primary">Toutes les succursales</span>';
   return txt;
 }
 
