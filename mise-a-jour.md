@@ -49,7 +49,7 @@
 - Toast : ne jamais poser `display:none` en ligne sans le retirer à l'affichage suivant. Signature du bogue : « marche au premier essai, mort ensuite ».
 
 **CSS**
-- Une valeur = un seul endroit (`:root`), nommée par sa valeur (`--ls-9`), jamais par son usage. Réutiliser `.roundel`, `.champ-saisie`, `.menu-liste`/`.item-liste`, `.controle`, `.titre-1`, `.titre-action` avant de créer du neuf. Jamais de style en dur dans le JS.
+- Une valeur = un seul endroit (`:root`), nommée par sa valeur (`--ls-9`), jamais par son usage. Réutiliser `.roundel`, `.champ-saisie`, `.menu-liste`/`.item-liste`, `.controle`, `.titre-1`, `.titre-action`, `.icone-loupe` (icône 20px des loupes), `.ligne-ajout` (rangée « titre + rond `+` »), `.bloc-favori`, `.toast-img` avant de créer du neuf. **Jamais de style en dur dans le JS** (sauf `display:none` d'état initial). Un nouveau filtre = une entrée dans `PANNEAUX_V2`, jamais un conteneur/CSS à part (leçon du 11 sept. : le sommelier fait à part a dû être refait).
 - **Accordéons** : indentation + espacement partagés via `.accordeon-1` (1er niveau) / `.accordeon-2` (2e niveau) + jeton `--espace-accordeon: 7px`. UN seul style réutilisé partout (menu burger, recettes SAQ, Chartier, Curieux Bégin). Un nouvel accordéon pose ces classes sur ses `.item-liste`, pas de nouveau CSS par cas (règle posée le 6 septembre 2026).
 - Jamais `100vh` : toujours `height:100%` (iOS recadre le fond). Fond de page toujours OPAQUE.
 - Loupe et ✕ d'une page-liste : `position:fixed` (`.gauche` reste `absolute`).
