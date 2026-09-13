@@ -1077,11 +1077,7 @@ function afficherCartesARangerV2() {
   div.innerHTML = groups.map(function(g) {
     var w = g.wine;
     var nom = decodeHTML(w.Nom || '—');
-    var pays = w.Pays || '';
-    var region = w.Region || '';
-    var paysRegion = (pays && region) ? (pays + ' • ' + region) : (pays || region);
-    var cepage = w.Cepage || '';
-    var sous = [paysRegion, cepage].filter(Boolean).join('<br>');
+    var sous = sousVinV2(w);
     var photo = w['Photo URL'] ? '<div class="carte-photo"><img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
     var onclick = g.cb ? ' onclick="deplacerDepuisARangerV2(\'' + g.cb + '\')"' : '';
     return '<div class="carte ' + couleurClasseV2(w.Couleur) + '"' + onclick + '>' + photo +
@@ -1284,11 +1280,7 @@ function afficherSuggestionsV2() {
     var w = g.wine;
     var cb = (w['Code-barres'] || '').toString().trim();
     var nom = decodeHTML(w.Nom || '—');
-    var pays = w.Pays || '';
-    var region = w.Region || '';
-    var paysRegion = (pays && region) ? (pays + ' • ' + region) : (pays || region);
-    var cepage = w.Cepage || '';
-    var sous = [paysRegion, cepage].filter(Boolean).join('<br>');
+    var sous = sousVinV2(w);
     var photo = w['Photo URL'] ? '<div class="carte-photo"><img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
     var onclick = cb ? ' onclick="ouvrirApresTap(function(){ouvrirFicheV2(\'' + cb + '\', \'suggestions\')})"' : '';
     var carteVin = '<div class="carte histo-vin ' + couleurClasseV2(w.Couleur) + '"' + onclick + '>' + photo +
@@ -1811,7 +1803,7 @@ function afficherCartesAchatV2(liste) {
     var codeSAQ = (w['Code SAQ'] || '').toString().trim();
     var nom = decodeHTML(w.Nom || '—');
     var paysRegion = (w.Pays && w.Region) ? (w.Pays + ' • ' + w.Region) : (w.Pays || w.Region || '');
-    var sousLignes = [paysRegion, w.Cepage || ''];
+    var sousLignes = [paysRegion, w.Cepage || '', w.Appellation || ''];
     if (achatV2Mode === 'suggestions') {
       var soms = sommeliersDuVinV2(codeSAQ);
       if (soms.length) sousLignes.push('<span class="color-primary">' + soms.join(', ') + '</span>');
@@ -2287,8 +2279,7 @@ function lancerRechercheV2() {
   div.innerHTML = groups.map(function(g) {
     var w = g.wine;
     var nom = decodeHTML(w.Nom || '—');
-    var paysRegion = (w.Pays && w.Region) ? (w.Pays + ' • ' + w.Region) : (w.Pays || w.Region || '');
-    var sous = [paysRegion, w.Cepage || ''].filter(Boolean).join('<br>');
+    var sous = sousVinV2(w);
     var photo = w['Photo URL'] ? '<div class="carte-photo"><img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
     var onclick = g.cb ? ' onclick="ouvrirApresTap(function(){ouvrirFicheV2(\'' + g.cb + '\', \'recherche\')})"' : '';
     var vide = g.count === 0 ? ' carte-vide' : '';
@@ -2406,11 +2397,7 @@ function reinitialiserFiltresEmpV2() {
 function empCarteVinV2(w, droite, versFiche) {
   var cb = (w['Code-barres'] || '').toString().trim().replace(/\s+/g, '');
   var nom = decodeHTML(w.Nom || '—');
-  var pays = w.Pays || '';
-  var region = w.Region || '';
-  var paysRegion = (pays && region) ? (pays + ' • ' + region) : (pays || region);
-  var cepage = w.Cepage || '';
-  var sous = [paysRegion, cepage].filter(Boolean).join('<br>');
+  var sous = sousVinV2(w);
   var photo = w['Photo URL'] ? '<div class="carte-photo"><img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
   var onclick = cb ? ' onclick="' + (versFiche ? 'ouvrirFicheDepuisListeEmpV2' : 'deplacerDepuisEmpV2') + '(\'' + cb + '\')"' : '';
   return '<div class="carte ' + couleurClasseV2(w.Couleur) + '"' + onclick + '>' + photo +
@@ -3073,11 +3060,7 @@ function afficherHistoV2() {
   div.innerHTML = groupes.map(function(g){
     var nom = decodeHTML(g.nom || '—');
     var info = cbInfos[g.cb] || {};
-    var pays = info.Pays || '';
-    var region = info.Region || '';
-    var paysRegion = (pays && region) ? (pays + ' • ' + region) : (pays || region);
-    var cepage = info.Cepage || '';
-    var sous = [paysRegion, cepage].filter(Boolean).join('<br>');
+    var sous = sousVinV2(info);
     var onclick = g.cb ? ' onclick="ouvrirApresTap(function(){ouvrirFicheV2(\'' + g.cb + '\', \'histo\')})"' : '';
     var photo = g.photo ? '<div class="carte-photo"><img src="' + g.photo + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
     var carteVin = '<div class="carte histo-vin ' + couleurClasseV2(g.couleur) + '"' + onclick + '>' + photo +
@@ -3302,6 +3285,13 @@ function couleurClasseV2(couleur) {
   return 'vin-rouge';
 }
 
+// Sous-titre standard d'une carte vin : Pays • Région, Cépage, Appellation (lignes vides masquées).
+function sousVinV2(w) {
+  var pays = w.Pays || '', region = w.Region || '';
+  var paysRegion = (pays && region) ? (pays + ' • ' + region) : (pays || region);
+  return [paysRegion, w.Cepage || '', w.Appellation || ''].filter(Boolean).join('<br>');
+}
+
 function grouperVinsV2(data) {
   var grouped = {};
   data.forEach(function(item) {
@@ -3347,7 +3337,7 @@ function afficherCartesCaveV2(data) {
     var paysRegion = (pays && region) ? (pays + ' • ' + region) : (pays || region);
     var cepage = w.Cepage || '';
     var cepageHtml = cepage ? (cepage + (w.Favori === 'Oui' ? ' <span class="etoile-favori actif">★</span>' : '')) : '';
-    var sous = [paysRegion, cepageHtml].filter(Boolean).join('<br>');
+    var sous = [paysRegion, cepageHtml, w.Appellation || ''].filter(Boolean).join('<br>');
     var photo = w['Photo URL'] ? '<div class="carte-photo"><img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
     var onclick = g.cb ? ' onclick="ouvrirApresTap(function(){ouvrirFicheV2(\'' + g.cb + '\', \'cave\')})"' : '';
     var vide = g.count === 0 ? ' carte-vide' : '';
@@ -3935,10 +3925,7 @@ function calculerSelonSaqV2() {
   div.innerHTML = vins.map(function(g) {
     var w = g.wine;
     var nom = decodeHTML(w.Nom || '—');
-    var pays = w.Pays || '';
-    var region = w.Region || '';
-    var paysRegion = (pays && region) ? (pays + ' • ' + region) : (pays || region);
-    var sous = [paysRegion, w.Cepage || ''].filter(Boolean).join('<br>');
+    var sous = sousVinV2(w);
     var photo = w['Photo URL'] ? '<div class="carte-photo"><img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
     var onclick = g.cb ? ' onclick="ouvrirApresTap(function(){fermerSelonSaqV2();ouvrirFicheV2(\'' + g.cb + '\', \'selonsaq\')})"' : '';
     var vide = g.count === 0 ? ' carte-vide' : '';
@@ -4104,8 +4091,7 @@ function chargerCurieuxBeginV2() {
       var cb = (w['Code-barres'] || '').toString().trim();
       classeCoul = couleurClasseV2(w.Couleur);
       var nom = decodeHTML(w.Nom || '—');
-      var paysRegion = (w.Pays && w.Region) ? (w.Pays + ' • ' + w.Region) : (w.Pays || w.Region || '');
-      var sous = [paysRegion, w.Cepage || ''].filter(Boolean).join('<br>');
+      var sous = sousVinV2(w);
       var photo = w['Photo URL'] ? '<div class="carte-photo"><img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
       var onclick = cb ? ' onclick="ouvrirApresTap(function(){ouvrirFicheV2(\'' + cb + '\', \'curieuxbegin\')})"' : '';
       carteVin = '<div class="carte histo-vin ' + classeCoul + '"' + onclick + '>' + photo +
