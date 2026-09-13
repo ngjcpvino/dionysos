@@ -136,12 +136,25 @@ function _cacherSpinner() {
 }
 
 // ==================== ERREURS GLOBALES ====================
+// Journalise une erreur dans l'onglet « Erreurs » du Sheet — feu-et-oublie, ne bloque ni ne relance jamais.
+function logErreurV2(message, page, code) {
+  try {
+    appelBackend('logErreur', {
+      message: (message == null ? 'inconnue' : message).toString(),
+      page: (page || '').toString(),
+      code: (code || (typeof CURRENT_WINE_CODEBARRE !== 'undefined' ? CURRENT_WINE_CODEBARRE : '') || '').toString()
+    }, {}).catch(function(){});
+  } catch (e) {}
+}
+
 window.addEventListener('error', function(e) {
   afficherMessage('Erreur : ' + (e.message || 'inconnue'));
+  logErreurV2(e.message, (e.filename || '') + (e.lineno ? ':' + e.lineno : ''));
 });
 window.addEventListener('unhandledrejection', function(e) {
   var raison = e.reason && e.reason.message ? e.reason.message : e.reason;
   afficherMessage('Erreur : ' + (raison || 'inconnue'));
+  logErreurV2(raison, 'promesse');
 });
 
 // ==================== MESSAGES ====================

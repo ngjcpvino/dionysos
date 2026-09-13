@@ -452,6 +452,7 @@ function cacherToutesPagesV2() {
 
 function retourAccueilV2(message) {
   var texte = message || 'Un problème est survenu, veuillez recommencer';
+  logErreurV2(texte, 'retourAccueil');
   if (suggestionsV2Attente) {
     suggestionsV2Attente = false;
     cacherToutesPagesV2();
@@ -3127,6 +3128,23 @@ function sauverHistoEditV2() {
         afficherHistoV2();
       }
       afficherMessage('Corrigé');
+    });
+  }).catch(function(){ retourAccueilV2(); });
+}
+
+function supprimerHistoEditV2() {
+  appelBackend('supprimerHistorique', { row: histoEditV2.row }, { spinner: 'Suppression' }).then(function(res){
+    if (!res || !res.success) { afficherMessage('Erreur'); return; }
+    return appelBackend('getHistorique', {}, { spinner: 'Suppression' }).then(function(data){
+      ALL_HISTORIQUE = data || [];
+      document.getElementById('histoEditV2Overlay').style.display = 'none';
+      if (histoEditV2.provenance === 'fiche') {
+        chargerPlatsV2(CURRENT_WINE_CODEBARRE);
+      } else {
+        remplirFiltresHistoV2();
+        afficherHistoV2();
+      }
+      afficherMessage('Supprimé');
     });
   }).catch(function(){ retourAccueilV2(); });
 }
