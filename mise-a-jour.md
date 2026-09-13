@@ -49,6 +49,7 @@
 **Erreurs**
 - Tout nouveau `.catch()` passe un message parlant à `retourAccueilV2(message)`. La phrase passe-partout cache les vraies causes.
 - Toast : ne jamais poser `display:none` en ligne sans le retirer à l'affichage suivant. Signature du bogue : « marche au premier essai, mort ensuite ».
+- **Journal des erreurs (13 sept. 2026)** : chaque erreur (capteurs `window error` / `unhandledrejection` + `retourAccueilV2`) appelle `logErreurV2` (socle) → route backend `logErreur` → onglet **« Erreurs »** du Sheet (Date · Message · Page · Code), créé au besoin. Feu-et-oublie : jamais bloquant, jamais de boucle. **Pas de fichier GitHub** : le front est statique, il ne peut pas écrire dans le dépôt.
 
 **CSS**
 - Une valeur = un seul endroit (`:root`), nommée par sa valeur (`--ls-9`), jamais par son usage. Réutiliser `.roundel`, `.champ-saisie`, `.menu-liste`/`.item-liste`, `.controle`, `.titre-1`, `.titre-action`, `.icone-loupe` (icône 20px des loupes), `.ligne-ajout` (rangée « titre + rond `+` »), `.bloc-favori`, `.toast-img` avant de créer du neuf. **Jamais de style en dur dans le JS** (sauf `display:none` d'état initial). Un nouveau filtre = une entrée dans `PANNEAUX_V2`, jamais un conteneur/CSS à part (leçon du 11 sept. : le sommelier fait à part a dû être refait).
@@ -89,6 +90,8 @@ Mot de passe d'app à chaque appel. Backend : `params.secret` comparé à la Scr
 
 ## 🔑 Backend — pièges
 - `checkWineExists` renvoie des bouteilles SANS `row` (d'où le repli sur `wineResult.row`).
+- **« Boire » idempotent (13 sept. 2026)** : `actionBouteille('boire')` vérifie d'abord le statut de la bouteille ; s'il est déjà vide (bouteille sortie), il **retourne sans réécrire l'historique** (`dejaFait:true`). Corrige le plat écrit en double quand un 1er essai réussit côté serveur mais que l'app affiche une erreur et qu'on reclique.
+- **`supprimerHistorique(row)` (13 sept. 2026)** : `deleteRow` dans l'onglet Historique. Front : rond **Supprimer** sur `histoEditV2Overlay` (`supprimerHistoEditV2`) → efface **seulement l'entrée** (le plat noté), **ne remet PAS la bouteille en stock**.
 - `addBottle` est appelée par l'Arrivée, `createVinoSheet` par `ajouterVinAvecBouteilles` — **ni l'une ni l'autre n'est morte**.
 - Clés Script : `SPREADSHEET_ID`, `APP_SECRET`, `SAQ_API_KEY`, `SAQ_ENV_ID`.
 - **Détection Spiritueux** (`lireFicheSAQ`) : la méta-description de la page SAQ commence par le type exact (« Vodka. Format… »). Type ne commençant pas par « Vin » → Couleur = Spiritueux, cépages vidés, type complet → Appellation. **Le fil d'Ariane n'est PAS fiable, ne pas y revenir.**
