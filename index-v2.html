@@ -246,7 +246,7 @@
       </div>
       <div id="deplacerV2-espace-menu" class="menu-liste"></div>
 
-      <div class="roundel" onclick="deplacerARangerV2()">
+      <div class="roundel" id="deplacerV2-aranger" onclick="deplacerARangerV2()">
         <span class="roundel-anneau"></span>
         <span class="roundel-barre">À ranger</span>
       </div>
@@ -336,7 +336,7 @@
   <div class="modal-v2-content modale-haut">
     <button class="btn-fermer" onclick="fermerHistoAjoutV2()">✕</button>
     <h2 id="histoAjoutV2-vin" class="titre-1">Ajouter à l'historique</h2>
-    <div class="titre-action">Choisir un vin</div>
+    <div class="titre-action" id="histoAjoutV2-action">Choisir un vin</div>
     <input type="text" id="histoAjoutV2-recherche" class="champ-saisie" placeholder="Rechercher un vin par nom" oninput="rechercherVinHistoAjoutV2()">
     <div id="histoAjoutV2-resultats" class="menu-liste"></div>
     <div id="histoAjoutV2-form" class="bloc-form" style="display:none;">
