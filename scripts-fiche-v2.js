@@ -76,7 +76,8 @@ function ficheDepuisMemoireV2(codebarre) {
     'Pastille gout': w['Pastille gout'] || '',
     'Photo URL': w['Photo URL'] || '',
     'Panier': w.Panier || '',
-    'Famille': w.Famille || ''
+    'Famille': w.Famille || '',
+    'Cellier': w.Cellier || ''
   };
   var bottles = items.filter(function(i) { return i.bottle && i.bottle > 0; }).map(function(i) {
     return { row: i.row, bottle: i.bottle, meuble: i.Meuble || '', rangee: i.Rangee || '', espace: i.Espace || '', statut: i.Statut || '' };
@@ -152,6 +153,7 @@ function afficherFicheV2(result) {
     if (wine.Prix) html += '<div class="ligne-info"><span id="ficheV2-prix">' + parseFloat(wine.Prix).toFixed(2) + '</span> $</div>';
 	 html += ligne('Code-barres', wine['Code-barres']);
   html += ligne('Code SAQ', wine['Code SAQ']);
+    if (wine.Cellier === 'Oui') html += '<div class="ligne-info"><span class="color-primary">Espace Cellier</span></div>';
     html += '</div>';
   }
 
