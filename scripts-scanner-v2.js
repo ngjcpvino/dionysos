@@ -1515,8 +1515,8 @@ function baseAchatV2() {
     return (promosDecV2 || []).map(function(p) {
       return {
         Nom: p.nom, 'Code SAQ': p.codeSAQ, Couleur: p.couleur || '', Pays: p.pays || '',
-        Region: '', Cepage: p.cepage || '', Appellation: '', 'Pastille gout': '',
-        'Photo URL': '', 'Code-barres': '', __decouverte: true,
+        Region: p.region || '', Cepage: p.cepage || '', Appellation: p.appellation || '', 'Pastille gout': p.pastille || '',
+        'Photo URL': p.photo || '', 'Code-barres': '', __decouverte: true,
         __promo: { prixRegulier: p.prixRegulier, prixFinal: p.prixFinal, rabais: p.rabais, pointsBonis: p.pointsBonis || 0 }
       };
     });
