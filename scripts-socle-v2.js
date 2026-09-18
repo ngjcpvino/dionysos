@@ -27,6 +27,16 @@ function ouvrirApresTap(fn) {
   setTimeout(fn, 0);
 }
 
+// Change d'écran sous le spinner : l'accueil n'apparaît jamais entre deux
+// pages, et le tap ne traverse pas jusqu'au nouvel écran.
+function naviguerV2(ouvrir) {
+  _afficherSpinner(' ');
+  cacherToutesPagesV2();
+  ouvrirApresTap(function() {
+    try { ouvrir(); } finally { _cacherSpinner(); }
+  });
+}
+
 function ouvrirSAQV2(codeSAQ) {
   var iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
             (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -90,7 +100,8 @@ function confirmerSecretV2() {
 
 // ==================== BACKEND ====================
 async function appelBackend(action, data = {}, options = {}) {
-  if (options.spinner) _afficherSpinner(options.spinner);
+  var texteSpinner = (options.spinner === undefined) ? ' ' : options.spinner;
+  if (texteSpinner) _afficherSpinner(texteSpinner);
   const controleur = new AbortController();
   const minuterie = setTimeout(function() { controleur.abort(); }, options.timeout || 30000);
   try {
@@ -114,11 +125,19 @@ async function appelBackend(action, data = {}, options = {}) {
     throw e;
   } finally {
     clearTimeout(minuterie);
-    if (options.spinner) _cacherSpinner();
+    if (texteSpinner) _cacherSpinner();
   }
 }
 
+// Le spinner reste affiché tant qu'un appel est en cours (compteur) et ne
+// disparaît qu'au tour suivant : une suite d'appels enchaînés ne laisse
+// jamais l'écran cliquable entre deux.
+var _SPINNER_COMPTEUR = 0;
+var _SPINNER_MINUTERIE = null;
+
 function _afficherSpinner(texte) {
+  _SPINNER_COMPTEUR++;
+  clearTimeout(_SPINNER_MINUTERIE);
   let overlay = document.getElementById('spinner-overlay');
   if (!overlay) {
     overlay = document.createElement('div');
@@ -126,13 +145,22 @@ function _afficherSpinner(texte) {
     overlay.innerHTML = '<div class="spinner-verre-wrap"><div class="spinner-verre"></div><div class="spinner-pied"></div><div class="spinner-base"></div></div><div class="spinner-texte" id="spinner-texte"></div>';
     document.body.appendChild(overlay);
   }
-  document.getElementById('spinner-texte').textContent = texte;
+  if (overlay.style.display !== 'flex' || (texte || '').trim() !== '') {
+    document.getElementById('spinner-texte').textContent = texte;
+  }
   overlay.style.display = 'flex';
 }
 
 function _cacherSpinner() {
-  const overlay = document.getElementById('spinner-overlay');
-  if (overlay) overlay.style.display = 'none';
+  _SPINNER_COMPTEUR--;
+  if (_SPINNER_COMPTEUR > 0) return;
+  _SPINNER_COMPTEUR = 0;
+  clearTimeout(_SPINNER_MINUTERIE);
+  _SPINNER_MINUTERIE = setTimeout(function() {
+    if (_SPINNER_COMPTEUR > 0) return;
+    const overlay = document.getElementById('spinner-overlay');
+    if (overlay) overlay.style.display = 'none';
+  }, 0);
 }
 
 // ==================== ERREURS GLOBALES ====================
@@ -143,7 +171,7 @@ function logErreurV2(message, page, code) {
       message: (message == null ? 'inconnue' : message).toString(),
       page: (page || '').toString(),
       code: (code || (typeof CURRENT_WINE_CODEBARRE !== 'undefined' ? CURRENT_WINE_CODEBARRE : '') || '').toString()
-    }, {}).catch(function(){});
+    }, { spinner: '' }).catch(function(){});
   } catch (e) {}
 }
 
