@@ -188,11 +188,11 @@ La page **« Promotions SAQ » a été supprimée** (item de menu, page `promoV2
 - L'entonnoir est doré dès qu'un des **six** filtres est actif — jamais pour le mode, conformément au standard.
 - **Exception au standard du 7 sept. (18 sept. 2026)** : le panneau des Emplacements garde un **roundel « Réinitialiser »** en bas (`apresReinit`), demandé explicitement. Il vide les six filtres, **ramène au plan des meubles** et referme le panneau — même fonction que le tap sur l'entonnoir doré. Les sept autres panneaux n'en ont toujours pas.
 
-## 📝 Mes notes d'accord (18 septembre 2026) — front prêt, `Code.gs` à faire
+## 📝 Mes notes d'accord (18 septembre 2026)
 Une phrase entendue, notée telle quelle : « asperge et crabe m'amènent un chablis ». **4e mécanique d'accord**, et la seule qui ne s'accroche à aucun vin — c'est ce qui la distingue des Propositions (un vin par code SAQ), de Chartier (cépage) et des Accords SAQ (famille). Raison d'être : Chartier demande de traduire « chablis » en cépage et son onglet est maigre ; la note, elle, se prend en trois champs.
 
 - **Données** : onglet Sheet **`Notes`** — Date · Aliments · Appelle · Source. Créé au besoin par le backend.
-- **Backend (à ajouter dans `Code.gs`, pas encore fait)** : `getNotesAccord` · `ajouterNoteAccord(aliments, appelle, source)` · `corrigerNoteAccord(row, …)` · `supprimerNoteAccord(row)`, plus leurs quatre `case` dans le `switch` de `doPost`. **Tant que ce n'est pas déployé, la page affiche une erreur** — c'est attendu, rien à déboguer.
+- **Backend** (`Code.gs`) : `getNotesAccord` · `ajouterNoteAccord(aliments, appelle, source)` · `corrigerNoteAccord(row, …)` · `supprimerNoteAccord(row)`, plus leurs quatre `case` dans le `switch` de `doPost`.
 - **Front** : global `ALL_NOTES` (socle), page `notesV2Container` + overlay `noteEditV2Overlay` (les deux dans `cacherToutesPagesV2`), route burger `'notes'` → item **« Mes notes »** dans ACCORD SELON…, sous Propositions.
 - Cartes `.carte fiche-mets` : **ce que ça appelle** en titre, aliments · source dessous, date à droite. Un tap rouvre la note pour la corriger ou la supprimer.
 - Panneau au standard : filtre **Qui l'a dit** + recherche texte (aliments, appelle, source) + roundel **Ajouter**. L'entonnoir dore avec l'un ou l'autre.
