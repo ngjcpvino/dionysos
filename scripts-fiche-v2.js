@@ -993,6 +993,10 @@ function fermerFicheV2() {
     document.getElementById('curieuxBeginV2Container').style.display = 'flex';
     remonterScrollV2('curieuxBeginV2Container');
     chargerCurieuxBeginV2();
+  } else if (FICHE_V2_PROVENANCE === 'notes') {
+    document.getElementById('notesV2Container').style.display = 'flex';
+    remonterScrollV2('notesV2Container');
+    afficherNotesV2();
   }
 
   FICHE_V2_PROVENANCE = null;

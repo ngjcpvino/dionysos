@@ -2286,13 +2286,13 @@ function lancerRechercheV2() {
 // Une phrase entendue (« asperge et crabe m'amènent un chablis »), notée telle
 // quelle : des aliments, ce que ça appelle, qui l'a dit. Aucun lien avec un vin
 // précis — c'est ce qui la distingue des Propositions.
-var filtresNotesV2 = { source: '' };
+var filtresNotesV2 = { source: '', cave: false };
 var noteEditV2 = { row: 0 };
 
 function ouvrirNotesV2() {
   document.getElementById('notesV2Container').style.display = 'flex';
   remonterScrollV2('notesV2Container');
-  filtresNotesV2 = { source: '' };
+  filtresNotesV2 = { source: '', cave: false };
   var champ = document.getElementById('notesV2-f-texte');
   if (champ) champ.value = '';
   if (ALL_NOTES && ALL_NOTES.length) { remplirFiltresNotesV2(); afficherNotesV2(); return; }
@@ -2323,8 +2323,14 @@ function choisirFiltreNotesV2(cle, valeur) {
   remplirFiltresNotesV2();
   afficherNotesV2();
 }
+function toggleCaveNotesV2() {
+  filtresNotesV2.cave = !filtresNotesV2.cave;
+  remplirFiltresNotesV2();
+  afficherNotesV2();
+}
+
 function reinitialiserFiltresNotesV2() {
-  filtresNotesV2 = { source: '' };
+  filtresNotesV2 = { source: '', cave: false };
   var champ = document.getElementById('notesV2-f-texte');
   if (champ) champ.value = '';
   document.getElementById('notesV2-f-source-menu').classList.remove('ouvert');
@@ -2344,6 +2350,24 @@ function remplirFiltresNotesV2() {
   }
   var disp = document.getElementById('notesV2-f-source-display');
   if (disp) disp.textContent = cur === '' ? 'Qui l\'a dit' : cur;
+  var btnCave = document.getElementById('notesV2-cave');
+  if (btnCave) { btnCave.classList.toggle('actif', filtresNotesV2.cave); btnCave.textContent = filtresNotesV2.cave ? '✓' : '✗'; }
+}
+
+// Les vins que la note appelle. « Chablis » est une appellation, pas un cépage :
+// on compare aux DEUX, et dans les deux sens (« un chablis bien frais » aussi).
+function vinsDeLaNoteV2(appelle, groupes) {
+  var q = (appelle || '').toString().trim();
+  if (!q) return [];
+  return groupes.filter(function(g) {
+    if ((g.wine.Statut || '') === 'Suggestion') return false;
+    if (filtresNotesV2.cave && !g.count) return false;
+    return [g.wine.Cepage, g.wine.Appellation].some(function(v) {
+      v = (v || '').toString().trim();
+      if (!v) return false;
+      return contientTexteV2(v, q) || contientTexteV2(q, v);
+    });
+  });
 }
 
 function afficherNotesV2() {
@@ -2356,16 +2380,31 @@ function afficherNotesV2() {
   });
 
   var loupe = document.getElementById('notesV2-loupe');
-  if (loupe) loupe.classList.toggle('actif', !!(src || texte));
+  if (loupe) loupe.classList.toggle('actif', !!(src || texte || filtresNotesV2.cave));
 
   document.getElementById('notesV2-compte').textContent = liste.length + ' note' + (liste.length > 1 ? 's' : '');
   var div = document.getElementById('notesV2-cartes');
   if (!liste.length) { div.innerHTML = '<div class="texte-secondaire">Aucune note</div>'; return; }
+  var groupes = grouperVinsV2(ALL_DATA || []);
   div.innerHTML = liste.map(function(n) {
     var sous = [n.aliments, n.source].filter(Boolean).join(' · ');
-    return '<div class="carte fiche-mets" onclick="ouvrirApresTap(function(){ouvrirNoteEditV2(' + n.row + ')})">' +
+    var carteNote = '<div class="carte histo-vin">' +
              '<div class="carte-centre"><span class="carte-titre">' + (n.appelle || '—') + '</span><span class="carte-sous">' + sous + '</span></div>' +
-             '<div class="carte-droite">' + (n.date || '') + '</div></div>';
+             '<div class="carte-droite">' + (n.date || '') +
+             '<span class="corriger-crayon" onclick="event.stopPropagation();ouvrirApresTap(function(){ouvrirNoteEditV2(' + n.row + ')})">✎</span>' +
+             '</div></div>';
+    var vins = vinsDeLaNoteV2(n.appelle, groupes);
+    var cartesVins = vins.map(function(g) {
+      var w = g.wine;
+      var cb = (w['Code-barres'] || '').toString().trim();
+      var onclick = cb ? ' onclick="ouvrirApresTap(function(){ouvrirFicheV2(\'' + cb + '\', \'notes\')})"' : '';
+      var photo = w['Photo URL'] ? '<div class="carte-photo"><img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
+      return '<div class="carte histo-mets ' + couleurClasseV2(w.Couleur) + '"' + onclick + '>' + photo +
+        '<div class="carte-centre"><span class="carte-titre">' + decodeHTML(w.Nom || '—') + '</span><span class="carte-sous">' + sousVinV2(w) + '</span></div>' +
+        '<div class="carte-droite">' + caseDroiteV2(w, g.count) + '</div></div>';
+    }).join('');
+    if (!cartesVins) cartesVins = '<div class="carte histo-mets"><div class="carte-centre"><span class="carte-sous">Aucun vin</span></div></div>';
+    return '<div class="histo-groupe">' + carteNote + cartesVins + '</div>';
   }).join('');
 }
 
