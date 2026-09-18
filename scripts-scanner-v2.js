@@ -442,7 +442,7 @@ function fermerMenuActionV2() {
 }
 
 function cacherToutesPagesV2() {
-  ['scannerV2Container', 'saisieManuelleV2Container', 'vinInconnuV2Container', 'menuActionV2Overlay', 'arriveeV2Container', 'deplacerV2Container', 'boireV2Container', 'donnerV2Container', 'caveV2Container', 'aRangerV2Container', 'sansCepageV2Container', 'suggestionsV2Container', 'suggestionEditV2Overlay', 'histoV2Container', 'histoAjoutV2Overlay', 'histoEditV2Overlay', 'empV2Container', 'achatV2Container', 'rechercheV2Container', 'editFicheV2Overlay', 'ficheV2Overlay', 'photoV2Overlay', 'corrigerRecetteV2Overlay', 'recuV2Container', 'recuValidationV2Container', 'chartierV2Container', 'selonSaqV2Container', 'curieuxBeginV2Container'].forEach(function(id) {
+  ['scannerV2Container', 'saisieManuelleV2Container', 'vinInconnuV2Container', 'menuActionV2Overlay', 'arriveeV2Container', 'deplacerV2Container', 'boireV2Container', 'donnerV2Container', 'caveV2Container', 'aRangerV2Container', 'sansCepageV2Container', 'suggestionsV2Container', 'suggestionEditV2Overlay', 'histoV2Container', 'histoAjoutV2Overlay', 'histoEditV2Overlay', 'empV2Container', 'achatV2Container', 'rechercheV2Container', 'editFicheV2Overlay', 'ficheV2Overlay', 'photoV2Overlay', 'corrigerRecetteV2Overlay', 'recuV2Container', 'recuValidationV2Container', 'chartierV2Container', 'selonSaqV2Container', 'curieuxBeginV2Container', 'notesV2Container', 'noteEditV2Overlay'].forEach(function(id) {
 
     var el = document.getElementById(id);
     if (el) el.style.display = 'none';
@@ -2280,6 +2280,147 @@ function lancerRechercheV2() {
            '<div class="carte-centre"><span class="carte-titre">' + nom + '</span><span class="carte-sous">' + sous + '</span></div>' +
            '<div class="carte-droite">' + caseDroiteV2(w, g.count) + emp + '</div></div>';
   }).join('');
+}
+
+// ==================== MES NOTES D'ACCORD V2 ====================
+// Une phrase entendue (« asperge et crabe m'amènent un chablis »), notée telle
+// quelle : des aliments, ce que ça appelle, qui l'a dit. Aucun lien avec un vin
+// précis — c'est ce qui la distingue des Propositions.
+var filtresNotesV2 = { source: '' };
+var noteEditV2 = { row: 0 };
+
+function ouvrirNotesV2() {
+  document.getElementById('notesV2Container').style.display = 'flex';
+  remonterScrollV2('notesV2Container');
+  filtresNotesV2 = { source: '' };
+  var champ = document.getElementById('notesV2-f-texte');
+  if (champ) champ.value = '';
+  if (ALL_NOTES && ALL_NOTES.length) { remplirFiltresNotesV2(); afficherNotesV2(); return; }
+  appelBackend('getNotesAccord', {}, { spinner: ' ' }).then(function(data) {
+    ALL_NOTES = data || [];
+    remplirFiltresNotesV2();
+    afficherNotesV2();
+  }).catch(function(err) { retourAccueilV2('Notes d\'accord : ' + err); });
+}
+
+function fermerNotesV2() {
+  fermerFiltresNotesV2();
+  document.getElementById('notesV2Container').style.display = 'none';
+}
+
+function ouvrirFiltresNotesV2() { clicLoupeV2('notesV2', reinitialiserFiltresNotesV2); }
+function fermerFiltresNotesV2() {
+  document.getElementById('notesV2-filtres-voile').classList.remove('ouvert');
+  document.getElementById('notesV2-filtres').classList.remove('ouvert');
+}
+function basculerFiltreNotesV2(cle) {
+  var menu = document.getElementById('notesV2-f-' + cle + '-menu');
+  menu.classList.toggle('ouvert');
+}
+function choisirFiltreNotesV2(cle, valeur) {
+  filtresNotesV2[cle] = valeur;
+  document.getElementById('notesV2-f-' + cle + '-menu').classList.remove('ouvert');
+  remplirFiltresNotesV2();
+  afficherNotesV2();
+}
+function reinitialiserFiltresNotesV2() {
+  filtresNotesV2 = { source: '' };
+  var champ = document.getElementById('notesV2-f-texte');
+  if (champ) champ.value = '';
+  document.getElementById('notesV2-f-source-menu').classList.remove('ouvert');
+  remplirFiltresNotesV2();
+  afficherNotesV2();
+  fermerFiltresNotesV2();
+}
+
+function remplirFiltresNotesV2() {
+  var cur = filtresNotesV2.source;
+  var sources = uniqueValeursAchat(ALL_NOTES || [], 'source');
+  var menu = document.getElementById('notesV2-f-source-menu');
+  if (menu) {
+    menu.innerHTML = '<div class="item-liste' + (cur === '' ? ' actif' : '') + '" onclick="choisirFiltreNotesV2(\'source\', \'\')">Tous</div>' + sources.map(function(v) {
+      return '<div class="item-liste' + (String(v) === String(cur) ? ' actif' : '') + '" onclick="choisirFiltreNotesV2(\'source\', \'' + String(v).replace(/'/g, "\\'") + '\')">' + v + '</div>';
+    }).join('');
+  }
+  var disp = document.getElementById('notesV2-f-source-display');
+  if (disp) disp.textContent = cur === '' ? 'Qui l\'a dit' : cur;
+}
+
+function afficherNotesV2() {
+  var champ = document.getElementById('notesV2-f-texte');
+  var texte = normaliserRechercheV2(champ ? champ.value.trim() : '');
+  var src = filtresNotesV2.source;
+  var liste = (ALL_NOTES || []).filter(function(n) {
+    return (!src || String(n.source) === String(src)) &&
+      (!texte || normaliserRechercheV2([n.aliments, n.appelle, n.source].join(' ')).indexOf(texte) !== -1);
+  });
+
+  var loupe = document.getElementById('notesV2-loupe');
+  if (loupe) loupe.classList.toggle('actif', !!(src || texte));
+
+  document.getElementById('notesV2-compte').textContent = liste.length + ' note' + (liste.length > 1 ? 's' : '');
+  var div = document.getElementById('notesV2-cartes');
+  if (!liste.length) { div.innerHTML = '<div class="texte-secondaire">Aucune note</div>'; return; }
+  div.innerHTML = liste.map(function(n) {
+    var sous = [n.aliments, n.source].filter(Boolean).join(' · ');
+    return '<div class="carte fiche-mets" onclick="ouvrirApresTap(function(){ouvrirNoteEditV2(' + n.row + ')})">' +
+             '<div class="carte-centre"><span class="carte-titre">' + (n.appelle || '—') + '</span><span class="carte-sous">' + sous + '</span></div>' +
+             '<div class="carte-droite">' + (n.date || '') + '</div></div>';
+  }).join('');
+}
+
+function ajouterDepuisNotesV2() {
+  fermerFiltresNotesV2();
+  ouvrirApresTap(function() { ouvrirNoteEditV2(0); });
+}
+
+// row = 0 → nouvelle note ; sinon correction de la ligne du Sheet.
+function ouvrirNoteEditV2(row) {
+  var n = row ? (ALL_NOTES || []).filter(function(x) { return String(x.row) === String(row); })[0] : null;
+  noteEditV2 = { row: row || 0 };
+  document.getElementById('noteEditV2-aliments').value = n ? (n.aliments || '') : '';
+  document.getElementById('noteEditV2-appelle').value = n ? (n.appelle || '') : '';
+  document.getElementById('noteEditV2-source').value = n ? (n.source || '') : '';
+  document.getElementById('noteEditV2-btn-supprimer').style.display = n ? 'flex' : 'none';
+  document.getElementById('noteEditV2Overlay').style.display = 'flex';
+  remonterScrollV2('noteEditV2Overlay');
+}
+
+function fermerNoteEditV2() {
+  document.getElementById('noteEditV2Overlay').style.display = 'none';
+}
+
+function confirmerNoteEditV2() {
+  var aliments = document.getElementById('noteEditV2-aliments').value.trim();
+  var appelle = document.getElementById('noteEditV2-appelle').value.trim();
+  var source = document.getElementById('noteEditV2-source').value.trim();
+  if (!aliments) { afficherMessage('Il faut au moins un aliment'); return; }
+  if (!appelle) { afficherMessage('Il manque ce que ça appelle'); return; }
+  var route = noteEditV2.row ? 'corrigerNoteAccord' : 'ajouterNoteAccord';
+  appelBackend(route, { row: noteEditV2.row, aliments: aliments, appelle: appelle, source: source }, { spinner: 'Sauvegarde' }).then(function() {
+    ALL_NOTES = [];
+    return appelBackend('getNotesAccord', {}, { spinner: 'Sauvegarde' });
+  }).then(function(data) {
+    ALL_NOTES = data || [];
+    fermerNoteEditV2();
+    remplirFiltresNotesV2();
+    afficherNotesV2();
+    afficherMessage('Note enregistrée');
+  }).catch(function(err) { afficherMessage('Erreur: ' + err); });
+}
+
+function supprimerNoteEditV2() {
+  if (!noteEditV2.row) return;
+  appelBackend('supprimerNoteAccord', { row: noteEditV2.row }, { spinner: 'Suppression' }).then(function() {
+    ALL_NOTES = [];
+    return appelBackend('getNotesAccord', {}, { spinner: 'Suppression' });
+  }).then(function(data) {
+    ALL_NOTES = data || [];
+    fermerNoteEditV2();
+    remplirFiltresNotesV2();
+    afficherNotesV2();
+    afficherMessage('Note supprimée');
+  }).catch(function(err) { afficherMessage('Erreur: ' + err); });
 }
 
 // ==================== EMPLACEMENTS V2 ====================
@@ -4236,6 +4377,7 @@ function burgerV2Click(cible) {
   if (cible === 'accords') { cacherToutesPagesV2(); ouvrirChartierV2(); return; }
   if (cible === 'selonsaq') { cacherToutesPagesV2(); ouvrirSelonSaqV2(); return; }
   if (cible === 'curieuxbegin') { cacherToutesPagesV2(); ouvrirCurieuxBeginV2(); return; }
+  if (cible === 'notes') { cacherToutesPagesV2(); ouvrirNotesV2(); return; }
 
   
   if (cible === 'majaccordssaq') { majAccordsSaqBoucleV2(0); return; }
@@ -4353,6 +4495,13 @@ var PANNEAUX_V2 = {
   recherche: {
     prefixe: 'rechercheV2', bascule: 'basculerFiltreRechercheV2', reinit: 'reinitialiserFiltresRechercheV2',
     filtres: [['sommelier', 'Sommelier'], ['couleur', 'Couleurs'], ['cepage', 'Cépages'], ['pays', 'Pays'], ['appellation', 'Appellations'], ['accords', 'Accords'], ['pastille', 'Pastille de goût']]
+  },
+  notes: {
+    prefixe: 'notesV2', bascule: 'basculerFiltreNotesV2', reinit: 'reinitialiserFiltresNotesV2',
+    filtres: [['source', 'Qui l\'a dit']],
+    apres: '<div class="panneau-separateur"></div>' +
+           '<input type="text" id="notesV2-f-texte" class="champ-saisie" placeholder="Chercher un aliment" oninput="afficherNotesV2()">',
+    apresReinit: '<div class="roundel" onclick="ajouterDepuisNotesV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Ajouter</span></div>'
   },
   suggestions: {
     prefixe: 'suggestionsV2', bascule: 'basculerFiltreSuggestionsV2', reinit: 'reinitialiserFiltresSuggestionsV2',

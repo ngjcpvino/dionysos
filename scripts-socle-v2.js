@@ -16,6 +16,7 @@ let CONFIG = null;
 let ALL_DATA = [];
 let ALL_HISTORIQUE = [];
 let ALL_SUGGESTIONS = [];
+let ALL_NOTES = [];
 let CURRENT_WINE_CODEBARRE = null;
 let CURRENT_WINE_DATA = null;
 let CURRENT_WINE_BOTTLES = [];
