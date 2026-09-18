@@ -2382,7 +2382,7 @@ function lancerRechercheV2() {
   div.innerHTML = sections.map(function(sec) {
     var reste = sec.total - sec.montres;
     var coupe = reste > 0 ? '<div class="texte-secondaire">' + reste + ' de plus — précise ton mot</div>' : '';
-    return '<div class="emp-meuble">' + sec.titre + ' (' + sec.total + ')</div>' + sec.html + coupe;
+    return '<div class="emp-meuble">' + sec.titre + '</div>' + sec.html + coupe;
   }).join('');
 }
 

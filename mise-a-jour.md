@@ -201,12 +201,12 @@ Une phrase entendue, notée telle quelle : « asperge et crabe m'amènent un cha
 - Les notes sont rechargées après chaque écriture (`ALL_NOTES` vidé puis `getNotesAccord`) — règle des données fraîches.
 
 ## 🔎 Recherche de l'accueil — elle fouille TOUT (18 septembre 2026)
-La loupe de l'accueil ne cherchait que dans les vins. Elle cherche maintenant dans les **six** sources, et les résultats sortent en **sections** (`.emp-meuble` en titre, compte entre parenthèses) : **Vins · Mes notes · Propositions · Chartier · Recettes SAQ · Curieux Bégin**.
+La loupe de l'accueil ne cherchait que dans les vins. Elle cherche maintenant dans les **six** sources, et les résultats sortent en **sections** (`.emp-meuble` en titre, sans compte — le total global reste en haut) : **Vins · Mes notes · Propositions · Chartier · Recettes SAQ · Curieux Bégin**.
 - Les **filtres du panneau** (sommelier, couleur, cépage, pays, appellation, accords, pastille, en cave) ne portent **que sur la section Vins** — voulu : ce sont des attributs de vin.
 - Les autres sections n'apparaissent qu'à partir de **2 lettres tapées** (le filtre Sommelier seul, sans mot, ne montre que des vins).
 - **Cartes réutilisées, jamais réécrites** : `groupeNoteV2` (page Mes notes), `groupeSuggestionV2` (Propositions), `groupeCurieuxBeginV2` (Curieux Bégin), `carteRecetteSaqV2` (volet « les recettes » de Selon SAQ) ont été **extraits** de leur page pour servir aux deux endroits. Corriger la carte = la corriger partout, une seule fois.
 - Chartier n'avait pas de carte : une par ligne trouvée (aliment en titre, cépage · nuance · source dessous) qui ouvre **Chartier déjà filtré sur ce cépage** (`ouvrirChartierCepageV2`).
-- **Chaque section est coupée à 50 cartes** (`MAX_SECTION_RECHERCHE_V2`) ; le titre garde le vrai total et une ligne « X de plus — précise ton mot » ferme la section.
+- **Chaque section est coupée à 50 cartes** (`MAX_SECTION_RECHERCHE_V2`) ; une ligne « X de plus — précise ton mot » ferme la section.
 - **Chargement** : Chartier, recettes SAQ, Curieux Bégin et les notes ne sont chargés qu'à l'ouverture de leur page. `chargerSourcesRechercheV2()` (appelée à l'ouverture de la recherche) va chercher **celles qui manquent**, une à la fois, puis relance l'affichage si la page est encore ouverte. Une seule attente par session.
 - Une note ou une proposition corrigée depuis la recherche remet la liste à jour (`rafraichirRechercheSiOuverteV2`).
 
