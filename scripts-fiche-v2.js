@@ -213,7 +213,7 @@ function afficherFicheV2(result) {
               '</div>' +
             '</div>' +
             '<div class="colonne-controle">' +
-              '<span class="libelle">Favori</span>' +
+              '<span class="libelle">Vin favori Cépage ?</span>' +
               '<div class="colonne-ronds">' +
                 '<div id="ficheV2-favori" class="cercle' + (wine.Favori === 'Oui' ? ' actif' : '') + '" onclick="toggleFavoriV2()">' + (wine.Favori === 'Oui' ? '✓' : '') + '</div>' +
               '</div>' +
