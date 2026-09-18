@@ -784,7 +784,7 @@ body::after {
   margin-bottom: var(--space-s);
   font-size: var(--fs-14);
 }
-.deux-colonnes {
+.colonnes-controle {
   display: flex;
   gap: var(--space-l);
   margin-top: var(--space-l);

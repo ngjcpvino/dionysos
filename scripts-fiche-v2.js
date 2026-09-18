@@ -136,7 +136,7 @@ function afficherFicheV2(result) {
   html += '<div class="section">';
   html += '<h3 class="titre-2">Information</h3>';
  
-  var favoriEtoile = wine.Favori === 'Oui' ? '<span class="etoile-favori actif">★</span>' : '';
+  var favoriEtoile = wine.Favori === 'Oui' ? '<span id="ficheV2-etoile-favori" class="etoile-favori actif">★</span>' : '';
   html += wine['Cépage'] ? '<div class="ligne-info"><span class="libelle">Cépages : </span><span id="ficheV2-cepages">' + decodeHTML(wine['Cépage'].toString()) + '</span>' + (favoriEtoile ? ' ' + favoriEtoile : '') + '</div>' : '';
   html += ligne('Appellation', wine.Appellation);
   html += ligne('Pastille', wine['Pastille gout']);
@@ -198,7 +198,7 @@ function afficherFicheV2(result) {
   html += '<div id="ficheV2-accords-menu" class="menu-liste">' + itemsAccords + '</div>';
 
   var aime = wine.Racheter || '';
-  html += '<div class="deux-colonnes">' +
+  html += '<div class="colonnes-controle">' +
             '<div class="colonne-controle">' +
               '<span class="libelle">Racheter ?</span>' +
               '<div class="colonne-ronds">' +
@@ -210,6 +210,12 @@ function afficherFicheV2(result) {
               '<span class="libelle">Sur-inventaire ?</span>' +
               '<div class="colonne-ronds">' +
                 '<div id="ficheV2-panier" class="cercle' + (wine.Panier === 'Oui' ? ' actif' : '') + '" onclick="togglePanierV2()">' + (wine.Panier === 'Oui' ? '✓' : '') + '</div>' +
+              '</div>' +
+            '</div>' +
+            '<div class="colonne-controle">' +
+              '<span class="libelle">Favori</span>' +
+              '<div class="colonne-ronds">' +
+                '<div id="ficheV2-favori" class="cercle' + (wine.Favori === 'Oui' ? ' actif' : '') + '" onclick="toggleFavoriV2()">' + (wine.Favori === 'Oui' ? '✓' : '') + '</div>' +
               '</div>' +
             '</div>' +
           '</div>';
@@ -703,6 +709,28 @@ function setAimeV2(value) {
   appelBackend('updateWineField', { codebarre: CURRENT_WINE_CODEBARRE, field: 'Racheter', value: value }, { spinner: 'Sauvegarde' }).then(function() {
     majMemoireVinV2(CURRENT_WINE_CODEBARRE, { 'Racheter': value });
     if (CURRENT_WINE_DATA) CURRENT_WINE_DATA.Racheter = value;
+  }).catch(function(err) { afficherMessage('Erreur: ' + err); });
+}
+
+// Le rond « Favori » de la fiche : même champ que « Vin pour cépage favori »
+// du crayon ; l'étoile ★ des cépages suit sans recharger la fiche.
+function toggleFavoriV2() {
+  var btn = document.getElementById('ficheV2-favori');
+  if (!btn) return;
+  var actif = btn.classList.contains('actif');
+  var newValue = actif ? '' : 'Oui';
+  btn.classList.toggle('actif', !actif);
+  btn.textContent = newValue === 'Oui' ? '✓' : '';
+  var cep = document.getElementById('ficheV2-cepages');
+  var etoile = document.getElementById('ficheV2-etoile-favori');
+  if (newValue === 'Oui') {
+    if (cep && !etoile) cep.insertAdjacentHTML('afterend', ' <span id="ficheV2-etoile-favori" class="etoile-favori actif">★</span>');
+  } else if (etoile) {
+    etoile.remove();
+  }
+  appelBackend('updateWineField', { codebarre: CURRENT_WINE_CODEBARRE, field: 'Favori', value: newValue }, { spinner: 'Sauvegarde' }).then(function() {
+    majMemoireVinV2(CURRENT_WINE_CODEBARRE, { 'Favori': newValue });
+    if (CURRENT_WINE_DATA) CURRENT_WINE_DATA.Favori = newValue;
   }).catch(function(err) { afficherMessage('Erreur: ' + err); });
 }
 
