@@ -473,30 +473,13 @@ function menuV2Click(action) {
   }
   if (action === 'visualiser') {
     const code = menuActionV2Context ? menuActionV2Context.code : CURRENT_WINE_CODEBARRE;
-    cacherToutesPagesV2();
-    setTimeout(function() { ouvrirFicheV2(code, 'menuScan'); }, 0);
+    naviguerV2(function() { ouvrirFicheV2(code, 'menuScan'); });
     return;
   }
-  if (action === 'arrivee') {
-    cacherToutesPagesV2();
-    setTimeout(ouvrirArriveeV2, 0);
-    return;
-  }
-  if (action === 'deplacer') {
-    cacherToutesPagesV2();
-    setTimeout(ouvrirDeplacerV2, 0);
-    return;
-  }
-  if (action === 'boire') {
-    cacherToutesPagesV2();
-    setTimeout(ouvrirBoireV2, 0);
-    return;
-  }
-  if (action === 'donner') {
-    cacherToutesPagesV2();
-    setTimeout(ouvrirDonnerV2, 0);
-    return;
-  }
+  if (action === 'arrivee') { naviguerV2(ouvrirArriveeV2); return; }
+  if (action === 'deplacer') { naviguerV2(ouvrirDeplacerV2); return; }
+  if (action === 'boire') { naviguerV2(ouvrirBoireV2); return; }
+  if (action === 'donner') { naviguerV2(ouvrirDonnerV2); return; }
 }
 
 var arriveeV2Choix = { meuble: '', rangee: '', espace: '' };
@@ -860,6 +843,8 @@ function rendreEnteteActionV2(prefixe) {
 
 // ---------- BOIRE ----------
 var BOIRE_V2_NOTE_INITIALE = '';
+var BOIRE_V2_ACCORDS_INITIAUX = '';
+var BOIRE_V2_EN_COURS = false;
 
 function ouvrirBoireV2() {
   if (!menuActionV2Context) return;
@@ -911,7 +896,12 @@ function construireFormBoireV2() {
     var sel = accordsActuels.indexOf(acc) !== -1;
     return '<div class="item-liste' + (sel ? ' actif' : '') + '" onclick="toggleAccordBoireV2(this)" data-accord="' + acc + '">' + acc + '</div>';
   }).join('');
+  BOIRE_V2_ACCORDS_INITIAUX = accordsSelectionnesBoireV2().join(', ');
   majAccordsDisplayBoireV2();
+}
+
+function accordsSelectionnesBoireV2() {
+  return Array.prototype.map.call(document.querySelectorAll('#boireV2-accords-menu .item-liste.actif'), function(el) { return el.getAttribute('data-accord'); });
 }
 
 function toggleAccordBoireV2(el) {
@@ -920,7 +910,7 @@ function toggleAccordBoireV2(el) {
 }
 
 function majAccordsDisplayBoireV2() {
-  var sel = Array.prototype.map.call(document.querySelectorAll('#boireV2-accords-menu .item-liste.actif'), function(el) { return el.getAttribute('data-accord'); });
+  var sel = accordsSelectionnesBoireV2();
   var disp = document.getElementById('boireV2-accords-display');
   if (disp) disp.textContent = sel.length ? sel.join(', ') : 'Accords';
 }
@@ -943,11 +933,13 @@ function basculerMenuAccordsBoireV2() {
 }
 
 function confirmerBoireV2() {
+  if (BOIRE_V2_EN_COURS) return;
   var plat = document.getElementById('boireV2-plat').value.trim();
   if (plat !== '' && actionV2Choix.note === 0) { afficherMessage('Choisissez une appréciation'); return; }
-  var accords = Array.prototype.map.call(document.querySelectorAll('#boireV2-accords-menu .item-liste.actif'), function(el) { return el.getAttribute('data-accord'); });
+  var accords = accordsSelectionnesBoireV2();
+  BOIRE_V2_EN_COURS = true;
   appelBackend('actionBouteille', { row: actionV2Choix.row, action: 'boire', bottle: actionV2Choix.bottle, plat: plat, bonAccord: actionV2Choix.note }, { spinner: 'Santé' }).then(function() {
-    if (accords.length) {
+    if (accords.join(', ') !== BOIRE_V2_ACCORDS_INITIAUX) {
       return appelBackend('updateWineField', { codebarre: menuActionV2Context.code, field: 'Accords', value: accords.join(', ') }, { spinner: 'Santé' });
     }
   }).then(function() {
@@ -966,7 +958,7 @@ function confirmerBoireV2() {
     cacherToutesPagesV2();
     menuActionV2Context = null;
     afficherMessage('Santé');
-  }).catch(function() { retourAccueilV2(); });
+  }).catch(function() { retourAccueilV2(); }).then(function() { BOIRE_V2_EN_COURS = false; });
 }
 
 function fermerBoireV2() {
@@ -1090,9 +1082,8 @@ function afficherCartesARangerV2() {
 function deplacerDepuisARangerV2(code) {
   var result = wineResultDepuisMemoireV2(code);
   if (!result) { afficherMessage('Vin introuvable'); return; }
-  document.getElementById('aRangerV2Container').style.display = 'none';
   menuActionV2Context = { code: code, wineResult: result, retour: 'aranger' };
-  ouvrirApresTap(ouvrirDeplacerV2);
+  naviguerV2(ouvrirDeplacerV2);
 }
 
 // ==================== SANS CÉPAGE V2 ====================
@@ -2518,8 +2509,7 @@ function brancherTirerRangeesEmpV2() {
           } else {
             c.addEventListener('click', function(ev){
               ev.stopPropagation();
-              document.getElementById('empV2Container').style.display = 'none';
-              ouvrirApresTap(startScanFromHomeV2);
+              naviguerV2(startScanFromHomeV2);
             });
           }
         });
@@ -2878,9 +2868,8 @@ function ouvrirFicheDepuisListeEmpV2(code) {
 function deplacerDepuisEmpV2(code) {
   var result = wineResultDepuisMemoireV2(code);
   if (!result) { afficherMessage('Vin introuvable'); return; }
-  document.getElementById('empV2Container').style.display = 'none';
   menuActionV2Context = { code: code, wineResult: result, retour: 'emplacements' };
-  ouvrirApresTap(ouvrirDeplacerV2);
+  naviguerV2(ouvrirDeplacerV2);
 }
 
 // ==================== HISTORIQUE V2 ====================

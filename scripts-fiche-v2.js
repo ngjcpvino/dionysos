@@ -615,10 +615,9 @@ function ouvrirActionDepuisFicheV2() {
   if (!code) return;
   var result = wineResultDepuisMemoireV2(code);
   if (!result) { afficherMessage('Vin introuvable'); return; }
-  document.getElementById('ficheV2Overlay').style.display = 'none';
   FICHE_V2_ORIGINE = FICHE_V2_PROVENANCE;
   FICHE_V2_PROVENANCE = 'menuScan';
-  setTimeout(function() { ouvrirMenuActionV2(code, result); }, 0);
+  naviguerV2(function() { ouvrirMenuActionV2(code, result); });
 }
 
 function basculerMenuAccordsV2() {
