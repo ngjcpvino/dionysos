@@ -199,3 +199,19 @@ Une phrase entendue, notée telle quelle : « asperge et crabe m'amènent un cha
 - Le tap sur la note ne sert plus à la corriger : la correction/suppression passe par le **✎** (`.corriger-crayon`, comme les recettes SAQ) à droite de la note.
 - Panneau au standard : filtre **Qui l'a dit** + recherche texte (aliments, appelle, source) + roundel **Ajouter**, plus l'interrupteur **« En cave »** (`notesV2-cave` / `toggleCaveNotesV2`, rond à droite de l'entonnoir) qui ne garde que les vins encore en stock — il filtre **les vins**, jamais les notes. L'entonnoir dore avec l'un des trois.
 - Les notes sont rechargées après chaque écriture (`ALL_NOTES` vidé puis `getNotesAccord`) — règle des données fraîches.
+
+## 🔎 Recherche de l'accueil — elle fouille TOUT (18 septembre 2026)
+La loupe de l'accueil ne cherchait que dans les vins. Elle cherche maintenant dans les **six** sources, et les résultats sortent en **sections** (`.emp-meuble` en titre, compte entre parenthèses) : **Vins · Mes notes · Propositions · Chartier · Recettes SAQ · Curieux Bégin**.
+- Les **filtres du panneau** (sommelier, couleur, cépage, pays, appellation, accords, pastille, en cave) ne portent **que sur la section Vins** — voulu : ce sont des attributs de vin.
+- Les autres sections n'apparaissent qu'à partir de **2 lettres tapées** (le filtre Sommelier seul, sans mot, ne montre que des vins).
+- **Cartes réutilisées, jamais réécrites** : `groupeNoteV2` (page Mes notes), `groupeSuggestionV2` (Propositions), `groupeCurieuxBeginV2` (Curieux Bégin), `carteRecetteSaqV2` (volet « les recettes » de Selon SAQ) ont été **extraits** de leur page pour servir aux deux endroits. Corriger la carte = la corriger partout, une seule fois.
+- Chartier n'avait pas de carte : une par ligne trouvée (aliment en titre, cépage · nuance · source dessous) qui ouvre **Chartier déjà filtré sur ce cépage** (`ouvrirChartierCepageV2`).
+- **Chaque section est coupée à 50 cartes** (`MAX_SECTION_RECHERCHE_V2`) ; le titre garde le vrai total et une ligne « X de plus — précise ton mot » ferme la section.
+- **Chargement** : Chartier, recettes SAQ, Curieux Bégin et les notes ne sont chargés qu'à l'ouverture de leur page. `chargerSourcesRechercheV2()` (appelée à l'ouverture de la recherche) va chercher **celles qui manquent**, une à la fois, puis relance l'affichage si la page est encore ouverte. Une seule attente par session.
+- Une note ou une proposition corrigée depuis la recherche remet la liste à jour (`rafraichirRechercheSiOuverteV2`).
+
+## 🔄 Bouton « Données » — il resynchronise TOUT (18 septembre 2026)
+Il ne reprenait que l'inventaire (et vidait l'historique) : ce que l'autre téléphone venait d'écrire — une note, une proposition, un accord — restait invisible tant que l'app n'était pas fermée.
+- Il reprend maintenant `getInventoryData` **et** `getSuggestions`, puis **vide** `ALL_HISTORIQUE`, `ALL_NOTES`, `ALL_ACCORDS`, `ALL_RECETTES`, `ALL_CURIEUXBEGIN` — chacune se recharge à l'ouverture de sa page (ou à la prochaine recherche).
+- **Toujours pas rechargée : `CONFIG`** (voir Trous connus) — inchangé, accepté.
+- ⚠️ **Règle** : toute nouvelle liste gardée en mémoire doit être ajoutée à ce bouton, sinon elle vieillit en silence sur l'autre téléphone.
