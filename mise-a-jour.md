@@ -173,7 +173,7 @@ La page **« Promotions SAQ » a été supprimée** (item de menu, page `promoV2
 - **Reste à diagnostiquer** : dans Boire, la liste des accords ne se referme pas quand on retape sur « Accords ». Cause non trouvée, `basculerMenuAccordsBoireV2` a l'air correcte. À tester sur le téléphone avant de corriger.
 
 ## ⭐ Rond « Favori » sur la fiche (18 septembre 2026)
-- La ligne de ronds de la fiche porte maintenant **trois** colonnes : « Racheter ? » · « Sur-inventaire ? » · **« Favori »** (`ficheV2-favori` / `toggleFavoriV2`, même mécanique que Sur-inventaire, écrit le champ `Favori` par `updateWineField`).
+- La ligne de ronds de la fiche porte maintenant **trois** colonnes : « Racheter ? » · « Sur-inventaire ? » · **« Vin favori Cépage ? »** (`ficheV2-favori` / `toggleFavoriV2`, même mécanique que Sur-inventaire, écrit le champ `Favori` par `updateWineField`).
 - C'est **le même champ** que « Vin pour cépage favori » du crayon (`editV2-favori`, route `saveWineEdits`) : les deux doivent toujours dire la même chose.
 - Le rond allume/éteint aussi l'**étoile ★** de la ligne des cépages (`ficheV2-etoile-favori`) sans recharger la fiche. L'étoile reste ABSENTE quand le vin n'est pas favori — jamais une étoile grise.
 - La classe `.deux-colonnes` a été renommée **`.colonnes-controle`** (elle en porte trois) — `flex: 1` par colonne, aucun CSS à ajouter pour une 4e.
