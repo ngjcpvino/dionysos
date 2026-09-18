@@ -2446,7 +2446,7 @@ function choisirFiltreEmpV2(cle, valeur) {
 
 function reinitialiserFiltresEmpV2() {
   filtresEmpV2 = { meuble: '', rangee: '', espace: '', cepage: '', couleur: '', pays: '' };
-  if (empV2Mode === 'cepdoubles' || empV2Mode === 'listemeuble') empV2Mode = 'plan';
+  empV2Mode = 'plan';
   ['meuble','rangee','espace','cepage','couleur','pays'].forEach(function(k) {
     var m = document.getElementById('empV2-f-' + k + '-menu');
     if (m) m.classList.remove('ouvert');
@@ -4331,7 +4331,9 @@ var PANNEAUX_V2 = {
            '<div class="item-liste" id="empV2-mode-appmanquante" onclick="choisirModeEmpV2(\'appmanquante\')">Appellation manquante</div>' +
            '<div class="item-liste" id="empV2-mode-fammanquante" onclick="choisirModeEmpV2(\'fammanquante\')">Familles manquantes</div>' +
            '<div class="panneau-separateur"></div>',
-    filtres: [['meuble', 'Meuble'], ['rangee', 'Rangée'], ['espace', 'Espace'], ['cepage', 'Cépage'], ['couleur', 'Couleur'], ['pays', 'Pays']]
+    filtres: [['meuble', 'Meuble'], ['rangee', 'Rangée'], ['espace', 'Espace'], ['cepage', 'Cépage'], ['couleur', 'Couleur'], ['pays', 'Pays']],
+    apresReinit: '<div class="panneau-separateur"></div>' +
+           '<div class="roundel" onclick="reinitialiserFiltresEmpV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Réinitialiser</span></div>'
   },
   achat: {
     prefixe: 'achatV2', bascule: 'basculerFiltreAchatV2', reinit: 'reinitialiserFiltresAchatV2',
