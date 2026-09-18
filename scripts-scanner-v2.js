@@ -3838,7 +3838,10 @@ function reinitialiserFiltresCaveV2() {
 
 // ==================== ACCORDS METS-VINS V2 ====================
 var ALL_ACCORDS = null;
-var chartierV2Selection = {};
+// UN SEUL aliment de départ (18 sept. 2026) : croiser deux aliments vidait la liste
+// (asperge + crabe = aucun cépage). Le deuxième aliment se lit maintenant dans
+// « Va aussi avec », sous le cépage proposé.
+var chartierV2Aliment = '';
 var chartierV2CategorieOuverte = null;
 var filtresChartierV2 = { couleur: '', cepage: '', dispo: false };
 
@@ -3858,7 +3861,7 @@ var LIBELLES_CATEGORIES_CHARTIER_V2 = { fruits:'Fruits', legumes:'Légumes', epi
 function ouvrirChartierV2() {
   document.getElementById('chartierV2Container').style.display = 'flex';
   remonterScrollV2('chartierV2Container');
-  chartierV2Selection = {};
+  chartierV2Aliment = '';
   chartierV2CategorieOuverte = null;
   filtresChartierV2 = { couleur: '', cepage: '', dispo: false };
   if (ALL_ACCORDS) {
@@ -3964,26 +3967,31 @@ function basculerCategorieChartierV2(cle) {
   var div = document.getElementById('chartierV2-cat-' + cle);
   var aliments = alimentsDisponiblesChartierV2(cle);
   div.innerHTML = aliments.map(function(a) {
-    var sel = chartierV2Selection[normaliserRechercheV2(a)];
-    return '<div class="item-liste' + (sel ? ' actif' : '') + '" data-aliment="' + a.replace(/"/g, '&quot;') + '" onclick="toggleIngredientChartierV2(this)">' + a + '</div>';
+    var sel = memeTexteV2(a, chartierV2Aliment);
+    return '<div class="item-liste' + (sel ? ' actif' : '') + '" data-aliment="' + a.replace(/"/g, '&quot;') + '" onclick="choisirAlimentChartierV2(this.getAttribute(\'data-aliment\'))">' + a + '</div>';
   }).join('');
   div.classList.add('ouvert');
 }
 
-function toggleIngredientChartierV2(el) {
-  var aliment = el.getAttribute('data-aliment');
-  var k = normaliserRechercheV2(aliment);
-  if (chartierV2Selection[k]) delete chartierV2Selection[k];
-  else chartierV2Selection[k] = aliment;
-  el.classList.toggle('actif');
+// Un aliment choisi remplace le précédent : depuis le panneau ou depuis « Va aussi avec ».
+function choisirAlimentChartierV2(aliment) {
+  chartierV2Aliment = memeTexteV2(aliment, chartierV2Aliment) ? '' : aliment;
+  filtresChartierV2.cepage = '';
+  remplirCepageMenuChartierV2();
+  if (chartierV2CategorieOuverte) {
+    var ouverte = chartierV2CategorieOuverte;
+    chartierV2CategorieOuverte = null;
+    basculerCategorieChartierV2(ouverte); // re-marque l'aliment actif
+  }
   majSelectionChartierV2();
   calculerResultatsChartierV2();
+  fermerFiltresChartierV2();
+  remonterScrollV2('chartierV2Container');
 }
 
 function majSelectionChartierV2() {
-  var noms = Object.values(chartierV2Selection);
   var div = document.getElementById('chartierV2-selection');
-  div.textContent = noms.length ? noms.join(', ') : 'Aucun ingrédient sélectionné';
+  div.textContent = chartierV2Aliment ? chartierV2Aliment : 'Choisis un aliment dans l\'entonnoir';
 }
 
 function remplirCouleurMenuChartierV2() {
@@ -4011,7 +4019,7 @@ function choisirCouleurChartierV2(val) {
 }
 
 function reinitialiserChartierV2() {
-  chartierV2Selection = {};
+  chartierV2Aliment = '';
   filtresChartierV2 = { couleur: '', cepage: '', dispo: false };
   chartierV2CategorieOuverte = null;
   construirePanneauChartierV2();
@@ -4037,7 +4045,7 @@ function vinsDisponiblesPourCepageV2(cepage) {
 function calculerResultatsChartierV2() {
   var div = document.getElementById('chartierV2-resultats');
   var loupe = document.getElementById('chartierV2-loupe');
-  if (loupe) loupe.classList.toggle('actif', !!(filtresChartierV2.dispo || filtresChartierV2.cepage || filtresChartierV2.couleur || Object.keys(chartierV2Selection).length));
+  if (loupe) loupe.classList.toggle('actif', !!(filtresChartierV2.dispo || filtresChartierV2.cepage || filtresChartierV2.couleur || chartierV2Aliment));
 
   if (filtresChartierV2.cepage) {
     var cep = filtresChartierV2.cepage;
@@ -4058,31 +4066,29 @@ function calculerResultatsChartierV2() {
     return;
   }
 
-  var selectionnes = Object.keys(chartierV2Selection);
-  if (!selectionnes.length) { div.innerHTML = '<div class="texte-secondaire">Sélectionnez des ingrédients dans le filtre</div>'; return; }
+  var alim = chartierV2Aliment;
+  if (!alim) { div.innerHTML = '<div class="texte-secondaire">Choisis un aliment dans l\'entonnoir</div>'; return; }
 
-  var scores = {};
-  (ALL_ACCORDS || []).forEach(function(a) {
-    var k = normaliserRechercheV2(a.aliment);
-    if (selectionnes.indexOf(k) === -1) return;
-    var cle = normaliserRechercheV2(a.cepage);
-    if (!scores[cle]) scores[cle] = { cepage: a.cepage, count: 0, aliments: {} };
-    if (!scores[cle].aliments[k]) { scores[cle].aliments[k] = true; scores[cle].count++; }
-  });
-
-  var classement = Object.values(scores);
+  var liste = cepagesPourAlimentChartierV2(alim);
   if (filtresChartierV2.couleur) {
-    classement = classement.filter(function(s) { return couleurCepageChartierV2(s.cepage) === filtresChartierV2.couleur; });
+    liste = liste.filter(function(s) { return couleurCepageChartierV2(s.cepage) === filtresChartierV2.couleur; });
   }
   if (filtresChartierV2.dispo) {
-    classement = classement.filter(function(s) { return vinsDisponiblesPourCepageV2(s.cepage); });
+    liste = liste.filter(function(s) { return vinsDisponiblesPourCepageV2(s.cepage); });
   }
-  classement.sort(function(a, b) { return b.count - a.count; });
-  if (!classement.length) { div.innerHTML = '<div class="texte-secondaire">Aucun accord trouvé</div>'; return; }
+  // Les cépages dont j'ai des bouteilles d'abord : c'est ce qu'on peut boire ce soir.
+  liste.sort(function(a, b) {
+    var da = vinsDisponiblesPourCepageV2(a.cepage) ? 0 : 1;
+    var db = vinsDisponiblesPourCepageV2(b.cepage) ? 0 : 1;
+    if (da !== db) return da - db;
+    return a.cepage.localeCompare(b.cepage);
+  });
+  if (!liste.length) { div.innerHTML = '<div class="texte-secondaire">Aucun cépage pour cet aliment</div>'; return; }
 
-  var html = classement.map(function(s) {
-    var vins = grouperVinsV2((ALL_DATA || []).filter(function(i) {
-      return contientTexteV2(cepageDominant(i), s.cepage);
+  div.innerHTML = liste.map(function(s, i) {
+    var entete = s.cepage + (s.nuance ? ' <span class="libelle">(' + s.nuance + ')</span>' : '');
+    var vins = grouperVinsV2((ALL_DATA || []).filter(function(it) {
+      return contientTexteV2(cepageDominant(it), s.cepage);
     }));
     var cartesVins = vins.length ? vins.map(function(g) {
       var w = g.wine;
@@ -4090,10 +4096,56 @@ function calculerResultatsChartierV2() {
       var onclick = g.cb ? ' onclick="ouvrirApresTap(function(){fermerChartierV2();ouvrirFicheV2(\'' + g.cb + '\', \'accords\')})"' : '';
       var vide = g.count === 0 ? ' carte-vide' : '';
       return '<div class="carte ' + couleurClasseV2(w.Couleur) + vide + '"' + onclick + '><div class="carte-centre"><span class="carte-titre">' + nom + '</span></div><div class="carte-droite">' + caseDroiteV2(w, g.count) + '</div></div>';
-    }).join('') : '<div class="texte-secondaire">Aucun vin de ce cépage en cave</div>';
-    return '<div class="emp-meuble">' + s.cepage + ' (' + s.count + '/' + selectionnes.length + ')</div>' + cartesVins;
+    }).join('') : '<div class="texte-secondaire">Aucun vin de ce cépage</div>';
+
+    // Le lien cherché : ce que Chartier met d'autre sur ce cépage — de quoi bâtir le plat.
+    var autres = autresAlimentsChartierV2(s.cepage, alim);
+    var bloc = '';
+    if (autres.length) {
+      bloc = '<div class="item-liste accordeon-1" onclick="basculerAutresChartierV2(' + i + ')">Va aussi avec…</div>' +
+             '<div id="chartierV2-autres-' + i + '" class="menu-liste">' + autres.map(function(a) {
+               return '<div class="item-liste accordeon-2" onclick="choisirAlimentChartierV2(this.getAttribute(\'data-aliment\'))" data-aliment="' + a.replace(/"/g, '&quot;') + '">' + a + '</div>';
+             }).join('') + '</div>';
+    }
+    return '<div class="emp-meuble">' + entete + '</div>' + cartesVins + bloc;
   }).join('');
-  div.innerHTML = html;
+}
+
+// Les cépages que Chartier associe à un aliment, avec la nuance de la ligne.
+function cepagesPourAlimentChartierV2(aliment) {
+  var vus = {}, out = [];
+  (ALL_ACCORDS || []).forEach(function(a) {
+    if (!a.cepage || !memeTexteV2(a.aliment, aliment)) return;
+    var k = normaliserRechercheV2(a.cepage);
+    if (vus[k]) return;
+    vus[k] = true;
+    out.push({ cepage: a.cepage, nuance: a.nuance || '' });
+  });
+  return out;
+}
+
+// Les autres aliments du même cépage (l'aliment de départ exclu).
+function autresAlimentsChartierV2(cepage, sauf) {
+  var vus = {}, out = [];
+  var cleSauf = normaliserRechercheV2(sauf);
+  (ALL_ACCORDS || []).forEach(function(a) {
+    if (!a.aliment || !memeTexteV2(a.cepage, cepage)) return;
+    var k = normaliserRechercheV2(a.aliment);
+    if (vus[k] || k === cleSauf) return;
+    vus[k] = true;
+    out.push(a.aliment);
+  });
+  out.sort(function(x, y) { return x.localeCompare(y); });
+  return out;
+}
+
+// Un seul « Va aussi avec… » ouvert à la fois.
+function basculerAutresChartierV2(i) {
+  var cible = document.getElementById('chartierV2-autres-' + i);
+  if (!cible) return;
+  var etait = cible.classList.contains('ouvert');
+  Array.prototype.forEach.call(document.querySelectorAll('#chartierV2-resultats .menu-liste'), function(d) { d.classList.remove('ouvert'); });
+  if (!etait) cible.classList.add('ouvert');
 }
 
 
