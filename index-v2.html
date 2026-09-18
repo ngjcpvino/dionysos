@@ -56,6 +56,7 @@
   <div class="item-liste" onclick="basculerSousMenuV2('burgerV2-accord')">ACCORD SELON…</div>
   <div id="burgerV2-accord" style="display:none;">
     <div class="item-liste accordeon-1" onclick="burgerV2Click('suggestions')">Propositions</div>
+    <div class="item-liste accordeon-1" onclick="burgerV2Click('notes')">Mes notes</div>
     <div class="item-liste accordeon-1" onclick="burgerV2Click('curieuxbegin')">Curieux Bégin</div>
     <div class="item-liste accordeon-1" onclick="burgerV2Click('accords')">Chartier</div>
     <div class="item-liste accordeon-1" onclick="burgerV2Click('selonsaq')">SAQ</div>
@@ -642,6 +643,46 @@
   <div class="filtre-toggle-haut">
     <div class="cercle" id="curieuxBeginV2-cave" onclick="toggleCaveCurieuxBeginV2()">✗</div>
     <span class="libelle-haut">En cave</span>
+  </div>
+</div>
+
+<!-- ====================== MES NOTES D'ACCORD V2 ====================== -->
+<div id="notesV2Container" class="modal-v2-fullscreen" style="display:none;">
+  <div class="modal-v2-content modale-haut">
+    <div class="cercle gauche" id="notesV2-loupe" onclick="ouvrirFiltresNotesV2()">
+      <img src="https://res.cloudinary.com/dym93w23h/image/upload/v1786985550/entonnoire_lqpv39.png" alt="Filtres" class="icone-loupe">
+    </div>
+    <div class="btn-fermer" onclick="fermerNotesV2()">✕</div>
+    <h2 class="titre-1">Mes notes d'accord</h2>
+    <div id="notesV2-compte" class="texte-secondaire"></div>
+    <div id="notesV2-cartes" class="contenu"></div>
+  </div>
+  <div id="notesV2-filtres-voile" class="panneau-voile" onclick="fermerFiltresNotesV2()"></div>
+  <div id="notesV2-filtres" class="panneau-gauche"></div>
+</div>
+
+<!-- ====================== NOTE D'ACCORD — AJOUT / CORRECTION ====================== -->
+<div id="noteEditV2Overlay" class="modal-v2-fullscreen modal-v2-avant" style="display:none;">
+  <div class="modal-v2-content modale-haut">
+    <button class="btn-fermer" onclick="fermerNoteEditV2()">✕</button>
+    <h2 class="titre-1">Note d'accord</h2>
+    <div class="titre-action">Noter</div>
+    <div class="bloc-form">
+      <div class="titre-3">Aliments</div>
+      <input type="text" id="noteEditV2-aliments" class="champ-saisie" placeholder="Asperge, crabe">
+      <div class="titre-3">Ça appelle</div>
+      <input type="text" id="noteEditV2-appelle" class="champ-saisie" placeholder="Chablis">
+      <div class="titre-3">Qui l'a dit</div>
+      <input type="text" id="noteEditV2-source" class="champ-saisie" placeholder="Nom">
+      <div class="roundel" onclick="confirmerNoteEditV2()">
+        <span class="roundel-anneau"></span>
+        <span class="roundel-barre">Enregistrer</span>
+      </div>
+      <div class="roundel" id="noteEditV2-btn-supprimer" style="display:none;" onclick="supprimerNoteEditV2()">
+        <span class="roundel-anneau"></span>
+        <span class="roundel-barre">Supprimer</span>
+      </div>
+    </div>
   </div>
 </div>
 
