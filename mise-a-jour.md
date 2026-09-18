@@ -105,7 +105,10 @@ Accords mets-vins par **cépage** (méthode Chartier), distincte des Accords SAQ
 - Données dans l'onglet Sheet **Chartier** (anciennement « Accords », renommé le 5 septembre 2026) : colonnes Cépage · Aliment · Nuance · Source. Lu par `getChartier`, alimenté à la main par `ajouterChartier`.
 - Front : tout est nommé `chartierV2…` (conteneur `chartierV2Container`, moteur `construirePanneauChartierV2` / `calculerResultatsChartierV2`, état `filtresChartierV2` / `chartierV2Selection`). Le mot-clé de navigation reste `'accords'` (`burgerV2Click('accords')`).
 - Le panneau se fabrique à la main (catégories d'ingrédients dépliantes) — **exception** à `PANNEAUX_V2`.
-- Sélection multiple d'ingrédients → cépages qui matchent → mes vins de ces cépages. Filtres Cépage et Couleur en plus.
+- **UN SEUL aliment de départ (18 sept. 2026)** : croiser deux aliments vidait la liste (asperge + crabe = aucun cépage, jamais un 2/2). Un aliment choisi **remplace** le précédent (`chartierV2Aliment`, `choisirAlimentChartierV2`) ; le panneau se referme sur le choix. Plus de score « 3/5 ».
+- **Résultat** : un bloc par cépage que Chartier associe à cet aliment — titre `cépage (nuance)`, les vins de ce cépage dessous (ceux dont j'ai des bouteilles **en premier**, `vinsDisponiblesPourCepageV2`), puis **« Va aussi avec… »** (repliable, un seul ouvert à la fois) qui liste les **autres aliments du même cépage** (`autresAlimentsChartierV2`). Taper un de ces aliments **repart de lui** — c'est le lien qui sert à bâtir le plat, et le remplaçant du croisement.
+- Un cépage sans vin en cave reste affiché (« Aucun vin de ce cépage ») : c'est la réponse du livre, pas un vide.
+- Filtres Cépage (sens inverse : cépage → ses aliments) et Couleur inchangés.
 - **À ne pas confondre** : le champ **Accords** de la fiche (colonne 28, `REF_COLS.ACCORDS`) et la colonne **Accords** de config gardent ce nom — ils ne sont PAS liés à Chartier.
 
 ## 🍽️ Accords SAQ — pièges
