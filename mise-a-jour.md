@@ -29,6 +29,7 @@
 - **Écriture = Sheet, puis resynchroniser AVANT de rendre la main** (`getInventoryData` → `ALL_DATA`, ou `majMemoireVinV2` pour une écriture ciblée). Invalider `ALL_HISTORIQUE` si l'écriture touche l'historique.
 - **Exceptions fraîches** (voulues) : `checkWineExists` au scan ; `checkLocationAvailable` au choix d'un espace ; bouton RAFRAÎCHIR.
 - **Nouvelle donnée = nouvelle colonne EN FIN de `Vino`**, jamais un recyclage : `Bois` (70), `Famille accords` (71). L'ancienne colonne « Recettes » est devenue `REF_COLS.FAVORI` — ne jamais la réutiliser pour autre chose.
+- **`Favori` (18 sept. 2026)** : l'en-tête de cette colonne dans l'onglet `Vino` a bien été renommé **« Favori »** — `updateWineField` peut donc l'écrire directement, comme Racheter / Panier / Accords / Notes temporaires.
 
 **Nommage**
 - **« Suggestions » → « Propositions » à l'écran (11 sept. 2026)** : tout le texte VISIBLE dit « Proposition(s) » (titre de page, item de menu — l'ancien « Sommeliers » compris —, onglet « Liste propositions » de la Liste d'achat, compteurs, « Aucune proposition », statut « Proposition » des cartes, toast). **Le code, les données et le backend gardent « suggestion »** : ids/fonctions `*Suggestion*V2`, `ALL_SUGGESTIONS`, la valeur de Statut `'Suggestion'` (comparée partout), les routes `getSuggestions`/`ajouterSuggestion`/`corrigerSuggestion`, la route burger `'suggestions'`. Ne PAS renommer ces derniers. Le mot **sommelier** (la personne) reste tel quel : filtre « Sommelier », « Ajouter un sommelier », volet « Les sommeliers » de la fiche.
@@ -170,3 +171,9 @@ La page **« Promotions SAQ » a été supprimée** (item de menu, page `promoV2
 - ⚠️ Les ouvertures qui se posent PAR-DESSUS une page (cartes → fiche, mets → éditeur, grande photo ronde) gardent `ouvrirApresTap` : rien n'est masqué dessous, donc aucun accueil à cacher.
 - **Boire** : `BOIRE_V2_EN_COURS` bloque un deuxième Confirmer. `BOIRE_V2_ACCORDS_INITIAUX` + `accordsSelectionnesBoireV2()` → les accords s'écrivent dès que la sélection CHANGE, **y compris quand on les retire tous** (avant, `if (accords.length)` ignorait un retrait complet).
 - **Reste à diagnostiquer** : dans Boire, la liste des accords ne se referme pas quand on retape sur « Accords ». Cause non trouvée, `basculerMenuAccordsBoireV2` a l'air correcte. À tester sur le téléphone avant de corriger.
+
+## ⭐ Rond « Favori » sur la fiche (18 septembre 2026)
+- La ligne de ronds de la fiche porte maintenant **trois** colonnes : « Racheter ? » · « Sur-inventaire ? » · **« Favori »** (`ficheV2-favori` / `toggleFavoriV2`, même mécanique que Sur-inventaire, écrit le champ `Favori` par `updateWineField`).
+- C'est **le même champ** que « Vin pour cépage favori » du crayon (`editV2-favori`, route `saveWineEdits`) : les deux doivent toujours dire la même chose.
+- Le rond allume/éteint aussi l'**étoile ★** de la ligne des cépages (`ficheV2-etoile-favori`) sans recharger la fiche. L'étoile reste ABSENTE quand le vin n'est pas favori — jamais une étoile grise.
+- La classe `.deux-colonnes` a été renommée **`.colonnes-controle`** (elle en porte trois) — `flex: 1` par colonne, aucun CSS à ajouter pour une 4e.
