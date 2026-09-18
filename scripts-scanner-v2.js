@@ -2283,14 +2283,32 @@ function lancerRechercheV2() {
 }
 
 // ==================== EMPLACEMENTS V2 ====================
-var filtresEmpV2 = { meuble: '', rangee: '', espace: '' };
+var filtresEmpV2 = { meuble: '', rangee: '', espace: '', cepage: '', couleur: '', pays: '' };
+// Mode d'affichage de la page (section « Afficher » du panneau) : le plan des
+// meubles, ou l'une des six listes. La PORTÉE des listes vient du filtre Meuble.
+var empV2Mode = 'plan';
+var MODES_EMP_V2 = ['plan', 'doubles', 'cepdoubles', 'listemeuble', 'cepmanquants', 'appmanquante', 'fammanquante'];
 
 function ouvrirEmpV2() {
   document.getElementById('empV2Container').style.display = 'flex';
   remonterScrollV2('empV2Container');
-  filtresEmpV2 = { meuble: '', rangee: '', espace: '' };
+  filtresEmpV2 = { meuble: '', rangee: '', espace: '', cepage: '', couleur: '', pays: '' };
+  empV2Mode = 'plan';
   remplirFiltresEmpV2();
-  afficherEmpV2();
+  rendreEmpV2();
+}
+
+// Rend ce que le mode courant demande.
+function rendreEmpV2() {
+  if (empV2Mode === 'plan') afficherEmpV2();
+  else afficherListeEmpV2(empV2Mode);
+}
+
+function choisirModeEmpV2(mode) {
+  empV2Mode = mode;
+  remplirFiltresEmpV2();
+  rendreEmpV2();
+  fermerFiltresEmpV2();
 }
 
 function fermerEmpV2() {
@@ -2335,34 +2353,82 @@ function remplirFiltresEmpV2() {
   });
   var espaces = uniqueValeursAchat(forEspace, 'Espace');
 
-  var listes = { meuble: meubles, rangee: rangees, espace: espaces };
-  ['meuble','rangee','espace'].forEach(function(cle){
+  // Cépage / Couleur / Pays : puisés dans ce que le mode courant peut montrer.
+  var baseVin = baseFiltresVinEmpV2();
+  var listes = { meuble: meubles, rangee: rangees, espace: espaces,
+                 cepage: uniqueCepagesEmpV2(baseVin), couleur: uniqueValeursAchat(baseVin, 'Couleur'), pays: uniqueValeursAchat(baseVin, 'Pays') };
+  ['meuble','rangee','espace','cepage','couleur','pays'].forEach(function(cle){
     var cur = f[cle];
     var menu = document.getElementById('empV2-f-' + cle + '-menu');
     menu.innerHTML = '<div class="item-liste' + (cur === '' ? ' actif' : '') + '" onclick="choisirFiltreEmpV2(\'' + cle + '\', \'\')">Tous</div>' + listes[cle].map(function(v){
       return '<div class="item-liste' + (String(v) === String(cur) ? ' actif' : '') + '" onclick="choisirFiltreEmpV2(\'' + cle + '\', \'' + String(v).replace(/'/g, "\\'") + '\')">' + v + '</div>';
     }).join('');
     var disp = document.getElementById('empV2-f-' + cle + '-display');
-    if (disp) disp.textContent = cur === '' ? ({meuble:'Meuble',rangee:'Rangée',espace:'Espace'})[cle] : cur;
+    if (disp) disp.textContent = cur === '' ? ({meuble:'Meuble',rangee:'Rangée',espace:'Espace',cepage:'Cépage',couleur:'Couleur',pays:'Pays'})[cle] : cur;
   });
 
-  // Cépages doubles : seulement si un meuble est choisi. Cépages manquants : toujours.
-  document.getElementById('empV2-btn-cepdoubles').style.display = f.meuble ? 'flex' : 'none';
-  document.getElementById('empV2-btn-listemeuble').style.display = (f.meuble && f.meuble !== 'À ranger') ? 'flex' : 'none';
-  document.getElementById('empV2-btn-cepmanquants').style.display = 'flex';
-  document.getElementById('empV2-btn-appmanquante').style.display = 'flex';
-  document.getElementById('empV2-btn-fammanquante').style.display = 'flex';
+  // Afficher : le mode courant est allumé ; les deux modes « dans un meuble »
+  // n'apparaissent que si un meuble est choisi.
+  MODES_EMP_V2.forEach(function(m){
+    var el = document.getElementById('empV2-mode-' + m);
+    if (el) el.classList.toggle('actif', empV2Mode === m);
+  });
+  var cepd = document.getElementById('empV2-mode-cepdoubles');
+  if (cepd) cepd.style.display = f.meuble ? 'block' : 'none';
+  var lstm = document.getElementById('empV2-mode-listemeuble');
+  if (lstm) lstm.style.display = (f.meuble && f.meuble !== 'À ranger') ? 'block' : 'none';
 
-  // Loupe : OR si un filtre actif
+  // Loupe : OR si un vrai filtre est actif (jamais pour le mode)
   var loupe = document.getElementById('empV2-loupe');
-  if (loupe) loupe.classList.toggle('actif', !!(f.meuble || f.rangee || f.espace));
+  if (loupe) loupe.classList.toggle('actif', !!(f.meuble || f.rangee || f.espace || f.cepage || f.couleur || f.pays));
+}
+
+// Les vins dans lesquels puiser les valeurs de Cépage / Couleur / Pays.
+// Les listes « manquants » montrent des vins hors stock : elles puisent partout.
+function baseFiltresVinEmpV2() {
+  var f = filtresEmpV2;
+  if (empV2Mode === 'cepmanquants' || empV2Mode === 'appmanquante' || empV2Mode === 'fammanquante') {
+    return (ALL_DATA || []).filter(function(i){ return (i.Statut || '') !== 'Suggestion'; });
+  }
+  if (f.meuble === 'À ranger') return bouteillesARangerEmpV2();
+  return bouteillesRangeesEmpV2().filter(function(i){
+    return (!f.meuble || String(i.Meuble) === String(f.meuble)) &&
+      (!f.rangee || String(i.Rangee) === String(f.rangee)) &&
+      (!f.espace || String(i.Espace) === String(f.espace));
+  });
+}
+
+// Un menu de cépages : le cépage dominant de chaque vin, sans doublon.
+function uniqueCepagesEmpV2(liste) {
+  var vues = {};
+  var out = [];
+  liste.forEach(function(i){
+    var c = cepageDominant(i);
+    if (!c) return;
+    var k = normaliserRechercheV2(c);
+    if (!vues[k]) { vues[k] = true; out.push(c); }
+  });
+  out.sort(function(a, b){ return a.localeCompare(b); });
+  return out;
+}
+
+// Cépage · Couleur · Pays, appliqués aux vins d'une liste.
+function vinPasseFiltresEmpV2(w) {
+  var f = filtresEmpV2;
+  return (!f.cepage || contientTexteV2(w.Cepage, f.cepage)) &&
+    (!f.couleur || w.Couleur === f.couleur) &&
+    (!f.pays || w.Pays === f.pays);
+}
+function groupesFiltresEmpV2(groupes) {
+  return groupes.filter(function(g){ return vinPasseFiltresEmpV2(g.wine); });
 }
 
 function basculerFiltreEmpV2(cle) {
   var menu = document.getElementById('empV2-f-' + cle + '-menu');
   var ouvert = menu.classList.contains('ouvert');
-  ['meuble','rangee','espace'].forEach(function(k){
-    document.getElementById('empV2-f-' + k + '-menu').classList.remove('ouvert');
+  ['meuble','rangee','espace','cepage','couleur','pays'].forEach(function(k){
+    var m = document.getElementById('empV2-f-' + k + '-menu');
+    if (m) m.classList.remove('ouvert');
   });
   if (!ouvert) menu.classList.add('ouvert');
 }
@@ -2372,17 +2438,21 @@ function choisirFiltreEmpV2(cle, valeur) {
   document.getElementById('empV2-f-' + cle + '-menu').classList.remove('ouvert');
   if (cle === 'meuble') { filtresEmpV2.rangee = ''; filtresEmpV2.espace = ''; }
   if (cle === 'rangee') { filtresEmpV2.espace = ''; }
+  // Deux modes n'existent que dans un meuble : sans meuble, retour au plan.
+  if (!filtresEmpV2.meuble && (empV2Mode === 'cepdoubles' || empV2Mode === 'listemeuble')) empV2Mode = 'plan';
   remplirFiltresEmpV2();
-  afficherEmpV2();
+  rendreEmpV2();
 }
 
 function reinitialiserFiltresEmpV2() {
-  filtresEmpV2 = { meuble: '', rangee: '', espace: '' };
-  ['meuble','rangee','espace'].forEach(function(k) {
-    document.getElementById('empV2-f-' + k + '-menu').classList.remove('ouvert');
+  filtresEmpV2 = { meuble: '', rangee: '', espace: '', cepage: '', couleur: '', pays: '' };
+  if (empV2Mode === 'cepdoubles' || empV2Mode === 'listemeuble') empV2Mode = 'plan';
+  ['meuble','rangee','espace','cepage','couleur','pays'].forEach(function(k) {
+    var m = document.getElementById('empV2-f-' + k + '-menu');
+    if (m) m.classList.remove('ouvert');
   });
   remplirFiltresEmpV2();
-  afficherEmpV2();
+  rendreEmpV2();
   fermerFiltresEmpV2();
 }
 
@@ -2399,7 +2469,7 @@ function empCarteVinV2(w, droite, versFiche) {
 
 // Vue par défaut : groupé meuble → rangée → cartes
 function afficherEmpV2() {
-  empListeV2Type = null;
+  empV2Mode = 'plan';
   var f = filtresEmpV2;
   var modeARanger = (f.meuble === 'À ranger');
   var aRanger = bouteillesARangerEmpV2();
@@ -2596,11 +2666,10 @@ function grouperParSaqEmpV2(liste) {
   return arr;
 }
 
-var empListeV2Type = null;
+
 
 function afficherListeEmpV2(type) {
-  empListeV2Type = type;
-  fermerFiltresEmpV2();
+  empV2Mode = type;
   var f = filtresEmpV2;
   var tousRanges = bouteillesRangeesEmpV2();
   var div = document.getElementById('empV2-cartes');
@@ -2610,7 +2679,7 @@ function afficherListeEmpV2(type) {
   if (type === 'doubles') {
     // Même code-barres en 2+ bouteilles. Si meuble choisi → dans le meuble, sinon tous.
     var portee = f.meuble ? tousRanges.filter(function(i){ return String(i.Meuble) === String(f.meuble); }) : tousRanges;
-    var groupes = grouperParSaqEmpV2(portee).filter(function(g){ return g.count >= 2; });
+    var groupes = groupesFiltresEmpV2(grouperParSaqEmpV2(portee)).filter(function(g){ return g.count >= 2; });
     titre = 'Vins en double';
     if (groupes.length === 0) { html = '<div class="texte-secondaire">Aucun vin en double</div>'; }
     else { html = groupes.map(function(g){ return empCarteVinV2(g.wine, g.count + ' btl<br>' + g.emplacements.join(', ')); }).join(''); }
@@ -2620,7 +2689,7 @@ function afficherListeEmpV2(type) {
     var dansMeubleL = tousRanges.filter(function(i){ return String(i.Meuble) === String(f.meuble); });
     var parCepL = {};
     var nomCepL = {};
-    grouperParSaqEmpV2(dansMeubleL).forEach(function(g){
+    groupesFiltresEmpV2(grouperParSaqEmpV2(dansMeubleL)).forEach(function(g){
       var cep = cepageDominant(g.wine) || 'Sans cépage';
       var k = normaliserRechercheV2(cep);
       if (!parCepL[k]) { parCepL[k] = []; nomCepL[k] = cep; }
@@ -2643,7 +2712,7 @@ function afficherListeEmpV2(type) {
   } else if (type === 'cepdoubles') {
     // Cépage dominant présent sur 2+ vins DIFFÉRENTS du meuble choisi
     var dansMeuble = tousRanges.filter(function(i){ return String(i.Meuble) === String(f.meuble); });
-    var parCb = grouperParSaqEmpV2(dansMeuble);
+    var parCb = groupesFiltresEmpV2(grouperParSaqEmpV2(dansMeuble));
     var parCepage = {};
     var nomCepage = {};
     parCb.forEach(function(g){
@@ -2672,7 +2741,7 @@ function afficherListeEmpV2(type) {
     actifsTous.forEach(function(w){ var c = cepageDominant(w); if (c) cepStock[normaliserRechercheV2(c)] = true; });
     var parCepGlobal = {};
     var nomCepGlobal = {};
-    grouperVinsV2(ALL_DATA || []).forEach(function(g){
+    groupesFiltresEmpV2(grouperVinsV2(ALL_DATA || [])).forEach(function(g){
       var cep = cepageDominant(g.wine);
       if (!cep) return;
       var k = normaliserRechercheV2(cep);
@@ -2701,7 +2770,7 @@ function afficherListeEmpV2(type) {
     dansMeuble2.forEach(function(w){ var c = cepageDominant(w); if (c) cepDansMeuble[normaliserRechercheV2(c)] = true; });
     var parCepageHors = {};
     var nomCepageHors = {};
-    grouperParSaqEmpV2(horsMeuble).forEach(function(g){
+    groupesFiltresEmpV2(grouperParSaqEmpV2(horsMeuble)).forEach(function(g){
       var cep = cepageDominant(g.wine);
       if (!cep || cepDansMeuble[normaliserRechercheV2(cep)]) return;
       var k = normaliserRechercheV2(cep);
@@ -2726,7 +2795,7 @@ function afficherListeEmpV2(type) {
     var famStock = {};
     actifsTousFam.forEach(function(w){ var fa = (w.Famille || '').toString().trim(); if (fa) famStock[fa] = true; });
     var parFamGlobal = {};
-    grouperVinsV2(ALL_DATA || []).forEach(function(g){
+    groupesFiltresEmpV2(grouperVinsV2(ALL_DATA || [])).forEach(function(g){
       var fam = (g.wine.Famille || '').toString().trim();
       if (!fam || famStock[fam]) return;
       if (!parFamGlobal[fam]) parFamGlobal[fam] = [];
@@ -2752,7 +2821,7 @@ function afficherListeEmpV2(type) {
     var famDansMeuble = {};
     dansMeubleFam.forEach(function(w){ var fa = (w.Famille || '').toString().trim(); if (fa) famDansMeuble[fa] = true; });
     var parFamHors = {};
-    grouperParSaqEmpV2(horsMeubleFam).forEach(function(g){
+    groupesFiltresEmpV2(grouperParSaqEmpV2(horsMeubleFam)).forEach(function(g){
       var fam = (g.wine.Famille || '').toString().trim();
       if (!fam || famDansMeuble[fam]) return;
       if (!parFamHors[fam]) parFamHors[fam] = [];
@@ -2777,7 +2846,7 @@ function afficherListeEmpV2(type) {
     actifsTousApp.forEach(function(w){ var a = (w.Appellation || '').toString().trim(); if (a) appStock[normaliserRechercheV2(a)] = true; });
     var parAppGlobal = {};
     var nomAppGlobal = {};
-    grouperVinsV2(ALL_DATA || []).forEach(function(g){
+    groupesFiltresEmpV2(grouperVinsV2(ALL_DATA || [])).forEach(function(g){
       var app = (g.wine.Appellation || '').toString().trim();
       if (!app) return;
       var k = normaliserRechercheV2(app);
@@ -2806,7 +2875,7 @@ function afficherListeEmpV2(type) {
     dansMeuble3.forEach(function(w){ var a = (w.Appellation || '').toString().trim(); if (a) appDansMeuble[normaliserRechercheV2(a)] = true; });
     var parAppHors = {};
     var nomAppHors = {};
-    grouperParSaqEmpV2(horsMeubleApp).forEach(function(g){
+    groupesFiltresEmpV2(grouperParSaqEmpV2(horsMeubleApp)).forEach(function(g){
       var app = (g.wine.Appellation || '').toString().trim();
       if (!app || appDansMeuble[normaliserRechercheV2(app)]) return;
       var k = normaliserRechercheV2(app);
@@ -4253,15 +4322,16 @@ var PANNEAUX_V2 = {
   },
   emp: {
     prefixe: 'empV2', bascule: 'basculerFiltreEmpV2', reinit: 'reinitialiserFiltresEmpV2',
-    filtres: [['meuble', 'Meuble'], ['rangee', 'Rangée'], ['espace', 'Espace']],
-    apresReinit: '<div class="panneau-separateur"></div>' +
-           '<div class="roundel" onclick="afficherListeEmpV2(\'doubles\')"><span class="roundel-anneau"></span><span class="roundel-barre">Vins en double</span></div>' +
-           '<div id="empV2-btn-cepdoubles" class="roundel" style="display:none;" onclick="afficherListeEmpV2(\'cepdoubles\')"><span class="roundel-anneau"></span><span class="roundel-barre">Cépages doubles</span></div>' +
-           '<div id="empV2-btn-listemeuble" class="roundel" style="display:none;" onclick="afficherListeEmpV2(\'listemeuble\')"><span class="roundel-anneau"></span><span class="roundel-barre">Liste du meuble</span></div>' +
-           '<div id="empV2-btn-cepmanquants" class="roundel" style="display:none;" onclick="afficherListeEmpV2(\'cepmanquants\')"><span class="roundel-anneau"></span><span class="roundel-barre">Cépages manquants</span></div>' +
-           '<div id="empV2-btn-appmanquante" class="roundel" style="display:none;" onclick="afficherListeEmpV2(\'appmanquante\')"><span class="roundel-anneau"></span><span class="roundel-barre">Appellation manquante</span></div>' +
-           '<div id="empV2-btn-fammanquante" class="roundel" style="display:none;" onclick="afficherListeEmpV2(\'fammanquante\')"><span class="roundel-anneau"></span><span class="roundel-barre">Familles manquantes</span></div>' +
-           '<div class="panneau-separateur"></div>'
+    avant: '<div class="titre-3">Afficher</div>' +
+           '<div class="item-liste" id="empV2-mode-plan" onclick="choisirModeEmpV2(\'plan\')">Plan des meubles</div>' +
+           '<div class="item-liste" id="empV2-mode-doubles" onclick="choisirModeEmpV2(\'doubles\')">Vins en double</div>' +
+           '<div class="item-liste" id="empV2-mode-cepdoubles" style="display:none;" onclick="choisirModeEmpV2(\'cepdoubles\')">Cépages doubles</div>' +
+           '<div class="item-liste" id="empV2-mode-listemeuble" style="display:none;" onclick="choisirModeEmpV2(\'listemeuble\')">Liste du meuble</div>' +
+           '<div class="item-liste" id="empV2-mode-cepmanquants" onclick="choisirModeEmpV2(\'cepmanquants\')">Cépages manquants</div>' +
+           '<div class="item-liste" id="empV2-mode-appmanquante" onclick="choisirModeEmpV2(\'appmanquante\')">Appellation manquante</div>' +
+           '<div class="item-liste" id="empV2-mode-fammanquante" onclick="choisirModeEmpV2(\'fammanquante\')">Familles manquantes</div>' +
+           '<div class="panneau-separateur"></div>',
+    filtres: [['meuble', 'Meuble'], ['rangee', 'Rangée'], ['espace', 'Espace'], ['cepage', 'Cépage'], ['couleur', 'Couleur'], ['pays', 'Pays']]
   },
   achat: {
     prefixe: 'achatV2', bascule: 'basculerFiltreAchatV2', reinit: 'reinitialiserFiltresAchatV2',
