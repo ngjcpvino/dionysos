@@ -4068,7 +4068,8 @@ function calculerResultatsChartierV2() {
   }
 
   var alim = chartierV2Aliment;
-  if (!alim) { div.innerHTML = '<div class="texte-secondaire">Choisis un aliment dans l\'entonnoir</div>'; return; }
+  // La consigne est déjà en haut (chartierV2-selection) : ne pas la répéter ici.
+  if (!alim) { div.innerHTML = ''; return; }
 
   var liste = cepagesPourAlimentChartierV2(alim);
   if (filtresChartierV2.couleur) {
