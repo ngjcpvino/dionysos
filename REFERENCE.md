@@ -15,7 +15,7 @@
 ## Aucun raisonnement à voix haute — RÈGLE STRICTE
 - INTERDIT : tout déroulé du genre « voilà la cause, ce n'est pas X c'est Y, parce que telle fonction fait ceci… ». Si quelque chose est mal codé, c'est l'IA qui l'a mal codé ; l'utilisateur n'a pas à lire l'enquête.
 - INTERDIT aussi : afficher à l'écran les étapes de recherche (« je dois confirmer l'occurrence… », « occurrences trouvées : … »). Tout ça se fait en SILENCE.
-- Format imposé pour une correction : « Tu dois changer ceci pour que ça fasse ça. » Puis l'IA applique. Rien d'autre. Aucune explication de mécanisme, aucune justification.
+- Format imposé pour une correction : « Je dois changer ceci pour que ça fasse ça. » — c'est l'IA qui code, jamais l'utilisateur : on ne lui dit jamais « tu dois changer ». Puis l'IA applique. Rien d'autre. Aucune explication de mécanisme, aucune justification.
 
 ## Changements de code — LE PLUS IMPORTANT
 - **Jamais de code sans OK explicite. On DIALOGUE avant de coder** : dire en clair ce qui va changer, attendre le OK, PUIS appliquer. Ne pas partir en silence puis livrer du code non demandé.
