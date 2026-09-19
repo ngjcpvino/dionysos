@@ -4052,6 +4052,7 @@ function calculerResultatsChartierV2() {
     var aliments = (ALL_ACCORDS || []).filter(function(a) { return memeTexteV2(a.cepage, cep); });
     if (!aliments.length) { div.innerHTML = '<div class="texte-secondaire">Aucun aliment associé</div>'; return; }
     var vins = grouperVinsV2((ALL_DATA || []).filter(function(i) { return contientTexteV2(cepageDominant(i), cep); }));
+    if (filtresChartierV2.dispo) vins = vins.filter(function(g) { return g.count > 0; });
     var cartesVins = vins.length ? vins.map(function(g) {
       var w = g.wine;
       var nom = decodeHTML(w.Nom || '—');
@@ -4090,6 +4091,8 @@ function calculerResultatsChartierV2() {
     var vins = grouperVinsV2((ALL_DATA || []).filter(function(it) {
       return contientTexteV2(cepageDominant(it), s.cepage);
     }));
+    // « En cave » : plus une seule carte de vin que je n'ai plus.
+    if (filtresChartierV2.dispo) vins = vins.filter(function(g) { return g.count > 0; });
     var cartesVins = vins.length ? vins.map(function(g) {
       var w = g.wine;
       var nom = decodeHTML(w.Nom || '—');
