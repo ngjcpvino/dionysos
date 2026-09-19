@@ -209,7 +209,8 @@ body::after {
   max-width: 700px;
   margin: 0 auto;
   min-height: 60px;
-  padding-top: env(safe-area-inset-top, 0px);
+  /* un cran sous le haut de l'écran : l'encoche PUIS un espace (19 sept. 2026) */
+  padding-top: calc(env(safe-area-inset-top, 0px) + var(--space-l));
   z-index: 1000;
   display: flex;
   align-items: center;
