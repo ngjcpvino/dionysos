@@ -510,6 +510,16 @@ function meubleALibre(meuble) {
   return rangees.some(function(r) { return rangeeALibre(meuble, r); });
 }
 
+// Le libellé d'un roundel de placement et son rond de coche vont toujours ensemble :
+// le texte montre la valeur choisie (ou le nom du champ), le rond n'est coché que si
+// une valeur est prise. Vaut pour Ajouter et pour Déplacer.
+function majBarrePlacementV2(prefixe, champ, valeur, defaut) {
+  var barre = document.getElementById(prefixe + '-' + champ + '-barre');
+  if (barre) barre.textContent = valeur || defaut;
+  var coche = document.getElementById(prefixe + '-' + champ + '-coche');
+  if (coche) coche.classList.toggle('actif', !!valeur);
+}
+
 function ouvrirArriveeV2() {
   if (!menuActionV2Context) return;
   construireArriveeV2();
@@ -529,9 +539,9 @@ function construireArriveeV2() {
     return;
   }
 
-  document.getElementById('arriveeV2-meuble-barre').textContent = 'Meuble';
-  document.getElementById('arriveeV2-rangee-barre').textContent = 'Rangée';
-  document.getElementById('arriveeV2-espace-barre').textContent = 'Espace';
+  majBarrePlacementV2('arriveeV2', 'meuble', '', 'Meuble');
+  majBarrePlacementV2('arriveeV2', 'rangee', '', 'Rangée');
+  majBarrePlacementV2('arriveeV2', 'espace', '', 'Espace');
 
   var menuMeuble = document.getElementById('arriveeV2-meuble-menu');
   var meubles = (CONFIG && CONFIG.meubles) ? Object.keys(CONFIG.meubles) : [];
@@ -571,10 +581,10 @@ function choisirMeubleArrivee(meuble) {
   arriveeV2Choix.meuble = meuble;
   arriveeV2Choix.rangee = '';
   arriveeV2Choix.espace = '';
-  document.getElementById('arriveeV2-meuble-barre').textContent = meuble;
+  majBarrePlacementV2('arriveeV2', 'meuble', meuble, 'Meuble');
   document.getElementById('arriveeV2-meuble-menu').classList.remove('ouvert');
-  document.getElementById('arriveeV2-rangee-barre').textContent = 'Rangée';
-  document.getElementById('arriveeV2-espace-barre').textContent = 'Espace';
+  majBarrePlacementV2('arriveeV2', 'rangee', '', 'Rangée');
+  majBarrePlacementV2('arriveeV2', 'espace', '', 'Espace');
 
   var rangees = (CONFIG.meubles[meuble]) ? Object.keys(CONFIG.meubles[meuble]) : [];
   rangees = rangees.filter(function(r) { return rangeeALibre(meuble, r); });
@@ -588,9 +598,9 @@ function choisirMeubleArrivee(meuble) {
 function choisirRangeeArrivee(rangee) {
   arriveeV2Choix.rangee = rangee;
   arriveeV2Choix.espace = '';
-  document.getElementById('arriveeV2-rangee-barre').textContent = rangee;
+  majBarrePlacementV2('arriveeV2', 'rangee', rangee, 'Rangée');
   document.getElementById('arriveeV2-rangee-menu').classList.remove('ouvert');
-  document.getElementById('arriveeV2-espace-barre').textContent = 'Espace';
+  majBarrePlacementV2('arriveeV2', 'espace', '', 'Espace');
 
   var meuble = arriveeV2Choix.meuble;
   var espaces = (CONFIG.meubles[meuble] && CONFIG.meubles[meuble][rangee]) ? CONFIG.meubles[meuble][rangee] : [];
@@ -604,7 +614,7 @@ function choisirRangeeArrivee(rangee) {
 
 function choisirEspaceArrivee(espace) {
   arriveeV2Choix.espace = espace;
-  document.getElementById('arriveeV2-espace-barre').textContent = espace;
+  majBarrePlacementV2('arriveeV2', 'espace', espace, 'Espace');
   document.getElementById('arriveeV2-espace-menu').classList.remove('ouvert');
 
   var c = arriveeV2Choix;
@@ -614,7 +624,7 @@ function choisirEspaceArrivee(espace) {
       return appelBackend('getInventoryData', {}).then(function(data) {
         if (data) ALL_DATA = data;
         arriveeV2Choix.espace = '';
-        document.getElementById('arriveeV2-espace-barre').textContent = 'Espace';
+        majBarrePlacementV2('arriveeV2', 'espace', '', 'Espace');
         var occ = espacesOccupesArrivee(c.meuble, c.rangee);
         var espaces = (CONFIG.meubles[c.meuble] && CONFIG.meubles[c.meuble][c.rangee]) ? CONFIG.meubles[c.meuble][c.rangee] : [];
         espaces = espaces.filter(function(e) { return occ.indexOf(String(e)) === -1; });
@@ -652,9 +662,9 @@ function construireDeplacerV2() {
 
   rendreEnteteActionV2('deplacer');
 
-  document.getElementById('deplacerV2-meuble-barre').textContent = 'Meuble';
-  document.getElementById('deplacerV2-rangee-barre').textContent = 'Rangée';
-  document.getElementById('deplacerV2-espace-barre').textContent = 'Espace';
+  majBarrePlacementV2('deplacerV2', 'meuble', '', 'Meuble');
+  majBarrePlacementV2('deplacerV2', 'rangee', '', 'Rangée');
+  majBarrePlacementV2('deplacerV2', 'espace', '', 'Espace');
   document.getElementById('deplacerV2-meuble-menu').innerHTML = '';
   document.getElementById('deplacerV2-rangee-menu').innerHTML = '';
   document.getElementById('deplacerV2-espace-menu').innerHTML = '';
@@ -712,10 +722,10 @@ function choisirMeubleDeplacer(meuble) {
   deplacerV2Choix.rangee = '';
   deplacerV2Choix.espace = '';
   document.getElementById('deplacerV2-aranger').style.display = 'none';
-  document.getElementById('deplacerV2-meuble-barre').textContent = meuble;
+  majBarrePlacementV2('deplacerV2', 'meuble', meuble, 'Meuble');
   document.getElementById('deplacerV2-meuble-menu').classList.remove('ouvert');
-  document.getElementById('deplacerV2-rangee-barre').textContent = 'Rangée';
-  document.getElementById('deplacerV2-espace-barre').textContent = 'Espace';
+  majBarrePlacementV2('deplacerV2', 'rangee', '', 'Rangée');
+  majBarrePlacementV2('deplacerV2', 'espace', '', 'Espace');
   document.getElementById('deplacerV2-espace-menu').innerHTML = '';
 
   var rangees = (CONFIG.meubles[meuble]) ? Object.keys(CONFIG.meubles[meuble]) : [];
@@ -729,9 +739,9 @@ function choisirMeubleDeplacer(meuble) {
 function choisirRangeeDeplacer(rangee) {
   deplacerV2Choix.rangee = rangee;
   deplacerV2Choix.espace = '';
-  document.getElementById('deplacerV2-rangee-barre').textContent = rangee;
+  majBarrePlacementV2('deplacerV2', 'rangee', rangee, 'Rangée');
   document.getElementById('deplacerV2-rangee-menu').classList.remove('ouvert');
-  document.getElementById('deplacerV2-espace-barre').textContent = 'Espace';
+  majBarrePlacementV2('deplacerV2', 'espace', '', 'Espace');
 
   var meuble = deplacerV2Choix.meuble;
   var espaces = (CONFIG.meubles[meuble] && CONFIG.meubles[meuble][rangee]) ? CONFIG.meubles[meuble][rangee] : [];
@@ -745,7 +755,7 @@ function choisirRangeeDeplacer(rangee) {
 
 function choisirEspaceDeplacer(espace) {
   deplacerV2Choix.espace = espace;
-  document.getElementById('deplacerV2-espace-barre').textContent = espace;
+  majBarrePlacementV2('deplacerV2', 'espace', espace, 'Espace');
   document.getElementById('deplacerV2-espace-menu').classList.remove('ouvert');
 
   var c = deplacerV2Choix;
@@ -755,7 +765,7 @@ function choisirEspaceDeplacer(espace) {
       return appelBackend('getInventoryData', {}).then(function(data) {
         if (data) ALL_DATA = data;
         c.espace = '';
-        document.getElementById('deplacerV2-espace-barre').textContent = 'Espace';
+        majBarrePlacementV2('deplacerV2', 'espace', '', 'Espace');
         var espaces = (CONFIG.meubles[c.meuble] && CONFIG.meubles[c.meuble][c.rangee]) ? CONFIG.meubles[c.meuble][c.rangee] : [];
         var occ = espacesOccupesArrivee(c.meuble, c.rangee);
         espaces = espaces.filter(function(e) { return occ.indexOf(String(e)) === -1; });

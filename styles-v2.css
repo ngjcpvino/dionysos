@@ -777,6 +777,15 @@ body::after {
 }
 .coche-panier.actif { background: var(--gold-30); }
 .coche-panier.actif::after { content: '✓'; color: var(--gold-2); font-size: var(--fs-14); }
+/* Le même rond, posé à droite d'un roundel de placement (Meuble · Rangée · Espace) :
+   en absolu pour ne pas décaler l'anneau, qui reste centré sur le roundel. */
+.roundel-coche {
+  position: absolute;
+  right: -32px;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 0;
+}
 
 .controle {
   display: flex;

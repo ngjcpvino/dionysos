@@ -219,3 +219,8 @@ Il ne reprenait que l'inventaire (et vidait l'historique) : ce que l'autre tél�
 - Il reprend maintenant `getInventoryData` **et** `getSuggestions`, puis **vide** `ALL_HISTORIQUE`, `ALL_NOTES`, `ALL_ACCORDS`, `ALL_RECETTES`, `ALL_CURIEUXBEGIN` — chacune se recharge à l'ouverture de sa page (ou à la prochaine recherche).
 - **Toujours pas rechargée : `CONFIG`** (voir Trous connus) — inchangé, accepté.
 - ⚠️ **Règle** : toute nouvelle liste gardée en mémoire doit être ajoutée à ce bouton, sinon elle vieillit en silence sur l'autre téléphone.
+
+## ⭕ Ronds à cocher sur le placement (20 septembre 2026)
+Sur **Ajouter** et **Déplacer**, chaque roundel **Meuble · Rangée · Espace** porte le rond vide de la Liste d'achat (`.coche-panier`, nouvelle pose `.roundel-coche` en absolu à droite pour ne pas décaler l'anneau). Il se coche dès que la valeur est choisie.
+- **Une seule fonction écrit les deux** : `majBarrePlacementV2(prefixe, champ, valeur, defaut)` — libellé ET rond. Ne jamais réécrire `…-barre.textContent` à la main, sinon le rond ment.
+- Changer de meuble décoche Rangée et Espace ; un espace refusé (`checkLocationAvailable`) décoche Espace.
