@@ -4599,7 +4599,7 @@ function groupeCurieuxBeginV2(g) {
     var url = 'https://cuisinez.telequebec.tv/recettes/' + a.recetteId + '/' + a.slug;
     var saison = a.saison ? 'Saison ' + a.saison + (a.episode ? '-' + a.episode : '') : '';
     return '<div class="carte histo-mets" onclick="window.open(\'' + url + '\', \'_blank\')">' +
-      '<div class="carte-centre"><span class="carte-titre">' + decodeHTML(a.plat || '') + '</span><span class="carte-sous">Curieux Bégin</span></div>' +
+      '<div class="carte-centre"><span class="carte-titre">' + decodeHTML(a.plat || '') + '</span></div>' +
       '<div class="carte-droite">' + saison + '</div></div>';
   }).join('');
 
