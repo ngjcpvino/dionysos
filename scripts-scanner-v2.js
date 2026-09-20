@@ -2141,6 +2141,7 @@ function ouvrirRechercheV2() {
   remplirFiltresRechercheV2();
   document.getElementById('rechercheV2-compte').textContent = '';
   document.getElementById('rechercheV2-cartes').innerHTML = '<div class="texte-secondaire">Tape un mot : vin, producteur, arôme, aliment, sommelier, recette…</div>';
+  RECHERCHE_V2_SECTION_OUVERTE = '';
   chargerSourcesRechercheV2();
 }
 
@@ -2256,6 +2257,8 @@ function toggleCaveRechercheV2() {
 
 // Limite d'affichage par section : au-delà, le mot est trop large pour être utile.
 var MAX_SECTION_RECHERCHE_V2 = 50;
+// Section d'accords dépliée (par son titre) : elle survit aux frappes suivantes.
+var RECHERCHE_V2_SECTION_OUVERTE = '';
 
 // Les listes d'accords ne sont chargées qu'à l'ouverture de leur page. La recherche
 // les fouille toutes : elle va chercher celles qui manquent (une fois par session ;
@@ -2330,7 +2333,7 @@ function lancerRechercheV2() {
 
   var sections = [];
   if (groups.length) {
-    sections.push({ titre: 'Vins', total: groups.length, montres: groups.length, html: groups.map(function(g) {
+    sections.push({ titre: 'Vins', pliable: false, total: groups.length, montres: groups.length, html: groups.map(function(g) {
       var w = g.wine;
       var nom = decodeHTML(w.Nom || '—');
       var sous = sousVinV2(w);
@@ -2397,11 +2400,21 @@ function lancerRechercheV2() {
   var total = sections.reduce(function(n, sec) { return n + sec.total; }, 0);
   compte.textContent = total + ' résultat' + (total > 1 ? 's' : '');
   if (!sections.length) { div.innerHTML = '<div class="texte-secondaire">Aucun résultat</div>'; return; }
-  div.innerHTML = sections.map(function(sec) {
+  var pliables = sections.filter(function(sec) { return sec.pliable; });
+  // Rien d'ouvert par défaut, sauf s'il n'y a aucun vin : la première section s'ouvre alors.
+  var titreOuvert = RECHERCHE_V2_SECTION_OUVERTE;
+  if (!pliables.some(function(sec) { return sec.titre === titreOuvert; })) {
+    titreOuvert = (sections.length && !sections[0].pliable) ? '' : (pliables.length ? pliables[0].titre : '');
+  }
+  div.innerHTML = sections.map(function(sec, i) {
     var reste = sec.total - sec.montres;
     var coupe = reste > 0 ? '<div class="texte-secondaire">' + reste + ' de plus — précise ton mot</div>' : '';
-    return '<div class="emp-meuble">' + sec.titre + '</div>' + sec.html + coupe;
+    if (!sec.pliable) return '<div class="emp-meuble">' + sec.titre + '</div>' + sec.html + coupe;
+    var ouvert = (sec.titre === titreOuvert);
+    return '<div class="emp-meuble emp-meuble-pliable' + (ouvert ? ' ouvert' : '') + '" onclick="basculerSectionRechercheV2(' + i + ')">' + sec.titre + '</div>' +
+           '<div id="rechercheV2-section-' + i + '" class="menu-liste' + (ouvert ? ' ouvert' : '') + '" data-titre="' + sec.titre + '">' + sec.html + coupe + '</div>';
   }).join('');
+  RECHERCHE_V2_SECTION_OUVERTE = titreOuvert;
 }
 
 // Une note ou une proposition corrigée depuis la recherche : remettre la liste à jour.
@@ -2411,10 +2424,24 @@ function rafraichirRechercheSiOuverteV2() {
 }
 
 // Ajoute une section de résultats, coupée à MAX_SECTION_RECHERCHE_V2 cartes.
+// Tout ce qui vient d'« Accord selon… » est pliable : la page reste lisible.
 function ajouterSectionRechercheV2(sections, titre, liste, rendu) {
   if (!liste.length) return;
   var montres = liste.slice(0, MAX_SECTION_RECHERCHE_V2);
-  sections.push({ titre: titre, total: liste.length, montres: montres.length, html: montres.map(function(x) { return rendu(x); }).join('') });
+  sections.push({ titre: titre, pliable: true, total: liste.length, montres: montres.length, html: montres.map(function(x) { return rendu(x); }).join('') });
+}
+
+// Une seule section d'accords ouverte à la fois ; elle le reste pendant qu'on tape.
+function basculerSectionRechercheV2(i) {
+  var cible = document.getElementById('rechercheV2-section-' + i);
+  if (!cible) return;
+  var etait = cible.classList.contains('ouvert');
+  Array.prototype.forEach.call(document.querySelectorAll('#rechercheV2-cartes .menu-liste'), function(d) { d.classList.remove('ouvert'); });
+  Array.prototype.forEach.call(document.querySelectorAll('#rechercheV2-cartes .emp-meuble-pliable'), function(t) { t.classList.remove('ouvert'); });
+  if (etait) { RECHERCHE_V2_SECTION_OUVERTE = ''; return; }
+  cible.classList.add('ouvert');
+  if (cible.previousElementSibling) cible.previousElementSibling.classList.add('ouvert');
+  RECHERCHE_V2_SECTION_OUVERTE = cible.getAttribute('data-titre') || '';
 }
 
 // ==================== MES NOTES D'ACCORD V2 ====================

@@ -443,6 +443,20 @@ body::after {
   letter-spacing: var(--ls-tight);
   margin: 0 0 var(--space-l) 0;
 }
+/* Titre de section qui se plie (sections « Accord selon… » de la recherche) :
+   même titre, plus un chevron qui tourne quand la section est ouverte. */
+.emp-meuble-pliable { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.emp-meuble-pliable::after {
+  content: '›';
+  display: inline-block;
+  margin-left: var(--space-s);
+  color: var(--gold);
+  transform: rotate(90deg);
+}
+.emp-meuble-pliable.ouvert::after { transform: rotate(-90deg); }
+/* Dans les résultats, un repli prend toute la largeur (le menu des panneaux, lui, est étroit). */
+#rechercheV2-cartes .menu-liste { width: 100%; margin: 0 0 var(--space-l) 0; }
+
 .emp-compte { color: var(--white-50); font-size: var(--fs-11); }
 .emp-compte-libre { color: var(--red); }
 .emp-rangee-nom { color: var(--white-50); font-size: var(--fs-13); }
