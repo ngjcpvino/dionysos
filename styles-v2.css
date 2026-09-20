@@ -777,15 +777,15 @@ body::after {
 }
 .coche-panier.actif { background: var(--gold-30); }
 .coche-panier.actif::after { content: '✓'; color: var(--gold-2); font-size: var(--fs-14); }
-/* Le même rond, posé à droite d'un roundel de placement (Meuble · Rangée · Espace) :
-   en absolu pour ne pas décaler l'anneau, qui reste centré sur le roundel. */
-.roundel-coche {
-  position: absolute;
-  right: -32px;
-  top: 50%;
-  transform: translateY(-50%);
-  margin-left: 0;
+/* Le même rond dans une ligne de choix (Meuble · Rangée · Espace des écrans de
+   placement) : la ligne garde son texte, le rond se pose à droite. */
+.item-liste.choix-placement {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-s);
 }
+.item-liste.choix-placement .coche-panier { width: 22px; height: 22px; margin-left: 0; }
 
 .controle {
   display: flex;

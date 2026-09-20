@@ -513,6 +513,14 @@ function meubleALibre(meuble) {
 // Le libellé d'un roundel de placement et son rond de coche vont toujours ensemble :
 // le texte montre la valeur choisie (ou le nom du champ), le rond n'est coché que si
 // une valeur est prise. Vaut pour Ajouter et pour Déplacer.
+// Une ligne de choix d'un écran de placement : le libellé + le rond vide de la Liste
+// d'achat, coché sur la valeur déjà prise. Montre qu'il FAUT choisir.
+function ligneChoixPlacementV2(valeur, appel, choisi) {
+  return '<div class="item-liste choix-placement' + (choisi ? ' actif' : '') + '" onclick="' + appel + '">' +
+         '<span>' + valeur + '</span>' +
+         '<span class="coche-panier' + (choisi ? ' actif' : '') + '"></span></div>';
+}
+
 function majBarrePlacementV2(prefixe, champ, valeur, defaut) {
   var barre = document.getElementById(prefixe + '-' + champ + '-barre');
   if (barre) barre.textContent = valeur || defaut;
@@ -548,7 +556,7 @@ function construireArriveeV2() {
   meubles = meubles.filter(function(m) { return meubleALibre(m); });
   meubles.sort(function(a, b) { return a.localeCompare(b); });
   menuMeuble.innerHTML = meubles.map(function(m) {
-    return '<div class="item-liste" onclick="choisirMeubleArrivee(\'' + m + '\')">' + m + '</div>';
+    return ligneChoixPlacementV2(m, 'choisirMeubleArrivee(&quot;' + m + '&quot;)', arriveeV2Choix.meuble === m);
   }).join('');
   menuMeuble.classList.remove('ouvert');
   document.getElementById('arriveeV2-rangee-menu').innerHTML = '';
@@ -590,7 +598,7 @@ function choisirMeubleArrivee(meuble) {
   rangees = rangees.filter(function(r) { return rangeeALibre(meuble, r); });
   rangees.sort(function(a, b) { return parseInt(a) - parseInt(b); });
   document.getElementById('arriveeV2-rangee-menu').innerHTML = rangees.map(function(r) {
-    return '<div class="item-liste" onclick="choisirRangeeArrivee(\'' + r + '\')">' + r + '</div>';
+    return ligneChoixPlacementV2(r, 'choisirRangeeArrivee(&quot;' + r + '&quot;)', String(arriveeV2Choix.rangee) === String(r));
   }).join('');
   document.getElementById('arriveeV2-espace-menu').innerHTML = '';
 }
@@ -608,7 +616,7 @@ function choisirRangeeArrivee(rangee) {
   espaces = espaces.filter(function(e) { return occ.indexOf(String(e)) === -1; });
   espaces.sort(function(a, b) { return parseInt(a) - parseInt(b); });
   document.getElementById('arriveeV2-espace-menu').innerHTML = espaces.map(function(e) {
-    return '<div class="item-liste" onclick="choisirEspaceArrivee(\'' + e + '\')">' + e + '</div>';
+    return ligneChoixPlacementV2(e, 'choisirEspaceArrivee(&quot;' + e + '&quot;)', String(arriveeV2Choix.espace) === String(e));
   }).join('');
 }
 
@@ -631,7 +639,7 @@ function choisirEspaceArrivee(espace) {
         espaces.sort(function(a, b) { return parseInt(a) - parseInt(b); });
         var menu = document.getElementById('arriveeV2-espace-menu');
         menu.innerHTML = espaces.map(function(e) {
-          return '<div class="item-liste" onclick="choisirEspaceArrivee(\'' + e + '\')">' + e + '</div>';
+          return ligneChoixPlacementV2(e, 'choisirEspaceArrivee(&quot;' + e + '&quot;)', false);
         }).join('');
         menu.classList.add('ouvert');
       });
@@ -705,7 +713,7 @@ function construireMeublesDeplacer() {
   meubles = meubles.filter(function(m) { return meubleALibre(m); });
   meubles.sort(function(a, b) { return a.localeCompare(b); });
   document.getElementById('deplacerV2-meuble-menu').innerHTML = meubles.map(function(m) {
-    return '<div class="item-liste" onclick="choisirMeubleDeplacer(\'' + m + '\')">' + m + '</div>';
+    return ligneChoixPlacementV2(m, 'choisirMeubleDeplacer(&quot;' + m + '&quot;)', deplacerV2Choix.meuble === m);
   }).join('');
 }
 
@@ -732,7 +740,7 @@ function choisirMeubleDeplacer(meuble) {
   rangees = rangees.filter(function(r) { return rangeeALibre(meuble, r); });
   rangees.sort(function(a, b) { return parseInt(a) - parseInt(b); });
   document.getElementById('deplacerV2-rangee-menu').innerHTML = rangees.map(function(r) {
-    return '<div class="item-liste" onclick="choisirRangeeDeplacer(\'' + r + '\')">' + r + '</div>';
+    return ligneChoixPlacementV2(r, 'choisirRangeeDeplacer(&quot;' + r + '&quot;)', String(deplacerV2Choix.rangee) === String(r));
   }).join('');
 }
 
@@ -749,7 +757,7 @@ function choisirRangeeDeplacer(rangee) {
   espaces = espaces.filter(function(e) { return occ.indexOf(String(e)) === -1; });
   espaces.sort(function(a, b) { return parseInt(a) - parseInt(b); });
   document.getElementById('deplacerV2-espace-menu').innerHTML = espaces.map(function(e) {
-    return '<div class="item-liste" onclick="choisirEspaceDeplacer(\'' + e + '\')">' + e + '</div>';
+    return ligneChoixPlacementV2(e, 'choisirEspaceDeplacer(&quot;' + e + '&quot;)', String(deplacerV2Choix.espace) === String(e));
   }).join('');
 }
 
@@ -772,7 +780,7 @@ function choisirEspaceDeplacer(espace) {
         espaces.sort(function(a, b) { return parseInt(a) - parseInt(b); });
         var menu = document.getElementById('deplacerV2-espace-menu');
         menu.innerHTML = espaces.map(function(e) {
-          return '<div class="item-liste" onclick="choisirEspaceDeplacer(\'' + e + '\')">' + e + '</div>';
+          return ligneChoixPlacementV2(e, 'choisirEspaceDeplacer(&quot;' + e + '&quot;)', false);
         }).join('');
         menu.classList.add('ouvert');
       });

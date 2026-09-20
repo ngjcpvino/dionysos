@@ -221,6 +221,7 @@ Il ne reprenait que l'inventaire (et vidait l'historique) : ce que l'autre tél�
 - ⚠️ **Règle** : toute nouvelle liste gardée en mémoire doit être ajoutée à ce bouton, sinon elle vieillit en silence sur l'autre téléphone.
 
 ## ⭕ Ronds à cocher sur le placement (20 septembre 2026)
-Sur **Ajouter** et **Déplacer**, chaque roundel **Meuble · Rangée · Espace** porte le rond vide de la Liste d'achat (`.coche-panier`, nouvelle pose `.roundel-coche` en absolu à droite pour ne pas décaler l'anneau). Il se coche dès que la valeur est choisie.
-- **Une seule fonction écrit les deux** : `majBarrePlacementV2(prefixe, champ, valeur, defaut)` — libellé ET rond. Ne jamais réécrire `…-barre.textContent` à la main, sinon le rond ment.
-- Changer de meuble décoche Rangée et Espace ; un espace refusé (`checkLocationAvailable`) décoche Espace.
+Une bouteille ne partait pas parce que l'**espace** n'avait pas été choisi, et rien ne le disait (le déplacement ne part qu'au choix de l'espace). Sur **Ajouter** et **Déplacer**, chaque **choix** des listes Meuble · Rangée · Espace porte donc le rond vide de la Liste d'achat (`.coche-panier`), coché sur la valeur prise.
+- **Le rond est sur les lignes de choix, PAS à côté du roundel** (essayé le 20 sept., refusé : ça défaisait le look).
+- **Un seul constructeur de ligne** : `ligneChoixPlacementV2(valeur, appel, choisi)` (+ `.item-liste.choix-placement` pour poser le rond à droite). Les huit listes des deux écrans passent par lui.
+- Le libellé du roundel reste écrit par `majBarrePlacementV2(prefixe, champ, valeur, defaut)` — ne jamais réécrire `…-barre.textContent` à la main.
