@@ -143,7 +143,7 @@ function _afficherSpinner(texte) {
   if (!overlay) {
     overlay = document.createElement('div');
     overlay.id = 'spinner-overlay';
-    overlay.innerHTML = '<div class="spinner-verre-wrap"><div class="spinner-verre"></div><div class="spinner-pied"></div><div class="spinner-base"></div></div><div class="spinner-texte" id="spinner-texte"></div>';
+    overlay.innerHTML = '<div class="spinner-verre-wrap"><div class="spinner-verre"></div><svg class="spinner-trace" viewBox="54 34 74 114"><path d="M59.5 38.5 L121.5 38.5 C122.5 52 123 64 121.5 78 C119.5 94 108 105.5 90.5 105.5 C73 105.5 61.5 94 59.5 78 C58 64 58.5 52 59.5 38.5 Z"/><path d="M90.5 105.5 V144 M69.5 144 H111.5"/></svg></div><div class="spinner-texte" id="spinner-texte"></div>';
     document.body.appendChild(overlay);
   }
   if (overlay.style.display !== 'flex' || (texte || '').trim() !== '') {
