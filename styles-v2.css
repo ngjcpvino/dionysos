@@ -341,9 +341,9 @@ body::after {
 }
 .spinner-verre-wrap { display: flex; flex-direction: column; align-items: center; }
 .spinner-verre {
-  width: 60px; height: 75px;
-  border: var(--largeur-bordure-2) solid var(--gold); border-top: none;
-  border-radius: 0 0 30px 30px;
+  width: 60px; height: 80px;
+  border: var(--largeur-bordure-2) solid var(--gold);
+  border-radius: 5px 5px 30px 30px / 30px 30px 50px 50px;
   position: relative; overflow: hidden;
   background: rgba(255,255,255,0.05);
 }
