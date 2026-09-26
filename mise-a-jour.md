@@ -226,3 +226,8 @@ Une bouteille ne partait pas parce que l'**espace** n'avait pas été choisi, et
 - **Le rond est sur les lignes de choix, PAS à côté du roundel** (essayé le 20 sept., refusé : ça défaisait le look).
 - **Un seul constructeur de ligne** : `ligneChoixPlacementV2(valeur, appel, choisi)` (+ `.item-liste.choix-placement` pour poser le rond à droite). Les huit listes des deux écrans passent par lui.
 - Le libellé du roundel reste écrit par `majBarrePlacementV2(prefixe, champ, valeur, defaut)` — ne jamais réécrire `…-barre.textContent` à la main.
+
+## 🍇 Cave — filtre Cépage = cépage principal (26 septembre 2026)
+- Le filtre **Cépages** de la cave ne retient que les vins dont c'est le **cépage principal** (premier, `cepageDominant`), comparé par `memeTexteV2` — un vin qui le contient en 2e/3e position n'apparaît plus.
+- Le menu Cépages ne propose donc que des cépages principaux (sinon un choix donnerait une liste vide). Les menus en aval (Pays, Appellation…) suivent la même règle.
+- Ne touche QUE la cave (`remplirFiltresCaveV2` / `appliquerFiltresCaveV2`) ; la Recherche garde « contient ».

@@ -3787,7 +3787,7 @@ function remplirFiltresCaveV2() {
 
   var forCouleur = base;
   var forCepage = f.couleur ? base.filter(function(i){ return i.Couleur === f.couleur; }) : base;
-  var forPays = forCepage.filter(function(i){ return !f.cepage || contientTexteV2(i.Cepage, f.cepage); });
+  var forPays = forCepage.filter(function(i){ return !f.cepage || memeTexteV2(cepageDominant(i), f.cepage); });
   var forAppellation = forPays.filter(function(i){ return !f.pays || i.Pays === f.pays; });
   var forAccords = forAppellation.filter(function(i){ return !f.appellation || i.Appellation === f.appellation; });
   var forPastille = forAccords.filter(function(i){ return !f.accords || (i.Accords && i.Accords.indexOf(f.accords) !== -1); });
@@ -3796,7 +3796,7 @@ function remplirFiltresCaveV2() {
   var sets = { couleur: {}, cepage: {}, pays: {}, appellation: {}, accords: {}, pastille: {}, acidite: {} };
   function retenir(cle, v) { var k = normaliserRechercheV2(v); if (v && !sets[cle][k]) sets[cle][k] = v; }
   forCouleur.forEach(function(i){ retenir('couleur', i.Couleur); });
-  forCepage.forEach(function(i){ (i.Cepage || '').split(',').map(function(x){return x.trim();}).filter(Boolean).forEach(function(x){ retenir('cepage', x); }); });
+  forCepage.forEach(function(i){ retenir('cepage', cepageDominant(i)); });
   forPays.forEach(function(i){ retenir('pays', i.Pays); });
   forAppellation.forEach(function(i){ retenir('appellation', i.Appellation); });
   forAccords.forEach(function(i){ (i.Accords || '').split(',').map(function(x){return x.trim();}).filter(Boolean).forEach(function(x){ retenir('accords', x); }); });
@@ -3852,7 +3852,7 @@ function appliquerFiltresCaveV2() {
 
   var filtered = (ALL_DATA || []).filter(function(i) {
     return (!c || i.Couleur === c) &&
-      (!cep || contientTexteV2(i.Cepage, cep)) &&
+      (!cep || memeTexteV2(cepageDominant(i), cep)) &&
       (!p || i.Pays === p) &&
       (!app || i.Appellation === app) &&
       (!a || (i.Accords && i.Accords.indexOf(a) !== -1)) &&
