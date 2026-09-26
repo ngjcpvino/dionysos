@@ -231,3 +231,7 @@ Une bouteille ne partait pas parce que l'**espace** n'avait pas été choisi, et
 - Le filtre **Cépages** de la cave ne retient que les vins dont c'est le **cépage principal** (premier, `cepageDominant`), comparé par `memeTexteV2` — un vin qui le contient en 2e/3e position n'apparaît plus.
 - Le menu Cépages ne propose donc que des cépages principaux (sinon un choix donnerait une liste vide). Les menus en aval (Pays, Appellation…) suivent la même règle.
 - Ne touche QUE la cave (`remplirFiltresCaveV2` / `appliquerFiltresCaveV2`) ; la Recherche garde « contient ».
+
+## 📷 Photo SAQ du crayon (26 septembre 2026)
+- `majPhotoSAQ` (backend) ne va chercher la photo que si la case **Photo URL** du Sheet est vide — un lien déjà là (même brisé) est gardé et renvoyé avec « succès ». Le front (`photoSAQDepuisEditV2`) **vide donc d'abord la case** (`updateWineField` 'Photo URL'), puis appelle `majPhotoSAQ` ; échec → l'ancien lien est remis.
+- Au succès, la fiche derrière le crayon est redessinée (`afficherFicheV2`) — plus besoin d'enregistrer ni de rouvrir.

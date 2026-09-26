@@ -1121,20 +1121,30 @@ function photoSAQDepuisEditV2() {
   var champSaq = document.getElementById('editV2-codesaq');
   var codeSAQ = (champSaq && champSaq.value.trim()) || (CURRENT_WINE_DATA && CURRENT_WINE_DATA['Code SAQ']) || '';
   if (!codeSAQ) { afficherMessage('Aucun code SAQ'); return; }
-  appelBackend('majPhotoSAQ', { codebarre: CURRENT_WINE_CODEBARRE, codeSAQ: codeSAQ }, { spinner: 'Photo SAQ' }).then(function(res) {
-    if (res && res.success) {
+  var cb = CURRENT_WINE_CODEBARRE;
+  var ancien = (CURRENT_WINE_DATA && CURRENT_WINE_DATA['Photo URL']) || '';
+  // Le backend ne va chercher la photo que si la case est vide : on la vide d'abord
+  function remettreAncien() {
+    if (ancien) appelBackend('updateWineField', { codebarre: cb, field: 'Photo URL', value: ancien }).catch(function() {});
+  }
+  var vider = ancien ? appelBackend('updateWineField', { codebarre: cb, field: 'Photo URL', value: '' }, { spinner: 'Photo SAQ' }) : Promise.resolve();
+  vider.then(function() {
+    return appelBackend('majPhotoSAQ', { codebarre: cb, codeSAQ: codeSAQ }, { spinner: 'Photo SAQ' });
+  }).then(function(res) {
+    if (res && res.success && res.photoURL) {
       var champPhoto = document.getElementById('editV2-photo');
       if (champPhoto) champPhoto.value = res.photoURL;
-      majMemoireVinV2(CURRENT_WINE_CODEBARRE, { 'Photo URL': res.photoURL });
+      majMemoireVinV2(cb, { 'Photo URL': res.photoURL });
       if (CURRENT_WINE_DATA) {
         CURRENT_WINE_DATA['Photo URL'] = res.photoURL;
         afficherFicheV2({ wine: CURRENT_WINE_DATA, bottles: CURRENT_WINE_BOTTLES });
       }
       afficherMessage('Photo mise à jour');
     } else {
+      remettreAncien();
       afficherMessage((res && res.message) || 'Photo introuvable');
     }
-  }).catch(function(err) { afficherMessage('Erreur: ' + err); });
+  }).catch(function(err) { remettreAncien(); afficherMessage('Erreur: ' + err); });
 }
 
 function sauverEditFicheV2() {
