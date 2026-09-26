@@ -1126,7 +1126,10 @@ function photoSAQDepuisEditV2() {
       var champPhoto = document.getElementById('editV2-photo');
       if (champPhoto) champPhoto.value = res.photoURL;
       majMemoireVinV2(CURRENT_WINE_CODEBARRE, { 'Photo URL': res.photoURL });
-      if (CURRENT_WINE_DATA) CURRENT_WINE_DATA['Photo URL'] = res.photoURL;
+      if (CURRENT_WINE_DATA) {
+        CURRENT_WINE_DATA['Photo URL'] = res.photoURL;
+        afficherFicheV2({ wine: CURRENT_WINE_DATA, bottles: CURRENT_WINE_BOTTLES });
+      }
       afficherMessage('Photo mise à jour');
     } else {
       afficherMessage((res && res.message) || 'Photo introuvable');
