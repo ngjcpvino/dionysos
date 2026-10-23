@@ -247,7 +247,7 @@ Une bouteille ne partait pas parce que l'**espace** n'avait pas été choisi, et
   - **Sommeliers au scan (23 oct.) — en discussion** : pour 1-2-3, montrer que le vin est cité par un de mes sommeliers (`ALL_SUGGESTIONS` par code SAQ). Pour le 3, c'est l'info de base de l'écran. **Contenu retenu : nom du sommelier + sa note** (pas la date). Placement à jaser.
   - **Curieux Bégin au scan — idée retenue, à jaser** : il cite des vins par code SAQ (`ALL_CURIEUXBEGIN`), même absents de ma cave → touche aussi le cas 4.
   - **Maquettes des 4 écrans montrées (23 oct.)** : sommeliers en or sous l'origine (nom + note, tous), puis « Comparable », puis les ronds. Rien de codé.
-  - **Même scan à la maison et en succursale** (rappel de l'utilisateur) : l'écran du scan doit servir les deux moments — agir chez soi (boire, ranger) et décider en succursale (acheter).
+  - **Même scan à la maison et en succursale** (rappel de l'utilisateur) : l'écran du scan doit servir les deux moments — agir chez soi (boire, ranger) et décider en succursale (acheter). **Tranché : le même écran à la maison, c'est OK** (sommeliers, Curieux Bégin et Comparables au-dessus des ronds, partout).
   - **Réseau lent en succursale** : à reparler plus tard (demande de l'utilisateur).
   - **Ordre sous l'origine (23 oct.)** : Sommeliers → **Selon Curieux Bégin** → **Comparables** (au pluriel). Rien de codé.
   - **Compte « 3-2 » (23 oct.)** : « en cave » disparaît des lignes de Comparables ; à la place « 3-2 » = 3 dans la cave, 2 en stock. Sens exact du 2 (vins ou bouteilles) à confirmer.
