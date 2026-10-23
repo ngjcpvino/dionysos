@@ -19,6 +19,7 @@
 
 ## Changements de code — LE PLUS IMPORTANT
 - **Jamais de code sans OK explicite. On DIALOGUE avant de coder** : dire en clair ce qui va changer, attendre le OK, PUIS appliquer. Ne pas partir en silence puis livrer du code non demandé.
+- **Jaser avant de coder (23 oct. 2026)** : sur un besoin nouveau, ouvrir la discussion — demander comment l'utilisateur vit la situation, offrir des pistes OUVERTES, laisser de la latitude. Jamais un plan bouclé « c'est ça et pas autre chose ». Le vin, c'est le goût et le feeling de l'utilisateur : c'est lui qui les apporte.
 - **L'IA modifie les fichiers du dépôt directement** (`index-v2.html`, `scripts-*-v2.js`, `styles-v2.css`) — plus de « Trouve / Remplace » à copier à la main. L'utilisateur relit et publie quand il veut (souvent une seule fois, à la fin d'une série).
 - **`Code.gs` est hors dépôt** (Apps Script). L'IA en garde une copie locale dans le dossier (`Code.gs`, gitignorée) et la modifie ; l'utilisateur fait **un seul copier-coller** de tout le fichier dans Apps Script, puis **redéploie** (Gérer les déploiements → nouvelle version). Ne jamais donner de Trouve/Remplace pour le backend.
 - **Aller vite : regrouper** les changements sans dépendance et les appliquer d'un coup. Ne découper (et attendre un OK au milieu) que si une étape doit être validée AVANT que la suivante ait du sens.
