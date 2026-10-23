@@ -207,7 +207,9 @@ function remplirEnteteVinInconnuV2(codeSAQ) {
   var titre = document.getElementById('vinInconnuV2-titre');
   var sous = document.getElementById('vinInconnuV2-soustitre');
   var nomInput = document.getElementById('vinInconnuV2-nom');
+  var cave = document.getElementById('vinInconnuV2-cave');
   if (!titre || !sous) return;
+  if (cave) cave.innerHTML = ''; // jamais le bloc du vin scanné avant
   if (!codeSAQ) {
     titre.textContent = 'Vin inconnu';
     sous.textContent = "Ce vin n'est pas dans ta cave";
@@ -221,8 +223,47 @@ function remplirEnteteVinInconnuV2(codeSAQ) {
       titre.textContent = decodeHTML((d.nom || 'Vin inconnu').toString());
       var org = [d.pays, d.region, d.appellation, d.cepages].filter(Boolean).map(function(x) { return decodeHTML(x.toString()); }).join(' · ');
       sous.textContent = org || "Ce vin n'est pas dans ta cave";
+      // Réponse d'un scan précédent arrivée en retard : on ne la mélange pas au vin affiché
+      if ((document.getElementById('vinInconnuV2-codesaq').value || '').replace(/\D/g, '').trim() === codeSAQ.toString().trim()) {
+        rendreDansMaCaveV2(d.appellation, cepageDominant({ Cepage: d.cepages }));
+      }
     }
   }).catch(function() {});
+}
+
+// « Dans ma cave » (vin inconnu) : mes vins de la même appellation et du même cépage PRINCIPAL (comme le filtre de la cave).
+// Propositions exclues ; ceux qui ont des bouteilles d'abord, puis (voilés) ceux déjà eus. Une seule liste ouverte à la fois.
+function rendreDansMaCaveV2(appellation, cepage) {
+  var div = document.getElementById('vinInconnuV2-cave');
+  if (!div) return;
+  appellation = decodeHTML((appellation || '').toString()).trim();
+  cepage = decodeHTML((cepage || '').toString()).replace(/\d+\s*%/g, '').trim();
+  var groupes = grouperVinsV2((ALL_DATA || []).filter(function(w) { return (w.Statut || '') !== 'Suggestion'; }));
+  var lignes = [];
+  if (appellation) lignes.push({ libelle: 'Appellation ' + appellation, vins: groupes.filter(function(g) { return memeTexteV2(decodeHTML((g.wine.Appellation || '').toString()), appellation); }) });
+  if (cepage) lignes.push({ libelle: 'Cépage ' + cepage, vins: groupes.filter(function(g) { return memeTexteV2(decodeHTML(cepageDominant(g.wine)), cepage); }) });
+  if (!lignes.length) { div.innerHTML = ''; return; }
+  var html = '<div class="section"><h3 class="titre-2">Dans ma cave</h3><div class="menu-liste ouvert">';
+  lignes.forEach(function(l, i) {
+    var enCave = l.vins.filter(function(g) { return g.count > 0; });
+    var etat = enCave.length ? (enCave.length + ' en cave') : (l.vins.length ? 'aucun en cave' : 'aucun');
+    if (!l.vins.length) { html += '<div class="item-liste multiligne">' + l.libelle + ' — ' + etat + '</div>'; return; }
+    var deja = l.vins.filter(function(g) { return !g.count; });
+    html += '<div class="item-liste multiligne" id="vinInconnuV2-cave-' + i + '-titre" onclick="basculerDansMaCaveV2(' + i + ')">' + l.libelle + ' — ' + etat + '</div>';
+    html += '<div id="vinInconnuV2-cave-' + i + '" style="display:none;">' + enCave.concat(deja).map(function(g) { return carteGroupeVinV2(g, 'vininconnu'); }).join('') + '</div>';
+  });
+  div.innerHTML = html + '</div></div>';
+}
+
+function basculerDansMaCaveV2(quel) {
+  [0, 1].forEach(function(k) {
+    var volet = document.getElementById('vinInconnuV2-cave-' + k);
+    var titre = document.getElementById('vinInconnuV2-cave-' + k + '-titre');
+    if (!volet) return;
+    var ouvrir = (k === quel) && volet.style.display === 'none';
+    volet.style.display = ouvrir ? '' : 'none';
+    if (titre) titre.classList.toggle('actif', ouvrir);
+  });
 }
 
 function ouvrirVinInconnuV2(code) {
@@ -2255,6 +2296,21 @@ function toggleCaveRechercheV2() {
   lancerRechercheV2();
 }
 
+// Carte d'un vin groupé (grouperVinsV2) : photo, nom, origine, « X btl » + emplacements, voilée à 0 bouteille → sa fiche.
+// Même carte dans la recherche et dans « Dans ma cave » du vin inconnu.
+function carteGroupeVinV2(g, provenance) {
+  var w = g.wine;
+  var nom = decodeHTML(w.Nom || '—');
+  var sous = sousVinV2(w);
+  var photo = w['Photo URL'] ? '<div class="carte-photo"><img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
+  var onclick = g.cb ? ' onclick="ouvrirApresTap(function(){ouvrirFicheV2(\'' + g.cb + '\', \'' + provenance + '\')})"' : '';
+  var vide = g.count === 0 ? ' carte-vide' : '';
+  var emp = (g.emplacements && g.emplacements.length) ? '<br>' + g.emplacements.join('<br>') : '';
+  return '<div class="carte ' + couleurClasseV2(w.Couleur) + vide + '"' + onclick + '>' + photo +
+         '<div class="carte-centre"><span class="carte-titre">' + nom + '</span><span class="carte-sous">' + sous + '</span></div>' +
+         '<div class="carte-droite">' + caseDroiteV2(w, g.count) + emp + '</div></div>';
+}
+
 // Limite d'affichage par section : au-delà, le mot est trop large pour être utile.
 var MAX_SECTION_RECHERCHE_V2 = 50;
 // Section d'accords dépliée (par son titre) : elle survit aux frappes suivantes.
@@ -2333,18 +2389,7 @@ function lancerRechercheV2() {
 
   var sections = [];
   if (groups.length) {
-    sections.push({ titre: 'Vins', pliable: false, total: groups.length, montres: groups.length, html: groups.map(function(g) {
-      var w = g.wine;
-      var nom = decodeHTML(w.Nom || '—');
-      var sous = sousVinV2(w);
-      var photo = w['Photo URL'] ? '<div class="carte-photo"><img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
-      var onclick = g.cb ? ' onclick="ouvrirApresTap(function(){ouvrirFicheV2(\'' + g.cb + '\', \'recherche\')})"' : '';
-      var vide = g.count === 0 ? ' carte-vide' : '';
-      var emp = (g.emplacements && g.emplacements.length) ? '<br>' + g.emplacements.join('<br>') : '';
-      return '<div class="carte ' + couleurClasseV2(w.Couleur) + vide + '"' + onclick + '>' + photo +
-             '<div class="carte-centre"><span class="carte-titre">' + nom + '</span><span class="carte-sous">' + sous + '</span></div>' +
-             '<div class="carte-droite">' + caseDroiteV2(w, g.count) + emp + '</div></div>';
-    }).join('') });
+    sections.push({ titre: 'Vins', pliable: false, total: groups.length, montres: groups.length, html: groups.map(function(g) { return carteGroupeVinV2(g, 'recherche'); }).join('') });
   }
 
   if (terme.length >= 2) {
