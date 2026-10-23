@@ -2354,7 +2354,7 @@ function lancerRechercheV2() {
 
     // --- Mes notes : aliments, ce que ça appelle, qui l'a dit
     var notes = (ALL_NOTES || []).filter(function(n) { return contient([n.aliments, n.appelle, n.source]); });
-    ajouterSectionRechercheV2(sections, 'Mes notes', notes, function(n) { return groupeNoteV2(n, tousVins); });
+    ajouterSectionRechercheV2(sections, 'Mes notes', notes, function(n) { return groupeNoteV2(n, tousVins, 'recherche'); });
 
     // --- Propositions : sommelier, note, nom du vin
     var props = (ALL_SUGGESTIONS || []).filter(function(sg) {
@@ -2394,7 +2394,7 @@ function lancerRechercheV2() {
       if (!parCb[cs]) parCb[cs] = { codeSAQ: cs, wine: infos[cs] || null, ref: a, items: [] };
       parCb[cs].items.push(a);
     });
-    ajouterSectionRechercheV2(sections, 'Curieux Bégin', Object.keys(parCb).map(function(k) { return parCb[k]; }), groupeCurieuxBeginV2);
+    ajouterSectionRechercheV2(sections, 'Curieux Bégin', Object.keys(parCb).map(function(k) { return parCb[k]; }), function(g) { return groupeCurieuxBeginV2(g, 'recherche'); });
   }
 
   var total = sections.reduce(function(n, sec) { return n + sec.total; }, 0);
@@ -2551,8 +2551,9 @@ function afficherNotesV2() {
   div.innerHTML = liste.map(function(n) { return groupeNoteV2(n, groupes); }).join('');
 }
 
-// Une note + les vins qu'elle appelle : même bloc sur la page Mes notes et dans la recherche.
-function groupeNoteV2(n, groupes) {
+// Une note + les vins qu'elle appelle : même bloc sur la page Mes notes et dans la recherche (provenance 'recherche').
+// La fiche est sous cette page dans le HTML : depuis la page, on la ferme avant d'ouvrir la fiche (le ✕ la rouvre).
+function groupeNoteV2(n, groupes, provenance) {
   var sous = [n.aliments, n.source].filter(Boolean).join(' · ');
   var carteNote = '<div class="carte histo-vin">' +
            '<div class="carte-centre"><span class="carte-titre">' + (n.appelle || '—') + '</span><span class="carte-sous">' + sous + '</span></div>' +
@@ -2563,7 +2564,8 @@ function groupeNoteV2(n, groupes) {
   var cartesVins = vins.map(function(g) {
     var w = g.wine;
     var cb = (w['Code-barres'] || '').toString().trim();
-    var onclick = cb ? ' onclick="ouvrirApresTap(function(){ouvrirFicheV2(\'' + cb + '\', \'notes\')})"' : '';
+    var ouvrir = provenance === 'recherche' ? 'ouvrirFicheV2(\'' + cb + '\', \'recherche\')' : 'fermerNotesV2();ouvrirFicheV2(\'' + cb + '\', \'notes\')';
+    var onclick = cb ? ' onclick="ouvrirApresTap(function(){' + ouvrir + '})"' : '';
     var photo = w['Photo URL'] ? '<div class="carte-photo"><img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
     return '<div class="carte histo-mets ' + couleurClasseV2(w.Couleur) + '"' + onclick + '>' + photo +
       '<div class="carte-centre"><span class="carte-titre">' + decodeHTML(w.Nom || '—') + '</span><span class="carte-sous">' + sousVinV2(w) + '</span></div>' +
@@ -4432,13 +4434,14 @@ function retourVinsSelonSaqV2() {
 }
 
 // ==================== SELON CURIEUX BÉGIN V2 ====================
-// Page façon « Suggestions » : groupée par vin (carte du vin → sa fiche), puis les recettes dessous (→ la recette).
-var filtresCurieuxBeginV2 = { couleur: '', cave: false, mode: 'mesvins' };
+// Page façon « Suggestions » : une section par saison (la plus récente en haut), groupée par vin dedans
+// (carte du vin → sa fiche), puis les recettes dessous (→ la recette).
+var filtresCurieuxBeginV2 = { saison: '', couleur: '', cave: false, mode: 'mesvins' };
 
 function ouvrirCurieuxBeginV2() {
   document.getElementById('curieuxBeginV2Container').style.display = 'flex';
   remonterScrollV2('curieuxBeginV2Container');
-  filtresCurieuxBeginV2 = { couleur: '', cave: false, mode: 'mesvins' };
+  filtresCurieuxBeginV2 = { saison: '', couleur: '', cave: false, mode: 'mesvins' };
   var champ = document.getElementById('curieuxBeginV2-f-texte');
   if (champ) champ.value = '';
   if (ALL_CURIEUXBEGIN) { remplirFiltresCurieuxBeginV2(); chargerCurieuxBeginV2(); return; }
@@ -4462,6 +4465,25 @@ function fermerFiltresCurieuxBeginV2() {
 
 function remplirFiltresCurieuxBeginV2() {
   var f = filtresCurieuxBeginV2;
+  // Saisons du mode affiché seulement (sinon un choix donnerait une liste vide), la plus récente en haut
+  var infos = saqInfosV2();
+  var vuesSaison = {};
+  var saisons = [];
+  (ALL_CURIEUXBEGIN || []).forEach(function(a) {
+    var s = (a.saison || '').toString().trim();
+    if (s && !vuesSaison[s] && cbDansModeV2(a, infos)) { vuesSaison[s] = true; saisons.push(s); }
+  });
+  saisons.sort(function(a, b) { return numeroCbV2(b) - numeroCbV2(a); });
+  if (f.saison && !vuesSaison[f.saison]) f.saison = '';
+  var menuSaison = document.getElementById('curieuxBeginV2-f-saison-menu');
+  if (menuSaison) {
+    menuSaison.innerHTML = saisons.map(function(v) {
+      return '<div class="item-liste' + (v === f.saison ? ' actif' : '') + '" onclick="choisirFiltreCurieuxBeginV2(\'saison\', \'' + v.replace(/'/g, "\\'") + '\')">Saison ' + v + '</div>';
+    }).join('');
+  }
+  var dispSaison = document.getElementById('curieuxBeginV2-f-saison-display');
+  if (dispSaison) dispSaison.textContent = f.saison ? 'Saison ' + f.saison : 'Saisons';
+
   var couleurs = uniqueValeursAchat(ALL_DATA || [], 'Couleur');
   var menuCoul = document.getElementById('curieuxBeginV2-f-couleur-menu');
   if (menuCoul) {
@@ -4481,7 +4503,7 @@ function remplirFiltresCurieuxBeginV2() {
 
 function choisirModeCurieuxBeginV2(mode) {
   filtresCurieuxBeginV2.mode = mode;
-  if (mode === 'horscave') filtresCurieuxBeginV2.cave = false; // « en cave » n'a pas de sens pour les vins que je n'ai pas
+  if (mode === 'horscave') filtresCurieuxBeginV2.cave = false; // « en cave » n'a pas de sens pour les vins à découvrir
   remplirFiltresCurieuxBeginV2();
   chargerCurieuxBeginV2();
 }
@@ -4489,7 +4511,7 @@ function choisirModeCurieuxBeginV2(mode) {
 function basculerFiltreCurieuxBeginV2(cle) {
   var menu = document.getElementById('curieuxBeginV2-f-' + cle + '-menu');
   var ouvert = menu.classList.contains('ouvert');
-  ['couleur'].forEach(function(k) {
+  ['saison', 'couleur'].forEach(function(k) {
     document.getElementById('curieuxBeginV2-f-' + k + '-menu').classList.remove('ouvert');
   });
   if (!ouvert) menu.classList.add('ouvert');
@@ -4509,14 +4531,28 @@ function toggleCaveCurieuxBeginV2() {
 }
 
 function reinitialiserFiltresCurieuxBeginV2() {
-  filtresCurieuxBeginV2 = { couleur: '', cave: false, mode: 'mesvins' };
+  filtresCurieuxBeginV2 = { saison: '', couleur: '', cave: false, mode: 'mesvins' };
   var champ = document.getElementById('curieuxBeginV2-f-texte');
   if (champ) champ.value = '';
-  var menu = document.getElementById('curieuxBeginV2-f-couleur-menu');
-  if (menu) menu.classList.remove('ouvert');
+  ['saison', 'couleur'].forEach(function(k) {
+    var menu = document.getElementById('curieuxBeginV2-f-' + k + '-menu');
+    if (menu) menu.classList.remove('ouvert');
+  });
   remplirFiltresCurieuxBeginV2();
   chargerCurieuxBeginV2();
   fermerFiltresCurieuxBeginV2();
+}
+
+// Vrai si l'accord appartient au mode affiché : « Mes vins » = j'ai ce code SAQ ; « Vins à découvrir » = je ne l'ai pas.
+function cbDansModeV2(a, infos) {
+  var possede = !!infos[(a.codeSAQ || '').toString().trim()];
+  return filtresCurieuxBeginV2.mode === 'horscave' ? !possede : possede;
+}
+
+// Numéro de saison ou d'épisode (texte ou nombre du Sheet) ; vide → -1, classé en dernier.
+function numeroCbV2(v) {
+  var n = parseInt(v, 10);
+  return isNaN(n) ? -1 : n;
 }
 
 function chargerCurieuxBeginV2() {
@@ -4533,9 +4569,10 @@ function chargerCurieuxBeginV2() {
     var cs = (a.codeSAQ || '').toString().trim();
     var w = infos[cs];
     var possede = !!w;
-    // modes exclusifs : « Mes vins » = mes vins ; « Vins que je n'ai pas » = les autres
-    if (f.mode === 'horscave') { if (possede) return false; }
-    else { if (!possede) return false; if (f.cave && !bouteillesEnCaveParSAQV2(cs)) return false; }
+    // modes exclusifs : « Mes vins » = mes vins ; « Vins à découvrir » = les autres
+    if (!cbDansModeV2(a, infos)) return false;
+    if (possede && f.cave && !bouteillesEnCaveParSAQV2(cs)) return false;
+    if (f.saison && (a.saison || '').toString().trim() !== f.saison) return false;
     if (cibleCoul) {
       var cc = possede ? couleurClasseV2(w.Couleur) : couleurClasseV2(a.type);
       if (cc !== cibleCoul) return false;
@@ -4547,30 +4584,45 @@ function chargerCurieuxBeginV2() {
     return true;
   });
 
-  var grouped = {};
+  // Une section par saison ; dedans, un bloc par vin avec les recettes de cette saison.
+  var parSaison = {};
+  var vins = {};
   base.forEach(function(a) {
+    var s = (a.saison || '').toString().trim();
     var cs = (a.codeSAQ || '').toString().trim();
-    if (!grouped[cs]) grouped[cs] = { codeSAQ: cs, wine: infos[cs] || null, ref: a, items: [] };
-    grouped[cs].items.push(a);
+    vins[cs] = true;
+    if (!parSaison[s]) parSaison[s] = {};
+    if (!parSaison[s][cs]) parSaison[s][cs] = { codeSAQ: cs, wine: infos[cs] || null, ref: a, items: [] };
+    parSaison[s][cs].items.push(a);
   });
-  var groupes = Object.keys(grouped).map(function(k) { return grouped[k]; });
-  groupes.sort(function(a, b) {
-    var na = a.wine ? decodeHTML(a.wine.Nom || '') : decodeHTML(a.ref.vin || '');
-    var nb = b.wine ? decodeHTML(b.wine.Nom || '') : decodeHTML(b.ref.vin || '');
-    return na.localeCompare(nb);
-  });
+  var nbVins = Object.keys(vins).length;
 
   var loupe = document.getElementById('curieuxBeginV2-loupe');
-  if (loupe) loupe.classList.toggle('actif', !!(f.couleur || f.cave || q));
+  if (loupe) loupe.classList.toggle('actif', !!(f.saison || f.couleur || f.cave || q));
 
-  compte.textContent = groupes.length + ' vin' + (groupes.length > 1 ? 's' : '');
-  if (!groupes.length) { div.innerHTML = '<div class="texte-secondaire">Aucun accord</div>'; return; }
+  compte.textContent = nbVins + ' vin' + (nbVins > 1 ? 's' : '');
+  if (!nbVins) { div.innerHTML = '<div class="texte-secondaire">Aucun accord</div>'; return; }
 
-  div.innerHTML = groupes.map(groupeCurieuxBeginV2).join('');
+  function nomGroupe(g) { return g.wine ? decodeHTML(g.wine.Nom || '') : decodeHTML(g.ref.vin || ''); }
+  // Saison la plus récente en haut ; dans la saison, les épisodes les plus récents d'abord.
+  var saisons = Object.keys(parSaison).sort(function(a, b) { return numeroCbV2(b) - numeroCbV2(a); });
+  div.innerHTML = saisons.map(function(s) {
+    var groupes = Object.keys(parSaison[s]).map(function(k) {
+      var g = parSaison[s][k];
+      g.items.sort(function(a, b) { return numeroCbV2(b.episode) - numeroCbV2(a.episode); });
+      return g;
+    });
+    groupes.sort(function(a, b) {
+      return (numeroCbV2(b.items[0].episode) - numeroCbV2(a.items[0].episode)) || nomGroupe(a).localeCompare(nomGroupe(b));
+    });
+    return '<div class="emp-meuble">' + (s ? 'Saison ' + s : 'Saison inconnue') + '</div>' +
+      groupes.map(function(g) { return groupeCurieuxBeginV2(g); }).join('');
+  }).join('');
 }
 
-// Un vin + ses recettes Curieux Bégin : même bloc sur la page et dans la recherche.
-function groupeCurieuxBeginV2(g) {
+// Un vin + ses recettes Curieux Bégin : même bloc sur la page et dans la recherche (provenance 'recherche').
+// La fiche est sous cette page dans le HTML : depuis la page, on la ferme avant d'ouvrir la fiche (le ✕ la rouvre).
+function groupeCurieuxBeginV2(g, provenance) {
   var carteVin, classeCoul;
   if (g.wine) {
     var w = g.wine;
@@ -4579,7 +4631,8 @@ function groupeCurieuxBeginV2(g) {
     var nom = decodeHTML(w.Nom || '—');
     var sous = sousVinV2(w);
     var photo = w['Photo URL'] ? '<div class="carte-photo"><img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
-    var onclick = cb ? ' onclick="ouvrirApresTap(function(){ouvrirFicheV2(\'' + cb + '\', \'curieuxbegin\')})"' : '';
+    var ouvrir = provenance === 'recherche' ? 'ouvrirFicheV2(\'' + cb + '\', \'recherche\')' : 'fermerCurieuxBeginV2();ouvrirFicheV2(\'' + cb + '\', \'curieuxbegin\')';
+    var onclick = cb ? ' onclick="ouvrirApresTap(function(){' + ouvrir + '})"' : '';
     carteVin = '<div class="carte histo-vin ' + classeCoul + '"' + onclick + '>' + photo +
       '<div class="carte-centre"><span class="carte-titre">' + nom + '</span><span class="carte-sous">' + sous + '</span></div></div>';
   } else {
@@ -4589,7 +4642,7 @@ function groupeCurieuxBeginV2(g) {
     var prixNum = parseFloat((a0.prix || '').toString().replace(',', '.'));
     var prix = isFinite(prixNum) ? (prixNum.toFixed(2).replace('.', ',') + ' $') : '';
     var ligne1 = [decodeHTML(a0.cepage || ''), prix].filter(Boolean).join(' • ');
-    var sousV = [ligne1, "je ne l'ai pas — voir SAQ"].filter(Boolean).join('<br>');
+    var sousV = [ligne1, 'Vin à découvrir à la SAQ'].filter(Boolean).join('<br>');
     var photoV = a0.photo ? '<div class="carte-photo"><img src="' + a0.photo + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
     carteVin = '<div class="carte histo-vin ' + classeCoul + '" onclick="window.open(\'https://www.saq.com/fr/' + g.codeSAQ + '\', \'_blank\')">' + photoV +
       '<div class="carte-centre"><span class="carte-titre">' + nomV + '</span><span class="carte-sous">' + sousV + '</span></div></div>';
@@ -4792,9 +4845,9 @@ var PANNEAUX_V2 = {
     prefixe: 'curieuxBeginV2', bascule: 'basculerFiltreCurieuxBeginV2', reinit: 'reinitialiserFiltresCurieuxBeginV2',
     avant: '<div class="titre-3">Afficher</div>' +
            '<div class="item-liste" id="curieuxBeginV2-mode-mesvins" onclick="choisirModeCurieuxBeginV2(\'mesvins\')">Mes vins</div>' +
-           '<div class="item-liste" id="curieuxBeginV2-mode-horscave" onclick="choisirModeCurieuxBeginV2(\'horscave\')">Vins que je n\'ai pas</div>' +
+           '<div class="item-liste" id="curieuxBeginV2-mode-horscave" onclick="choisirModeCurieuxBeginV2(\'horscave\')">Vins à découvrir</div>' +
            '<div class="panneau-separateur"></div>',
-    filtres: [['couleur', 'Couleurs']],
+    filtres: [['saison', 'Saisons'], ['couleur', 'Couleurs']],
     apres: '<div class="panneau-separateur"></div>' +
            '<input type="text" id="curieuxBeginV2-f-texte" class="champ-saisie" placeholder="Chercher un plat ou un vin" oninput="chargerCurieuxBeginV2()">'
   }
