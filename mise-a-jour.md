@@ -244,7 +244,8 @@ Une bouteille ne partait pas parce que l'**espace** n'avait pas été choisi, et
   - **Menu d'action (vin déjà en cave) — convenu, PAS de code avant le OK** : même bloc « Dans ma cave », **en haut, sous l'origine**. Le vin scanné ne compte pas (« il n'est pas acheté » ; ses bouteilles sont déjà dans les emplacements du menu) → libellés « Appellation X — N autres en cave » / « aucun autre en cave » / « aucun autre ». Carte → fiche de l'autre vin, ✕ → retour au menu d'action du vin scanné (le menu est à 10010 : passer par `naviguerV2` + provenance `'menuScan'`).
   - **Nom du bloc (23 oct.)** : « Dans ma cave » devient **« Comparable »** (nom provisoire), sur « Vin inconnu » comme sur le menu d'action. PAS encore codé.
   - **Les 4 cas du scan** (posés par l'utilisateur) : (1) vin avec 1 bouteille ou plus · (2) vin à 0 bouteille (déjà eu) · (3) vin jamais acheté, seulement proposé (Statut `'Suggestion'`) · (4) vin absent du Sheet → « Vin inconnu ». Aujourd'hui, 2 et 3 donnent le même écran.
-  - **Sommeliers au scan (23 oct.) — en discussion** : pour 1-2-3, montrer que le vin est cité par un de mes sommeliers (`ALL_SUGGESTIONS` par code SAQ). Pour le 3, c'est l'info de base de l'écran. Contenu et placement à jaser.
+  - **Sommeliers au scan (23 oct.) — en discussion** : pour 1-2-3, montrer que le vin est cité par un de mes sommeliers (`ALL_SUGGESTIONS` par code SAQ). Pour le 3, c'est l'info de base de l'écran. **Contenu retenu : nom du sommelier + sa note** (pas la date). Placement à jaser.
+  - **Curieux Bégin au scan — idée retenue, à jaser** : il cite des vins par code SAQ (`ALL_CURIEUXBEGIN`), même absents de ma cave → touche aussi le cas 4.
 
 ## 🔎 Scan d'un vin que je n'ai pas — bloc « Dans ma cave » (23 octobre 2026)
 Besoin vécu en succursale (soldes) : savoir tout de suite si j'ai déjà cette appellation ou ce cépage, sans passer par la recherche.
