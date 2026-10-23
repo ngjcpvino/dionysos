@@ -250,7 +250,8 @@ Une bouteille ne partait pas parce que l'**espace** n'avait pas été choisi, et
   - **Même scan à la maison et en succursale** (rappel de l'utilisateur) : l'écran du scan doit servir les deux moments — agir chez soi (boire, ranger) et décider en succursale (acheter). **Tranché : le même écran à la maison, c'est OK** (sommeliers, Curieux Bégin et Comparables au-dessus des ronds, partout).
   - **Réseau lent en succursale** : à reparler plus tard (demande de l'utilisateur).
   - **Ordre sous l'origine (23 oct.)** : Sommeliers → **Selon Curieux Bégin** → **Comparables** (au pluriel). Rien de codé.
-  - **Compte « 3-2 » (23 oct.)** : « en cave » disparaît des lignes de Comparables ; à la place « 3-2 » = 3 dans la cave, 2 en stock. **Tranché : le 2e chiffre = BOUTEILLES en stock.** Ex. 3 Chablis (4 btl, 1 btl, fini) → « Appellation Chablis — 3-5 ». Le 1er chiffre = mes vins de cette appellation/ce cépage, finis compris (propositions exclues ; le vin scanné exclu pour les cas 1-3).
+  - **Maquettes v2 montrées (23 oct.)** : sommeliers (nom en or + note) → Curieux Bégin (titre en or + « plat — Saison X-Y ») → Comparables (« Appellation X — vins-bouteilles », « Cépage Y — vins-bouteilles »). Cas 4 : pas de sommelier possible, Curieux Bégin oui.
+  - **Compte « 3-2 » (23 oct.)** : « en cave » disparaît des lignes de Comparables ; à la place « 3-2 » = 3 dans la cave, 2 en stock. **Tranché : le 2e chiffre = BOUTEILLES en stock ; rien du tout = « 0-0 » (gardé tel quel, pas de mot « aucun »).** Ex. 3 Chablis (4 btl, 1 btl, fini) → « Appellation Chablis — 3-5 ». Le 1er chiffre = mes vins de cette appellation/ce cépage, finis compris (propositions exclues ; le vin scanné exclu pour les cas 1-3).
 
 ## 🔎 Scan d'un vin que je n'ai pas — bloc « Dans ma cave » (23 octobre 2026)
 Besoin vécu en succursale (soldes) : savoir tout de suite si j'ai déjà cette appellation ou ce cépage, sans passer par la recherche.
