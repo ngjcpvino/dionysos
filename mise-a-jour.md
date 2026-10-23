@@ -246,6 +246,9 @@ Une bouteille ne partait pas parce que l'**espace** n'avait pas été choisi, et
   - **Les 4 cas du scan** (posés par l'utilisateur) : (1) vin avec 1 bouteille ou plus · (2) vin à 0 bouteille (déjà eu) · (3) vin jamais acheté, seulement proposé (Statut `'Suggestion'`) · (4) vin absent du Sheet → « Vin inconnu ». Aujourd'hui, 2 et 3 donnent le même écran.
   - **Sommeliers au scan (23 oct.) — en discussion** : pour 1-2-3, montrer que le vin est cité par un de mes sommeliers (`ALL_SUGGESTIONS` par code SAQ). Pour le 3, c'est l'info de base de l'écran. **Contenu retenu : nom du sommelier + sa note** (pas la date). Placement à jaser.
   - **Curieux Bégin au scan — idée retenue, à jaser** : il cite des vins par code SAQ (`ALL_CURIEUXBEGIN`), même absents de ma cave → touche aussi le cas 4.
+  - **Maquettes des 4 écrans montrées (23 oct.)** : sommeliers en or sous l'origine (nom + note, tous), puis « Comparable », puis les ronds. Rien de codé.
+  - **Même scan à la maison et en succursale** (rappel de l'utilisateur) : l'écran du scan doit servir les deux moments — agir chez soi (boire, ranger) et décider en succursale (acheter).
+  - **Réseau lent en succursale** : à reparler plus tard (demande de l'utilisateur).
 
 ## 🔎 Scan d'un vin que je n'ai pas — bloc « Dans ma cave » (23 octobre 2026)
 Besoin vécu en succursale (soldes) : savoir tout de suite si j'ai déjà cette appellation ou ce cépage, sans passer par la recherche.
