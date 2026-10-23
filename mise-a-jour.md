@@ -240,7 +240,7 @@ Une bouteille ne partait pas parce que l'**espace** n'avait pas été choisi, et
 
 ## 📋 En attente (23 octobre 2026)
 - **Bug à régler — « + » du vin inconnu** : je scanne un vin que je n'ai pas → page « Vin inconnu » → « + » → l'Arrivée s'ouvre ; je ne choisis rien et j'annule (✕ → menu d'action) → **le vin est déjà créé dans le Sheet**, sans bouteille. Annuler ne défait pas la création (`creerVinManuelV2('achat')` → `creerVinSAQV2` / `creerVinNomV2` → `ajouterVinAvecBouteilles` AVANT `ouvrirArriveeV2` ; `fermerArriveeV2` ramène au menu d'action du vin neuf). À reprendre avec l'utilisateur.
-- **Question en suspens** : le bloc « Dans ma cave » aussi sur le menu d'action (vin déjà en cave) ? Pas tranché — pour l'instant, seulement sur « Vin inconnu ».
+- **Sujet du scan en succursale — à reprendre** : le bloc « Dans ma cave » n'est que sur « Vin inconnu ». Les pistes proposées par l'IA le 23 oct. (menu d'action, réseau faible, autre code-barres, appellations voisines, couleur, spiritueux, cépage élargi, Découvertes) sont **toutes refusées** : c'est l'utilisateur qui décrit les situations vécues, l'IA ne propose rien de plus d'ici là.
 
 ## 🔎 Scan d'un vin que je n'ai pas — bloc « Dans ma cave » (23 octobre 2026)
 Besoin vécu en succursale (soldes) : savoir tout de suite si j'ai déjà cette appellation ou ce cépage, sans passer par la recherche.
