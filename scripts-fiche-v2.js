@@ -127,11 +127,6 @@ function afficherFicheV2(result) {
 
   var html = '';
 
-  function carte(libelle, valeur) {
-    if (!valeur) return '';
-    return '<div class="carte-info"><span class="libelle">' + libelle + '</span><span class="valeur">' + decodeHTML(valeur.toString()) + '</span></div>';
-  }
-
   // === INFORMATION ===
   html += '<div class="section">';
   html += '<h3 class="titre-2">Information</h3>';
@@ -158,20 +153,7 @@ function afficherFicheV2(result) {
   }
 
   // === DÉGUSTATION ===
-  html += '<div class="section">';
-  html += '<h3 class="titre-2">Dégustation</h3>';
-  html += ligne('Arômes', wine['Arômes']);
-  var cartes = '';
-  cartes += carte('Acidité', wine['Acidité']);
-  cartes += carte('Sucrosité', wine['Sucrosité']);
-  cartes += carte('Corps', wine.Corps);
-  cartes += carte('Bouche', wine.Bouche);
-  cartes += carte('Sucre', wine.Sucre);
-  cartes += carte('Alcool', wine.Alcool);
-  cartes += carte('Servir', (wine.Temperature || '').toString().replace(/^De\s+/i, ''));
-  cartes += carte('Bois', wine.Bois);
-  if (cartes) html += '<div class="grille-cartes">' + cartes + '</div>';
-  html += '</div>';
+  html += sectionDegustationV2(wine);
 
   // === PRODUCTION ===
   if (wine.Producteur || wine['Agent promo']) {
@@ -757,6 +739,29 @@ function fusionnerCepagesPourcentV2(actuel, bruts) {
     var m = (bruts || '').toString().match(re);
     return m ? (cep + ' ' + m[1] + ' %') : cep;
   }).join(', ');
+}
+
+// Section « Dégustation » : même rendu sur la fiche et en bas de la page du vin inconnu (portrait SAQ, même sans réseau).
+// d : { 'Arômes', 'Acidité', 'Sucrosité', Corps, Bouche, Sucre, Alcool, Temperature, Bois }
+function sectionDegustationV2(d) {
+  function carte(libelle, valeur) {
+    if (!valeur) return '';
+    return '<div class="carte-info"><span class="libelle">' + libelle + '</span><span class="valeur">' + decodeHTML(valeur.toString()) + '</span></div>';
+  }
+  var html = '<div class="section">';
+  html += '<h3 class="titre-2">Dégustation</h3>';
+  if (d['Arômes']) html += '<div class="ligne-info"><span class="libelle">Arômes : </span>' + decodeHTML(d['Arômes'].toString()) + '</div>';
+  var cartes = '';
+  cartes += carte('Acidité', d['Acidité']);
+  cartes += carte('Sucrosité', d['Sucrosité']);
+  cartes += carte('Corps', d.Corps);
+  cartes += carte('Bouche', d.Bouche);
+  cartes += carte('Sucre', d.Sucre);
+  cartes += carte('Alcool', d.Alcool);
+  cartes += carte('Servir', (d.Temperature || '').toString().replace(/^De\s+/i, ''));
+  cartes += carte('Bois', d.Bois);
+  if (cartes) html += '<div class="grille-cartes">' + cartes + '</div>';
+  return html + '</div>';
 }
 
 function verifierPrixV2(codebarre, codeSAQ) {
