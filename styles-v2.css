@@ -506,6 +506,11 @@ body::after {
 .emp-ronds .ligne-ronds.haut { display: flex; }
 /* Numéro d'espace en exposant (coin haut-droit, à 2 h) — visible seulement quand la rangée est ouverte */
 .emp-espace { position: relative; display: inline-flex; }
+/* Plan filtré (Cépage, Couleur, Pays, Appellation) : ce qui ne répond pas s'estompe.
+   Rangée fermée (petits ronds décoratifs) : la rangée entière ; ouverte (ou « À ranger ») : rond par rond. */
+.emp-rangee.estompee:not(.ouvert) { opacity: 0.3; }
+.emp-rangee.ouvert .cercle.estompe,
+.emp-rangee.a-ranger .cercle.estompe { opacity: 0.2; }
 .emp-espace-num {
   position: absolute; top: -5px; right: -5px;
   color: var(--white-50); font-size: var(--fs-11); line-height: 1;
