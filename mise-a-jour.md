@@ -276,3 +276,23 @@ Besoin : en succursale (murs de béton), si l'iPhone ferme Dionysos (ouverte par
 - **Première copie** : l'app doit être ouverte une fois **avec du réseau** après la publication.
 - Testé (navigateur, serveur local) : 1re ouverture en ligne → copie de l'app + des données ; réouverture hors ligne en ~2 s avec le signe, scan d'un vin connu OK ; retour du réseau → signe effacé.
 - ⚠️ **Règle** : une nouvelle liste qui doit servir hors ligne s'ajoute à `COPIES_V2` (socle). Un nouveau fichier de l'app (ou une image d'interface) s'ajoute à `FICHIERS` dans `sw.js` ; changer une ressource externe (CDN, Cloudinary) = mettre à jour `EXTERNES`.
+
+### 🔙 Retirer le hors-ligne (si les essais en succursale ne sont pas concluants)
+Écrit le 24 oct. 2026, à la demande de l'utilisateur, AVANT les essais. Le code du hors-ligne est le commit **`163f25f`** (« Hors ligne : l'app se rouvre sans réseau… » : `sw.js`, `scripts-socle-v2.js`, `scripts-scanner-v2.js`, `index-v2.html`, `styles-v2.css`). L'inventaire de la succursale, l'écran du scan, etc. sont dans des commits ANTÉRIEURS : ils restent.
+⚠️ **Ne JAMAIS simplement supprimer `sw.js`** : un service worker déjà installé dans l'iPhone continuerait de tourner. Il faut d'abord le remplacer par un `sw.js` « qui se retire lui-même ».
+1. **`git revert 163f25f`** (retire l'enregistrement, la copie des données, le signe « Hors ligne », la porte de sortie du bouton Données, les copies de l'inventaire) — puis remettre un `sw.js` (le revert le supprime) avec ce contenu exact :
+   ```js
+   // Retrait du hors-ligne : ce service worker efface ses copies, se désinscrit et recharge l'app depuis le site.
+   self.addEventListener('install', function() { self.skipWaiting(); });
+   self.addEventListener('activate', function(e) {
+     e.waitUntil(caches.keys().then(function(cles) { return Promise.all(cles.map(function(k) { return caches.delete(k); })); })
+       .then(function() { return self.registration.unregister(); })
+       .then(function() { return self.clients.matchAll(); })
+       .then(function(clients) { clients.forEach(function(c) { c.navigate(c.url); }); }));
+   });
+   ```
+2. Dans `window.onload` du socle, à la place de l'ancien `register`, ajouter le ménage :
+   `if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistrations().then(function(rs) { rs.forEach(function(r) { r.unregister(); }); }).catch(function() {}); try { indexedDB.deleteDatabase('dionysos'); } catch (e) {}`
+3. Publier (commit + push), puis **chaque téléphone ouvre Dionysos une fois avec du réseau** (le service worker se met à jour, se retire, l'app se recharge).
+4. Quelques semaines plus tard, quand tous les téléphones sont passés : supprimer `sw.js` et la ligne de ménage du socle.
+5. **Dernier recours sur un iPhone** (si l'app reste coincée) : supprimer l'icône Dionysos de l'écran d'accueil, puis la remettre (Safari → la page `index-v2.html` → Partager → « Sur l'écran d'accueil »). L'iPhone oublie alors la copie ; le mot de passe de l'app sera redemandé.
