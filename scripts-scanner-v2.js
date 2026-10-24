@@ -3149,6 +3149,10 @@ function afficherEmpV2() {
     parPlace[w.Meuble + '|' + w.Rangee + '|' + w.Espace] = w;
   });
 
+  // Filtres de vin (Cépage, Couleur, Pays, Appellation) sur le plan : ce qui n'y répond pas s'estompe —
+  // rangée ouverte : les autres bouteilles et les espaces vides ; rangée fermée : la rangée entière si rien n'y répond.
+  var filtreVin = !!(f.cepage || f.couleur || f.pays || f.appellation);
+
   // meubles à dessiner : celui filtré, sinon les 3 de CONFIG (ordre alphabétique)
   var meubles = modeARanger ? [] : (f.meuble ? [f.meuble] : Object.keys(CONFIG.meubles || {}).sort(function(a,b){ return a.localeCompare(b); }));
 
@@ -3161,14 +3165,18 @@ function afficherEmpV2() {
       var espacesDef = rangeesDef[rangee] || [];
       var nb = espacesDef.length;
       var occ = 0;
+      var repondent = 0;
       var ronds = [];
       espacesDef.forEach(function(esp){
         var w = parPlace[meuble + '|' + rangee + '|' + esp];
         if (w) occ++;
+        var passe = !!w && vinPasseFiltresEmpV2(w);
+        if (passe) repondent++;
+        var estompe = (filtreVin && !passe) ? ' estompe' : '';
         var photo = (w && w['Photo URL']) ? w['Photo URL'] : '';
         var cb = (w && w['Code-barres']) ? w['Code-barres'].toString().trim().replace(/\s+/g, '') : '';
         var coul = w ? 'var(--' + couleurClasseV2(w.Couleur) + ')' : '';
-        ronds.push('<div class="emp-espace"><div class="cercle" data-photo="' + photo + '" data-cb="' + cb + '" data-row="' + (w ? w.row : '') + '" data-couleur="' + coul + '"></div><span class="emp-espace-num">' + esp + '</span></div>');
+        ronds.push('<div class="emp-espace"><div class="cercle' + estompe + '" data-photo="' + photo + '" data-cb="' + cb + '" data-row="' + (w ? w.row : '') + '" data-couleur="' + coul + '"></div><span class="emp-espace-num">' + esp + '</span></div>');
       });
       // 7 espaces = quinconce réel : bas 1-3-5-7, haut 2-4-6
       var lignes;
@@ -3179,7 +3187,8 @@ function afficherEmpV2() {
         lignes = '<div class="ligne-ronds">' + ronds.join('') + '</div>';
       }
       var compteClasse = occ < nb ? ' emp-compte-libre' : '';
-      html += '<div class="emp-rangee" data-meuble="' + meuble + '" data-rangee="' + rangee + '">' +
+      var rangeeEstompee = (filtreVin && !repondent) ? ' estompee' : '';
+      html += '<div class="emp-rangee' + rangeeEstompee + '" data-meuble="' + meuble + '" data-rangee="' + rangee + '">' +
                 '<span class="emp-rangee-nom">Rangée ' + rangee + '</span>' +
                 '<div class="emp-ronds">' + lignes + '</div>' +
                 '<span class="emp-compte' + compteClasse + '">' + occ + '/' + nb + '</span>' +
@@ -3192,7 +3201,8 @@ function afficherEmpV2() {
       var photo = w['Photo URL'] || '';
       var cb = (w['Code-barres'] || '').toString().trim().replace(/\s+/g, '');
       var coul = 'var(--' + couleurClasseV2(w.Couleur) + ')';
-      return '<div class="cercle" data-photo="' + photo + '" data-cb="' + cb + '" data-row="' + w.row + '" data-couleur="' + coul + '"></div>';
+      var estompe = (filtreVin && !vinPasseFiltresEmpV2(w)) ? ' estompe' : '';
+      return '<div class="cercle' + estompe + '" data-photo="' + photo + '" data-cb="' + cb + '" data-row="' + w.row + '" data-couleur="' + coul + '"></div>';
     }).join('');
     html += '<div class="emp-bloc"><div class="emp-meuble">À ranger</div>' +
             '<div class="emp-rangee a-ranger">' +
