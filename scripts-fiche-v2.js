@@ -957,6 +957,9 @@ function fermerFicheV2() {
   }
   if (FICHE_V2_PROVENANCE === 'menuScan' && menuActionV2Context) {
     ouvrirMenuActionV2(menuActionV2Context.code, menuActionV2Context.wineResult);
+  } else if (FICHE_V2_PROVENANCE === 'comparable') {
+    // fiche d'un vin de Comparables : retour au menu d'action du vin scanné
+    if (menuActionV2Context) ouvrirMenuActionV2(menuActionV2Context.code, menuActionV2Context.wineResult);
   } else if (FICHE_V2_PROVENANCE === 'cave') {
     document.getElementById('caveV2Container').style.display = 'flex';
     remonterScrollV2('caveV2Container');
