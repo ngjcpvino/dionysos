@@ -2178,8 +2178,8 @@ function quantiteDispoAchatV2(codeSAQ, succ) {
 
 // ==================== INVENTAIRE DE LA SUCCURSALE ====================
 // Tout ce que la succursale choisie dans la Liste d'achat a en stock (route getInventaireSuccursale, ~1500 produits).
-// Chargé une fois par succursale (dans l'auto, avec du réseau), gardé en mémoire pour le scan entre les murs de béton.
-// Vidé par le bouton « Données ».
+// Chargé une fois par succursale (dans l'auto, avec du réseau), gardé en mémoire pour le scan entre les murs de béton,
+// et en copie dans le téléphone (repris au redémarrage : < 24 h, ou toujours sans réseau). Vidé par le bouton « Données ».
 var INVENTAIRE_SUCC_V2 = null;         // { succ, produits: [{ codeSAQ, nom, cups:[…], pays, appellation, cepage, aromes… }] }
 var INVENTAIRE_SUCC_V2_ATTENTE = null; // { succ, promesse } pendant le chargement (évite les doubles appels)
 
@@ -2197,6 +2197,7 @@ function inventaireSuccV2(succ) {
   }
   var promesse = page(1, []).then(function(produits) {
     INVENTAIRE_SUCC_V2 = { succ: succ, produits: produits };
+    garderCopieV2('inventaireSucc', INVENTAIRE_SUCC_V2); // pour rouvrir l'app sans réseau en succursale
     return INVENTAIRE_SUCC_V2;
   });
   INVENTAIRE_SUCC_V2_ATTENTE = { succ: succ, promesse: promesse };
@@ -5008,7 +5009,9 @@ function burgerV2Click(cible) {
       ALL_RECETTES = null;
       ALL_CURIEUXBEGIN = null;
       INVENTAIRE_SUCC_V2 = null;
+      effacerCopieV2('inventaireSucc');
       afficherMessage('✓ Synchronisé');
+      mettreAJourAppV2(); // porte de sortie : la dernière version de l'app, pas une vieille copie
     }).catch(function() { afficherMessage('Erreur de synchronisation'); });
     return;
   }

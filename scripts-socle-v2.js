@@ -56,6 +56,8 @@ let FICHE_V2_ORIGINE = null;
 
 // ==================== INITIALISATION ====================
 window.onload = function() {
+  // Copie de l'app dans le téléphone (sw.js) : elle s'ouvre même sans réseau
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function() {});
   if (!localStorage.getItem('vinoSecret')) {
     ouvrirSecretV2();
     return;
@@ -65,22 +67,139 @@ window.onload = function() {
 
 function demarrerAppV2(essai) {
   essai = essai || 1;
-  appelBackend('getConfig', {}, { spinner: ' ' }).then(function(cfg) {
-    CONFIG = cfg;
-    return appelBackend('getInventoryData', {}, { spinner: ' ' });
-  }).then(function(data) {
-    ALL_DATA = data || [];
-    return appelBackend('getSuggestions', {}, { spinner: ' ' });
-  }).then(function(sugg) {
-    ALL_SUGGESTIONS = sugg || [];
-  }).catch(function(err) {
-    var msg = (err && err.message) ? err.message : String(err);
-    // Mot de passe : appelBackend a déjà rouvert l'écran du mot de passe → ne pas réessayer.
-    if (msg === 'Mot de passe incorrect') return;
-    // Réseau/serveur momentané (« Failed to fetch », « Le serveur ne répond pas ») : réessayer avant d'abandonner.
-    if (essai < 3) { setTimeout(function() { demarrerAppV2(essai + 1); }, 1500); return; }
-    afficherMessage('Connexion au serveur impossible (' + msg + '). Vérifiez le réseau, puis rechargez.');
+  // Avec une copie gardée dans le téléphone, on n'attend pas un réseau qui traîne : 8 s, puis la copie.
+  lireCopieV2('inventaire').then(function(copie) {
+    var opt = { spinner: ' ', timeout: copie ? 8000 : 30000 };
+    appelBackend('getConfig', {}, opt).then(function(cfg) {
+      CONFIG = cfg;
+      return appelBackend('getInventoryData', {}, opt);
+    }).then(function(data) {
+      ALL_DATA = data || [];
+      return appelBackend('getSuggestions', {}, opt);
+    }).then(function(sugg) {
+      ALL_SUGGESTIONS = sugg || [];
+      restaurerInventaireSuccV2(false);
+    }).catch(function(err) {
+      var msg = (err && err.message) ? err.message : String(err);
+      // Mot de passe : appelBackend a déjà rouvert l'écran du mot de passe → ne pas réessayer.
+      if (msg === 'Mot de passe incorrect') return;
+      // Pas de réseau : démarrer sur la copie gardée dans le téléphone
+      if (copie) { demarrerSurCopieV2(); return; }
+      // Réseau/serveur momentané (« Failed to fetch », « Le serveur ne répond pas ») : réessayer avant d'abandonner.
+      if (essai < 3) { setTimeout(function() { demarrerAppV2(essai + 1); }, 1500); return; }
+      afficherMessage('Connexion au serveur impossible (' + msg + '). Vérifiez le réseau, puis rechargez.');
+    });
   });
+}
+
+// ==================== COPIE HORS LIGNE (24 oct. 2026) ====================
+// Chaque réponse utile du serveur est gardée dans le téléphone (IndexedDB, quelques Mo) : sans réseau,
+// l'app démarre sur cette copie, l'accueil affiche « Hors ligne — données de 14 h 05 », et elle se
+// resynchronise seule dès que le réseau revient. Les écritures (Boire, Arrivée…) restent impossibles sans réseau.
+var COPIES_V2 = { getConfig: 'config', getInventoryData: 'inventaire', getSuggestions: 'suggestions', getCurieuxBegin: 'curieuxbegin' };
+var COPIE_V2_BD = null;
+var RESYNC_V2 = null;
+
+function baseCopieV2() {
+  if (!COPIE_V2_BD) {
+    COPIE_V2_BD = new Promise(function(ok, ko) {
+      if (!window.indexedDB) { ko(new Error('IndexedDB absent')); return; }
+      var req = indexedDB.open('dionysos', 1);
+      req.onupgradeneeded = function() { req.result.createObjectStore('copie'); };
+      req.onsuccess = function() { ok(req.result); };
+      req.onerror = function() { ko(req.error); };
+    });
+  }
+  return COPIE_V2_BD;
+}
+
+// Feu-et-oublie : une copie qui échoue ne gêne jamais l'app
+function garderCopieV2(cle, valeur) {
+  baseCopieV2().then(function(bd) {
+    bd.transaction('copie', 'readwrite').objectStore('copie').put({ valeur: valeur, date: Date.now() }, cle);
+  }).catch(function() {});
+}
+
+// → { valeur, date } ou null (jamais d'erreur)
+function lireCopieV2(cle) {
+  return baseCopieV2().then(function(bd) {
+    return new Promise(function(ok) {
+      var r = bd.transaction('copie', 'readonly').objectStore('copie').get(cle);
+      r.onsuccess = function() { ok(r.result || null); };
+      r.onerror = function() { ok(null); };
+    });
+  }).catch(function() { return null; });
+}
+
+function effacerCopieV2(cle) {
+  baseCopieV2().then(function(bd) {
+    bd.transaction('copie', 'readwrite').objectStore('copie').delete(cle);
+  }).catch(function() {});
+}
+
+// Inventaire de la dernière succursale : repris au démarrage s'il a moins de 24 h (toujours, sans réseau)
+function restaurerInventaireSuccV2(horsLigne) {
+  return lireCopieV2('inventaireSucc').then(function(c) {
+    if (!c || INVENTAIRE_SUCC_V2) return;
+    if (horsLigne || Date.now() - c.date < 86400000) INVENTAIRE_SUCC_V2 = c.valeur;
+  });
+}
+
+function demarrerSurCopieV2() {
+  return Promise.all(['config', 'inventaire', 'suggestions', 'curieuxbegin'].map(lireCopieV2)).then(function(c) {
+    if (!c[0] || !c[1]) { afficherMessage('Connexion au serveur impossible. Vérifiez le réseau, puis rechargez.'); return; }
+    CONFIG = c[0].valeur;
+    ALL_DATA = c[1].valeur || [];
+    ALL_SUGGESTIONS = c[2] ? (c[2].valeur || []) : [];
+    if (c[3] && !ALL_CURIEUXBEGIN) ALL_CURIEUXBEGIN = c[3].valeur || [];
+    restaurerInventaireSuccV2(true);
+    afficherHorsLigneV2(c[1].date);
+    resynchroniserV2();
+  });
+}
+
+// « Hors ligne — données de 14 h 05 » sous le logo (avec le jour si la copie n'est pas d'aujourd'hui)
+function afficherHorsLigneV2(date) {
+  var el = document.getElementById('accueilV2-horsligne');
+  if (!el) return;
+  var d = new Date(date);
+  var mois = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+  var jour = (d.toDateString() === new Date().toDateString()) ? '' : ' le ' + d.getDate() + ' ' + mois[d.getMonth()];
+  el.textContent = 'Hors ligne — données de ' + d.getHours() + ' h ' + ('0' + d.getMinutes()).slice(-2) + jour;
+  el.style.display = '';
+}
+
+// Démarrée sur la copie : toutes les 20 s, on retente le serveur ; au retour du réseau, données fraîches et le signe s'efface
+function resynchroniserV2() {
+  clearTimeout(RESYNC_V2);
+  RESYNC_V2 = setTimeout(function() {
+    var opt = { spinner: '' };
+    appelBackend('getConfig', {}, opt).then(function(cfg) {
+      return appelBackend('getInventoryData', {}, opt).then(function(data) {
+        return appelBackend('getSuggestions', {}, opt).then(function(sugg) {
+          CONFIG = cfg;
+          ALL_DATA = data || [];
+          ALL_SUGGESTIONS = sugg || [];
+          var el = document.getElementById('accueilV2-horsligne');
+          if (el) el.style.display = 'none';
+        });
+      });
+    }).catch(function(e) {
+      if (e && e.message === 'Mot de passe incorrect') return;
+      resynchroniserV2();
+    });
+  }, 20000);
+}
+
+// Porte de sortie (bouton « Données », avec réseau seulement) : oublie la copie de l'app et la recharge
+// depuis le site — au cas où elle resterait coincée sur une vieille version.
+function mettreAJourAppV2() {
+  var fin = function() { setTimeout(function() { location.reload(); }, 1200); };
+  if (!('caches' in window)) { fin(); return; }
+  var maj = ('serviceWorker' in navigator) ? navigator.serviceWorker.getRegistration().then(function(r) { return r && r.update(); }).catch(function() {}) : Promise.resolve();
+  maj.then(function() { return caches.keys(); }).then(function(cles) {
+    return Promise.all(cles.filter(function(k) { return k.indexOf('dionysos-app') === 0; }).map(function(k) { return caches.delete(k); }));
+  }).catch(function() {}).then(fin);
 }
 
 // ==================== MOT DE PASSE D'APP ====================
@@ -120,6 +239,7 @@ async function appelBackend(action, data = {}, options = {}) {
       }
       throw new Error(json.error || 'Erreur backend');
     }
+    if (COPIES_V2[action]) garderCopieV2(COPIES_V2[action], json.result); // copie hors ligne
     return json.result;
   } catch (e) {
     if (e.name === 'AbortError') throw new Error('Le serveur ne répond pas');

@@ -307,6 +307,15 @@ body::after {
 }
 
 /* Pied de page de l'accueil — ligne dorée (assise) + droit d'auteur */
+/* « Hors ligne — données de 14 h 05 » : l'app tourne sur la copie gardée dans le téléphone */
+#accueilV2-horsligne {
+  font-size: var(--fs-13);
+  color: var(--white-60);
+  text-align: center;
+  margin: 0 auto;
+  padding: 0 var(--space-xl);
+}
+
 #accueilV2-pied {
   position: fixed;
   left: 0;
