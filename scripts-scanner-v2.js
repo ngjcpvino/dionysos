@@ -192,7 +192,24 @@ function traiterResultatScanV2(code) {
     majMenuDepuisReseauV2(code, memoire);
     return;
   }
+  // Pas dans ma cave, mais dans l'inventaire de la succursale (chargé avec la Liste d'achat) : réponse sans réseau
+  var produit = suggestionsV2Attente ? null : produitInventaireParCodeV2(code);
+  if (produit) {
+    afficherVinInconnuV2(code, produit.codeSAQ, produit);
+    verifierVinScanneEnFondV2(code);
+    return;
+  }
   chercherVinScanneV2(code, false).catch(function() { vinInconnuSansReseauV2(code); });
+}
+
+// Page remplie depuis l'inventaire : si le serveur répond que ce code-barres est en fait un de mes vins
+// (code secondaire, absent de la mémoire), on passe au menu d'action.
+function verifierVinScanneEnFondV2(code) {
+  appelBackend('checkWineExists', { codebarre: code }, { spinner: '' }).then(function(result) {
+    if (!result || !result.exists || !vinInconnuAttendV2(code)) return;
+    document.getElementById('vinInconnuV2Container').style.display = 'none';
+    ouvrirMenuActionV2(code, result);
+  }).catch(function() {});
 }
 
 // Menu ouvert depuis la mémoire : si le serveur répond, on prend sa réponse ; on ne redessine que si les bouteilles ont changé.
@@ -233,13 +250,16 @@ var vinInconnuV2Saq = null;      // fiche SAQ du vin inconnu affiché (nom, orig
 var VIN_INCONNU_V2_ESSAI = null; // minuterie du réessai sans réseau
 
 // Remplit l'en-tête de la page « Vin inconnu » avec ce que dit la SAQ (nom + origine), puis le bloc du scan
-function remplirEnteteVinInconnuV2(codeSAQ) {
+// et la Dégustation en bas. produit (facultatif) = l'inventaire de la succursale : rien à demander au réseau.
+function remplirEnteteVinInconnuV2(codeSAQ, produit) {
   var titre = document.getElementById('vinInconnuV2-titre');
   var sous = document.getElementById('vinInconnuV2-soustitre');
   var nomInput = document.getElementById('vinInconnuV2-nom');
   var bloc = document.getElementById('vinInconnuV2-scan');
+  var degustation = document.getElementById('vinInconnuV2-degustation');
   if (!titre || !sous) return;
   if (bloc) bloc.innerHTML = ''; // jamais le bloc du vin scanné avant
+  if (degustation) degustation.innerHTML = '';
   vinInconnuV2Saq = null;
   SCAN_V2_COURANT = null;
   if (!codeSAQ) {
@@ -249,29 +269,44 @@ function remplirEnteteVinInconnuV2(codeSAQ) {
     return;
   }
   if (nomInput) nomInput.style.display = 'none';
+  if (produit) {
+    appliquerFicheSaqVinInconnuV2(codeSAQ, {
+      nom: produit.nom, pays: produit.pays, region: produit.region, appellation: produit.appellation, cepages: produit.cepage,
+      aromes: produit.aromes, acidite: produit.acidite, sucrosite: produit.sucrosite, corps: produit.corps, bouche: produit.bouche,
+      sucre: produit.sucre, alcool: produit.alcool, temperature: produit.temperature, bois: produit.bois
+    });
+    return;
+  }
   appelBackend('testScrapingSAQ', { codeSAQ: codeSAQ }, { spinner: '' }).then(function(res) {
     // Réponse d'un scan précédent arrivée en retard : on ne la mélange pas au vin affiché
     if ((document.getElementById('vinInconnuV2-codesaq').value || '').replace(/\D/g, '').trim() !== codeSAQ.toString().trim()) return;
-    if (res && res.success && res.data) {
-      var d = res.data;
-      vinInconnuV2Saq = { codeSAQ: codeSAQ.toString().trim(), nom: d.nom || '', pays: d.pays || '', region: d.region || '', appellation: d.appellation || '' };
-      titre.textContent = decodeHTML((d.nom || 'Vin inconnu').toString());
-      var org = [d.pays, d.region, d.appellation, d.cepages].filter(Boolean).map(function(x) { return decodeHTML(x.toString()); }).join(' · ');
-      sous.textContent = org || "Ce vin n'est pas dans ta cave";
-      rendreBlocsScanV2({ prefixe: 'vinInconnu', cb: vinInconnuV2Code, codeSAQ: codeSAQ, appellation: d.appellation, cepage: cepageDominant({ Cepage: d.cepages }), provenance: 'vininconnu' });
-    }
+    if (res && res.success && res.data) appliquerFicheSaqVinInconnuV2(codeSAQ, res.data);
   }).catch(function() {});
 }
 
-// Ouvre (ou remplit) la page « Vin inconnu » pour ce code-barres et ce code SAQ (vide si la SAQ ne le connaît pas)
-function afficherVinInconnuV2(code, codeSAQ) {
+// d = fiche SAQ (noms de lireFicheSAQ — l'inventaire de la succursale porte les mêmes) : en-tête, bloc du scan, Dégustation
+function appliquerFicheSaqVinInconnuV2(codeSAQ, d) {
+  vinInconnuV2Saq = { codeSAQ: codeSAQ.toString().trim(), nom: d.nom || '', pays: d.pays || '', region: d.region || '', appellation: d.appellation || '' };
+  document.getElementById('vinInconnuV2-titre').textContent = decodeHTML((d.nom || 'Vin inconnu').toString());
+  var org = [d.pays, d.region, d.appellation, d.cepages].filter(Boolean).map(function(x) { return decodeHTML(x.toString()); }).join(' · ');
+  document.getElementById('vinInconnuV2-soustitre').textContent = org || "Ce vin n'est pas dans ta cave";
+  rendreBlocsScanV2({ prefixe: 'vinInconnu', cb: vinInconnuV2Code, codeSAQ: codeSAQ, appellation: d.appellation, cepage: cepageDominant({ Cepage: d.cepages || '' }), provenance: 'vininconnu' });
+  var portrait = { 'Arômes': d.aromes, 'Acidité': d.acidite, 'Sucrosité': d.sucrosite, Corps: d.corps, Bouche: d.bouche, Sucre: d.sucre, Alcool: d.alcool, Temperature: d.temperature, Bois: d.bois };
+  var degustation = document.getElementById('vinInconnuV2-degustation');
+  var aDuPortrait = Object.keys(portrait).some(function(k) { return !!portrait[k]; });
+  if (degustation) degustation.innerHTML = aDuPortrait ? sectionDegustationV2(portrait) : '';
+}
+
+// Ouvre (ou remplit) la page « Vin inconnu » pour ce code-barres et ce code SAQ (vide si la SAQ ne le connaît pas).
+// produit (facultatif) : l'inventaire de la succursale, qui remplit la page sans réseau.
+function afficherVinInconnuV2(code, codeSAQ, produit) {
   var page = document.getElementById('vinInconnuV2Container');
   var dejaOuverte = page.style.display !== 'none' && vinInconnuV2Code === code;
   vinInconnuV2Code = code;
   document.getElementById('vinInconnuV2-codebarre-champ').value = code;
   document.getElementById('vinInconnuV2-codesaq').value = codeSAQ || '';
   if (!dejaOuverte) document.getElementById('vinInconnuV2-nom').value = ''; // garde un nom tapé pendant l'attente
-  remplirEnteteVinInconnuV2(codeSAQ || '');
+  remplirEnteteVinInconnuV2(codeSAQ || '', produit);
   page.style.display = 'flex';
 }
 
@@ -2090,31 +2125,94 @@ function majEntetesAchatV2() {
 function chargerDispoAchatV2(liste) {
   var f = filtresAchatV2;
   if (!f.succ || f.succ === 'TOUTES') return;
-  var favoris = succursalesAchatV2.map(function(s){ return s.numero; });
-  liste.forEach(function(w){
-    var codeSAQ = (w['Code SAQ'] || '').toString().trim();
-    if (!codeSAQ) return;
-    function el(){ return document.getElementById('achatV2-dispo-' + codeSAQ); }
-    if (f.succ === 'FAV') {
+  if (f.succ === 'FAV') {
+    var favoris = succursalesAchatV2.map(function(s){ return s.numero; });
+    liste.forEach(function(w){
+      var codeSAQ = (w['Code SAQ'] || '').toString().trim();
+      if (!codeSAQ) return;
+      function el(){ return document.getElementById('achatV2-dispo-' + codeSAQ); }
       appelBackend('getSuccursalesDisponibles', { codeSAQ: codeSAQ }, { spinner: '', timeout: 120000 }).then(function(succursales){
         var e = el(); if (!e) return;
         var dansFav = (succursales || []).filter(function(s){ return favoris.indexOf(s.numero) !== -1 && s.quantite > 0; });
         if (!dansFav.length) { e.innerHTML = '<span class="dispo-non">✗</span>'; return; }
         e.innerHTML = dansFav.map(function(s){ return '<span class="dispo-oui">' + s.nom + ' ' + s.quantite + '</span>'; }).join('<br>');
       }).catch(function(){ var e = el(); if (e) e.textContent = '—'; });
-    } else {
-      appelBackend('verifierDispoSAQ_GRAPHQL_V1', { codeSAQ: codeSAQ, succursale: f.succ }, { spinner: '' }).then(function(res){
-        var e = el(); if (!e) return;
-        if (res && res.disponible) {
-          e.innerHTML = '<span class="dispo-oui">' + (res.quantite ? res.quantite + ' btl' : '✓') + '</span>';
-        } else {
-          var carte = e.closest('.carte');
-          if (carte) carte.style.display = 'none';
-          majCompteAchatV2();
-        }
-      }).catch(function(){ var e = el(); if (e) e.textContent = '—'; });
-    }
+    });
+    return;
+  }
+  // Succursale précise : l'inventaire d'abord (un seul appel, gardé pour le scan sans réseau) → la liste se réduit
+  // aux vins disponibles → la quantité n'est demandée que pour ceux-là. Sans inventaire : une question par vin, comme avant.
+  var succ = f.succ;
+  var codes = liste.map(function(w){ return (w['Code SAQ'] || '').toString().trim(); }).filter(Boolean);
+  inventaireSuccV2(succ).then(function(inv) {
+    if (filtresAchatV2.succ !== succ) return;
+    var dispo = {};
+    inv.produits.forEach(function(p){ dispo[p.codeSAQ] = true; });
+    codes.forEach(function(codeSAQ){
+      if (dispo[codeSAQ]) { quantiteDispoAchatV2(codeSAQ, succ); return; }
+      var e = document.getElementById('achatV2-dispo-' + codeSAQ);
+      var carte = e ? e.closest('.carte') : null;
+      if (carte) carte.style.display = 'none';
+    });
+    majCompteAchatV2();
+  }).catch(function() {
+    if (filtresAchatV2.succ !== succ) return;
+    codes.forEach(function(codeSAQ){ quantiteDispoAchatV2(codeSAQ, succ); });
   });
+}
+
+// Quantité d'un vin dans la succursale (« X btl ») ; absent → la carte est masquée
+function quantiteDispoAchatV2(codeSAQ, succ) {
+  function el(){ return document.getElementById('achatV2-dispo-' + codeSAQ); }
+  appelBackend('verifierDispoSAQ_GRAPHQL_V1', { codeSAQ: codeSAQ, succursale: succ }, { spinner: '' }).then(function(res){
+    var e = el(); if (!e) return;
+    if (res && res.disponible) {
+      e.innerHTML = '<span class="dispo-oui">' + (res.quantite ? res.quantite + ' btl' : '✓') + '</span>';
+    } else {
+      var carte = e.closest('.carte');
+      if (carte) carte.style.display = 'none';
+      majCompteAchatV2();
+    }
+  }).catch(function(){ var e = el(); if (e) e.textContent = '—'; });
+}
+
+// ==================== INVENTAIRE DE LA SUCCURSALE ====================
+// Tout ce que la succursale choisie dans la Liste d'achat a en stock (route getInventaireSuccursale, ~1500 produits).
+// Chargé une fois par succursale (dans l'auto, avec du réseau), gardé en mémoire pour le scan entre les murs de béton.
+// Vidé par le bouton « Données ».
+var INVENTAIRE_SUCC_V2 = null;         // { succ, produits: [{ codeSAQ, nom, cups:[…], pays, appellation, cepage, aromes… }] }
+var INVENTAIRE_SUCC_V2_ATTENTE = null; // { succ, promesse } pendant le chargement (évite les doubles appels)
+
+function inventaireSuccV2(succ) {
+  if (INVENTAIRE_SUCC_V2 && INVENTAIRE_SUCC_V2.succ === succ) return Promise.resolve(INVENTAIRE_SUCC_V2);
+  if (INVENTAIRE_SUCC_V2_ATTENTE && INVENTAIRE_SUCC_V2_ATTENTE.succ === succ) return INVENTAIRE_SUCC_V2_ATTENTE.promesse;
+  function page(n, cumul) {
+    return appelBackend('getInventaireSuccursale', { succursale: succ, page: n }, { spinner: '', timeout: 330000 }).then(function(res) {
+      // Exige une vraie réponse : un backend pas encore redéployé répond « Action inconnue » → on retombe sur l'ancien mode
+      if (!res || res.success !== true || !Array.isArray(res.produits)) throw new Error((res && (res.message || res.error)) || 'Inventaire indisponible');
+      cumul = cumul.concat(res.produits);
+      if (!res.termine && res.pageSuivante) return page(res.pageSuivante, cumul);
+      return cumul;
+    });
+  }
+  var promesse = page(1, []).then(function(produits) {
+    INVENTAIRE_SUCC_V2 = { succ: succ, produits: produits };
+    return INVENTAIRE_SUCC_V2;
+  });
+  INVENTAIRE_SUCC_V2_ATTENTE = { succ: succ, promesse: promesse };
+  var fin = function() { if (INVENTAIRE_SUCC_V2_ATTENTE && INVENTAIRE_SUCC_V2_ATTENTE.promesse === promesse) INVENTAIRE_SUCC_V2_ATTENTE = null; };
+  promesse.then(fin, fin);
+  return promesse;
+}
+
+// Produit de l'inventaire qui porte ce code-barres (un code par millésime ; zéros de tête ignorés)
+function produitInventaireParCodeV2(code) {
+  if (!INVENTAIRE_SUCC_V2) return null;
+  var produits = INVENTAIRE_SUCC_V2.produits;
+  for (var i = 0; i < produits.length; i++) {
+    if ((produits[i].cups || []).some(function(c){ return memeCodeV2(c, code); })) return produits[i];
+  }
+  return null;
 }
 
 function dispoProchesAchatV2(codeSAQ) {
@@ -4909,6 +5007,7 @@ function burgerV2Click(cible) {
       ALL_ACCORDS = null;
       ALL_RECETTES = null;
       ALL_CURIEUXBEGIN = null;
+      INVENTAIRE_SUCC_V2 = null;
       afficherMessage('✓ Synchronisé');
     }).catch(function() { afficherMessage('Erreur de synchronisation'); });
     return;
