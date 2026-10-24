@@ -897,6 +897,12 @@ textarea.champ-saisie { resize: none; font-family: inherit; line-height: 1.4; }
 .item-liste.accordeon-1 { margin-left: var(--space-l); }
 .item-liste.accordeon-2 { margin-left: calc(var(--space-l) * 2); }
 .item-liste.accordeon-1, .item-liste.accordeon-2 { margin-bottom: var(--espace-accordeon); white-space: normal; }
+/* Citations sous l'origine (écran du scan : sommeliers, Curieux Bégin) — nom en or, texte gris dessous. Réutilisable.
+   Remonte sous l'origine (.texte-secondaire garde sa grande marge du bas). */
+.citations { text-align: center; margin: calc(-1 * var(--space-l)) 0 var(--space-l); }
+.citation { margin-bottom: var(--space-s); }
+.citation > span { display: block; }
+.citation-texte { font-size: var(--fs-12); color: var(--white-60); }
 /* Item dont le libellé peut être long (ex. « Appellation … — 2 en cave ») : il replie au lieu de déborder. Réutilisable. */
 .item-liste.multiligne { white-space: normal; }
 /* Icône devant le libellé d'un item de menu (Curieux Bégin, Données) — partagée, pas de style en ligne */
