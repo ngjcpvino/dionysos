@@ -2921,7 +2921,7 @@ function supprimerNoteEditV2() {
 }
 
 // ==================== EMPLACEMENTS V2 ====================
-var filtresEmpV2 = { meuble: '', rangee: '', espace: '', cepage: '', couleur: '', pays: '' };
+var filtresEmpV2 = { meuble: '', rangee: '', espace: '', cepage: '', couleur: '', pays: '', appellation: '' };
 // Mode d'affichage de la page (section « Afficher » du panneau) : le plan des
 // meubles, ou l'une des six listes. La PORTÉE des listes vient du filtre Meuble.
 var empV2Mode = 'plan';
@@ -2930,7 +2930,7 @@ var MODES_EMP_V2 = ['plan', 'doubles', 'cepdoubles', 'listemeuble', 'cepmanquant
 function ouvrirEmpV2() {
   document.getElementById('empV2Container').style.display = 'flex';
   remonterScrollV2('empV2Container');
-  filtresEmpV2 = { meuble: '', rangee: '', espace: '', cepage: '', couleur: '', pays: '' };
+  filtresEmpV2 = { meuble: '', rangee: '', espace: '', cepage: '', couleur: '', pays: '', appellation: '' };
   empV2Mode = 'plan';
   remplirFiltresEmpV2();
   rendreEmpV2();
@@ -2991,18 +2991,20 @@ function remplirFiltresEmpV2() {
   });
   var espaces = uniqueValeursAchat(forEspace, 'Espace');
 
-  // Cépage / Couleur / Pays : puisés dans ce que le mode courant peut montrer.
+  // Cépage / Couleur / Pays / Appellation : puisés dans ce que le mode courant peut montrer.
+  // Appellation suit le Pays : un pays choisi → seulement ses appellations.
   var baseVin = baseFiltresVinEmpV2();
   var listes = { meuble: meubles, rangee: rangees, espace: espaces,
-                 cepage: uniqueCepagesEmpV2(baseVin), couleur: uniqueValeursAchat(baseVin, 'Couleur'), pays: uniqueValeursAchat(baseVin, 'Pays') };
-  ['meuble','rangee','espace','cepage','couleur','pays'].forEach(function(cle){
+                 cepage: uniqueCepagesEmpV2(baseVin), couleur: uniqueValeursAchat(baseVin, 'Couleur'), pays: uniqueValeursAchat(baseVin, 'Pays'),
+                 appellation: appellationsEmpV2(baseVin) };
+  ['meuble','rangee','espace','cepage','couleur','pays','appellation'].forEach(function(cle){
     var cur = f[cle];
     var menu = document.getElementById('empV2-f-' + cle + '-menu');
     menu.innerHTML = '<div class="item-liste' + (cur === '' ? ' actif' : '') + '" onclick="choisirFiltreEmpV2(\'' + cle + '\', \'\')">Tous</div>' + listes[cle].map(function(v){
       return '<div class="item-liste' + (String(v) === String(cur) ? ' actif' : '') + '" onclick="choisirFiltreEmpV2(\'' + cle + '\', \'' + String(v).replace(/'/g, "\\'") + '\')">' + v + '</div>';
     }).join('');
     var disp = document.getElementById('empV2-f-' + cle + '-display');
-    if (disp) disp.textContent = cur === '' ? ({meuble:'Meuble',rangee:'Rangée',espace:'Espace',cepage:'Cépage',couleur:'Couleur',pays:'Pays'})[cle] : cur;
+    if (disp) disp.textContent = cur === '' ? ({meuble:'Meuble',rangee:'Rangée',espace:'Espace',cepage:'Cépage',couleur:'Couleur',pays:'Pays',appellation:'Appellation'})[cle] : cur;
   });
 
   // Afficher : le mode courant est allumé ; les deux modes « dans un meuble »
@@ -3018,7 +3020,13 @@ function remplirFiltresEmpV2() {
 
   // Loupe : OR si un vrai filtre est actif (jamais pour le mode)
   var loupe = document.getElementById('empV2-loupe');
-  if (loupe) loupe.classList.toggle('actif', !!(f.meuble || f.rangee || f.espace || f.cepage || f.couleur || f.pays));
+  if (loupe) loupe.classList.toggle('actif', !!(f.meuble || f.rangee || f.espace || f.cepage || f.couleur || f.pays || f.appellation));
+}
+
+// Appellations du menu : celles du pays choisi seulement (cascade Pays → Appellation)
+function appellationsEmpV2(baseVin) {
+  var p = filtresEmpV2.pays;
+  return uniqueValeursAchat(p ? baseVin.filter(function(i){ return i.Pays === p; }) : baseVin, 'Appellation');
 }
 
 // Les vins dans lesquels puiser les valeurs de Cépage / Couleur / Pays.
@@ -3050,12 +3058,13 @@ function uniqueCepagesEmpV2(liste) {
   return out;
 }
 
-// Cépage · Couleur · Pays, appliqués aux vins d'une liste.
+// Cépage · Couleur · Pays · Appellation, appliqués aux vins d'une liste.
 function vinPasseFiltresEmpV2(w) {
   var f = filtresEmpV2;
   return (!f.cepage || contientTexteV2(w.Cepage, f.cepage)) &&
     (!f.couleur || w.Couleur === f.couleur) &&
-    (!f.pays || w.Pays === f.pays);
+    (!f.pays || w.Pays === f.pays) &&
+    (!f.appellation || memeTexteV2(w.Appellation, f.appellation));
 }
 function groupesFiltresEmpV2(groupes) {
   return groupes.filter(function(g){ return vinPasseFiltresEmpV2(g.wine); });
@@ -3064,7 +3073,7 @@ function groupesFiltresEmpV2(groupes) {
 function basculerFiltreEmpV2(cle) {
   var menu = document.getElementById('empV2-f-' + cle + '-menu');
   var ouvert = menu.classList.contains('ouvert');
-  ['meuble','rangee','espace','cepage','couleur','pays'].forEach(function(k){
+  ['meuble','rangee','espace','cepage','couleur','pays','appellation'].forEach(function(k){
     var m = document.getElementById('empV2-f-' + k + '-menu');
     if (m) m.classList.remove('ouvert');
   });
@@ -3076,6 +3085,11 @@ function choisirFiltreEmpV2(cle, valeur) {
   document.getElementById('empV2-f-' + cle + '-menu').classList.remove('ouvert');
   if (cle === 'meuble') { filtresEmpV2.rangee = ''; filtresEmpV2.espace = ''; }
   if (cle === 'rangee') { filtresEmpV2.espace = ''; }
+  // Nouveau pays : une appellation qui n'y existe pas se vide (jamais une liste vide sans raison)
+  if (cle === 'pays' && filtresEmpV2.appellation &&
+      !appellationsEmpV2(baseFiltresVinEmpV2()).some(function(a){ return memeTexteV2(a, filtresEmpV2.appellation); })) {
+    filtresEmpV2.appellation = '';
+  }
   // Deux modes n'existent que dans un meuble : sans meuble, retour au plan.
   if (!filtresEmpV2.meuble && (empV2Mode === 'cepdoubles' || empV2Mode === 'listemeuble')) empV2Mode = 'plan';
   remplirFiltresEmpV2();
@@ -3083,9 +3097,9 @@ function choisirFiltreEmpV2(cle, valeur) {
 }
 
 function reinitialiserFiltresEmpV2() {
-  filtresEmpV2 = { meuble: '', rangee: '', espace: '', cepage: '', couleur: '', pays: '' };
+  filtresEmpV2 = { meuble: '', rangee: '', espace: '', cepage: '', couleur: '', pays: '', appellation: '' };
   empV2Mode = 'plan';
-  ['meuble','rangee','espace','cepage','couleur','pays'].forEach(function(k) {
+  ['meuble','rangee','espace','cepage','couleur','pays','appellation'].forEach(function(k) {
     var m = document.getElementById('empV2-f-' + k + '-menu');
     if (m) m.classList.remove('ouvert');
   });
@@ -5103,7 +5117,7 @@ var PANNEAUX_V2 = {
            '<div class="item-liste" id="empV2-mode-appmanquante" onclick="choisirModeEmpV2(\'appmanquante\')">Appellation manquante</div>' +
            '<div class="item-liste" id="empV2-mode-fammanquante" onclick="choisirModeEmpV2(\'fammanquante\')">Familles manquantes</div>' +
            '<div class="panneau-separateur"></div>',
-    filtres: [['meuble', 'Meuble'], ['rangee', 'Rangée'], ['espace', 'Espace'], ['cepage', 'Cépage'], ['couleur', 'Couleur'], ['pays', 'Pays']],
+    filtres: [['meuble', 'Meuble'], ['rangee', 'Rangée'], ['espace', 'Espace'], ['cepage', 'Cépage'], ['couleur', 'Couleur'], ['pays', 'Pays'], ['appellation', 'Appellation']],
     apresReinit: '<div class="panneau-separateur"></div>' +
            '<div class="roundel" onclick="reinitialiserFiltresEmpV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Réinitialiser</span></div>'
   },
