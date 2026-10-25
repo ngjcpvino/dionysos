@@ -1160,6 +1160,8 @@ textarea.champ-saisie { resize: none; font-family: inherit; line-height: 1.4; }
    ========================================= */
 .mt-10 { margin-top: var(--space-s); }
 .mt-20 { margin-top: var(--space-l); }
+/* Petit titre gris aligné à gauche (sous-groupe d'une liste : « Pinot noir — 2 au cellier »). Réutilisable. */
+.texte-secondaire.texte-gauche { text-align: left; margin-bottom: var(--space-s); }
 .mt-40 { margin-top: 40px; }
 .mb-20 { margin-bottom: var(--space-l); }
 .text-center    { text-align: center; }
