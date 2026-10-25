@@ -3274,7 +3274,8 @@ function parcoursMeubleEmpV2(meuble) {
 //   « À ranger » la mérite plus (cépage sans place nulle part) : l'« À ranger » la prend, le doublon devient « À ranger » ;
 // - jamais « À ranger » pour faire de la place autrement ; pas d'échange pour la seule rotation ;
 // - au plus 10 bouteilles par tournée ; couleur douteuse = jamais déplacée (liste « À vérifier ») ;
-// - entre vins équivalents : la rotation (jamais bu, ou bu il y a le plus longtemps — l'Historique).
+// - entre vins équivalents : la rotation (jamais bu, ou bu il y a le plus longtemps — l'Historique) ;
+// - les synonymes de cépages comptent comme un seul cépage (SYNONYMES_CEPAGES_MENAGE_V2).
 // Zones : meubles et rangées de l'onglet config — si l'aménagement change, corriger ici.
 var ZONES_MENAGE_V2 = {
   Cellier: [
@@ -3293,6 +3294,44 @@ var NOMS_COULEURS_MENAGE_V2 = { 'vin-blanc': 'blancs', 'vin-rouge': 'rouges', 'v
 // sortie[groupe] = vin à sortir en premier d'un doublon ; choix[cépage] = vin choisi pour entrer ;
 // refus[opération] = opération décochée ; faits[ligne] = ligne cochée pendant la tournée.
 var MENAGE_V2 = { sortie: {}, choix: {}, refus: {}, etape: 'propositions', faits: {} };
+
+// Synonymes de cépages (25 oct. 2026) — pour le ménage SEULEMENT ; liste tenue ici, à compléter quand
+// l'utilisateur en signale un. Nom commun (celui le plus présent en cave) : ses autres noms.
+// Restent à part : Garnacha tintorera (= Alicante Bouschet), Grenache blanc, Grenache gris.
+var SYNONYMES_CEPAGES_MENAGE_V2 = {
+  'Grenache': ['Garnacha', 'Grenache noir', 'Cannonau'],
+  'Pinot grigio': ['Pinot gris'],
+  'Monastrell': ['Mourvèdre'],
+  'Syrah': ['Shiraz'],
+  'Tempranillo': ['Tinta Roriz', 'Aragonez', 'Tinto Fino'],
+  'Jaen': ['Mencía'],
+  'Trebbiano': ['Ugni blanc'],
+  'Macabeo': ['Viura'],
+  'Vermentino': ['Rolle'],
+  'Carignan': ['Cariñena', 'Mazuelo'],
+  'Primitivo': ['Zinfandel'],
+  'Cabernet-Sauvignon': ['Cabernet']   // « Cabernet » seul = Cabernet-Sauvignon, jamais Cabernet franc
+};
+
+// Clé de comparaison d'un cépage : sans majuscules, accents ni traits d'union
+function cleCepageMenageV2(nom) { return normaliserRechercheV2(nom).replace(/[-\s]+/g, ' ').trim(); }
+
+// Nom commun d'un cépage (lui-même s'il n'a pas de synonyme)
+function cepageCommunMenageV2(nom) {
+  var cle = cleCepageMenageV2(nom);
+  var commun = nom;
+  Object.keys(SYNONYMES_CEPAGES_MENAGE_V2).some(function(c) {
+    if (cleCepageMenageV2(c) === cle || SYNONYMES_CEPAGES_MENAGE_V2[c].some(function(s) { return cleCepageMenageV2(s) === cle; })) { commun = c; return true; }
+    return false;
+  });
+  return commun;
+}
+
+// « Grenache (Cannonau) » : le nom commun, puis celui de la fiche s'il diffère
+function libelleCepageMenageV2(b) {
+  if (!b.cepNom) return '';
+  return b.cepCommun + (cleCepageMenageV2(b.cepCommun) !== cleCepageMenageV2(b.cepNom) ? ' (' + b.cepNom + ')' : '');
+}
 
 function placeMenageV2(p) { return p ? p.meuble + '|' + p.rangee + '|' + p.espace : ''; }
 function libellePlaceMenageV2(p) {
@@ -3334,11 +3373,12 @@ function bouteillesMenageV2() {
     var place = (i.Meuble && i.Rangee && i.Espace) ? { meuble: i.Meuble.toString(), rangee: i.Rangee.toString(), espace: i.Espace.toString() } : null;
     var lieu = !place ? 'aranger' : memeTexteV2(place.meuble, 'Cellier') ? 'cellier' : memeTexteV2(place.meuble, 'Pigeonnier') ? 'pigeonnier' : memeTexteV2(place.meuble, 'Réserve') ? 'reserve' : 'autre';
     var cepNom = decodeHTML(cepageDominant(i));
+    var cepCommun = cepageCommunMenageV2(cepNom);
     var codeSaq = (i['Code SAQ'] || '').toString().trim().replace(/^0+/, '');
     var codeCb = (i['Code-barres'] || '').toString().trim().replace(/^0+/, '');
     var b = {
       w: i, cle: i.row + '|' + i.bottle, vin: cleVinV2(i), lieu: lieu, place: place,
-      coul: couleurClasseV2(i.Couleur), cep: normaliserRechercheV2(cepNom), cepNom: cepNom,
+      coul: couleurClasseV2(i.Couleur), cep: cleCepageMenageV2(cepCommun), cepNom: cepNom, cepCommun: cepCommun,
       app: normaliserRechercheV2(decodeHTML(i.Appellation || '')), appNom: decodeHTML(i.Appellation || ''),
       fam: (i.Famille || '').toString().replace(/^'/, '').replace(/^0+/, ''),
       passe: der[codeSaq] || der[codeCb] || null, doute: ''
@@ -3351,6 +3391,8 @@ function bouteillesMenageV2() {
       var z = zoneMenageV2(place);
       if (z && z.nom !== 'rangée 7' && !z.couleurs[b.coul]) b.doute = (NOMS_COULEURS_MENAGE_V2[b.coul] || 'Ce vin').replace(/s$/, '').replace(/^./, function(c) { return c.toUpperCase(); }) + ' rangé chez les ' + z.nom + ' (' + place.meuble + ')';
     }
+    // « Autre(s) cépage(s) » de la SAQ : pas un vrai cépage — l'utilisateur l'inscrit dans la fiche
+    if (!b.doute && /^autre/.test(b.cep)) b.doute = 'Cépage non nommé : inscris le vrai dans la fiche';
     return b;
   });
 }
@@ -3579,9 +3621,9 @@ function cocheMenageV2(id, actif) {
 
 function raisonMenageV2(op) {
   var b = op.entre;
-  if (op.etape === 3) return op.crit === 'cep' ? b.cepNom + ' — cépage sans place ailleurs' : 'à ranger → une place à la Réserve';
+  if (op.etape === 3) return op.crit === 'cep' ? libelleCepageMenageV2(b) + ' — cépage sans place ailleurs' : 'à ranger → une place à la Réserve';
   var ou = op.etape === 1 ? 'du cellier' : 'du cellier et du Pigeonnier';
-  if (op.crit === 'cep') return b.cepNom + ' — cépage absent ' + ou;
+  if (op.crit === 'cep') return libelleCepageMenageV2(b) + ' — cépage absent ' + ou;
   if (op.crit === 'app') return b.appNom + ' — appellation absente ' + ou;
   return 'Famille d\'accords absente ' + ou;
 }
@@ -3628,16 +3670,16 @@ function afficherMenageEmpV2() {
       if (op.sort) {
         var s = op.sort;
         var dest = s.vers ? '→ Réserve ' + libellePlaceMenageV2(s.vers) : '→ À ranger';
-        var pourquoi = s.dejaAuCellier ? 'déjà au cellier' : 'doublon de ' + (s.b.cepNom || 'ce vin');
+        var pourquoi = s.dejaAuCellier ? 'déjà au cellier' : 'doublon de ' + (libelleCepageMenageV2(s.b) || 'ce vin');
         html += carteMenageV2(s.b, 'histo-mets', '↓ Sort : ' + nomMenageV2(s.b), pourquoi + ' · ' + passeMenageV2(s.b) + ' · ' + libellePlaceMenageV2(s.de),
           '<span class="color-primary fs-12">' + dest + '</span>', '', false);
         if (op.case) {
           html += carteMenageV2(op.case.b, 'histo-mets', '↓ Prend sa place à la Réserve : ' + nomMenageV2(op.case.b),
-            (op.case.b.cepNom || '') + ' — cépage sans place, il attendait « À ranger »', '<span class="fs-12">→ ' + libellePlaceMenageV2(op.case.vers) + '</span>', '', false);
+            libelleCepageMenageV2(op.case.b) + ' — cépage sans place, il attendait « À ranger »', '<span class="fs-12">→ ' + libellePlaceMenageV2(op.case.vers) + '</span>', '', false);
         }
         // sortir plutôt un autre exemplaire du même doublon
         s.tous.filter(function(o) { return o.vin !== s.b.vin; }).slice(0, 3).forEach(function(o) {
-          html += carteMenageV2(o, 'histo-mets', nomMenageV2(o), 'même cépage · ' + passeMenageV2(o) + ' · ' + libellePlaceMenageV2(o.place),
+          html += carteMenageV2(o, 'histo-mets', nomMenageV2(o), 'même cépage' + (cleCepageMenageV2(o.cepNom) !== cleCepageMenageV2(o.cepCommun) ? ' (' + o.cepNom + ')' : '') + ' · ' + passeMenageV2(o) + ' · ' + libellePlaceMenageV2(o.place),
             '<span class="fs-12">sortir plutôt</span>', "choisirSortieMenageV2('" + guillemetMenageV2(s.groupe) + "', '" + guillemetMenageV2(o.vin) + "')", true);
         });
       }
