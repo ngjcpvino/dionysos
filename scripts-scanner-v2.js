@@ -1419,7 +1419,7 @@ function remplirFiltresSuggestionsV2() {
     }).join('');
   }
   var dispCoul = document.getElementById('suggestionsV2-f-couleur-display');
-  if (dispCoul) dispCoul.textContent = f.couleur || 'Couleurs';
+  if (dispCoul) dispCoul.textContent = f.couleur || 'Couleur';
 
   var btnCave = document.getElementById('suggestionsV2-cave');
   if (btnCave) { btnCave.classList.toggle('actif', f.cave); btnCave.textContent = f.cave ? '✓' : '✗'; }
@@ -1648,7 +1648,7 @@ function ajouterDepuisSuggestionsV2() {
 var filtresAchatV2 = { couleur: '', pays: '', cepage: '', appellation: '', pastille: '', succ: '', sommelier: '' };
 var achatV2Mode = 'achat';
 var achatV2PromoSeul = false; // interrupteur « Que les vins en promotion »
-var libellesFiltreAchatV2 = { couleur: 'Couleurs', pays: 'Pays', cepage: 'Cépages', appellation: 'Appellations', pastille: 'Pastille de goût', succ: 'Succursale' };
+var libellesFiltreAchatV2 = { couleur: 'Couleur', pays: 'Pays', cepage: 'Cépage', appellation: 'Appellation', pastille: 'Pastille de goût', succ: 'Succursale' };
 var succursalesAchatV2 = [];
 
 // Promotions SAQ repliées dans la liste d'achat
@@ -2434,7 +2434,7 @@ function fermerRechercheV2() {
 }
 
 var filtresRechercheV2 = { sommelier: '', couleur: '', cepage: '', pays: '', appellation: '', accords: '', pastille: '', cave: false };
-var libellesFiltreRechercheV2 = { sommelier: 'Sommelier', couleur: 'Couleurs', cepage: 'Cépages', pays: 'Pays', appellation: 'Appellations', accords: 'Accords', pastille: 'Pastille de goût' };
+var libellesFiltreRechercheV2 = { sommelier: 'Sommelier', couleur: 'Couleur', cepage: 'Cépage', pays: 'Pays', appellation: 'Appellation', accords: 'Accords', pastille: 'Pastille de goût' };
 
 function ouvrirFiltresRechercheV2() { clicLoupeV2('rechercheV2', reinitialiserFiltresRechercheV2); }
 function fermerFiltresRechercheV2() {
@@ -4096,7 +4096,7 @@ function fermerFiltresCaveV2() {
 }
 
 var filtresCaveV2 = { couleur: '', cepage: '', pays: '', appellation: '', accords: '', pastille: '', acidite: '', dispo: false };
-var libellesFiltreCaveV2 = { couleur: 'Couleurs', cepage: 'Cépages', pays: 'Pays', appellation: 'Appellations', accords: 'Accords', pastille: 'Pastille de goût', acidite: 'Acidité' };
+var libellesFiltreCaveV2 = { couleur: 'Couleur', cepage: 'Cépage', pays: 'Pays', appellation: 'Appellation', accords: 'Accord', pastille: 'Pastille de goût', acidite: 'Acidité' };
 
 function remplirFiltresCaveV2() {
   var f = filtresCaveV2;
@@ -4260,17 +4260,17 @@ function alimentsDisponiblesChartierV2(cle) {
 function construirePanneauChartierV2() {
   var html = '';
   majToggleHautV2('chartierV2-dispo', filtresChartierV2.dispo);
+  // Ordre standard (25 oct. 2026) : ce qui est propre à la page (les aliments), puis le vin — Couleur · Cépage
   html += '<div class="titre-3">Filtrer</div>';
-  html += '<div class="champ-cliquable" id="chartierV2-f-cepage-display" onclick="basculerCepageChartierV2()">Cépage</div>';
-  html += '<div id="chartierV2-f-cepage-menu" class="menu-liste"></div>';
-  html += '<div class="panneau-separateur"></div>';
   Object.keys(LIBELLES_CATEGORIES_CHARTIER_V2).forEach(function(cle) {
     html += '<div class="champ-cliquable" onclick="basculerCategorieChartierV2(\'' + cle + '\')">' + LIBELLES_CATEGORIES_CHARTIER_V2[cle] + '</div>';
     html += '<div id="chartierV2-cat-' + cle + '" class="menu-liste"></div>';
   });
   html += '<div class="panneau-separateur"></div>';
-  html += '<div class="champ-cliquable" id="chartierV2-f-couleur-display" onclick="basculerCouleurChartierV2()">Couleurs</div>';
+  html += '<div class="champ-cliquable" id="chartierV2-f-couleur-display" onclick="basculerCouleurChartierV2()">Couleur</div>';
   html += '<div id="chartierV2-f-couleur-menu" class="menu-liste"></div>';
+  html += '<div class="champ-cliquable" id="chartierV2-f-cepage-display" onclick="basculerCepageChartierV2()">Cépage</div>';
+  html += '<div id="chartierV2-f-cepage-menu" class="menu-liste"></div>';
   document.getElementById('chartierV2-filtres').innerHTML = html;
   remplirCouleurMenuChartierV2();
   remplirCepageMenuChartierV2();
@@ -4365,7 +4365,7 @@ function remplirCouleurMenuChartierV2() {
   var disp = document.getElementById('chartierV2-f-couleur-display');
   if (disp) {
     var sel = couleurs.filter(function(c) { return c[0] === filtresChartierV2.couleur; })[0];
-    disp.textContent = sel ? sel[1] : 'Couleurs';
+    disp.textContent = sel ? sel[1] : 'Couleur';
   }
 }
 
@@ -4751,12 +4751,12 @@ function retourVinsSelonSaqV2() {
 // ==================== SELON CURIEUX BÉGIN V2 ====================
 // Page façon « Suggestions » : une section par saison (la plus récente en haut), groupée par vin dedans
 // (carte du vin → sa fiche), puis les recettes dessous (→ la recette).
-var filtresCurieuxBeginV2 = { saison: '', couleur: '', cave: false, mode: 'mesvins' };
+var filtresCurieuxBeginV2 = { saison: '', couleur: '', cepage: '', pays: '', appellation: '', cave: false, mode: 'mesvins' };
 
 function ouvrirCurieuxBeginV2() {
   document.getElementById('curieuxBeginV2Container').style.display = 'flex';
   remonterScrollV2('curieuxBeginV2Container');
-  filtresCurieuxBeginV2 = { saison: '', couleur: '', cave: false, mode: 'mesvins' };
+  filtresCurieuxBeginV2 = { saison: '', couleur: '', cepage: '', pays: '', appellation: '', cave: false, mode: 'mesvins' };
   var champ = document.getElementById('curieuxBeginV2-f-texte');
   if (champ) champ.value = '';
   if (ALL_CURIEUXBEGIN) { remplirFiltresCurieuxBeginV2(); chargerCurieuxBeginV2(); return; }
@@ -4797,7 +4797,26 @@ function remplirFiltresCurieuxBeginV2() {
     }).join('');
   }
   var dispSaison = document.getElementById('curieuxBeginV2-f-saison-display');
-  if (dispSaison) dispSaison.textContent = f.saison ? 'Saison ' + f.saison : 'Saisons';
+  if (dispSaison) dispSaison.textContent = f.saison ? 'Saison ' + f.saison : 'Saison';
+
+  // Cépage (principal) · Pays · Appellation : puisés dans le mode affiché ; Appellation suit le Pays
+  var attrs = (ALL_CURIEUXBEGIN || []).filter(function(a) { return cbDansModeV2(a, infos); }).map(function(a) { return attributsVinCbV2(a, infos); });
+  var listes = {
+    cepage: valeursUniquesCbV2(attrs, 'cepage'),
+    pays: valeursUniquesCbV2(attrs, 'pays'),
+    appellation: valeursUniquesCbV2(attrs.filter(function(x) { return !f.pays || memeTexteV2(x.pays, f.pays); }), 'appellation')
+  };
+  var libelles = { cepage: 'Cépage', pays: 'Pays', appellation: 'Appellation' };
+  ['cepage', 'pays', 'appellation'].forEach(function(cle) {
+    var menu = document.getElementById('curieuxBeginV2-f-' + cle + '-menu');
+    if (menu) {
+      menu.innerHTML = listes[cle].map(function(v) {
+        return '<div class="item-liste' + (memeTexteV2(v, f[cle]) ? ' actif' : '') + '" onclick="choisirFiltreCurieuxBeginV2(\'' + cle + '\', \'' + v.replace(/'/g, "\\'") + '\')">' + v + '</div>';
+      }).join('');
+    }
+    var disp = document.getElementById('curieuxBeginV2-f-' + cle + '-display');
+    if (disp) disp.textContent = f[cle] || libelles[cle];
+  });
 
   var couleurs = uniqueValeursAchat(ALL_DATA || [], 'Couleur');
   var menuCoul = document.getElementById('curieuxBeginV2-f-couleur-menu');
@@ -4807,7 +4826,7 @@ function remplirFiltresCurieuxBeginV2() {
     }).join('');
   }
   var dispCoul = document.getElementById('curieuxBeginV2-f-couleur-display');
-  if (dispCoul) dispCoul.textContent = f.couleur || 'Couleurs';
+  if (dispCoul) dispCoul.textContent = f.couleur || 'Couleur';
   var btnCave = document.getElementById('curieuxBeginV2-cave');
   if (btnCave) { btnCave.classList.toggle('actif', f.cave); btnCave.textContent = f.cave ? '✓' : '✗'; }
   var elMes = document.getElementById('curieuxBeginV2-mode-mesvins');
@@ -4826,15 +4845,26 @@ function choisirModeCurieuxBeginV2(mode) {
 function basculerFiltreCurieuxBeginV2(cle) {
   var menu = document.getElementById('curieuxBeginV2-f-' + cle + '-menu');
   var ouvert = menu.classList.contains('ouvert');
-  ['saison', 'couleur'].forEach(function(k) {
+  ['saison', 'couleur', 'cepage', 'pays', 'appellation'].forEach(function(k) {
     document.getElementById('curieuxBeginV2-f-' + k + '-menu').classList.remove('ouvert');
   });
   if (!ouvert) menu.classList.add('ouvert');
 }
 
 function choisirFiltreCurieuxBeginV2(cle, valeur) {
-  filtresCurieuxBeginV2[cle] = valeur;
+  var f = filtresCurieuxBeginV2;
+  f[cle] = valeur;
   document.getElementById('curieuxBeginV2-f-' + cle + '-menu').classList.remove('ouvert');
+  // Nouveau pays : une appellation qui n'y existe pas se vide (jamais une liste vide sans raison)
+  if (cle === 'pays' && f.appellation) {
+    var infos = saqInfosV2();
+    var garde = (ALL_CURIEUXBEGIN || []).some(function(a) {
+      if (!cbDansModeV2(a, infos)) return false;
+      var x = attributsVinCbV2(a, infos);
+      return memeTexteV2(x.pays, f.pays) && memeTexteV2(x.appellation, f.appellation);
+    });
+    if (!garde) f.appellation = '';
+  }
   remplirFiltresCurieuxBeginV2();
   chargerCurieuxBeginV2();
 }
@@ -4846,10 +4876,10 @@ function toggleCaveCurieuxBeginV2() {
 }
 
 function reinitialiserFiltresCurieuxBeginV2() {
-  filtresCurieuxBeginV2 = { saison: '', couleur: '', cave: false, mode: 'mesvins' };
+  filtresCurieuxBeginV2 = { saison: '', couleur: '', cepage: '', pays: '', appellation: '', cave: false, mode: 'mesvins' };
   var champ = document.getElementById('curieuxBeginV2-f-texte');
   if (champ) champ.value = '';
-  ['saison', 'couleur'].forEach(function(k) {
+  ['saison', 'couleur', 'cepage', 'pays', 'appellation'].forEach(function(k) {
     var menu = document.getElementById('curieuxBeginV2-f-' + k + '-menu');
     if (menu) menu.classList.remove('ouvert');
   });
@@ -4862,6 +4892,26 @@ function reinitialiserFiltresCurieuxBeginV2() {
 function cbDansModeV2(a, infos) {
   var possede = !!infos[(a.codeSAQ || '').toString().trim()];
   return filtresCurieuxBeginV2.mode === 'horscave' ? !possede : possede;
+}
+
+// Couleur, cépage principal, pays et appellation d'un vin de Curieux Bégin : ceux de ma fiche si je l'ai,
+// sinon ceux que l'enrichissement SAQ a gardés (couleur d'après le type ; pays et appellation depuis le 25 oct. 2026).
+function attributsVinCbV2(a, infos) {
+  var w = infos[(a.codeSAQ || '').toString().trim()];
+  if (w) return { couleur: couleurClasseV2(w.Couleur), cepage: decodeHTML(cepageDominant(w)), pays: decodeHTML(w.Pays || ''), appellation: decodeHTML(w.Appellation || '') };
+  return { couleur: couleurClasseV2(a.type), cepage: decodeHTML(cepageDominant({ Cepage: a.cepage || '' })), pays: decodeHTML(a.pays || ''), appellation: decodeHTML(a.appellation || '') };
+}
+
+// Valeurs d'un champ, sans doublon (accents et casse ignorés), triées
+function valeursUniquesCbV2(attrs, champ) {
+  var vues = {};
+  var out = [];
+  attrs.forEach(function(x) {
+    var v = (x[champ] || '').toString().trim();
+    var k = normaliserRechercheV2(v);
+    if (v && !vues[k]) { vues[k] = true; out.push(v); }
+  });
+  return out.sort(function(a, b) { return a.localeCompare(b); });
 }
 
 // Numéro de saison ou d'épisode (texte ou nombre du Sheet) ; vide → -1, classé en dernier.
@@ -4888,10 +4938,11 @@ function chargerCurieuxBeginV2() {
     if (!cbDansModeV2(a, infos)) return false;
     if (possede && f.cave && !bouteillesEnCaveParSAQV2(cs)) return false;
     if (f.saison && (a.saison || '').toString().trim() !== f.saison) return false;
-    if (cibleCoul) {
-      var cc = possede ? couleurClasseV2(w.Couleur) : couleurClasseV2(a.type);
-      if (cc !== cibleCoul) return false;
-    }
+    var x = attributsVinCbV2(a, infos);
+    if (cibleCoul && x.couleur !== cibleCoul) return false;
+    if (f.cepage && !memeTexteV2(x.cepage, f.cepage)) return false;
+    if (f.pays && !memeTexteV2(x.pays, f.pays)) return false;
+    if (f.appellation && !memeTexteV2(x.appellation, f.appellation)) return false;
     if (q) {
       var nomRech = possede ? (w.Nom || '') : (a.vin || '');
       if (normaliserRechercheV2(a.plat).indexOf(q) === -1 && normaliserRechercheV2(nomRech).indexOf(q) === -1) return false;
@@ -4913,7 +4964,7 @@ function chargerCurieuxBeginV2() {
   var nbVins = Object.keys(vins).length;
 
   var loupe = document.getElementById('curieuxBeginV2-loupe');
-  if (loupe) loupe.classList.toggle('actif', !!(f.saison || f.couleur || f.cave || q));
+  if (loupe) loupe.classList.toggle('actif', !!(f.saison || f.couleur || f.cepage || f.pays || f.appellation || f.cave || q));
 
   compte.textContent = nbVins + ' vin' + (nbVins > 1 ? 's' : '');
   if (!nbVins) { div.innerHTML = '<div class="texte-secondaire">Aucun accord</div>'; return; }
@@ -5105,13 +5156,13 @@ function ajouterBouteilleArrivee(meuble, rangee, espace) {
 var PANNEAUX_V2 = {
   cave: {
     prefixe: 'caveV2', bascule: 'basculerFiltreCaveV2', reinit: 'reinitialiserFiltresCaveV2',
-    filtres: [['couleur', 'Couleurs'], ['cepage', 'Cépages'], ['pays', 'Pays'], ['appellation', 'Appellations'], ['accords', 'Accords'], ['pastille', 'Pastille de goût'], ['acidite', 'Acidité']],
+    filtres: [['couleur', 'Couleur'], ['cepage', 'Cépage'], ['pays', 'Pays'], ['appellation', 'Appellation'], ['accords', 'Accord'], ['pastille', 'Pastille de goût'], ['acidite', 'Acidité']],
     apres: '<div class="panneau-separateur"></div>' +
            '<input type="text" id="caveV2-f-nom" class="champ-saisie" placeholder="Rechercher par nom" oninput="appliquerFiltresCaveV2()">'
   },
   histo: {
     prefixe: 'histoV2', bascule: 'basculerFiltreHistoV2', reinit: 'reinitialiserFiltresHistoV2',
-    filtres: [['vin', 'Vin'], ['accord', 'Accord'], ['couleur', 'Couleur']],
+    filtres: [['vin', 'Vin'], ['couleur', 'Couleur'], ['accord', 'Accord']],
     apres: '<div class="panneau-separateur"></div>' +
            '<input type="text" id="histoV2-f-mets" class="champ-saisie" placeholder="Rechercher un mets" oninput="filtrerMetsHistoV2()">',
     apresReinit: '<div class="roundel" onclick="ouvrirHistoAjoutV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Ajouter</span></div>'
@@ -5127,7 +5178,7 @@ var PANNEAUX_V2 = {
            '<div class="item-liste" id="empV2-mode-appmanquante" onclick="choisirModeEmpV2(\'appmanquante\')">Appellation manquante</div>' +
            '<div class="item-liste" id="empV2-mode-fammanquante" onclick="choisirModeEmpV2(\'fammanquante\')">Familles manquantes</div>' +
            '<div class="panneau-separateur"></div>',
-    filtres: [['meuble', 'Meuble'], ['rangee', 'Rangée'], ['espace', 'Espace'], ['cepage', 'Cépage'], ['couleur', 'Couleur'], ['pays', 'Pays'], ['appellation', 'Appellation']],
+    filtres: [['meuble', 'Meuble'], ['rangee', 'Rangée'], ['espace', 'Espace'], ['couleur', 'Couleur'], ['cepage', 'Cépage'], ['pays', 'Pays'], ['appellation', 'Appellation']],
     apresReinit: '<div class="panneau-separateur"></div>' +
            '<div class="roundel" onclick="reinitialiserFiltresEmpV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Réinitialiser</span></div>'
   },
@@ -5144,11 +5195,11 @@ var PANNEAUX_V2 = {
            '<div class="item-liste" id="achatV2-mode-decouvertes" onclick="choisirModeAchatV2(\'decouvertes\')">Liste découvertes</div>' +
            '<div class="item-liste" id="achatV2-mode-nepasracheter" onclick="choisirModeAchatV2(\'nepasracheter\')">Liste ne pas racheter</div>' +
            '<div class="panneau-separateur"></div>',
-    filtres: [['couleur', 'Couleurs'], ['pays', 'Pays'], ['cepage', 'Cépages'], ['appellation', 'Appellations'], ['pastille', 'Pastille de goût'], ['sommelier', 'Sommelier']]
+    filtres: [['sommelier', 'Sommelier'], ['couleur', 'Couleur'], ['cepage', 'Cépage'], ['pays', 'Pays'], ['appellation', 'Appellation'], ['pastille', 'Pastille de goût']]
   },
   recherche: {
     prefixe: 'rechercheV2', bascule: 'basculerFiltreRechercheV2', reinit: 'reinitialiserFiltresRechercheV2',
-    filtres: [['sommelier', 'Sommelier'], ['couleur', 'Couleurs'], ['cepage', 'Cépages'], ['pays', 'Pays'], ['appellation', 'Appellations'], ['accords', 'Accords'], ['pastille', 'Pastille de goût']]
+    filtres: [['sommelier', 'Sommelier'], ['couleur', 'Couleur'], ['cepage', 'Cépage'], ['pays', 'Pays'], ['appellation', 'Appellation'], ['accords', 'Accord'], ['pastille', 'Pastille de goût']]
   },
   notes: {
     prefixe: 'notesV2', bascule: 'basculerFiltreNotesV2', reinit: 'reinitialiserFiltresNotesV2',
@@ -5159,7 +5210,7 @@ var PANNEAUX_V2 = {
   },
   suggestions: {
     prefixe: 'suggestionsV2', bascule: 'basculerFiltreSuggestionsV2', reinit: 'reinitialiserFiltresSuggestionsV2',
-    filtres: [['sommelier', 'Sommelier'], ['couleur', 'Couleurs']],
+    filtres: [['sommelier', 'Sommelier'], ['couleur', 'Couleur']],
     apres: '<div class="panneau-separateur"></div>' +
            '<input type="text" id="suggestionsV2-f-texte" class="champ-saisie" placeholder="Chercher dans les notes" oninput="afficherSuggestionsV2()">',
     apresReinit: '<div class="roundel" onclick="ajouterDepuisSuggestionsV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Ajouter</span></div>'
@@ -5170,7 +5221,7 @@ var PANNEAUX_V2 = {
            '<div class="item-liste" id="curieuxBeginV2-mode-mesvins" onclick="choisirModeCurieuxBeginV2(\'mesvins\')">Mes vins</div>' +
            '<div class="item-liste" id="curieuxBeginV2-mode-horscave" onclick="choisirModeCurieuxBeginV2(\'horscave\')">Vins à découvrir</div>' +
            '<div class="panneau-separateur"></div>',
-    filtres: [['saison', 'Saisons'], ['couleur', 'Couleurs']],
+    filtres: [['saison', 'Saison'], ['couleur', 'Couleur'], ['cepage', 'Cépage'], ['pays', 'Pays'], ['appellation', 'Appellation']],
     apres: '<div class="panneau-separateur"></div>' +
            '<input type="text" id="curieuxBeginV2-f-texte" class="champ-saisie" placeholder="Chercher un plat ou un vin" oninput="chargerCurieuxBeginV2()">'
   }
