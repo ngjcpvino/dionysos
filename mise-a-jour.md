@@ -273,6 +273,7 @@ Besoin vécu en succursale (soldes, murs de béton) : savoir tout de suite ce qu
 - **À faire par l'utilisateur, à l'ordinateur** : recoller `Code.gs` (version avec le portrait) dans Apps Script + redéployer (nouvelle version). Tant que ce n'est pas fait, la Liste d'achat marche comme avant (repli automatique) et le scan n'a pas d'inventaire.
 - **Réouverture sans réseau** : réglée le 24 oct. — voir la section 📴 Hors ligne.
 - **Synonymes de cépages partout dans l'app (à réfléchir plus tard — utilisateur, 25 oct.)** : pour l'instant ils ne comptent QUE dans le ménage ; à voir s'ils doivent aussi compter dans Cépages doubles / Cépages manquants (Emplacements), les Comparables du scan et le filtre Cépage. Voir 🧹 Ménage de la cave.
+- **Nouveau nom pour « Ménage de la cave » (à trouver plus tard — utilisateur, 26 oct.)** : « ménage », c'est pas très joli. Pistes lancées, aucune retenue ni refusée : La chaise musicale · La valse des bouteilles · Remettre la cave en ordre · Le grand brassage · Varier la cave · L'assemblage · Le remuage · Le soutirage · L'encavage. Le libellé est dans le menu Afficher d'Emplacements et en tête de l'écran (`afficherMenageEmpV2`).
 - **Reste à jaser** : ni retenues ni refusées, les autres pistes du 23 oct. (autre code-barres, appellations voisines, couleur, spiritueux « Type », cépage élargi, Découvertes).
 
 ## 📴 Hors ligne — l'app se rouvre sans réseau (24 octobre 2026)
