@@ -3756,24 +3756,24 @@ function afficherMenageEmpV2(recalculer) {
   document.getElementById('empV2-compte').innerHTML = 'Tri œnophile : ' + n + ' bouteille' + (n > 1 ? 's' : '') + ' à déplacer';
   var arrets = lignesMenageV2(plan);
   var titres = { 1: '1 · Au cellier', 2: '2 · Au Pigeonnier', 3: '3 · En bas, à la Réserve', 4: '4 · Au Pigeonnier', 5: '5 · Au cellier' };
-  var ordre = { 1: ['Tes choix', 'Sors', 'Déplace'], 2: ['Tes choix', 'Sors', 'Déplace', 'Place ce qui vient du cellier'], 3: ['Sors', 'Range', 'Pose avec les « À ranger »'], 4: ['Place'], 5: ['Place'] };
+  var ordre = { 1: ['Choisir', 'Sors', 'Déplace'], 2: ['Choisir', 'Sors', 'Déplace', 'Place ce qui vient du cellier'], 3: ['Sors', 'Range', 'Pose avec les « À ranger »'], 4: ['Place'], 5: ['Place'] };
   var html = '';
   [1, 2, 3, 4, 5].forEach(function(a) {
     html += '<div class="emp-bloc"><div class="emp-meuble">' + titres[a] + '</div>';
     var vide = true;
     ordre[a].forEach(function(rubrique) {
-      if (rubrique === 'Tes choix') {
+      if (rubrique === 'Choisir') {
         var gs = plan.groupes.filter(function(g) { return g.meuble === (a === 1 ? 'Cellier' : 'Pigeonnier'); });
         if (!gs.length) return;
         vide = false;
-        html += '<div class="texte-secondaire texte-gauche">Tes choix</div>';
+        html += '<div class="titre-rubrique">Choisir</div>';
         gs.forEach(function(g) { html += choixMenageV2Html(g, plan); });
         return;
       }
       var lignes = arrets[a][rubrique];
       if (!lignes || !lignes.length) return;
       vide = false;
-      html += '<div class="texte-secondaire texte-gauche">' + rubrique + '</div>';
+      html += '<div class="titre-rubrique">' + rubrique + '</div>';
       lignes.forEach(function(l) { html += ligneMenageV2Html(l); });
     });
     if (vide) html += '<div class="texte-secondaire texte-gauche">Rien à faire ici</div>';
@@ -3794,12 +3794,13 @@ function afficherMenageEmpV2(recalculer) {
   document.getElementById('empV2-cartes').innerHTML = html;
 }
 
-// « Pinot grigio : tu en as 3 au cellier, cèdes-en 2 »
+// « Pinot grigio : tu en as 3 au cellier, cèdes-en 2 » — en titre au-dessus du groupe, pas collé au premier vin
 function choixMenageV2Html(g, plan) {
   var M = MENAGE_V2;
   var nCedes = g.bouteilles.filter(function(b) { return M.cedes[b.cle]; }).length;
-  var html = '<div class="histo-groupe ' + g.coul + '"><div class="carte-titre">' + g.titre + ' : tu en as ' + g.bouteilles.length +
-    (g.meuble === 'Cellier' ? ' au cellier' : ' au Pigeonnier') + ', cèdes-en ' + g.aCeder + (nCedes ? ' (' + nCedes + ' choisi' + (nCedes > 1 ? 's' : '') + ')' : '') + '</div>';
+  var html = '<div class="titre-groupe">' + g.titre + ' : tu en as ' + g.bouteilles.length +
+    (g.meuble === 'Cellier' ? ' au cellier' : ' au Pigeonnier') + ', cèdes-en ' + g.aCeder + (nCedes ? ' (' + nCedes + ' choisi' + (nCedes > 1 ? 's' : '') + ')' : '') + '</div>' +
+    '<div class="histo-groupe ' + g.coul + '">';
   g.bouteilles.forEach(function(b) {
     var cede = !!M.cedes[b.cle];
     var autreNom = cleCepageMenageV2(b.cepNom) !== cleCepageMenageV2(b.cepCommun) ? b.cepNom + ' · ' : '';
