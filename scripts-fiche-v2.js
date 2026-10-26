@@ -981,6 +981,8 @@ function fermerFicheV2() {
     document.getElementById('empV2Container').style.display = 'flex';
     remonterScrollV2('empV2Container');
     rendreEmpV2();
+    // le Tri œnophile : on revient au même endroit du parcours
+    if (empV2Mode === 'menage') document.querySelector('#empV2Container .modal-v2-content').scrollTop = SCROLL_EMP_V2;
   } else if (FICHE_V2_PROVENANCE === 'emplacements') {
     ouvrirEmpV2();
   } else if (FICHE_V2_PROVENANCE === 'sanscepage') {
