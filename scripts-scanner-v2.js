@@ -3621,7 +3621,7 @@ function simulerMenageV2(toutes, groupes, restent) {
     if (ou[b.cle] !== TRANSIT) return;
     var libre = libresReserve()[0];
     if (!libre) {
-      if (!s.horsZone) { ou[b.cle] = null; raison[b.cle] += ' — la Réserve est pleine'; }
+      if (!s.horsZone) ou[b.cle] = null;
       return;
     }
     var m = s.horsZone ? null : meritant();
