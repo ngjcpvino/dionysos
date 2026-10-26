@@ -1160,8 +1160,14 @@ textarea.champ-saisie { resize: none; font-family: inherit; line-height: 1.4; }
    ========================================= */
 .mt-10 { margin-top: var(--space-s); }
 .mt-20 { margin-top: var(--space-l); }
-/* Petit titre gris aligné à gauche, en lettres normales (rubriques du Tri œnophile : « Sors », « Place »…). Réutilisable. */
+/* Petit titre gris aligné à gauche, en lettres normales (« Rien à faire ici » du Tri œnophile). Réutilisable. */
 .texte-secondaire.texte-gauche { text-align: left; margin-bottom: var(--space-s); text-transform: none; letter-spacing: normal; }
+/* Titre de rubrique dans un bloc (Tri œnophile : « Choisir », « Sors », « Déplace »…) : or, en lettres normales,
+   sous le titre du bloc (.emp-meuble). Réutilisable. */
+.titre-rubrique { color: var(--gold); font-size: var(--fs-18); text-align: left; margin: var(--space-l) 0 var(--space-s) 0; }
+.emp-meuble + .titre-rubrique { margin-top: 0; }
+/* Titre posé AU-DESSUS d'un groupe coloré (.histo-groupe), sous une rubrique (« Pinot grigio : tu en as 3… »). Réutilisable. */
+.titre-groupe { color: var(--white); font-size: var(--fs-16); text-align: left; margin: var(--space-m) 0 var(--space-s) 0; }
 .mt-40 { margin-top: 40px; }
 .mb-20 { margin-bottom: var(--space-l); }
 .text-center    { text-align: center; }
