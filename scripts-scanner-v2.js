@@ -3280,7 +3280,7 @@ function parcoursMeubleEmpV2(meuble) {
 // - Pigeonnier : un vin par cépage ; un cépage absent du cellier ET du Pigeonnier y entre (place libre, sinon celle
 //   d'un vin dont le cépage est déjà au cellier, qui descend à la Réserve s'il y a de la place) ;
 // - Réserve : aucun classement ; ses places libres restantes vont aux « À ranger » (cépage sans place d'abord) ;
-// - pas de limite de bouteilles ; couleur douteuse ou cépage non nommé = jamais déplacé (« À vérifier ») ;
+// - pas de limite de bouteilles ; couleur douteuse, cépage non nommé ou manquant = jamais déplacé (« À vérifier ») ;
 // - les cases cochées restent gardées dans le téléphone ; un seul « Enregistrer » à la fin.
 // Zones : meubles et rangées de l'onglet config — si l'aménagement change, corriger ici.
 var ZONES_MENAGE_V2 = {
@@ -3418,6 +3418,7 @@ function bouteillesMenageV2() {
     if (!/rouge|blanc|ros|bulle|mousseux|spiritueux/i.test(i.Couleur || '')) b.doute = 'Couleur manquante';
     else if (b.coul === 'vin-blanc' && /glera|prosecco|champagne|cremant|cava|mousseux|petillant|franciacorta/.test(texte)) b.doute = 'Des bulles notées « Blanc » ?';
     else if (/^autre/.test(b.cep)) b.doute = 'Cépage non nommé : inscris le vrai dans la fiche';
+    else if (!b.cep && b.coul !== 'vin-spiritueux') b.doute = 'Cépage manquant : inscris-le dans la fiche';
     // Hors de sa zone : un rouge chez les blancs, ou l'inverse (les autres couleurs ne sont pas touchées)
     var z = zoneMenageV2(place);
     if (z && z.couleur !== b.coul && (b.coul === 'vin-blanc' || b.coul === 'vin-rouge')) {
