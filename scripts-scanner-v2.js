@@ -3262,7 +3262,7 @@ function parcoursMeubleEmpV2(meuble) {
 }
 
 // ==================== MÉNAGE DE LA CAVE (25 oct. 2026, refait après l'essai sur la vraie cave) ====================
-// Emplacements → Afficher → « Ménage de la cave ». L'assistant propose la chaise musicale en TROIS ÉTAPES
+// Emplacements → Afficher → « Tri œnophile » (nommé « Ménage de la cave » jusqu'au 26 oct. 2026). L'assistant propose la chaise musicale en TROIS ÉTAPES
 // (1. le cellier · 2. le Pigeonnier · 3. la Réserve), l'utilisateur décide, puis la tournée
 // (en haut · en bas · en haut) enregistre d'un coup les déplacements cochés.
 // Trois étages : Cellier = la variété (un vin par cépage principal et par couleur) ; Pigeonnier = les cépages
@@ -3640,7 +3640,7 @@ function afficherMenageEmpV2() {
   var ligne = function(meuble) {
     return meuble + ' : ' + Object.keys(e[meuble]).map(function(c) { return NOMS_COULEURS_MENAGE_V2[c] + ' ' + e[meuble][c].n + '/' + e[meuble][c].cap; }).join(' · ');
   };
-  document.getElementById('empV2-compte').innerHTML = 'Ménage de la cave · ' + plan.nbMoves + ' bouteille' + (plan.nbMoves > 1 ? 's' : '') + ' à bouger (au plus ' + MAX_MENAGE_V2 + ')' +
+  document.getElementById('empV2-compte').innerHTML = 'Tri œnophile · ' + plan.nbMoves + ' bouteille' + (plan.nbMoves > 1 ? 's' : '') + ' à bouger (au plus ' + MAX_MENAGE_V2 + ')' +
     '<br><span class="fs-12">' + ligne('Cellier') + '<br>' + ligne('Pigeonnier') + '<br>À ranger : ' + plan.resteARanger + '</span>';
 
   var titres = { 1: 'Étape 1 — Le cellier', 2: 'Étape 2 — Le Pigeonnier', 3: 'Étape 3 — La Réserve' };
@@ -3797,13 +3797,13 @@ function enregistrerMenageV2() {
   var suite = dep.reduce(function(p, d) {
     return p.then(function() {
       var appel = d.vers
-        ? appelBackend('actionBouteille', { row: d.b.w.row, action: 'deplacer', bottle: d.b.w.bottle, meuble: d.vers.meuble, rangee: d.vers.rangee, espace: d.vers.espace }, { spinner: 'Ménage' })
-        : appelBackend('mettreBotteilleARanger', { row: d.b.w.row, bottle: d.b.w.bottle }, { spinner: 'Ménage' });
+        ? appelBackend('actionBouteille', { row: d.b.w.row, action: 'deplacer', bottle: d.b.w.bottle, meuble: d.vers.meuble, rangee: d.vers.rangee, espace: d.vers.espace }, { spinner: 'Tri' })
+        : appelBackend('mettreBotteilleARanger', { row: d.b.w.row, bottle: d.b.w.bottle }, { spinner: 'Tri' });
       return appel.then(function() { faits++; });
     });
   }, Promise.resolve());
   suite.then(function() {
-    return appelBackend('getInventoryData', {}, { spinner: 'Ménage' });
+    return appelBackend('getInventoryData', {}, { spinner: 'Tri' });
   }).then(function(data) {
     if (data) ALL_DATA = data;
     MENAGE_V2 = { sortie: {}, choix: {}, refus: {}, etape: 'propositions', faits: {} };
@@ -3812,7 +3812,7 @@ function enregistrerMenageV2() {
   }).catch(function(e) {
     // une partie a pu s'écrire : on reprend l'inventaire pour ne pas mentir
     appelBackend('getInventoryData', {}, { spinner: '' }).then(function(data) { if (data) ALL_DATA = data; }).catch(function() {});
-    retourAccueilV2('Ménage : ' + faits + ' sur ' + dep.length + ' enregistré(s) — ' + (e && e.message ? e.message : 'erreur inconnue'));
+    retourAccueilV2('Tri : ' + faits + ' sur ' + dep.length + ' enregistré(s) — ' + (e && e.message ? e.message : 'erreur inconnue'));
   });
 }
 
@@ -5733,7 +5733,7 @@ var PANNEAUX_V2 = {
            '<div class="item-liste" id="empV2-mode-cepmanquants" onclick="choisirModeEmpV2(\'cepmanquants\')">Cépages manquants</div>' +
            '<div class="item-liste" id="empV2-mode-appmanquante" onclick="choisirModeEmpV2(\'appmanquante\')">Appellation manquante</div>' +
            '<div class="item-liste" id="empV2-mode-fammanquante" onclick="choisirModeEmpV2(\'fammanquante\')">Familles manquantes</div>' +
-           '<div class="item-liste" id="empV2-mode-menage" onclick="choisirModeEmpV2(\'menage\')">Ménage de la cave</div>' +
+           '<div class="item-liste" id="empV2-mode-menage" onclick="choisirModeEmpV2(\'menage\')">Tri œnophile</div>' +
            '<div class="panneau-separateur"></div>',
     filtres: [['meuble', 'Meuble'], ['rangee', 'Rangée'], ['espace', 'Espace'], ['couleur', 'Couleur'], ['cepage', 'Cépage'], ['pays', 'Pays'], ['appellation', 'Appellation']],
     apresReinit: '<div class="panneau-separateur"></div>' +
