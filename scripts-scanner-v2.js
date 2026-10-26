@@ -3272,8 +3272,8 @@ function parcoursMeubleEmpV2(meuble) {
 //   rouge ; le reste de la rangée 7 est une tablette pour les formats embêtants : l'assistant n'y touche pas ;
 // - les doublons, c'est l'utilisateur qui choisit ceux qu'il cède (« tu en as 3, cèdes-en 2 ») ; ils sortent même sans
 //   remplaçant (une place vide vaut mieux qu'un doublon) : au Pigeonnier si leur cépage n'y est pas, sinon à la
-//   Réserve ; « À ranger » seulement si un « À ranger » mérite plus la place à la Réserve (cépage sans place
-//   nulle part) ; nulle part où aller = il reste ;
+//   Réserve, sinon à « À ranger » (la « mini mini SAQ » de l'utilisateur) ; et un « À ranger » qui mérite plus la
+//   place à la Réserve (cépage sans place nulle part) la prend : le doublon va alors à « À ranger » ;
 // - un rouge chez les blancs (ou l'inverse) va dans sa zone, sinon il suit les règles d'une bouteille qui sort ;
 // - ce qui entre (cépage, puis appellation, puis famille absents ; jamais un doublon de cépage) : l'app le choisit
 //   par la rotation (jamais bu, ou bu il y a le plus longtemps) ; « Pas celle-là » = la suivante ;
@@ -3614,15 +3614,16 @@ function simulerMenageV2(toutes, groupes, restent) {
     if (!dejaLa && libre) ou[b.cle] = libre;
   });
 
-  // 4. Le reste descend à la Réserve — sauf si un « À ranger » mérite la place : le doublon devient « À ranger ».
-  // Le cellier d'abord ; ce qui reste de places sert au Pigeonnier.
-  var placesEnBas = 0;
-  sortiesCellier.concat([null], sortiesPigeonnier).forEach(function(s) {
-    if (!s) { placesEnBas = libresReserve().length; return; }
+  // 4. Le reste descend à la Réserve (le cellier d'abord) — sauf si un « À ranger » mérite la place : le doublon
+  // devient « À ranger ». Réserve pleine : un doublon cédé va à « À ranger » ; un hors-zone, lui, reste.
+  sortiesCellier.concat(sortiesPigeonnier).forEach(function(s) {
     var b = s.b;
     if (ou[b.cle] !== TRANSIT) return;
     var libre = libresReserve()[0];
-    if (!libre) return;                                  // Réserve pleine : il reste (jamais « À ranger » pour faire de la place)
+    if (!libre) {
+      if (!s.horsZone) { ou[b.cle] = null; raison[b.cle] += ' — la Réserve est pleine'; }
+      return;
+    }
     var m = s.horsZone ? null : meritant();
     if (m) {
       bouger(m, libre, libelleCepageMenageV2(m) + ' n\'a sa place nulle part ailleurs');
@@ -3664,7 +3665,7 @@ function simulerMenageV2(toutes, groupes, restent) {
   var moves = toutes.filter(function(b) { return placeMenageV2(ou[b.cle]) !== placeMenageV2(b.place); }).map(function(b) {
     return { b: b, de: b.place, vers: ou[b.cle], raison: raison[b.cle] || '', parUtilisateur: !!choisiParUtilisateur[b.cle] };
   });
-  return { moves: moves, conflits: conflits, bloques: bloques, placesEnBas: placesEnBas };
+  return { moves: moves, conflits: conflits, bloques: bloques };
 }
 
 function ouvrirMenageEmpV2() {
@@ -3765,13 +3766,7 @@ function afficherMenageEmpV2(recalculer) {
         var gs = plan.groupes.filter(function(g) { return g.meuble === (a === 1 ? 'Cellier' : 'Pigeonnier'); });
         if (!gs.length) return;
         vide = false;
-        // Au Pigeonnier, un doublon cédé n'a que la Réserve : pas de place en bas = pas de choix à faire
-        var choisis = gs.some(function(g) { return g.bouteilles.some(function(b) { return M.cedes[b.cle]; }); });
-        if (a === 2 && !plan.placesEnBas && !choisis) {
-          html += '<div class="texte-secondaire texte-gauche">Doublons : ' + gs.length + ' cépage' + (gs.length > 1 ? 's' : '') + ' en double, mais pas de place en bas pour l\'instant</div>';
-          return;
-        }
-        html += '<div class="texte-secondaire texte-gauche">Tes choix' + (a === 2 ? ' — de la place en bas pour ' + plan.placesEnBas + ' bouteille' + (plan.placesEnBas > 1 ? 's' : '') : '') + '</div>';
+        html += '<div class="texte-secondaire texte-gauche">Tes choix</div>';
         gs.forEach(function(g) { html += choixMenageV2Html(g, plan); });
         return;
       }
