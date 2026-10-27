@@ -3262,25 +3262,24 @@ function parcoursMeubleEmpV2(meuble) {
 }
 
 // ==================== TRI ŒNOPHILE (ex-« Ménage de la cave ») — v3 du 26 oct. 2026 ====================
-// Emplacements → Afficher → « Tri œnophile ». Plus d'écran de propositions : l'app calcule et dicte LE PARCOURS
-// de l'utilisateur, en 5 arrêts — 1. au cellier (tes choix, puis sors) · 2. au Pigeonnier (tes choix, sors, place
-// ce qui vient du cellier) · 3. en bas (sors ce qui monte, range ce qui descend, case des « À ranger ») ·
-// 4. au Pigeonnier (place) · 5. au cellier (place).
-// But (utilisateur) : maximiser les places par la diversité des cépages et des appellations.
-// Règles (utilisateur, 25-26 oct.) :
-// - cellier : un vin par cépage (et par couleur), blancs rangées 1-3, rouges 4-6, C-7-1 = une vraie place pour un
-//   rouge ; le reste de la rangée 7 est une tablette pour les formats embêtants : l'assistant n'y touche pas ;
-// - les doublons, c'est l'utilisateur qui choisit ceux qu'il cède (« tu en as 3, cèdes-en 2 ») ; ils sortent même sans
-//   remplaçant (une place vide vaut mieux qu'un doublon) : au Pigeonnier si leur cépage n'y est pas, sinon à la
-//   Réserve, sinon à « À ranger » (la « mini mini SAQ » de l'utilisateur) ; et un « À ranger » qui mérite plus la
-//   place à la Réserve (cépage sans place nulle part) la prend : le doublon va alors à « À ranger » ;
-// - un rouge chez les blancs (ou l'inverse) va dans sa zone, sinon il suit les règles d'une bouteille qui sort ;
-// - ce qui entre (cépage, puis appellation, puis famille absents ; jamais un doublon de cépage) : l'app le choisit
-//   par la rotation (jamais bu, ou bu il y a le plus longtemps) ; « Pas celle-là » = la suivante ;
-// - Pigeonnier : un vin par cépage ; un cépage absent du cellier ET du Pigeonnier y entre (place libre, sinon celle
-//   d'un vin dont le cépage est déjà au cellier, qui descend à la Réserve s'il y a de la place) ;
-// - Réserve : aucun classement ; ses places libres restantes vont aux « À ranger » (cépage sans place d'abord) ;
-// - pas de limite de bouteilles ; couleur douteuse, cépage non nommé ou manquant = jamais déplacé (« À vérifier ») ;
+// Emplacements → Afficher → « Tri œnophile ». L'app calcule et dicte LA TOURNÉE de l'utilisateur, en 7 arrêts —
+// 1. au cellier (choisir, sors, déplace) · 2. au Pigeonnier (sors, déplace, place ce qui vient du cellier) ·
+// 3. en bas, à la Réserve (sors, range ce qui est descendu) · 4. « À ranger » (sors, pose) ·
+// 5. à la Réserve en remontant (range ce qui vient d'« À ranger ») · 6. au Pigeonnier (place) · 7. au cellier (place).
+// But (utilisateur) : le plus de cépages possible par meuble, puis le plus d'appellations.
+// Règles (utilisateur, 25-27 oct.) :
+// - une seule règle pour le cellier, le Pigeonnier et la Réserve, dans cet ordre : les cépages absents des meubles
+//   du dessus (et du meuble lui-même), puis les appellations absentes, puis le reste — le plus ancien d'abord
+//   (dernière fois bu quand l'Historique le sait, sinon la date d'arrivée de la bouteille) ;
+// - cellier : blancs rangées 1-3, rouges 4-6, C-7-1 = une vraie place pour un rouge ; le reste de la rangée 7 est une
+//   tablette pour les formats embêtants : l'assistant n'y touche pas. Seules ses places libres se remplissent ; ses
+//   doublons, c'est l'utilisateur qui choisit ceux qu'il cède (« tu en as 3, cèdes-en 2 ») ;
+// - Pigeonnier et Réserve : tout est reclassé ; à égalité, une bouteille déjà en place garde sa place ; aucune place
+//   vide tant qu'une bouteille qui convient attend plus bas. La Réserve ne classe pas les couleurs ;
+// - « À ranger » (la « mini mini SAQ » de l'utilisateur) : le reste ;
+// - un rouge chez les blancs (ou l'inverse) rejoint sa couleur dans son meuble, sinon il suit la cascade ;
+// - couleur douteuse, cépage non nommé ou manquant = jamais déplacé (« À vérifier ») ; « pas celle-là » = elle reste ;
+// - la boîte de transport : chaque bouteille sortie prend la première case libre (« case 1-1 »), libérée à la pose ;
 // - les cases cochées restent gardées dans le téléphone ; un seul « Enregistrer » à la fin.
 // Zones : meubles et rangées de l'onglet config — si l'aménagement change, corriger ici.
 var ZONES_MENAGE_V2 = {
@@ -3302,7 +3301,7 @@ function tabletteMenageV2(p) { return !!p && memeTexteV2(p.meuble, 'Cellier') &&
 // cedes[bouteille] = doublon cédé par l'utilisateur ; refus[bouteille] = « pas celle-là » (elle ne bouge pas) ;
 // faits[ligne] = ligne cochée pendant la tournée. Gardés dans le téléphone jusqu'à l'enregistrement.
 var MENAGE_V2 = { cedes: {}, refus: {}, faits: {} };
-var CLE_STOCKAGE_MENAGE_V2 = 'dionysos-tri';
+var CLE_STOCKAGE_MENAGE_V2 = 'dionysos-tri-7-arrets';   // nouvelle clé : les cases cochées de l'ancienne tournée ne valent plus
 
 function garderMenageV2() {
   var M = MENAGE_V2;
@@ -3310,6 +3309,7 @@ function garderMenageV2() {
 }
 function reprendreMenageV2() {
   try {
+    localStorage.removeItem('dionysos-tri');
     var s = JSON.parse(localStorage.getItem(CLE_STOCKAGE_MENAGE_V2) || 'null');
     if (s && s.quand && Date.now() - s.quand < 7 * 24 * 3600 * 1000) return { cedes: s.cedes || {}, refus: s.refus || {}, faits: s.faits || {} };
   } catch (e) {}
@@ -3411,7 +3411,7 @@ function bouteillesMenageV2() {
       coul: couleurClasseV2(i.Couleur), cep: cleCepageMenageV2(cepCommun), cepNom: cepNom, cepCommun: cepCommun,
       app: normaliserRechercheV2(decodeHTML(i.Appellation || '')), appNom: decodeHTML(i.Appellation || ''),
       fam: (i.Famille || '').toString().replace(/^'/, '').replace(/^0+/, ''),
-      passe: der[codeSaq] || der[codeCb] || null, doute: '', horsZone: ''
+      passe: der[codeSaq] || der[codeCb] || null, arrivee: Date.parse(i['Date d\'ajout'] || '') || 0, doute: '', horsZone: ''
     };
     // Douteux : jamais déplacé, listé « À vérifier »
     var texte = normaliserRechercheV2([i.Nom, i.Appellation, i.Cepage].join(' '));
@@ -3428,8 +3428,9 @@ function bouteillesMenageV2() {
   });
 }
 
-// Rotation : jamais bu d'abord, puis le passage à table le plus ancien (plus petit = « son tour »)
-function rangRotationMenageV2(b) { return b.passe ? b.passe.quand : 0; }
+// « Le plus ancien d'abord » : la dernière fois bu quand l'Historique le sait (il est venu après le début de la
+// consommation : « jamais bu » n'est pas fiable), sinon la date d'arrivée de la bouteille ; plus petit = « son tour »
+function rangRotationMenageV2(b) { return b.passe ? b.passe.quand : (b.arrivee || 0); }
 
 // Places d'un meuble (rangées données, ou toutes), dans l'ordre physique
 function placesMenageV2(meuble, rangees) {
@@ -3443,11 +3444,11 @@ function placesMenageV2(meuble, rangees) {
   return out;
 }
 
-// Les doublons au départ, meuble par meuble (même cépage principal de même couleur, ou même vin) :
-// l'utilisateur en cède « taille − 1 ». La tablette et les vins douteux n'en font pas partie.
+// Les doublons du cellier au départ (même cépage principal de même couleur, ou même vin) : l'utilisateur en cède
+// « taille − 1 ». La tablette et les vins douteux n'en font pas partie. (Au Pigeonnier et à la Réserve, la règle décide.)
 function groupesDoublonsMenageV2(toutes) {
   var out = [];
-  ['Cellier', 'Pigeonnier'].forEach(function(meuble) {
+  ['Cellier'].forEach(function(meuble) {
     var groupes = {};
     toutes.forEach(function(b) {
       if (b.lieu !== meuble.toLowerCase() || b.tablette || b.doute) return;
@@ -3462,210 +3463,159 @@ function groupesDoublonsMenageV2(toutes) {
   return out.sort(function(a, b) { return (b.bouteilles.length - a.bouteilles.length) || a.titre.localeCompare(b.titre); });
 }
 
-// Le parcours : où finit chaque bouteille, d'après les choix de l'utilisateur.
-// Une bouteille qui sort sans trouver de place (Réserve pleine) reste ; si quelqu'un a déjà pris sa place
-// dans le calcul, on la fige et on recalcule.
+// Le plan : où finit chaque bouteille, d'après les choix de l'utilisateur
 function calculerMenageV2() {
   var toutes = bouteillesMenageV2();
   var groupes = groupesDoublonsMenageV2(toutes);
-  var restent = {};
-  var r;
-  for (var tour = 0; tour < 300; tour++) {
-    r = simulerMenageV2(toutes, groupes, restent);
-    if (!r.conflits.length) break;
-    r.conflits.forEach(function(c) { restent[c] = true; });
-  }
+  var r = simulerMenageV2(toutes, groupes);
   r.groupes = groupes;
-  r.restent = restent;
   r.aVerifier = toutes.filter(function(b) { return b.doute; });
   return r;
 }
 
-function simulerMenageV2(toutes, groupes, restent) {
+function simulerMenageV2(toutes, groupes) {
   var M = MENAGE_V2;
   var TRANSIT = 'transit';
-  var ou = {}, raison = {}, bouge = {}, choisiParUtilisateur = {};
+  var ou = {}, sort = {}, entre = {}, cede = {}, decide = {};
   toutes.forEach(function(b) { ou[b.cle] = b.place; });
   var lieu = function(p) { return p === TRANSIT ? 'transit' : lieuMenageV2(p); };
-  var fige = function(b) { return !!(b.doute || b.tablette || M.refus[b.cle] || restent[b.cle] || b.lieu === 'autre'); };
+  var noms = { cellier: 'au cellier', pigeonnier: 'au Pigeonnier', reserve: 'à la Réserve' };
+  // Figée : jamais déplacée (À vérifier, tablette, « pas celle-là », meuble hors tri, spiritueux) ; au cellier et au
+  // Pigeonnier, une couleur qu'aucune zone n'accepte (rosé, bulles) garde aussi sa place
+  var fige = function(b) {
+    if (b.doute || b.tablette || M.refus[b.cle] || b.lieu === 'autre' || b.coul === 'vin-spiritueux') return true;
+    return (b.lieu === 'cellier' || b.lieu === 'pigeonnier') && b.coul !== 'vin-blanc' && b.coul !== 'vin-rouge';
+  };
+  var poser = function(b, p) { ou[b.cle] = p; decide[b.cle] = true; };
   var occ = function() { var s = {}; toutes.forEach(function(b) { var p = ou[b.cle]; if (p && p !== TRANSIT) s[placeMenageV2(p)] = b; }); return s; };
-  var libresZone = function(meuble, couleur) {
-    var o = occ(), out = [];
-    ZONES_MENAGE_V2[meuble].forEach(function(z) {
-      if (z.couleur !== couleur) return;
-      placesMenageV2(meuble, z.rangees).forEach(function(p) {
-        if (z.espaces && z.espaces.indexOf(p.espace) === -1) return;
-        if (!o[placeMenageV2(p)]) out.push(p);
-      });
-    });
-    return out;
+  var placesZone = function(meuble, z) {
+    return placesMenageV2(meuble, z.rangees).filter(function(p) { return !z.espaces || z.espaces.indexOf(p.espace) !== -1; });
   };
-  var libresReserve = function() { var o = occ(); return placesMenageV2('Réserve').filter(function(p) { return !o[placeMenageV2(p)]; }); };
-  var present = function(lieux, c) {
-    var s = {};
-    toutes.forEach(function(b) { if (!b.tablette && b[c] && lieux.indexOf(lieu(ou[b.cle])) !== -1) s[b.coul + '|' + b[c]] = true; });
-    return s;
+  // Ce que contiennent des meubles : cépages (avec leur compte) et appellations, par couleur ; la tablette ne compte pas
+  var ajouterContenu = function(c, b) {
+    if (b.cep) c.cep[b.coul + '|' + b.cep] = (c.cep[b.coul + '|' + b.cep] || 0) + 1;
+    if (b.app) c.app[b.coul + '|' + b.app] = true;
   };
-  var bouger = function(b, vers, pourquoi) { ou[b.cle] = vers; bouge[b.cle] = true; if (pourquoi) raison[b.cle] = pourquoi; };
-  var rang = rangRotationMenageV2;
-  var sortiesCellier = [], sortiesPigeonnier = [];
-
-  // Ce qui entre dans un meuble : cépage absent (sinon appellation, puis famille, pour un vin sans cépage connu),
-  // jamais un doublon de cépage ; l'app choisit par la rotation ; à égalité, le Pigeonnier (pas d'escalier).
-  function entrer(meuble, lieuxPresents, sources, pourquoi, avecEviction) {
-    var essayes = {};
-    for (;;) {
-      var pres = { cep: present(lieuxPresents, 'cep'), app: present(lieuxPresents, 'app'), fam: present(lieuxPresents, 'fam') };
-      var nouveau = function(b, c) { return !!b[c] && !pres[c][b.coul + '|' + b[c]]; };
-      var apport = function(b) { return (nouveau(b, 'app') ? 2 : 0) + (nouveau(b, 'fam') ? 1 : 0); };
-      var cand = toutes.filter(function(b) {
-        return !fige(b) && !bouge[b.cle] && !essayes[b.cle] && (b.coul === 'vin-blanc' || b.coul === 'vin-rouge') &&
-          sources.indexOf(lieu(ou[b.cle])) !== -1 && (b.cep ? nouveau(b, 'cep') : (nouveau(b, 'app') || nouveau(b, 'fam')));
-      });
-      if (!cand.length) return;
-      cand.sort(function(a, b) {
-        return ((a.cep ? 0 : 1) - (b.cep ? 0 : 1)) || (apport(b) - apport(a)) || (rang(a) - rang(b)) || ((a.lieu === 'pigeonnier' ? 0 : 1) - (b.lieu === 'pigeonnier' ? 0 : 1));
-      });
-      var e = cand[0];
-      essayes[e.cle] = true;
-      var texte = e.cep ? 'nouveau cépage ' + pourquoi + ' : ' + libelleCepageMenageV2(e)
-        : nouveau(e, 'app') ? 'nouvelle appellation ' + pourquoi + ' : ' + e.appNom : 'nouvelle famille d\'accords ' + pourquoi;
-      var libre = libresZone(meuble, e.coul)[0];
-      if (libre) { bouger(e, libre, texte); continue; }
-      if (!avecEviction) continue;
-      // Pigeonnier plein : la place d'un vin dont le cépage est déjà au cellier, s'il peut descendre à la Réserve
-      var auCellier = present(['cellier'], 'cep');
-      var x = toutes.filter(function(o) {
-        var z = zoneMenageV2(ou[o.cle]);
-        return lieu(ou[o.cle]) === 'pigeonnier' && z && z.couleur === e.coul && !fige(o) && !bouge[o.cle] && o.cep && auCellier[o.coul + '|' + o.cep];
-      }).sort(function(a, b) { return rang(b) - rang(a); })[0];
-      if (!x) continue;
-      var px = ou[x.cle], pe = ou[e.cle];
-      ou[x.cle] = TRANSIT; ou[e.cle] = px;
-      var r = libresReserve()[0];
-      if (!r) { ou[x.cle] = px; ou[e.cle] = pe; continue; }
-      bouger(e, px, texte);
-      bouger(x, r, libelleCepageMenageV2(x) + ' est déjà au cellier : il laisse sa place à ' + nomMenageV2(e));
-    }
-  }
-
-  // Un « À ranger » qui mérite une place à la Réserve plus qu'un doublon : son cépage n'a sa place nulle part
-  function meritant() {
-    var places = present(['cellier', 'pigeonnier', 'reserve'], 'cep');
-    return toutes.filter(function(b) {
-      return lieu(ou[b.cle]) === 'aranger' && !fige(b) && !bouge[b.cle] && b.cep && !places[b.coul + '|' + b.cep] && b.coul !== 'vin-spiritueux';
-    }).sort(function(a, b) { return rang(a) - rang(b); })[0] || null;
-  }
-
-  // Les doublons cédés par l'utilisateur dans un meuble (au plus « taille − 1 » par groupe)
-  function cedes(meuble) {
-    var out = [];
-    groupes.filter(function(g) { return g.meuble === meuble; }).forEach(function(g) {
-      g.bouteilles.filter(function(b) { return M.cedes[b.cle]; }).slice(0, g.aCeder).forEach(function(b) { out.push({ b: b, g: g }); });
-    });
-    return out;
-  }
-
-  // Ramener un hors-zone dans sa couleur, sinon il sort (un vin figé faute de place en bas peut encore
-  // rejoindre sa couleur dans son meuble)
-  function horsZone(meuble, sorties) {
+  var contenu = function(lieux) {
+    var c = { cep: {}, app: {} };
     toutes.forEach(function(b) {
-      if (!b.horsZone || b.lieu !== meuble.toLowerCase() || b.doute || M.refus[b.cle] || bouge[b.cle]) return;
-      var libre = libresZone(meuble, b.coul)[0];
-      if (libre) bouger(b, libre, b.horsZone);
-      else if (!restent[b.cle]) { bouger(b, TRANSIT, b.horsZone); sorties.push({ b: b, horsZone: true }); }
+      var p = ou[b.cle];
+      if (p && p !== TRANSIT && !tabletteMenageV2(p) && lieux.indexOf(lieu(p)) !== -1) ajouterContenu(c, b);
     });
-  }
+    return c;
+  };
+  var palier = function(c, b) { return b.cep && !c.cep[b.coul + '|' + b.cep] ? 1 : b.app && !c.app[b.coul + '|' + b.app] ? 2 : 3; };
+  var texteEntre = function(n, b, ici) {
+    return n === 1 ? 'nouveau cépage ' + noms[ici] + ' : ' + libelleCepageMenageV2(b)
+      : n === 2 ? 'nouvelle appellation ' + noms[ici] + ' : ' + b.appNom : 'une place libre ' + noms[ici];
+  };
+  var marches = { pigeonnier: 0, reserve: 1, transit: 2, aranger: 3 };
+  // Le meilleur candidat pour une place de « ici » : le palier, puis le déjà-là (il garde sa place), puis le cépage
+  // le moins présent, puis le plus ancien, puis le moins de marches
+  var meilleur = function(cand, c, ici) {
+    return cand.map(function(b) { return { b: b, n: palier(c, b) }; }).sort(function(x, y) {
+      var lx = lieu(ou[x.b.cle]), ly = lieu(ou[y.b.cle]);
+      return (x.n - y.n) || ((lx === ici ? 0 : 1) - (ly === ici ? 0 : 1)) ||
+        ((c.cep[x.b.coul + '|' + x.b.cep] || 0) - (c.cep[y.b.coul + '|' + y.b.cep] || 0)) ||
+        (rangRotationMenageV2(x.b) - rangRotationMenageV2(y.b)) || ((marches[lx] || 0) - (marches[ly] || 0));
+    })[0] || null;
+  };
 
   // 0. La tablette : C-7-1 est la place d'un rouge ; ce qui l'occupe d'autre glisse sur la tablette
   var c71 = toutes.filter(function(b) { return b.place && memeTexteV2(b.place.meuble, 'Cellier') && b.place.rangee === '7' && b.place.espace === '1'; })[0];
-  if (c71 && c71.coul !== 'vin-rouge' && !M.refus[c71.cle] && !restent[c71.cle]) {
+  if (c71 && c71.coul !== 'vin-rouge' && !M.refus[c71.cle]) {
     var o71 = occ();
     var t = placesMenageV2('Cellier', ['7']).filter(function(p) { return p.espace !== '1' && !o71[placeMenageV2(p)]; })[0];
-    if (t) bouger(c71, t, 'C-7-1 se libère pour un rouge');
+    if (t) { poser(c71, t); entre[c71.cle] = 'C-7-1 se libère pour un rouge'; }
   }
 
-  // 1. Cellier : les doublons cédés sortent, les hors-zone rentrent dans leur couleur, les cépages absents entrent
-  cedes('Cellier').forEach(function(c) {
-    if (restent[c.b.cle] || bouge[c.b.cle]) return;
-    bouger(c.b, TRANSIT, 'doublon de ' + (libelleCepageMenageV2(c.b) || c.g.titre));
-    choisiParUtilisateur[c.b.cle] = true;
-    sortiesCellier.push({ b: c.b });
-  });
-  horsZone('Cellier', sortiesCellier);
-  entrer('Cellier', ['cellier'], ['pigeonnier', 'reserve', 'aranger'], 'au cellier', false);
-
-  // 2. Pigeonnier : idem, puis les cépages absents du cellier ET du Pigeonnier
-  cedes('Pigeonnier').forEach(function(c) {
-    if (restent[c.b.cle] || bouge[c.b.cle]) return;
-    bouger(c.b, TRANSIT, 'doublon de ' + (libelleCepageMenageV2(c.b) || c.g.titre));
-    choisiParUtilisateur[c.b.cle] = true;
-    sortiesPigeonnier.push({ b: c.b });
-  });
-  horsZone('Pigeonnier', sortiesPigeonnier);
-  entrer('Pigeonnier', ['cellier', 'pigeonnier'], ['reserve', 'aranger'], 'au Pigeonnier', false);
-
-  // 3. Ce qui sort du cellier va au Pigeonnier si son cépage n'y est pas encore
-  sortiesCellier.forEach(function(s) {
-    var b = s.b;
-    if (ou[b.cle] !== TRANSIT) return;
-    var dejaLa = toutes.some(function(o) { return o !== b && lieu(ou[o.cle]) === 'pigeonnier' && !o.tablette && o.coul === b.coul && (b.cep ? o.cep === b.cep : o.vin === b.vin); });
-    var libre = libresZone('Pigeonnier', b.coul)[0];
-    if (!dejaLa && libre) ou[b.cle] = libre;
-  });
-
-  // 4. Le reste descend à la Réserve (le cellier d'abord) — sauf si un « À ranger » mérite la place : le doublon
-  // devient « À ranger ». Réserve pleine : un doublon cédé va à « À ranger » ; un hors-zone, lui, reste.
-  sortiesCellier.concat(sortiesPigeonnier).forEach(function(s) {
-    var b = s.b;
-    if (ou[b.cle] !== TRANSIT) return;
-    var libre = libresReserve()[0];
-    if (!libre) {
-      if (!s.horsZone) ou[b.cle] = null;
-      return;
-    }
-    var m = s.horsZone ? null : meritant();
-    if (m) {
-      bouger(m, libre, libelleCepageMenageV2(m) + ' n\'a sa place nulle part ailleurs');
-      ou[b.cle] = null;
-      raison[b.cle] += ' — sa place à la Réserve va à ' + nomMenageV2(m);
-    } else ou[b.cle] = libre;
-  });
-
-  // 5. Pigeonnier plein : un cépage absent des deux prend la place d'un vin dont le cépage est déjà au cellier
-  entrer('Pigeonnier', ['cellier', 'pigeonnier'], ['reserve', 'aranger'], 'au Pigeonnier', true);
-
-  // 6. Les places libres restantes de la Réserve vont aux « À ranger » — cépage sans place d'abord
-  var places = present(['cellier', 'pigeonnier', 'reserve'], 'cep');
-  toutes.filter(function(b) { return lieu(ou[b.cle]) === 'aranger' && !fige(b) && !bouge[b.cle] && b.coul !== 'vin-spiritueux'; })
-    .sort(function(a, b) {
-      var na = a.cep && !places[a.coul + '|' + a.cep] ? 0 : 1, nb = b.cep && !places[b.coul + '|' + b.cep] ? 0 : 1;
-      return (na - nb) || (rang(a) - rang(b));
-    })
-    .forEach(function(b) {
-      var libre = libresReserve()[0];
-      if (!libre) return;
-      var sansPlace = b.cep && !places[b.coul + '|' + b.cep];
-      if (b.cep) places[b.coul + '|' + b.cep] = true;
-      bouger(b, libre, sansPlace ? libelleCepageMenageV2(b) + ' n\'a sa place nulle part ailleurs' : 'une place libre à la Réserve');
+  // 1. Cellier : les doublons cédés sortent ; un vin hors de sa couleur la rejoint s'il y a une place, sinon il sort ;
+  // puis les places libres se remplissent
+  groupes.forEach(function(g) {
+    g.bouteilles.filter(function(b) { return M.cedes[b.cle] && !fige(b) && !decide[b.cle]; }).slice(0, g.aCeder).forEach(function(b) {
+      ou[b.cle] = TRANSIT;
+      cede[b.cle] = true;
+      sort[b.cle] = 'doublon de ' + (libelleCepageMenageV2(b) || g.titre);
     });
-
-  // 7. Ce qui n'a trouvé aucune place reste ; si sa place a été prise entre-temps, on la fige et on recalcule
-  var conflits = [];
-  var bloques = {};
-  var o = occ();
-  toutes.forEach(function(b) {
-    if (ou[b.cle] !== TRANSIT) return;
-    if (choisiParUtilisateur[b.cle]) bloques[b.cle] = true;
-    if (o[placeMenageV2(b.place)]) conflits.push(b.cle);
-    ou[b.cle] = b.place;
   });
-  Object.keys(restent).forEach(function(c) { if (M.cedes[c]) bloques[c] = true; });
+  toutes.forEach(function(b) {
+    if (!b.horsZone || b.lieu !== 'cellier' || fige(b) || decide[b.cle] || cede[b.cle]) return;
+    var o = occ();
+    var libre = [];
+    ZONES_MENAGE_V2.Cellier.forEach(function(z) {
+      if (z.couleur === b.coul) libre = libre.concat(placesZone('Cellier', z).filter(function(p) { return !o[placeMenageV2(p)]; }));
+    });
+    if (libre.length) { poser(b, libre[0]); entre[b.cle] = b.horsZone; }
+    else { ou[b.cle] = TRANSIT; sort[b.cle] = b.horsZone + ' : pas de place chez les ' + (b.coul === 'vin-rouge' ? 'rouges' : 'blancs'); }
+  });
+  var cCellier = contenu(['cellier']);
+  ZONES_MENAGE_V2.Cellier.forEach(function(z) {
+    var o = occ();
+    placesZone('Cellier', z).filter(function(p) { return !o[placeMenageV2(p)]; }).forEach(function(p) {
+      var cand = toutes.filter(function(b) {
+        return b.coul === z.couleur && !fige(b) && !decide[b.cle] && !cede[b.cle] && lieu(ou[b.cle]) !== 'cellier';
+      });
+      var m = meilleur(cand, cCellier, 'cellier');
+      if (!m) return;
+      poser(m.b, p);
+      entre[m.b.cle] = texteEntre(m.n, m.b, 'cellier');
+      ajouterContenu(cCellier, m.b);
+    });
+  });
+
+  // 2-3. Pigeonnier puis Réserve : tout est reclassé, zone par zone ; les déjà-là non retenus descendent
+  function reclasser(meuble, ici, zones, dessus) {
+    var c = contenu(dessus);
+    var cDessus = contenu(dessus);
+    toutes.forEach(function(b) { var p = ou[b.cle]; if (fige(b) && p && p !== TRANSIT && lieu(p) === ici && !tabletteMenageV2(p)) ajouterContenu(c, b); });
+    zones.forEach(function(z) {
+      var o = occ();
+      var places = placesZone(meuble, z);
+      var libres = places.filter(function(p) { var x = o[placeMenageV2(p)]; return !x || (!fige(x) && !decide[x.cle]); });
+      var cand = toutes.filter(function(b) {
+        return (!z.couleur || b.coul === z.couleur) && !fige(b) && !decide[b.cle] && [ici, 'reserve', 'aranger', 'transit'].indexOf(lieu(ou[b.cle])) !== -1;
+      });
+      var retenus = [];
+      while (retenus.length < libres.length) {
+        var m = meilleur(cand, c, ici);
+        if (!m) break;
+        cand.splice(cand.indexOf(m.b), 1);
+        ajouterContenu(c, m.b);
+        retenus.push(m);
+      }
+      // ceux qui sont déjà à une place de la zone la gardent ; les autres prennent les places libres, dans l'ordre
+      var gardees = {};
+      retenus.forEach(function(m) {
+        var p = ou[m.b.cle];
+        if (p && p !== TRANSIT && libres.some(function(l) { return placeMenageV2(l) === placeMenageV2(p); })) { gardees[placeMenageV2(p)] = true; decide[m.b.cle] = true; m.garde = true; }
+      });
+      var restantes = libres.filter(function(l) { return !gardees[placeMenageV2(l)]; });
+      retenus.forEach(function(m) {
+        if (m.garde) return;
+        var dici = lieu(ou[m.b.cle]) === ici;
+        poser(m.b, restantes.shift());
+        entre[m.b.cle] = dici && m.b.horsZone ? m.b.horsZone : texteEntre(m.n, m.b, ici);
+      });
+      cand.forEach(function(b) {
+        if (lieu(ou[b.cle]) !== ici) return;
+        ou[b.cle] = TRANSIT;
+        var cle = b.coul + '|' + b.cep;
+        sort[b.cle] = b.horsZone ? b.horsZone + ' : pas de place chez les ' + (b.coul === 'vin-rouge' ? 'rouges' : 'blancs')
+          : b.cep && cDessus.cep[cle] ? libelleCepageMenageV2(b) + ' est déjà ' + (contenu(['cellier']).cep[cle] ? noms.cellier : noms.pigeonnier)
+          : b.cep && c.cep[cle] ? libelleCepageMenageV2(b) + ' est déjà ' + noms[ici] : 'plus de place ' + noms[ici];
+      });
+    });
+  }
+  reclasser('Pigeonnier', 'pigeonnier', ZONES_MENAGE_V2.Pigeonnier, ['cellier']);
+  reclasser('Réserve', 'reserve', [{ nom: 'tout', rangees: null, couleur: null }], ['cellier', 'pigeonnier']);
+
+  // 4. Le reste va à « À ranger »
+  toutes.forEach(function(b) { if (ou[b.cle] === TRANSIT) ou[b.cle] = null; });
 
   var moves = toutes.filter(function(b) { return placeMenageV2(ou[b.cle]) !== placeMenageV2(b.place); }).map(function(b) {
-    return { b: b, de: b.place, vers: ou[b.cle], raison: raison[b.cle] || '', parUtilisateur: !!choisiParUtilisateur[b.cle] };
+    return { b: b, de: b.place, vers: ou[b.cle], sort: sort[b.cle] || '', entre: entre[b.cle] || '', parUtilisateur: !!cede[b.cle] };
   });
-  return { moves: moves, conflits: conflits, bloques: bloques };
+  return { moves: moves };
 }
 
 function ouvrirMenageEmpV2() {
@@ -3678,12 +3628,14 @@ function ouvrirMenageEmpV2() {
   }).catch(function() {}).then(function() { if (empV2Mode === 'menage') afficherMenageEmpV2(true); });
 }
 
+// « bu le 27 mars ★★★★ » quand l'Historique le sait, sinon « arrivée le 20 févr. »
 function passeMenageV2(b) {
-  if (!b.passe) return 'jamais bu';
-  var d = new Date(b.passe.quand);
+  var quand = b.passe ? b.passe.quand : b.arrivee;
+  if (!quand) return '';
+  var d = new Date(quand);
   var mois = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
-  var txt = 'bu le ' + d.getDate() + ' ' + mois[d.getMonth()] + (d.getFullYear() !== new Date().getFullYear() ? ' ' + d.getFullYear() : '');
-  return txt + (b.passe.note ? ' ' + new Array(b.passe.note + 1).join('★') : '');
+  var txt = (b.passe ? 'bu le ' : 'arrivée le ') + d.getDate() + ' ' + mois[d.getMonth()] + (d.getFullYear() !== new Date().getFullYear() ? ' ' + d.getFullYear() : '');
+  return txt + (b.passe && b.passe.note ? ' ' + new Array(b.passe.note + 1).join('★') : '');
 }
 
 function nomMenageV2(b) { return decodeHTML(b.w.Nom || '—'); }
@@ -3708,32 +3660,29 @@ function pasCelleLaMenageV2Html(cle) {
   return '<span class="fs-12 color-primary" onclick="event.stopPropagation();pasCelleLaMenageV2(\'' + cle + '\')">pas celle-là</span>';
 }
 
-// Les lignes du parcours, arrêt par arrêt. Une bouteille qui change de meuble a deux lignes (je la prends,
+// La tournée : titre et rubriques de chaque arrêt, dans l'ordre où l'utilisateur les fait
+var TITRES_ARRETS_MENAGE_V2 = { 1: '1 · Au cellier', 2: '2 · Au Pigeonnier', 3: '3 · En bas, à la Réserve', 4: '4 · À ranger', 5: '5 · À la Réserve, en remontant', 6: '6 · Au Pigeonnier', 7: '7 · Au cellier' };
+var RUBRIQUES_ARRETS_MENAGE_V2 = { 1: ['Choisir', 'Sors', 'Déplace'], 2: ['Sors', 'Déplace', 'Place ce qui vient du cellier'], 3: ['Sors', 'Déplace', 'Range'], 4: ['Sors', 'Pose'], 5: ['Range'], 6: ['Place'], 7: ['Place'] };
+
+// Les lignes de la tournée, arrêt par arrêt. Une bouteille qui change de meuble a deux lignes (je la prends,
 // je la pose) ; une qui reste dans son meuble, une seule. « Enregistrer » ne compte que la ligne où elle est posée.
+// Ce qui va du Pigeonnier au cellier attend devant le cellier ; tout le reste voyage dans la boîte.
 function lignesMenageV2(plan) {
-  var arrets = { 1: {}, 2: {}, 3: {}, 4: {}, 5: {} };
+  var arrets = { 1: {}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {}, 7: {} };
   var ajouter = function(n, rubrique, l) { (arrets[n][rubrique] = arrets[n][rubrique] || []).push(l); };
-  var dest = { cellier: 'cellier', pigeonnier: 'Pigeonnier', reserve: 'Réserve', aranger: 'À ranger' };
+  var arretPrise = { cellier: 1, pigeonnier: 2, reserve: 3, aranger: 4 };
   plan.moves.forEach(function(d) {
     var de = lieuMenageV2(d.de), vers = lieuMenageV2(d.vers), cle = d.b.cle;
-    var prise = { id: 'p|' + cle, d: d, sorte: 'prise', vers: dest[vers] };
-    var pose = { id: 'd|' + cle, d: d, sorte: 'pose' };
-    var seule = { id: 'd|' + cle, d: d, sorte: 'seule' };
-    if (de === vers || (de === 'aranger' && vers === 'reserve')) {
-      ajouter(de === 'cellier' ? 1 : de === 'pigeonnier' ? 2 : 3, de === 'aranger' ? 'Range' : 'Déplace', seule);
-    } else if (de === 'cellier') {
-      ajouter(1, 'Sors', prise);
-      ajouter(vers === 'pigeonnier' ? 2 : 3, vers === 'aranger' ? 'Pose avec les « À ranger »' : vers === 'pigeonnier' ? 'Place ce qui vient du cellier' : 'Range', pose);
-    } else if (de === 'pigeonnier') {
-      ajouter(2, 'Sors', prise);
-      ajouter(vers === 'cellier' ? 5 : 3, vers === 'cellier' ? 'Place' : vers === 'aranger' ? 'Pose avec les « À ranger »' : 'Range', pose);
-    } else {
-      ajouter(3, 'Sors', prise);
-      ajouter(vers === 'pigeonnier' ? 4 : 5, 'Place', pose);
-    }
+    if (de === vers) { ajouter(arretPrise[de], 'Déplace', { id: 'd|' + cle, d: d, sorte: 'seule' }); return; }
+    var devant = de === 'pigeonnier' && vers === 'cellier';
+    ajouter(arretPrise[de], 'Sors', { id: 'p|' + cle, d: d, sorte: 'prise', devant: devant });
+    if (vers === 'cellier') ajouter(7, 'Place', { id: 'd|' + cle, d: d, sorte: 'pose', devant: devant });
+    else if (vers === 'pigeonnier') ajouter(de === 'cellier' ? 2 : 6, de === 'cellier' ? 'Place ce qui vient du cellier' : 'Place', { id: 'd|' + cle, d: d, sorte: 'pose' });
+    else if (vers === 'reserve') ajouter(de === 'aranger' ? 5 : 3, 'Range', { id: 'd|' + cle, d: d, sorte: 'pose' });
+    else ajouter(4, 'Pose', { id: 'd|' + cle, d: d, sorte: 'pose' });
   });
   // Dans un même meuble, une bouteille ne va dans une place qu'une fois celle-ci libérée
-  [1, 2].forEach(function(n) {
+  [1, 2, 3].forEach(function(n) {
     var reste = arrets[n]['Déplace'] || [], ordre = [];
     while (reste.length) {
       var libre = reste.filter(function(l) { return !reste.some(function(m) { return m !== l && placeMenageV2(m.d.de) === placeMenageV2(l.d.vers); }); });
@@ -3743,34 +3692,55 @@ function lignesMenageV2(plan) {
     }
     if (ordre.length) arrets[n]['Déplace'] = ordre;
   });
-  return arrets;
+  // La boîte (4 cases par rangée, 3 rangées par boîte) : une bouteille sortie prend la première case libre,
+  // qui se libère quand elle est posée
+  var cases = [], caseDe = {}, max = 0;
+  [1, 2, 3, 4, 5, 6, 7].forEach(function(n) {
+    RUBRIQUES_ARRETS_MENAGE_V2[n].forEach(function(r) {
+      (arrets[n][r] || []).forEach(function(l) {
+        var cle = l.d.b.cle;
+        if (l.sorte === 'prise' && !l.devant) {
+          var i = 0;
+          while (cases[i]) i++;
+          cases[i] = true;
+          caseDe[cle] = i;
+          max = Math.max(max, cases.filter(Boolean).length);
+        }
+        if (caseDe[cle] == null) return;
+        l.boite = 'case ' + (Math.floor(caseDe[cle] / 4) + 1) + '-' + (caseDe[cle] % 4 + 1);
+        if (l.sorte === 'pose') cases[caseDe[cle]] = false;
+      });
+    });
+  });
+  return { arrets: arrets, max: max };
 }
 
-// recalculer = true : le parcours est recalculé (ouverture, un choix, un « pas celle-là ») ;
-// sinon on redessine le même (une case cochée ne change rien au parcours).
+// recalculer = true : le plan est recalculé (ouverture, un choix, un « pas celle-là ») ;
+// sinon on redessine le même (une case cochée ne change rien au plan).
 function afficherMenageEmpV2(recalculer) {
   var M = MENAGE_V2;
   if (recalculer || !M.plan) M.plan = calculerMenageV2();
   var plan = M.plan;
   var n = plan.moves.length;
   document.getElementById('empV2-compte').innerHTML = 'Tri œnophile : ' + n + ' bouteille' + (n > 1 ? 's' : '') + ' à déplacer';
-  var arrets = lignesMenageV2(plan);
-  var titres = { 1: '1 · Au cellier', 2: '2 · Au Pigeonnier', 3: '3 · En bas, à la Réserve', 4: '4 · Au Pigeonnier', 5: '5 · Au cellier' };
-  var ordre = { 1: ['Choisir', 'Sors', 'Déplace'], 2: ['Choisir', 'Sors', 'Déplace', 'Place ce qui vient du cellier'], 3: ['Sors', 'Range', 'Pose avec les « À ranger »'], 4: ['Place'], 5: ['Place'] };
+  var tournee = lignesMenageV2(plan);
   var html = '';
-  [1, 2, 3, 4, 5].forEach(function(a) {
-    html += '<div class="emp-bloc"><div class="emp-meuble">' + titres[a] + '</div>';
+  if (tournee.max) {
+    html += '<div class="titre-groupe">' + (tournee.max <= 12 ? 'Une boîte suffit' : 'Prends ' + Math.ceil(tournee.max / 12) + ' boîtes') +
+      ' : au plus ' + tournee.max + ' bouteille' + (tournee.max > 1 ? 's' : '') + ' à la fois</div>';
+  }
+  [1, 2, 3, 4, 5, 6, 7].forEach(function(a) {
+    html += '<div class="emp-bloc"><div class="emp-meuble">' + TITRES_ARRETS_MENAGE_V2[a] + '</div>';
     var vide = true;
-    ordre[a].forEach(function(rubrique) {
+    RUBRIQUES_ARRETS_MENAGE_V2[a].forEach(function(rubrique) {
       if (rubrique === 'Choisir') {
-        var gs = plan.groupes.filter(function(g) { return g.meuble === (a === 1 ? 'Cellier' : 'Pigeonnier'); });
-        if (!gs.length) return;
+        if (!plan.groupes.length) return;
         vide = false;
         html += '<div class="titre-rubrique">Choisir</div>';
-        gs.forEach(function(g) { html += choixMenageV2Html(g, plan); });
+        plan.groupes.forEach(function(g) { html += choixMenageV2Html(g); });
         return;
       }
-      var lignes = arrets[a][rubrique];
+      var lignes = tournee.arrets[a][rubrique];
       if (!lignes || !lignes.length) return;
       vide = false;
       html += '<div class="titre-rubrique">' + rubrique + '</div>';
@@ -3795,35 +3765,40 @@ function afficherMenageEmpV2(recalculer) {
 }
 
 // « Pinot grigio : tu en as 3 au cellier, cèdes-en 2 » — en titre au-dessus du groupe, pas collé au premier vin
-function choixMenageV2Html(g, plan) {
+function choixMenageV2Html(g) {
   var M = MENAGE_V2;
   var nCedes = g.bouteilles.filter(function(b) { return M.cedes[b.cle]; }).length;
-  var html = '<div class="titre-groupe">' + g.titre + ' : tu en as ' + g.bouteilles.length +
-    (g.meuble === 'Cellier' ? ' au cellier' : ' au Pigeonnier') + ', cèdes-en ' + g.aCeder + (nCedes ? ' (' + nCedes + ' choisi' + (nCedes > 1 ? 's' : '') + ')' : '') + '</div>' +
+  var html = '<div class="titre-groupe">' + g.titre + ' : tu en as ' + g.bouteilles.length + ' au cellier, cèdes-en ' + g.aCeder +
+    (nCedes ? ' (' + nCedes + ' choisi' + (nCedes > 1 ? 's' : '') + ')' : '') + '</div>' +
     '<div class="histo-groupe ' + g.coul + '">';
   g.bouteilles.forEach(function(b) {
     var cede = !!M.cedes[b.cle];
-    var autreNom = cleCepageMenageV2(b.cepNom) !== cleCepageMenageV2(b.cepCommun) ? b.cepNom + ' · ' : '';
-    var bloque = cede && plan.bloques[b.cle] ? ' · reste : pas de place en bas' : '';
-    html += carteMenageV2(b, libellePlaceMenageV2(b.place) + ' · ' + nomMenageV2(b), autreNom + passeMenageV2(b) + bloque,
+    var autreNom = cleCepageMenageV2(b.cepNom) !== cleCepageMenageV2(b.cepCommun) ? b.cepNom : '';
+    html += carteMenageV2(b, libellePlaceMenageV2(b.place) + ' · ' + nomMenageV2(b), [autreNom, passeMenageV2(b)].filter(Boolean).join(' · '),
       cocheMenageV2("cederMenageV2('" + b.cle + "', '" + guillemetMenageV2(g.cle) + "')", cede) + '<span class="fs-12">' + (cede ? 'cédé' : 'céder') + '</span>', false);
   });
   return html + '</div>';
 }
 
+// Une ligne de la tournée. Sortie : sa case dans la boîte (ou « devant le cellier ») et où elle va ;
+// pose : « case 1-1 → P-4-1 » ; déplacement dans le même meuble : « C-2-4 → C-7-1 ».
 function ligneMenageV2Html(l) {
   var M = MENAGE_V2;
   var d = l.d, b = d.b;
   var fait = !!M.faits[l.id];
   var coche = cocheMenageV2("cocherTourneeMenageV2('" + l.id + "')", fait);
   var pas = d.parUtilisateur ? '' : pasCelleLaMenageV2Html(b.cle);
+  var dest = { cellier: 'cellier', pigeonnier: 'Pigeonnier', reserve: 'Réserve', aranger: 'À ranger' }[lieuMenageV2(d.vers)];
   if (l.sorte === 'prise') {
-    return carteMenageV2(b, libellePlaceMenageV2(d.de) + ' · ' + nomMenageV2(b), d.raison, coche + '<span class="fs-12">→ ' + l.vers + '</span>' + pas, fait);
+    var ou = l.devant ? '<span class="fs-12">→ devant le cellier</span>' : '<span class="fs-12 color-white">' + l.boite + '</span><span class="fs-12">→ ' + dest + '</span>';
+    return carteMenageV2(b, libellePlaceMenageV2(d.de) + ' · ' + nomMenageV2(b), d.sort || d.entre, coche + ou + pas, fait);
   }
   if (l.sorte === 'pose') {
-    return carteMenageV2(b, libellePlaceMenageV2(d.vers) + ' · ' + nomMenageV2(b), 'vient de ' + libellePlaceMenageV2(d.de) + (d.raison ? ' · ' + d.raison : ''), coche, fait);
+    var raison = d.entre || d.sort;
+    return carteMenageV2(b, (l.devant ? 'devant le cellier' : l.boite) + ' → ' + libellePlaceMenageV2(d.vers) + ' · ' + nomMenageV2(b),
+      'vient de ' + libellePlaceMenageV2(d.de) + (raison ? ' · ' + raison : ''), coche, fait);
   }
-  return carteMenageV2(b, libellePlaceMenageV2(d.de) + ' → ' + libellePlaceMenageV2(d.vers) + ' · ' + nomMenageV2(b), d.raison, coche + pas, fait);
+  return carteMenageV2(b, libellePlaceMenageV2(d.de) + ' → ' + libellePlaceMenageV2(d.vers) + ' · ' + nomMenageV2(b), d.entre || d.sort, coche + pas, fait);
 }
 
 function cederMenageV2(cle, groupe) {
