@@ -1405,21 +1405,21 @@ function remplirFiltresSuggestionsV2() {
   var menuSom = document.getElementById('suggestionsV2-f-sommelier-menu');
   if (menuSom) {
     menuSom.innerHTML = sommeliers.map(function(v) {
-      return '<div class="item-liste' + (v === f.sommelier ? ' actif' : '') + '" onclick="choisirFiltreSuggestionsV2(\'sommelier\', \'' + v.replace(/'/g, "\\'") + '\')">' + v + '</div>';
+      return '<div class="item-liste' + classeChoixV2(v, f.sommelier) + '" onclick="choisirFiltreSuggestionsV2(\'sommelier\', \'' + v.replace(/'/g, "\\'") + '\')">' + v + '</div>';
     }).join('');
   }
   var dispSom = document.getElementById('suggestionsV2-f-sommelier-display');
-  if (dispSom) dispSom.textContent = f.sommelier || 'Sommelier';
+  if (dispSom) dispSom.textContent = libelleChoixV2(f.sommelier, 'Sommelier');
 
   var couleurs = uniqueValeursAchat(ALL_DATA || [], 'Couleur');
   var menuCoul = document.getElementById('suggestionsV2-f-couleur-menu');
   if (menuCoul) {
     menuCoul.innerHTML = couleurs.map(function(v) {
-      return '<div class="item-liste' + (v === f.couleur ? ' actif' : '') + '" onclick="choisirFiltreSuggestionsV2(\'couleur\', \'' + v.replace(/'/g, "\\'") + '\')">' + v + '</div>';
+      return '<div class="item-liste' + classeChoixV2(v, f.couleur) + '" onclick="choisirFiltreSuggestionsV2(\'couleur\', \'' + v.replace(/'/g, "\\'") + '\')">' + v + '</div>';
     }).join('');
   }
   var dispCoul = document.getElementById('suggestionsV2-f-couleur-display');
-  if (dispCoul) dispCoul.textContent = f.couleur || 'Couleur';
+  if (dispCoul) dispCoul.textContent = libelleChoixV2(f.couleur, 'Couleur');
 
   var btnCave = document.getElementById('suggestionsV2-cave');
   if (btnCave) { btnCave.classList.toggle('actif', f.cave); btnCave.textContent = f.cave ? '✓' : '✗'; }
@@ -1435,7 +1435,7 @@ function basculerFiltreSuggestionsV2(cle) {
 }
 
 function choisirFiltreSuggestionsV2(cle, valeur) {
-  filtresSuggestionsV2[cle] = valeur;
+  filtresSuggestionsV2[cle] = cycleFiltreV2(filtresSuggestionsV2[cle], valeur);
   document.getElementById('suggestionsV2-f-' + cle + '-menu').classList.remove('ouvert');
   remplirFiltresSuggestionsV2();
   afficherSuggestionsV2();
@@ -1486,10 +1486,10 @@ function afficherSuggestionsV2() {
   if (loupeS) loupeS.classList.toggle('actif', !!(f.sommelier || f.couleur || f.cave || texte));
 
   var base = (ALL_SUGGESTIONS || []).filter(function(s) {
-    if (f.sommelier && s.sommelier !== f.sommelier) return false;
+    if (!passeFiltreV2(f.sommelier, s.sommelier)) return false;
     if (texte && normaliserRechercheV2(s.note).indexOf(texte) === -1) return false;
     var info = infos[s.codeSAQ] || {};
-    if (f.couleur && info.Couleur !== f.couleur) return false;
+    if (!passeFiltreV2(f.couleur, info.Couleur)) return false;
     if (f.cave && !bouteillesEnCaveParSAQV2(s.codeSAQ)) return false;
     return true;
   });
@@ -1791,15 +1791,15 @@ function remplirFiltresAchatV2() {
 
   var base = baseAchatV2();
   var forCouleur = base;
-  var forPays = f.couleur ? base.filter(function(i){ return i.Couleur === f.couleur; }) : base;
+  var forPays = base.filter(function(i){ return passeFiltreV2(f.couleur, i.Couleur); });
   var forCepage = base.filter(function(i){
-    return (!f.couleur || i.Couleur === f.couleur) && (!f.pays || i.Pays === f.pays);
+    return passeFiltreV2(f.couleur, i.Couleur) && passeFiltreV2(f.pays, i.Pays);
   });
   var forAppellation = forCepage.filter(function(i){
-    return (!f.cepage || contientTexteV2(i.Cepage, f.cepage));
+    return passeFiltreV2(f.cepage, i.Cepage, contientTexteV2);
   });
   var forPastille = forAppellation.filter(function(i){
-    return (!f.appellation || i.Appellation === f.appellation);
+    return passeFiltreV2(f.appellation, i.Appellation);
   });
 
   var listes = {
@@ -1815,10 +1815,10 @@ function remplirFiltresAchatV2() {
     var menu = document.getElementById('achatV2-f-' + cle + '-menu');
     if (!menu) return;
     menu.innerHTML = '<div class="item-liste' + (cur === '' ? ' actif' : '') + '" onclick="choisirFiltreAchatV2(\'' + cle + '\', \'\')">Tous</div>' + listes[cle].map(function(v){
-      return '<div class="item-liste' + (v === cur ? ' actif' : '') + '" onclick="choisirFiltreAchatV2(\'' + cle + '\', \'' + v.replace(/'/g, "\\'") + '\')">' + v + '</div>';
+      return '<div class="item-liste' + classeChoixV2(v, cur) + '" onclick="choisirFiltreAchatV2(\'' + cle + '\', \'' + v.replace(/'/g, "\\'") + '\')">' + v + '</div>';
     }).join('');
     var disp = document.getElementById('achatV2-f-' + cle + '-display');
-    if (disp) disp.textContent = cur === '' ? libellesFiltreAchatV2[cle] : cur;
+    if (disp) disp.textContent = libelleChoixV2(cur, libellesFiltreAchatV2[cle]);
   });
 
   var menuSucc = document.getElementById('achatV2-f-succ-menu');
@@ -1851,10 +1851,10 @@ function remplirFiltresAchatV2() {
     });
     sommeliers.sort(function(a, b){ return a.localeCompare(b); });
     menuSom.innerHTML = '<div class="item-liste' + (f.sommelier === '' ? ' actif' : '') + '" onclick="choisirFiltreAchatV2(\'sommelier\', \'\')">Tous</div>' + sommeliers.map(function(v){
-      return '<div class="item-liste' + (v === f.sommelier ? ' actif' : '') + '" onclick="choisirFiltreAchatV2(\'sommelier\', \'' + v.replace(/'/g, "\\'") + '\')">' + v + '</div>';
+      return '<div class="item-liste' + classeChoixV2(v, f.sommelier) + '" onclick="choisirFiltreAchatV2(\'sommelier\', \'' + v.replace(/'/g, "\\'") + '\')">' + v + '</div>';
     }).join('');
     var dispSom = document.getElementById('achatV2-f-sommelier-display');
-    if (dispSom) dispSom.textContent = f.sommelier || 'Sommelier';
+    if (dispSom) dispSom.textContent = libelleChoixV2(f.sommelier, 'Sommelier');
   }
 }
 
@@ -1888,7 +1888,8 @@ function basculerFiltreAchatV2(cle) {
 }
 
 function choisirFiltreAchatV2(cle, valeur) {
-  filtresAchatV2[cle] = valeur;
+  // la succursale est un choix, pas un filtre : pas de « sauf »
+  filtresAchatV2[cle] = cle === 'succ' ? valeur : cycleFiltreV2(filtresAchatV2[cle], valeur);
   var menu = document.getElementById('achatV2-f-' + cle + '-menu');
   if (menu) menu.classList.remove('ouvert');
   if (cle === 'couleur') { filtresAchatV2.pays = ''; filtresAchatV2.cepage = ''; filtresAchatV2.appellation = ''; filtresAchatV2.pastille = ''; }
@@ -1944,12 +1945,12 @@ function appliquerFiltresAchatV2() {
   var f = filtresAchatV2;
   var base = baseAchatV2();
   var filtered = base.filter(function(i){
-    return (!f.couleur || i.Couleur === f.couleur) &&
-      (!f.pays || i.Pays === f.pays) &&
-      (!f.cepage || contientTexteV2(i.Cepage, f.cepage)) &&
-      (!f.appellation || i.Appellation === f.appellation) &&
-      (!f.pastille || contientTexteV2(i['Pastille gout'], f.pastille)) &&
-      (!f.sommelier || sommeliersDuVinV2((i['Code SAQ'] || '').toString().trim()).indexOf(f.sommelier) !== -1);
+    return passeFiltreV2(f.couleur, i.Couleur) &&
+      passeFiltreV2(f.pays, i.Pays) &&
+      passeFiltreV2(f.cepage, i.Cepage, contientTexteV2) &&
+      passeFiltreV2(f.appellation, i.Appellation) &&
+      passeFiltreV2(f.pastille, i['Pastille gout'], contientTexteV2) &&
+      (!f.sommelier || passeFiltreV2(f.sommelier, sommeliersDuVinV2((i['Code SAQ'] || '').toString().trim()), listeContientV2));
   });
   afficherCartesAchatV2(filtered);
   majEntonnoirAchatV2();
@@ -2466,18 +2467,18 @@ function remplirFiltresRechercheV2() {
   var menuSom = document.getElementById('rechercheV2-f-sommelier-menu');
   if (menuSom) {
     menuSom.innerHTML = '<div class="item-liste' + (f.sommelier === '' ? ' actif' : '') + '" onclick="choisirFiltreRechercheV2(\'sommelier\', \'\')">Tous</div>' + sommeliers.map(function(v) {
-      return '<div class="item-liste' + (v === f.sommelier ? ' actif' : '') + '" onclick="choisirFiltreRechercheV2(\'sommelier\', \'' + v.replace(/'/g, "\\'") + '\')">' + v + '</div>';
+      return '<div class="item-liste' + classeChoixV2(v, f.sommelier) + '" onclick="choisirFiltreRechercheV2(\'sommelier\', \'' + v.replace(/'/g, "\\'") + '\')">' + v + '</div>';
     }).join('');
   }
   var dispSom = document.getElementById('rechercheV2-f-sommelier-display');
-  if (dispSom) dispSom.textContent = f.sommelier || 'Sommelier';
+  if (dispSom) dispSom.textContent = libelleChoixV2(f.sommelier, 'Sommelier');
 
   var forCouleur = base;
-  var forCepage = f.couleur ? base.filter(function(i){ return i.Couleur === f.couleur; }) : base;
-  var forPays = forCepage.filter(function(i){ return !f.cepage || contientTexteV2(i.Cepage, f.cepage); });
-  var forAppellation = forPays.filter(function(i){ return !f.pays || i.Pays === f.pays; });
-  var forAccords = forAppellation.filter(function(i){ return !f.appellation || i.Appellation === f.appellation; });
-  var forPastille = forAccords.filter(function(i){ return !f.accords || (i.Accords && i.Accords.indexOf(f.accords) !== -1); });
+  var forCepage = base.filter(function(i){ return passeFiltreV2(f.couleur, i.Couleur); });
+  var forPays = forCepage.filter(function(i){ return passeFiltreV2(f.cepage, i.Cepage, contientTexteV2); });
+  var forAppellation = forPays.filter(function(i){ return passeFiltreV2(f.pays, i.Pays); });
+  var forAccords = forAppellation.filter(function(i){ return passeFiltreV2(f.appellation, i.Appellation); });
+  var forPastille = forAccords.filter(function(i){ return passeFiltreV2(f.accords, i.Accords || '', contientChaineV2); });
 
   var sets = { couleur: {}, cepage: {}, pays: {}, appellation: {}, accords: {}, pastille: {} };
   function retenir(cle, v) { var k = normaliserRechercheV2(v); if (v && !sets[cle][k]) sets[cle][k] = v; }
@@ -2494,10 +2495,10 @@ function remplirFiltresRechercheV2() {
     var opts = Object.keys(sets[cle]).map(function(k){ return sets[cle][k]; }).sort(function(a,b){ return a.localeCompare(b); });
     var cur = filtresRechercheV2[cle];
     menu.innerHTML = '<div class="item-liste' + (cur === '' ? ' actif' : '') + '" onclick="choisirFiltreRechercheV2(\'' + cle + '\', \'\')">Tous</div>' + opts.map(function(v) {
-      return '<div class="item-liste' + (v === cur ? ' actif' : '') + '" onclick="choisirFiltreRechercheV2(\'' + cle + '\', \'' + v.replace(/'/g, "\\'") + '\')">' + v + '</div>';
+      return '<div class="item-liste' + classeChoixV2(v, cur) + '" onclick="choisirFiltreRechercheV2(\'' + cle + '\', \'' + v.replace(/'/g, "\\'") + '\')">' + v + '</div>';
     }).join('');
     var disp = document.getElementById('rechercheV2-f-' + cle + '-display');
-    if (disp) disp.textContent = cur === '' ? libellesFiltreRechercheV2[cle] : cur;
+    if (disp) disp.textContent = libelleChoixV2(cur, libellesFiltreRechercheV2[cle]);
   });
 }
 
@@ -2511,7 +2512,7 @@ function basculerFiltreRechercheV2(cle) {
 }
 
 function choisirFiltreRechercheV2(cle, valeur) {
-  filtresRechercheV2[cle] = valeur;
+  filtresRechercheV2[cle] = cycleFiltreV2(filtresRechercheV2[cle], valeur);
   document.getElementById('rechercheV2-f-' + cle + '-menu').classList.remove('ouvert');
   remplirFiltresRechercheV2();
   lancerRechercheV2();
@@ -2618,18 +2619,18 @@ function lancerRechercheV2() {
   if (f.sommelier) {
     saqSommelier = {};
     (ALL_SUGGESTIONS || []).forEach(function(s) {
-      if (s.sommelier === f.sommelier) saqSommelier[s.codeSAQ] = true;
+      if (s.sommelier === valeurChoixV2(f.sommelier)) saqSommelier[s.codeSAQ] = true;
     });
   }
   var champsExclus = { row: 1, bottle: 1, Statut: 1, Meuble: 1, Rangee: 1, Espace: 1, 'Date d\'ajout': 1, 'Date sortie': 1, Source: 1, 'Photo URL': 1 };
   var trouves = (ALL_DATA || []).filter(function(i) {
-    return (!saqSommelier || saqSommelier[(i['Code SAQ'] || '').toString().trim()]) &&
-      (!f.couleur || i.Couleur === f.couleur) &&
-      (!f.cepage || contientTexteV2(i.Cepage, f.cepage)) &&
-      (!f.pays || i.Pays === f.pays) &&
-      (!f.appellation || i.Appellation === f.appellation) &&
-      (!f.accords || (i.Accords && i.Accords.indexOf(f.accords) !== -1)) &&
-      (!f.pastille || contientTexteV2(i['Pastille gout'], f.pastille)) &&
+    return (!saqSommelier || passeFiltreV2(f.sommelier, !!saqSommelier[(i['Code SAQ'] || '').toString().trim()], function(propose) { return propose; })) &&
+      passeFiltreV2(f.couleur, i.Couleur) &&
+      passeFiltreV2(f.cepage, i.Cepage, contientTexteV2) &&
+      passeFiltreV2(f.pays, i.Pays) &&
+      passeFiltreV2(f.appellation, i.Appellation) &&
+      passeFiltreV2(f.accords, i.Accords || '', contientChaineV2) &&
+      passeFiltreV2(f.pastille, i['Pastille gout'], contientTexteV2) &&
       (terme.length < 2 || Object.keys(i).some(function(k) {
         if (champsExclus[k]) return false;
         return normaliserRechercheV2(i[k]).indexOf(terme) !== -1;
@@ -2776,7 +2777,7 @@ function basculerFiltreNotesV2(cle) {
   menu.classList.toggle('ouvert');
 }
 function choisirFiltreNotesV2(cle, valeur) {
-  filtresNotesV2[cle] = valeur;
+  filtresNotesV2[cle] = cycleFiltreV2(filtresNotesV2[cle], valeur);
   document.getElementById('notesV2-f-' + cle + '-menu').classList.remove('ouvert');
   remplirFiltresNotesV2();
   afficherNotesV2();
@@ -2803,11 +2804,11 @@ function remplirFiltresNotesV2() {
   var menu = document.getElementById('notesV2-f-source-menu');
   if (menu) {
     menu.innerHTML = '<div class="item-liste' + (cur === '' ? ' actif' : '') + '" onclick="choisirFiltreNotesV2(\'source\', \'\')">Tous</div>' + sources.map(function(v) {
-      return '<div class="item-liste' + (String(v) === String(cur) ? ' actif' : '') + '" onclick="choisirFiltreNotesV2(\'source\', \'' + String(v).replace(/'/g, "\\'") + '\')">' + v + '</div>';
+      return '<div class="item-liste' + classeChoixV2(String(v), cur) + '" onclick="choisirFiltreNotesV2(\'source\', \'' + String(v).replace(/'/g, "\\'") + '\')">' + v + '</div>';
     }).join('');
   }
   var disp = document.getElementById('notesV2-f-source-display');
-  if (disp) disp.textContent = cur === '' ? 'Qui l\'a dit' : cur;
+  if (disp) disp.textContent = libelleChoixV2(cur, 'Qui l\'a dit');
   var btnCave = document.getElementById('notesV2-cave');
   if (btnCave) { btnCave.classList.toggle('actif', filtresNotesV2.cave); btnCave.textContent = filtresNotesV2.cave ? '✓' : '✗'; }
 }
@@ -2833,7 +2834,7 @@ function afficherNotesV2() {
   var texte = normaliserRechercheV2(champ ? champ.value.trim() : '');
   var src = filtresNotesV2.source;
   var liste = (ALL_NOTES || []).filter(function(n) {
-    return (!src || String(n.source) === String(src)) &&
+    return passeFiltreV2(src, String(n.source)) &&
       (!texte || normaliserRechercheV2([n.aliments, n.appelle, n.source].join(' ')).indexOf(texte) !== -1);
   });
 
@@ -3009,10 +3010,10 @@ function remplirFiltresEmpV2() {
     var cur = f[cle];
     var menu = document.getElementById('empV2-f-' + cle + '-menu');
     menu.innerHTML = '<div class="item-liste' + (cur === '' ? ' actif' : '') + '" onclick="choisirFiltreEmpV2(\'' + cle + '\', \'\')">Tous</div>' + listes[cle].map(function(v){
-      return '<div class="item-liste' + (String(v) === String(cur) ? ' actif' : '') + '" onclick="choisirFiltreEmpV2(\'' + cle + '\', \'' + String(v).replace(/'/g, "\\'") + '\')">' + v + '</div>';
+      return '<div class="item-liste' + classeChoixV2(String(v), String(cur)) + '" onclick="choisirFiltreEmpV2(\'' + cle + '\', \'' + String(v).replace(/'/g, "\\'") + '\')">' + v + '</div>';
     }).join('');
     var disp = document.getElementById('empV2-f-' + cle + '-display');
-    if (disp) disp.textContent = cur === '' ? ({meuble:'Meuble',rangee:'Rangée',espace:'Espace',cepage:'Cépage',couleur:'Couleur',pays:'Pays',appellation:'Appellation'})[cle] : cur;
+    if (disp) disp.textContent = libelleChoixV2(cur, ({meuble:'Meuble',rangee:'Rangée',espace:'Espace',cepage:'Cépage',couleur:'Couleur',pays:'Pays',appellation:'Appellation'})[cle]);
   });
 
   // Afficher : le mode courant est allumé ; les deux modes « dans un meuble »
@@ -3034,7 +3035,7 @@ function remplirFiltresEmpV2() {
 // Appellations du menu : celles du pays choisi seulement (cascade Pays → Appellation)
 function appellationsEmpV2(baseVin) {
   var p = filtresEmpV2.pays;
-  return uniqueValeursAchat(p ? baseVin.filter(function(i){ return i.Pays === p; }) : baseVin, 'Appellation');
+  return uniqueValeursAchat(baseVin.filter(function(i){ return passeFiltreV2(p, i.Pays); }), 'Appellation');
 }
 
 // Les vins dans lesquels puiser les valeurs de Cépage / Couleur / Pays.
@@ -3069,10 +3070,10 @@ function uniqueCepagesEmpV2(liste) {
 // Cépage · Couleur · Pays · Appellation, appliqués aux vins d'une liste.
 function vinPasseFiltresEmpV2(w) {
   var f = filtresEmpV2;
-  return (!f.cepage || contientTexteV2(w.Cepage, f.cepage)) &&
-    (!f.couleur || w.Couleur === f.couleur) &&
-    (!f.pays || w.Pays === f.pays) &&
-    (!f.appellation || memeTexteV2(w.Appellation, f.appellation));
+  return passeFiltreV2(f.cepage, w.Cepage, contientTexteV2) &&
+    passeFiltreV2(f.couleur, w.Couleur) &&
+    passeFiltreV2(f.pays, w.Pays) &&
+    passeFiltreV2(f.appellation, w.Appellation, memeTexteV2);
 }
 function groupesFiltresEmpV2(groupes) {
   return groupes.filter(function(g){ return vinPasseFiltresEmpV2(g.wine); });
@@ -3089,13 +3090,14 @@ function basculerFiltreEmpV2(cle) {
 }
 
 function choisirFiltreEmpV2(cle, valeur) {
-  filtresEmpV2[cle] = valeur;
+  // Meuble · Rangée · Espace décident de ce qui est dessiné : « seulement » (pas de « sauf »)
+  filtresEmpV2[cle] = (cle === 'meuble' || cle === 'rangee' || cle === 'espace') ? valeur : cycleFiltreV2(filtresEmpV2[cle], valeur);
   document.getElementById('empV2-f-' + cle + '-menu').classList.remove('ouvert');
   if (cle === 'meuble') { filtresEmpV2.rangee = ''; filtresEmpV2.espace = ''; }
   if (cle === 'rangee') { filtresEmpV2.espace = ''; }
   // Nouveau pays : une appellation qui n'y existe pas se vide (jamais une liste vide sans raison)
   if (cle === 'pays' && filtresEmpV2.appellation &&
-      !appellationsEmpV2(baseFiltresVinEmpV2()).some(function(a){ return memeTexteV2(a, filtresEmpV2.appellation); })) {
+      !appellationsEmpV2(baseFiltresVinEmpV2()).some(function(a){ return memeTexteV2(a, valeurChoixV2(filtresEmpV2.appellation)); })) {
     filtresEmpV2.appellation = '';
   }
   // Deux modes n'existent que dans un meuble : sans meuble, retour au plan.
@@ -4288,10 +4290,9 @@ function valeursFiltreHistoV2(cle, h, w) {
 }
 // Cépage = cépage principal, comme la Cave
 function passeFiltreHistoV2(cle, h, w, choix) {
-  if (!choix) return true;
-  if (cle === 'cepage') return memeTexteV2(cepageDominant(w), choix);
-  if (cle === 'pastille') return contientTexteV2(w['Pastille gout'], choix);
-  return valeursFiltreHistoV2(cle, h, w).indexOf(choix) !== -1;
+  if (cle === 'cepage') return passeFiltreV2(choix, cepageDominant(w), memeTexteV2);
+  if (cle === 'pastille') return passeFiltreV2(choix, w['Pastille gout'], contientTexteV2);
+  return passeFiltreV2(choix, valeursFiltreHistoV2(cle, h, w), listeContientV2);
 }
 function libelleNoteHistoV2(n) { n = parseInt(n, 10) || 0; return n ? n + ' verre' + (n > 1 ? 's' : '') : 'Sans appréciation'; }
 function filtresHistoActifsV2() {
@@ -4316,10 +4317,10 @@ function remplirFiltresHistoV2() {
     var cur = f[cle];
     var menu = document.getElementById('histoV2-f-' + cle + '-menu');
     menu.innerHTML = '<div class="item-liste' + (cur === '' ? ' actif' : '') + '" onclick="choisirFiltreHistoV2(\'' + cle + '\', \'\')">Tous</div>' + opts.map(function(v){
-      return '<div class="item-liste' + (v === cur ? ' actif' : '') + '" onclick="choisirFiltreHistoV2(\'' + cle + '\', \'' + v.replace(/'/g, "\\'") + '\')">' + libelle(v) + '</div>';
+      return '<div class="item-liste' + classeChoixV2(v, cur) + '" onclick="choisirFiltreHistoV2(\'' + cle + '\', \'' + v.replace(/'/g, "\\'") + '\')">' + libelle(v) + '</div>';
     }).join('');
     var disp = document.getElementById('histoV2-f-' + cle + '-display');
-    if (disp) disp.textContent = cur === '' ? libellesFiltreHistoV2[cle] : libelle(cur);
+    if (disp) disp.textContent = libelleChoixV2(cur, libellesFiltreHistoV2[cle], libelle);
     base = base.filter(function(h) { return passeFiltreHistoV2(cle, h, vinDe(h), cur); });
   });
 
@@ -4350,7 +4351,7 @@ function basculerFiltreHistoV2(cle) {
 }
 
 function choisirFiltreHistoV2(cle, valeur) {
-  filtresHistoV2[cle] = valeur;
+  filtresHistoV2[cle] = cycleFiltreV2(filtresHistoV2[cle], valeur);
   document.getElementById('histoV2-f-' + cle + '-menu').classList.remove('ouvert');
   remplirFiltresHistoV2();
   afficherHistoV2();
@@ -4764,12 +4765,12 @@ function remplirFiltresCaveV2() {
   var base = (ALL_DATA || []);
 
   var forCouleur = base;
-  var forCepage = f.couleur ? base.filter(function(i){ return i.Couleur === f.couleur; }) : base;
-  var forPays = forCepage.filter(function(i){ return !f.cepage || memeTexteV2(cepageDominant(i), f.cepage); });
-  var forAppellation = forPays.filter(function(i){ return !f.pays || i.Pays === f.pays; });
-  var forAccords = forAppellation.filter(function(i){ return !f.appellation || i.Appellation === f.appellation; });
-  var forPastille = forAccords.filter(function(i){ return !f.accords || (i.Accords && i.Accords.indexOf(f.accords) !== -1); });
-  var forAcidite = forPastille.filter(function(i){ return !f.pastille || contientTexteV2(i['Pastille gout'], f.pastille); });
+  var forCepage = base.filter(function(i){ return passeFiltreV2(f.couleur, i.Couleur); });
+  var forPays = forCepage.filter(function(i){ return passeFiltreV2(f.cepage, cepageDominant(i), memeTexteV2); });
+  var forAppellation = forPays.filter(function(i){ return passeFiltreV2(f.pays, i.Pays); });
+  var forAccords = forAppellation.filter(function(i){ return passeFiltreV2(f.appellation, i.Appellation); });
+  var forPastille = forAccords.filter(function(i){ return passeFiltreV2(f.accords, i.Accords || '', contientChaineV2); });
+  var forAcidite = forPastille.filter(function(i){ return passeFiltreV2(f.pastille, i['Pastille gout'], contientTexteV2); });
 
   var sets = { couleur: {}, cepage: {}, pays: {}, appellation: {}, accords: {}, pastille: {}, acidite: {} };
   function retenir(cle, v) { var k = normaliserRechercheV2(v); if (v && !sets[cle][k]) sets[cle][k] = v; }
@@ -4787,10 +4788,10 @@ function remplirFiltresCaveV2() {
     var opts = Object.keys(sets[cle]).map(function(k){ return sets[cle][k]; }).sort(function(a,b){ return a.localeCompare(b); });
     var cur = filtresCaveV2[cle];
     menu.innerHTML = '<div class="item-liste' + (cur === '' ? ' actif' : '') + '" onclick="choisirFiltreCaveV2(\'' + cle + '\', \'\')">Tous</div>' + opts.map(function(v) {
-      return '<div class="item-liste' + (v === cur ? ' actif' : '') + '" onclick="choisirFiltreCaveV2(\'' + cle + '\', \'' + v.replace(/'/g, "\\'") + '\')">' + v + '</div>';
+      return '<div class="item-liste' + classeChoixV2(v, cur) + '" onclick="choisirFiltreCaveV2(\'' + cle + '\', \'' + v.replace(/'/g, "\\'") + '\')">' + v + '</div>';
     }).join('');
     var disp = document.getElementById('caveV2-f-' + cle + '-display');
-    if (disp) disp.textContent = cur === '' ? libellesFiltreCaveV2[cle] : cur;
+    if (disp) disp.textContent = libelleChoixV2(cur, libellesFiltreCaveV2[cle]);
   });
 }
 
@@ -4804,7 +4805,7 @@ function basculerFiltreCaveV2(cle) {
 }
 
 function choisirFiltreCaveV2(cle, valeur) {
-  filtresCaveV2[cle] = valeur;
+  filtresCaveV2[cle] = cycleFiltreV2(filtresCaveV2[cle], valeur);
   document.getElementById('caveV2-f-' + cle + '-menu').classList.remove('ouvert');
   appliquerFiltresCaveV2();
 }
@@ -4829,13 +4830,13 @@ function appliquerFiltresCaveV2() {
   var champsExclusCave = { row: 1, bottle: 1, Statut: 1, Meuble: 1, Rangee: 1, Espace: 1, 'Date d\'ajout': 1, 'Date sortie': 1, Source: 1, 'Photo URL': 1 };
 
   var filtered = (ALL_DATA || []).filter(function(i) {
-    return (!c || i.Couleur === c) &&
-      (!cep || memeTexteV2(cepageDominant(i), cep)) &&
-      (!p || i.Pays === p) &&
-      (!app || i.Appellation === app) &&
-      (!a || (i.Accords && i.Accords.indexOf(a) !== -1)) &&
-      (!past || contientTexteV2(i['Pastille gout'], past)) &&
-      (!acid || contientTexteV2(i['Acidité'], acid)) &&
+    return passeFiltreV2(c, i.Couleur) &&
+      passeFiltreV2(cep, cepageDominant(i), memeTexteV2) &&
+      passeFiltreV2(p, i.Pays) &&
+      passeFiltreV2(app, i.Appellation) &&
+      passeFiltreV2(a, i.Accords || '', contientChaineV2) &&
+      passeFiltreV2(past, i['Pastille gout'], contientTexteV2) &&
+      passeFiltreV2(acid, i['Acidité'], contientTexteV2) &&
       (!nom || Object.keys(i).some(function(k) {
         if (champsExclusCave[k]) return false;
         return normaliserRechercheV2(i[k]).indexOf(nom) !== -1;
@@ -4844,7 +4845,7 @@ function appliquerFiltresCaveV2() {
   afficherCartesCaveV2(filtered);
   remplirFiltresCaveV2();
   var loupe = document.getElementById('caveV2-loupe');
-  if (loupe) loupe.classList.toggle('actif', !!(c || cep || p || app || a || past || nom));
+  if (loupe) loupe.classList.toggle('actif', !!(c || cep || p || app || a || past || acid || nom));
 }
 
 function reinitialiserFiltresCaveV2() {
@@ -5450,44 +5451,44 @@ function remplirFiltresCurieuxBeginV2() {
     if (s && !vuesSaison[s] && cbDansModeV2(a, infos)) { vuesSaison[s] = true; saisons.push(s); }
   });
   saisons.sort(function(a, b) { return numeroCbV2(b) - numeroCbV2(a); });
-  if (f.saison && !vuesSaison[f.saison]) f.saison = '';
+  if (f.saison && !vuesSaison[valeurChoixV2(f.saison)]) f.saison = '';
   var menuSaison = document.getElementById('curieuxBeginV2-f-saison-menu');
   if (menuSaison) {
     menuSaison.innerHTML = saisons.map(function(v) {
-      return '<div class="item-liste' + (v === f.saison ? ' actif' : '') + '" onclick="choisirFiltreCurieuxBeginV2(\'saison\', \'' + v.replace(/'/g, "\\'") + '\')">Saison ' + v + '</div>';
+      return '<div class="item-liste' + classeChoixV2(v, f.saison) + '" onclick="choisirFiltreCurieuxBeginV2(\'saison\', \'' + v.replace(/'/g, "\\'") + '\')">Saison ' + v + '</div>';
     }).join('');
   }
   var dispSaison = document.getElementById('curieuxBeginV2-f-saison-display');
-  if (dispSaison) dispSaison.textContent = f.saison ? 'Saison ' + f.saison : 'Saison';
+  if (dispSaison) dispSaison.textContent = libelleChoixV2(f.saison, 'Saison', function(v) { return 'Saison ' + v; });
 
   // Cépage (principal) · Pays · Appellation : puisés dans le mode affiché ; Appellation suit le Pays
   var attrs = (ALL_CURIEUXBEGIN || []).filter(function(a) { return cbDansModeV2(a, infos); }).map(function(a) { return attributsVinCbV2(a, infos); });
   var listes = {
     cepage: valeursUniquesCbV2(attrs, 'cepage'),
     pays: valeursUniquesCbV2(attrs, 'pays'),
-    appellation: valeursUniquesCbV2(attrs.filter(function(x) { return !f.pays || memeTexteV2(x.pays, f.pays); }), 'appellation')
+    appellation: valeursUniquesCbV2(attrs.filter(function(x) { return passeFiltreV2(f.pays, x.pays, memeTexteV2); }), 'appellation')
   };
   var libelles = { cepage: 'Cépage', pays: 'Pays', appellation: 'Appellation' };
   ['cepage', 'pays', 'appellation'].forEach(function(cle) {
     var menu = document.getElementById('curieuxBeginV2-f-' + cle + '-menu');
     if (menu) {
       menu.innerHTML = listes[cle].map(function(v) {
-        return '<div class="item-liste' + (memeTexteV2(v, f[cle]) ? ' actif' : '') + '" onclick="choisirFiltreCurieuxBeginV2(\'' + cle + '\', \'' + v.replace(/'/g, "\\'") + '\')">' + v + '</div>';
+        return '<div class="item-liste' + classeChoixV2(v, f[cle]) + '" onclick="choisirFiltreCurieuxBeginV2(\'' + cle + '\', \'' + v.replace(/'/g, "\\'") + '\')">' + v + '</div>';
       }).join('');
     }
     var disp = document.getElementById('curieuxBeginV2-f-' + cle + '-display');
-    if (disp) disp.textContent = f[cle] || libelles[cle];
+    if (disp) disp.textContent = libelleChoixV2(f[cle], libelles[cle]);
   });
 
   var couleurs = uniqueValeursAchat(ALL_DATA || [], 'Couleur');
   var menuCoul = document.getElementById('curieuxBeginV2-f-couleur-menu');
   if (menuCoul) {
     menuCoul.innerHTML = couleurs.map(function(v) {
-      return '<div class="item-liste' + (v === f.couleur ? ' actif' : '') + '" onclick="choisirFiltreCurieuxBeginV2(\'couleur\', \'' + v.replace(/'/g, "\\'") + '\')">' + v + '</div>';
+      return '<div class="item-liste' + classeChoixV2(v, f.couleur) + '" onclick="choisirFiltreCurieuxBeginV2(\'couleur\', \'' + v.replace(/'/g, "\\'") + '\')">' + v + '</div>';
     }).join('');
   }
   var dispCoul = document.getElementById('curieuxBeginV2-f-couleur-display');
-  if (dispCoul) dispCoul.textContent = f.couleur || 'Couleur';
+  if (dispCoul) dispCoul.textContent = libelleChoixV2(f.couleur, 'Couleur');
   var btnCave = document.getElementById('curieuxBeginV2-cave');
   if (btnCave) { btnCave.classList.toggle('actif', f.cave); btnCave.textContent = f.cave ? '✓' : '✗'; }
   var elMes = document.getElementById('curieuxBeginV2-mode-mesvins');
@@ -5514,7 +5515,7 @@ function basculerFiltreCurieuxBeginV2(cle) {
 
 function choisirFiltreCurieuxBeginV2(cle, valeur) {
   var f = filtresCurieuxBeginV2;
-  f[cle] = valeur;
+  f[cle] = cycleFiltreV2(f[cle], valeur);
   document.getElementById('curieuxBeginV2-f-' + cle + '-menu').classList.remove('ouvert');
   // Nouveau pays : une appellation qui n'y existe pas se vide (jamais une liste vide sans raison)
   if (cle === 'pays' && f.appellation) {
@@ -5522,7 +5523,7 @@ function choisirFiltreCurieuxBeginV2(cle, valeur) {
     var garde = (ALL_CURIEUXBEGIN || []).some(function(a) {
       if (!cbDansModeV2(a, infos)) return false;
       var x = attributsVinCbV2(a, infos);
-      return memeTexteV2(x.pays, f.pays) && memeTexteV2(x.appellation, f.appellation);
+      return passeFiltreV2(f.pays, x.pays, memeTexteV2) && memeTexteV2(x.appellation, valeurChoixV2(f.appellation));
     });
     if (!garde) f.appellation = '';
   }
@@ -5590,7 +5591,6 @@ function chargerCurieuxBeginV2() {
   var champ = document.getElementById('curieuxBeginV2-f-texte');
   var q = normaliserRechercheV2(champ ? champ.value.trim() : '');
 
-  var cibleCoul = f.couleur ? couleurClasseV2(f.couleur) : '';
   var base = (ALL_CURIEUXBEGIN || []).filter(function(a) {
     var cs = (a.codeSAQ || '').toString().trim();
     var w = infos[cs];
@@ -5598,12 +5598,12 @@ function chargerCurieuxBeginV2() {
     // modes exclusifs : « Mes vins » = mes vins ; « Vins à découvrir » = les autres
     if (!cbDansModeV2(a, infos)) return false;
     if (possede && f.cave && !bouteillesEnCaveParSAQV2(cs)) return false;
-    if (f.saison && (a.saison || '').toString().trim() !== f.saison) return false;
+    if (!passeFiltreV2(f.saison, (a.saison || '').toString().trim())) return false;
     var x = attributsVinCbV2(a, infos);
-    if (cibleCoul && x.couleur !== cibleCoul) return false;
-    if (f.cepage && !memeTexteV2(x.cepage, f.cepage)) return false;
-    if (f.pays && !memeTexteV2(x.pays, f.pays)) return false;
-    if (f.appellation && !memeTexteV2(x.appellation, f.appellation)) return false;
+    if (!passeFiltreV2(f.couleur, x.couleur, function(classe, v) { return classe === couleurClasseV2(v); })) return false;
+    if (!passeFiltreV2(f.cepage, x.cepage, memeTexteV2)) return false;
+    if (!passeFiltreV2(f.pays, x.pays, memeTexteV2)) return false;
+    if (!passeFiltreV2(f.appellation, x.appellation, memeTexteV2)) return false;
     if (q) {
       var nomRech = possede ? (w.Nom || '') : (a.vin || '');
       if (normaliserRechercheV2(a.plat).indexOf(q) === -1 && normaliserRechercheV2(nomRech).indexOf(q) === -1) return false;
@@ -5811,6 +5811,39 @@ function ajouterBouteilleArrivee(meuble, rangee, espace) {
   }).catch(function() {
     retourAccueilV2();
   });
+}
+
+// ==================== FILTRES : « SEULEMENT » OU « SAUF » (27 oct. 2026) ====================
+// Dans un menu de filtre, taper une valeur = « seulement elle » ; la retaper = « sauf elle » ; une 3e fois = « Tous ».
+// « Sauf X » se garde dans la même variable que « X », précédé de SAUF_FILTRE_V2 : toute comparaison passe par
+// passeFiltreV2, toute ligne de menu par classeChoixV2, tout menu fermé par libelleChoixV2.
+var SAUF_FILTRE_V2 = '≠';
+function cycleFiltreV2(actuel, valeur) {
+  if (!valeur) return '';
+  if (actuel === valeur) return SAUF_FILTRE_V2 + valeur;
+  if (actuel === SAUF_FILTRE_V2 + valeur) return '';
+  return valeur;
+}
+function estSaufV2(choix) { return typeof choix === 'string' && choix.charAt(0) === SAUF_FILTRE_V2; }
+function valeurChoixV2(choix) { return estSaufV2(choix) ? choix.slice(1) : (choix || ''); }
+// La valeur d'un élément passe-t-elle le choix ? comparer(valeur, choisie) — égalité stricte par défaut
+function passeFiltreV2(choix, valeur, comparer) {
+  if (!choix) return true;
+  var v = valeurChoixV2(choix);
+  var r = comparer ? !!comparer(valeur, v) : valeur === v;
+  return estSaufV2(choix) ? !r : r;
+}
+// Le texte contient-il la valeur choisie, telle quelle ? (accords d'un vin : « Poulet, Fromage »)
+function contientChaineV2(texte, v) { return (texte || '').toString().indexOf(v) !== -1; }
+// Une liste (accords, sommeliers d'un vin…) contient-elle la valeur choisie ?
+function listeContientV2(liste, v) { return (liste || []).indexOf(v) !== -1; }
+// Ligne de menu : « actif » (seulement elle) ou « exclu » (sauf elle)
+function classeChoixV2(v, choix) { return v === choix ? ' actif' : (estSaufV2(choix) && valeurChoixV2(choix) === v ? ' exclu' : ''); }
+// Menu fermé : la valeur, « Sauf X », ou le libellé par défaut
+function libelleChoixV2(choix, defaut, montrer) {
+  if (!choix) return defaut;
+  var v = montrer ? montrer(valeurChoixV2(choix)) : valeurChoixV2(choix);
+  return estSaufV2(choix) ? 'Sauf ' + v : v;
 }
 
 // ==================== PANNEAUX DE FILTRES (générés) ====================
