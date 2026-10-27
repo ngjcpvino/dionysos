@@ -884,7 +884,8 @@ body::after {
 #histoV2-f-mets-recherche { margin-bottom: var(--space-s); }
 
 .champ-saisie:focus { background: rgba(0,0,0,0.7); }
-textarea.champ-saisie { resize: none; font-family: inherit; line-height: 1.4; }
+/* Une case de texte garde sa hauteur : dans une page en colonne (flex), un écran court ne l'écrase plus. */
+textarea.champ-saisie { resize: none; font-family: inherit; line-height: 1.4; flex-shrink: 0; }
 /* Champ date (« bu le » de l'Historique) : même look ; iOS le centre et l'écrase quand il est vide. Réutilisable. */
 input[type="date"].champ-saisie { -webkit-appearance: none; appearance: none; display: block; min-height: var(--taille-tactile); font-family: inherit; color-scheme: dark; }
 input[type="date"].champ-saisie::-webkit-date-and-time-value { text-align: left; }
