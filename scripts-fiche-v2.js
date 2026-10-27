@@ -373,11 +373,12 @@ function ouvrirCorrigerRecetteV2(sku) {
   var r = (ALL_RECETTES || []).filter(function(x) { return (x.sku || '').toString() === sku.toString(); })[0];
   if (!r) { afficherMessage('Recette introuvable'); return; }
   corrigerRecetteV2Etat = { sku: r.sku.toString(), typesPlats: (r.typesPlats || []).slice(), ingredients: (r.ingredients || []).slice() };
+  PASTILLES_V2.corrigerRecetteV2 = { valeurs: corrigerRecetteV2Etat, connues: valeursConnuesRecettesV2, champs: ['typesPlats', 'ingredients'] };
   document.getElementById('corrigerRecetteV2-nom').value = decodeHTML(r.nom || '');
   ['typesPlats', 'ingredients'].forEach(function(champ) {
     var menu = document.getElementById('corrigerRecetteV2-' + champ + '-menu');
     menu.classList.remove('ouvert'); menu.innerHTML = '';
-    rendreChipsCorrigerV2(champ);
+    rendrePastillesV2('corrigerRecetteV2', champ);
   });
   document.getElementById('corrigerRecetteV2Overlay').style.display = 'flex';
   remonterScrollV2('corrigerRecetteV2Overlay');
@@ -388,55 +389,66 @@ function fermerCorrigerRecetteV2() {
   corrigerRecetteV2Etat = null;
 }
 
-function rendreChipsCorrigerV2(champ) {
-  var div = document.getElementById('corrigerRecetteV2-' + champ + '-chips');
-  var vals = corrigerRecetteV2Etat ? corrigerRecetteV2Etat[champ] : [];
+// ==================== Pastilles à choisir (réutilisable) ====================
+// Des valeurs en pastilles (toucher = retirer, ✗) + « + Ajouter… » : un menu des valeurs connues et une case
+// « Nouveau… ». Sert au correcteur de recettes SAQ et aux notes d'accord. PASTILLES_V2[prefixe] =
+// { valeurs: { champ: [] }, connues: function(champ) → [], champs: [] } ; ids : <prefixe>-<champ>-chips / -menu / -nouveau.
+var PASTILLES_V2 = {};
+
+function rendrePastillesV2(prefixe, champ) {
+  var div = document.getElementById(prefixe + '-' + champ + '-chips');
+  var p = PASTILLES_V2[prefixe];
+  var vals = p ? p.valeurs[champ] : [];
   if (!vals.length) { div.innerHTML = '<div class="texte-secondaire">Aucun</div>'; return; }
   div.innerHTML = vals.map(function(v) {
     var esc = v.replace(/'/g, "\\'");
-    return '<div class="item-liste" onclick="retirerCorrigerV2(\'' + champ + '\', \'' + esc + '\')">' + decodeHTML(v) + '<span class="fav-x">✗</span></div>';
+    return '<div class="item-liste" onclick="retirerPastilleV2(\'' + prefixe + '\', \'' + champ + '\', \'' + esc + '\')">' + decodeHTML(v) + '<span class="fav-x">✗</span></div>';
   }).join('');
 }
 
-function retirerCorrigerV2(champ, valeur) {
-  if (!corrigerRecetteV2Etat) return;
-  corrigerRecetteV2Etat[champ] = corrigerRecetteV2Etat[champ].filter(function(v) { return v !== valeur; });
-  rendreChipsCorrigerV2(champ);
+function retirerPastilleV2(prefixe, champ, valeur) {
+  var p = PASTILLES_V2[prefixe];
+  if (!p) return;
+  p.valeurs[champ] = p.valeurs[champ].filter(function(v) { return v !== valeur; });
+  rendrePastillesV2(prefixe, champ);
 }
 
-function basculerAjoutCorrigerV2(champ) {
-  if (!corrigerRecetteV2Etat) return;
-  var menu = document.getElementById('corrigerRecetteV2-' + champ + '-menu');
+function basculerAjoutPastilleV2(prefixe, champ) {
+  var p = PASTILLES_V2[prefixe];
+  if (!p) return;
+  var menu = document.getElementById(prefixe + '-' + champ + '-menu');
   var etaitOuvert = menu.classList.contains('ouvert');
-  ['typesPlats', 'ingredients'].forEach(function(k) {
-    var m = document.getElementById('corrigerRecetteV2-' + k + '-menu');
+  p.champs.forEach(function(k) {
+    var m = document.getElementById(prefixe + '-' + k + '-menu');
     m.classList.remove('ouvert'); m.innerHTML = '';
   });
   if (etaitOuvert) return;
   var deja = {};
-  corrigerRecetteV2Etat[champ].forEach(function(v) { deja[v] = true; });
-  var html = '<input type="text" id="corrigerRecetteV2-' + champ + '-nouveau" class="champ-saisie" placeholder="Nouveau…" onkeydown="if(event.key===\'Enter\'){event.preventDefault();ajouterNouveauCorrigerV2(\'' + champ + '\');}">';
-  html += valeursConnuesRecettesV2(champ).filter(function(v) { return !deja[v]; }).map(function(v) {
+  p.valeurs[champ].forEach(function(v) { deja[normaliserRechercheV2(v)] = true; });
+  var html = '<input type="text" id="' + prefixe + '-' + champ + '-nouveau" class="champ-saisie" placeholder="Nouveau…" onkeydown="if(event.key===\'Enter\'){event.preventDefault();ajouterNouvellePastilleV2(\'' + prefixe + '\', \'' + champ + '\');}">';
+  html += p.connues(champ).filter(function(v) { return !deja[normaliserRechercheV2(v)]; }).map(function(v) {
     var esc = v.replace(/'/g, "\\'");
-    return '<div class="item-liste" onclick="ajouterCorrigerV2(\'' + champ + '\', \'' + esc + '\')">' + decodeHTML(v) + '</div>';
+    return '<div class="item-liste" onclick="ajouterPastilleV2(\'' + prefixe + '\', \'' + champ + '\', \'' + esc + '\')">' + decodeHTML(v) + '</div>';
   }).join('');
   menu.innerHTML = html;
   menu.classList.add('ouvert');
 }
 
-function ajouterCorrigerV2(champ, valeur) {
-  if (!corrigerRecetteV2Etat) return;
-  if (corrigerRecetteV2Etat[champ].indexOf(valeur) === -1) corrigerRecetteV2Etat[champ].push(valeur);
-  var menu = document.getElementById('corrigerRecetteV2-' + champ + '-menu');
+function ajouterPastilleV2(prefixe, champ, valeur) {
+  var p = PASTILLES_V2[prefixe];
+  if (!p) return;
+  var k = normaliserRechercheV2(valeur);
+  if (!p.valeurs[champ].some(function(v) { return normaliserRechercheV2(v) === k; })) p.valeurs[champ].push(valeur);
+  var menu = document.getElementById(prefixe + '-' + champ + '-menu');
   menu.classList.remove('ouvert'); menu.innerHTML = '';
-  rendreChipsCorrigerV2(champ);
+  rendrePastillesV2(prefixe, champ);
 }
 
-function ajouterNouveauCorrigerV2(champ) {
-  var inp = document.getElementById('corrigerRecetteV2-' + champ + '-nouveau');
+function ajouterNouvellePastilleV2(prefixe, champ) {
+  var inp = document.getElementById(prefixe + '-' + champ + '-nouveau');
   if (!inp) return;
   var v = (inp.value || '').trim();
-  if (v) ajouterCorrigerV2(champ, v);
+  if (v) ajouterPastilleV2(prefixe, champ, v);
 }
 
 function sauverCorrigerRecetteV2() {
