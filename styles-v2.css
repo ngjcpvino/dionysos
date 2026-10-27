@@ -883,6 +883,9 @@ body::after {
 
 .champ-saisie:focus { background: rgba(0,0,0,0.7); }
 textarea.champ-saisie { resize: none; font-family: inherit; line-height: 1.4; }
+/* Champ date (« bu le » de l'Historique) : même look ; iOS le centre et l'écrase quand il est vide. Réutilisable. */
+input[type="date"].champ-saisie { -webkit-appearance: none; appearance: none; display: block; min-height: var(--taille-tactile); font-family: inherit; color-scheme: dark; }
+input[type="date"].champ-saisie::-webkit-date-and-time-value { text-align: left; }
 .menu-liste {
   display: none;
   width: 80%;

@@ -345,6 +345,7 @@
     <input type="text" id="histoAjoutV2-recherche" class="champ-saisie" placeholder="Rechercher un vin par nom" oninput="rechercherVinHistoAjoutV2()">
     <div id="histoAjoutV2-resultats" class="menu-liste"></div>
     <div id="histoAjoutV2-form" class="bloc-form" style="display:none;">
+      <input type="date" id="histoAjoutV2-date" class="champ-saisie">
       <textarea id="histoAjoutV2-plat" class="champ-saisie" rows="2" placeholder="Plat"></textarea>
       <div id="histoAjoutV2-verres" class="boire-verres"></div>
       <div class="champ-cliquable" id="histoAjoutV2-accords-display" onclick="basculerMenuAccordsHistoAjoutV2()">Accords</div>
@@ -365,6 +366,7 @@
     <h2 id="histoEditV2-vin" class="titre-1"></h2>
     <div id="histoEditV2-origine" class="texte-secondaire"></div>
     <div class="titre-action">Corriger</div>
+    <input type="date" id="histoEditV2-date" class="champ-saisie">
     <textarea id="histoEditV2-plat" class="champ-saisie" rows="2" placeholder="Plat"></textarea>
     <div id="histoEditV2-verres" class="boire-verres"></div>
     <div class="roundel" onclick="sauverHistoEditV2()">

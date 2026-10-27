@@ -203,6 +203,14 @@ La page **« Promotions SAQ » a été supprimée** (item de menu, page `promoV2
 - **Assistant de ménage** : v1 publiée le 25 oct. 2026, v2 (trois étapes, synonymes) publiée le même jour — voir la section 🧹 Ménage de la cave.
 - **Exception au standard du 7 sept. (18 sept. 2026)** : le panneau des Emplacements garde un **roundel « Réinitialiser »** en bas (`apresReinit`), demandé explicitement. Il vide les sept filtres, **ramène au plan des meubles** et referme le panneau — même fonction que le tap sur l'entonnoir doré. Les sept autres panneaux n'en ont toujours pas.
 
+## 📅 Historique — un « bu » à une autre date (codé le 27 oct. 2026)
+Besoin : inscrire les vins bus AVANT la fonction Boire, avec leur date (souvent connue par l'app de la SAQ) — sert aussi à la rotation du Tri œnophile.
+- **« Ajouter à l'historique »** (page Historique et « + » de la fiche, `histoAjoutV2Overlay`) : champ **date** `histoAjoutV2-date` (aujourd'hui par défaut, jamais dans le futur) ; **plat et appréciation facultatifs** (un vieux « bu » n'a souvent que sa date).
+- **« Corriger »** (`histoEditV2Overlay`) : champ `histoEditV2-date` rempli avec la date de l'entrée (retrouvée dans `ALL_HISTORIQUE` par `row`) ; envoyée seulement si elle change.
+- Utilitaires `dateIsoV2` (aujourd'hui « aaaa-mm-jj ») et `dateHistoIsoV2` (« jj-mm-aaaa » → « aaaa-mm-jj »). Style : `input[type="date"].champ-saisie`.
+- **Backend** : `ajouterHistoriqueManuel(…, date)` et `corrigerHistorique(…, date)` (+ leurs `case`) ; `enregistrerHistorique` prend un `quand` facultatif ; `dateHistorique_` écrit « aaaa-mm-jj 12:00 » (midi : jamais un jour de travers). Ils renvoient `avecDate: true` — **un serveur pas redéployé** ignore la date : le front le voit et dit « … à la date du jour : Code.gs à recoller » / « Corrigé, sauf la date : … ».
+- **À faire par l'utilisateur** : recoller `Code.gs` + redéployer (prévu le 28 oct.). D'ici là, ne pas inscrire de bus antérieurs (ils prendraient la date du jour).
+
 ## 📝 Mes notes d'accord (18 septembre 2026)
 Une phrase entendue, notée telle quelle : « asperge et crabe m'amènent un chablis ». **4e mécanique d'accord**, et la seule qui ne s'accroche à aucun vin — c'est ce qui la distingue des Propositions (un vin par code SAQ), de Chartier (cépage) et des Accords SAQ (famille). Raison d'être : Chartier demande de traduire « chablis » en cépage et son onglet est maigre ; la note, elle, se prend en trois champs.
 
