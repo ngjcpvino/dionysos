@@ -1659,6 +1659,8 @@ var succursalesAchatV2 = [];
 var promosMesV2 = null;        // promos sur MES vins (par code SAQ)
 var promosDecV2 = null;        // toutes les promos SAQ (Découvertes)
 var promosDecEnCours = false;
+var promosDecDebut = 0;        // début du chargement des Découvertes (le compteur « 0:45 »)
+var COMPTEUR_DEC_V2 = null;
 var promoParCodeV2 = {};       // code SAQ -> { prixRegulier, prixFinal, rabais, pointsBonis }
 
 function codesSAQCaveV2() {
@@ -1707,6 +1709,7 @@ function chargerPromosMesV2() {
 function chargerDecouvertesV2() {
   if (promosDecV2 || promosDecEnCours) return;
   promosDecEnCours = true;
+  promosDecDebut = Date.now();
   appelBackend('getToutesPromotionsSAQ', { codesSAQ: codesSAQCaveV2() }, { spinner: '', timeout: 300000 }).then(function(promos) {
     promosDecV2 = promos || [];
     promosDecEnCours = false;
@@ -1718,6 +1721,12 @@ function chargerDecouvertesV2() {
       document.getElementById('achatV2-cartes').innerHTML = '<div class="texte-secondaire">Découvertes indisponibles' + (e && e.message ? ' : ' + e.message : '') + ' — rechoisis la liste pour réessayer</div>';
     }
   });
+}
+
+// « 0:45 » depuis le début du chargement des Découvertes
+function dureeDecouvertesV2() {
+  var s = promosDecEnCours ? Math.floor((Date.now() - promosDecDebut) / 1000) : 0;
+  return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
 }
 
 function promoDuVinV2(w) {
@@ -1946,7 +1955,14 @@ function appliquerFiltresAchatV2() {
     chargerDecouvertesV2();
     remplirFiltresAchatV2();
     document.getElementById('achatV2-compte').textContent = '';
-    document.getElementById('achatV2-cartes').innerHTML = '<div class="spinner-en-ligne">' + verreSpinnerHtmlV2() + '<div class="spinner-texte">Découvertes</div></div>';
+    document.getElementById('achatV2-cartes').innerHTML = '<div class="spinner-en-ligne">' + verreSpinnerHtmlV2() +
+      '<div class="spinner-texte">Découvertes · <span id="achatV2-compteur">' + dureeDecouvertesV2() + '</span></div>' +
+      '<div class="texte-secondaire sans-majuscules">Patience… la SAQ envoie toutes ses promotions. Ça peut prendre une minute ou deux.</div></div>';
+    if (!COMPTEUR_DEC_V2) COMPTEUR_DEC_V2 = setInterval(function() {
+      var el = document.getElementById('achatV2-compteur');
+      if (!el || !promosDecEnCours) { clearInterval(COMPTEUR_DEC_V2); COMPTEUR_DEC_V2 = null; return; }
+      el.textContent = dureeDecouvertesV2();
+    }, 1000);
     majEntonnoirAchatV2();
     return;
   }
