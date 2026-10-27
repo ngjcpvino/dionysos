@@ -1370,6 +1370,7 @@ function ouvrirSuggestionsV2() {
   if (champTexte) champTexte.value = '';
   remplirFiltresSuggestionsV2();
   afficherSuggestionsV2();
+  chargerPromosMesV2();   // en fond : les prix promo remplacent les prix réguliers à l'arrivée
 }
 
 function fermerSuggestionsV2() {
@@ -1516,8 +1517,11 @@ function groupeSuggestionV2(g) {
   var sous = sousVinV2(w);
   var photo = w['Photo URL'] ? '<div class="carte-photo"><img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
   var onclick = cb ? ' onclick="ouvrirApresTap(function(){ouvrirFicheV2(\'' + cb + '\', \'suggestions\')})"' : '';
+  // le prix SAQ, comme dans la Liste d'achat (promo : prix barré, prix promo, points bonis)
+  var prix = blocPrixAchatV2(w);
   var carteVin = '<div class="carte histo-vin ' + couleurClasseV2(w.Couleur) + '"' + onclick + '>' + photo +
-    '<div class="carte-centre"><span class="carte-titre">' + nom + '</span><span class="carte-sous">' + sous + '</span></div></div>';
+    '<div class="carte-centre"><span class="carte-titre">' + nom + '</span><span class="carte-sous">' + sous + '</span></div>' +
+    (prix ? '<div class="carte-droite carte-droite-empilee">' + prix + '</div>' : '') + '</div>';
 
   var cartesSugg = g.items.map(function(s) {
     var somEsc = (s.sommelier || '').replace(/'/g, "\\'");
@@ -1693,6 +1697,10 @@ function chargerPromosMesV2() {
     promosMesV2 = promos || [];
     indexerPromosMesV2();
     if (achatV2Ouvert() && achatV2Mode !== 'decouvertes') appliquerFiltresAchatV2();
+    // les cartes des Propositions montrent aussi le prix (page et section de la Recherche)
+    var sugg = document.getElementById('suggestionsV2Container');
+    if (sugg && sugg.style.display !== 'none') afficherSuggestionsV2();
+    rafraichirRechercheSiOuverteV2();
   }).catch(function() {});
 }
 
