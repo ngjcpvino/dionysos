@@ -907,6 +907,8 @@ input[type="date"].champ-saisie::-webkit-date-and-time-value { text-align: left;
 }
 .item-liste:last-child { margin-bottom: 0; }
 .item-liste.actif { background: var(--gold-30); }
+/* Filtre « sauf » : la valeur exclue (2e tap sur une valeur d'un menu de filtre), barrée en rouge. Réutilisable. */
+.item-liste.exclu { color: var(--red); text-decoration: line-through; }
 .panneau-gauche .item-liste { white-space: normal; }
 /* Enfants directs du panneau (onglets de mode) : espacés par le gap du panneau, pas de marge en double */
 .panneau-gauche > .item-liste { margin-bottom: 0; }
