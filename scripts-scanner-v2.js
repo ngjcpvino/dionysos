@@ -1432,12 +1432,12 @@ function basculerFiltreSuggestionsV2(cle) {
   ['sommelier', 'couleur'].forEach(function(k) {
     document.getElementById('suggestionsV2-f-' + k + '-menu').classList.remove('ouvert');
   });
-  if (!ouvert) menu.classList.add('ouvert');
+  if (!ouvert) { menu.classList.add('ouvert'); annulerFermetureMenuV2(menu.id); }
 }
 
 function choisirFiltreSuggestionsV2(cle, valeur) {
   filtresSuggestionsV2[cle] = cycleFiltreV2(filtresSuggestionsV2[cle], valeur);
-  document.getElementById('suggestionsV2-f-' + cle + '-menu').classList.remove('ouvert');
+  fermerMenuApresV2('suggestionsV2-f-' + cle + '-menu');
   remplirFiltresSuggestionsV2();
   afficherSuggestionsV2();
 }
@@ -1901,14 +1901,13 @@ function basculerFiltreAchatV2(cle) {
     var m = document.getElementById('achatV2-f-' + k + '-menu');
     if (m) m.classList.remove('ouvert');
   });
-  if (!ouvert) menu.classList.add('ouvert');
+  if (!ouvert) { menu.classList.add('ouvert'); annulerFermetureMenuV2(menu.id); }
 }
 
 function choisirFiltreAchatV2(cle, valeur) {
   // la succursale est un choix, pas un filtre : pas de « sauf »
   filtresAchatV2[cle] = cle === 'succ' ? valeur : cycleFiltreV2(filtresAchatV2[cle], valeur);
-  var menu = document.getElementById('achatV2-f-' + cle + '-menu');
-  if (menu) menu.classList.remove('ouvert');
+  fermerMenuApresV2('achatV2-f-' + cle + '-menu');
   if (cle === 'couleur') { filtresAchatV2.pays = ''; filtresAchatV2.cepage = ''; filtresAchatV2.appellation = ''; filtresAchatV2.pastille = ''; }
   if (cle === 'pays') { filtresAchatV2.cepage = ''; filtresAchatV2.appellation = ''; filtresAchatV2.pastille = ''; }
   if (cle === 'cepage') { filtresAchatV2.appellation = ''; filtresAchatV2.pastille = ''; }
@@ -2532,12 +2531,12 @@ function basculerFiltreRechercheV2(cle) {
   ['sommelier','couleur','cepage','pays','appellation','accords','pastille'].forEach(function(k) {
     document.getElementById('rechercheV2-f-' + k + '-menu').classList.remove('ouvert');
   });
-  if (!ouvert) menu.classList.add('ouvert');
+  if (!ouvert) { menu.classList.add('ouvert'); annulerFermetureMenuV2(menu.id); }
 }
 
 function choisirFiltreRechercheV2(cle, valeur) {
   filtresRechercheV2[cle] = cycleFiltreV2(filtresRechercheV2[cle], valeur);
-  document.getElementById('rechercheV2-f-' + cle + '-menu').classList.remove('ouvert');
+  fermerMenuApresV2('rechercheV2-f-' + cle + '-menu');
   remplirFiltresRechercheV2();
   lancerRechercheV2();
 }
@@ -2799,10 +2798,11 @@ function fermerFiltresNotesV2() {
 function basculerFiltreNotesV2(cle) {
   var menu = document.getElementById('notesV2-f-' + cle + '-menu');
   menu.classList.toggle('ouvert');
+  annulerFermetureMenuV2(menu.id);
 }
 function choisirFiltreNotesV2(cle, valeur) {
   filtresNotesV2[cle] = cycleFiltreV2(filtresNotesV2[cle], valeur);
-  document.getElementById('notesV2-f-' + cle + '-menu').classList.remove('ouvert');
+  fermerMenuApresV2('notesV2-f-' + cle + '-menu');
   remplirFiltresNotesV2();
   afficherNotesV2();
 }
@@ -3160,13 +3160,13 @@ function basculerFiltreEmpV2(cle) {
     var m = document.getElementById('empV2-f-' + k + '-menu');
     if (m) m.classList.remove('ouvert');
   });
-  if (!ouvert) menu.classList.add('ouvert');
+  if (!ouvert) { menu.classList.add('ouvert'); annulerFermetureMenuV2(menu.id); }
 }
 
 function choisirFiltreEmpV2(cle, valeur) {
   // Meuble · Rangée · Espace décident de ce qui est dessiné : « seulement » (pas de « sauf »)
   filtresEmpV2[cle] = (cle === 'meuble' || cle === 'rangee' || cle === 'espace') ? valeur : cycleFiltreV2(filtresEmpV2[cle], valeur);
-  document.getElementById('empV2-f-' + cle + '-menu').classList.remove('ouvert');
+  fermerMenuApresV2('empV2-f-' + cle + '-menu');
   if (cle === 'meuble') { filtresEmpV2.rangee = ''; filtresEmpV2.espace = ''; }
   if (cle === 'rangee') { filtresEmpV2.espace = ''; }
   // Nouveau pays : une appellation qui n'y existe pas se vide (jamais une liste vide sans raison)
@@ -4421,12 +4421,12 @@ function basculerFiltreHistoV2(cle) {
   Object.keys(libellesFiltreHistoV2).forEach(function(k){
     document.getElementById('histoV2-f-' + k + '-menu').classList.remove('ouvert');
   });
-  if (!ouvert) menu.classList.add('ouvert');
+  if (!ouvert) { menu.classList.add('ouvert'); annulerFermetureMenuV2(menu.id); }
 }
 
 function choisirFiltreHistoV2(cle, valeur) {
   filtresHistoV2[cle] = cycleFiltreV2(filtresHistoV2[cle], valeur);
-  document.getElementById('histoV2-f-' + cle + '-menu').classList.remove('ouvert');
+  fermerMenuApresV2('histoV2-f-' + cle + '-menu');
   remplirFiltresHistoV2();
   afficherHistoV2();
 }
@@ -4875,12 +4875,12 @@ function basculerFiltreCaveV2(cle) {
   ['couleur','cepage','pays','appellation','accords','pastille','acidite'].forEach(function(k) {
     document.getElementById('caveV2-f-' + k + '-menu').classList.remove('ouvert');
   });
-  if (!ouvert) menu.classList.add('ouvert');
+  if (!ouvert) { menu.classList.add('ouvert'); annulerFermetureMenuV2(menu.id); }
 }
 
 function choisirFiltreCaveV2(cle, valeur) {
   filtresCaveV2[cle] = cycleFiltreV2(filtresCaveV2[cle], valeur);
-  document.getElementById('caveV2-f-' + cle + '-menu').classList.remove('ouvert');
+  fermerMenuApresV2('caveV2-f-' + cle + '-menu');
   appliquerFiltresCaveV2();
 }
 
@@ -5584,13 +5584,13 @@ function basculerFiltreCurieuxBeginV2(cle) {
   ['saison', 'couleur', 'cepage', 'pays', 'appellation'].forEach(function(k) {
     document.getElementById('curieuxBeginV2-f-' + k + '-menu').classList.remove('ouvert');
   });
-  if (!ouvert) menu.classList.add('ouvert');
+  if (!ouvert) { menu.classList.add('ouvert'); annulerFermetureMenuV2(menu.id); }
 }
 
 function choisirFiltreCurieuxBeginV2(cle, valeur) {
   var f = filtresCurieuxBeginV2;
   f[cle] = cycleFiltreV2(f[cle], valeur);
-  document.getElementById('curieuxBeginV2-f-' + cle + '-menu').classList.remove('ouvert');
+  fermerMenuApresV2('curieuxBeginV2-f-' + cle + '-menu');
   // Nouveau pays : une appellation qui n'y existe pas se vide (jamais une liste vide sans raison)
   if (cle === 'pays' && f.appellation) {
     var infos = saqInfosV2();
@@ -5911,6 +5911,18 @@ function passeFiltreV2(choix, valeur, comparer) {
 function contientChaineV2(texte, v) { return (texte || '').toString().indexOf(v) !== -1; }
 // Une liste (accords, sommeliers d'un vin…) contient-elle la valeur choisie ?
 function listeContientV2(liste, v) { return (liste || []).indexOf(v) !== -1; }
+// Après un choix, le menu reste ouvert UNE SECONDE — le temps du 2e tap (« sauf ») —, puis se referme seul ;
+// chaque tap relance la seconde. Rouvrir le menu (basculer) annule la fermeture prévue.
+var FERMETURES_MENUS_V2 = {};
+function fermerMenuApresV2(id) {
+  clearTimeout(FERMETURES_MENUS_V2[id]);
+  FERMETURES_MENUS_V2[id] = setTimeout(function() {
+    delete FERMETURES_MENUS_V2[id];
+    var m = document.getElementById(id);
+    if (m) m.classList.remove('ouvert');
+  }, 1000);
+}
+function annulerFermetureMenuV2(id) { clearTimeout(FERMETURES_MENUS_V2[id]); delete FERMETURES_MENUS_V2[id]; }
 // Ligne de menu : « actif » (seulement elle) ou « exclu » (sauf elle)
 function classeChoixV2(v, choix) { return v === choix ? ' actif' : (estSaufV2(choix) && valeurChoixV2(choix) === v ? ' exclu' : ''); }
 // Menu fermé : la valeur, « Sauf X », ou le libellé par défaut
