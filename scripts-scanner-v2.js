@@ -401,7 +401,7 @@ function rendreBlocsScanV2(scan) {
   }));
   var lignes = [];
   if (app) lignes.push({ libelle: 'Appellation ' + app, vins: groupes.filter(function(g) { return memeTexteV2(decodeHTML((g.wine.Appellation || '').toString()), app); }) });
-  if (cep) lignes.push({ libelle: 'Cépage ' + cep, vins: groupes.filter(function(g) { return memeTexteV2(decodeHTML(cepageDominant(g.wine)), cep); }) });
+  if (cep) lignes.push({ libelle: 'Cépage ' + annoterCepagesV2(cep), vins: groupes.filter(function(g) { return memeCepageV2(cepageDominant(g.wine), cep); }) });
   if (lignes.length) {
     var p = scan.prefixe;
     html += '<div class="section"><h3 class="titre-2">Comparables</h3><div class="menu-liste ouvert">';
@@ -1813,7 +1813,7 @@ function remplirFiltresAchatV2() {
     return passeFiltreV2(f.couleur, i.Couleur) && passeFiltreV2(f.pays, i.Pays);
   });
   var forAppellation = forCepage.filter(function(i){
-    return passeFiltreV2(f.cepage, i.Cepage, contientTexteV2);
+    return passeFiltreV2(f.cepage, i.Cepage, contientCepageV2);
   });
   var forPastille = forAppellation.filter(function(i){
     return passeFiltreV2(f.appellation, i.Appellation);
@@ -1822,7 +1822,7 @@ function remplirFiltresAchatV2() {
   var listes = {
     couleur: uniqueValeursAchat(forCouleur, 'Couleur'),
     pays: uniqueValeursAchat(forPays, 'Pays'),
-    cepage: uniqueValeursAchat(forCepage, 'Cepage'),
+    cepage: menuCepagesV2([].concat.apply([], forCepage.map(function(i){ return cepagesDuTexteV2(i.Cepage); }))),
     appellation: uniqueValeursAchat(forAppellation, 'Appellation'),
     pastille: uniqueValeursAchat(forPastille, 'Pastille gout')
   };
@@ -1970,7 +1970,7 @@ function appliquerFiltresAchatV2() {
   var filtered = base.filter(function(i){
     return passeFiltreV2(f.couleur, i.Couleur) &&
       passeFiltreV2(f.pays, i.Pays) &&
-      passeFiltreV2(f.cepage, i.Cepage, contientTexteV2) &&
+      passeFiltreV2(f.cepage, i.Cepage, contientCepageV2) &&
       passeFiltreV2(f.appellation, i.Appellation) &&
       passeFiltreV2(f.pastille, i['Pastille gout'], contientTexteV2) &&
       (!f.sommelier || passeFiltreV2(f.sommelier, sommeliersDuVinV2((i['Code SAQ'] || '').toString().trim()), listeContientV2));
@@ -2019,7 +2019,7 @@ function cepagesPrincipauxCaveV2() {
   var s = {};
   (ALL_DATA || []).forEach(function(w){
     if (estPropositionV2(w)) return;
-    var c = normaliserRechercheV2(cepageDominant(w));
+    var c = cleCommuneCepageV2(cepageDominant(w));
     if (c) s[c] = true;
   });
   return s;
@@ -2029,8 +2029,8 @@ function afficherCartesAchatV2(liste) {
   var parCepage = (achatV2Mode === 'decouvertes');
   liste.sort(function(a, b){
     if (parCepage) {
-      var ca = normaliserRechercheV2(cepageDominant({ Cepage: a.Cepage }));
-      var cbb = normaliserRechercheV2(cepageDominant({ Cepage: b.Cepage }));
+      var ca = cleCommuneCepageV2(cepagesDuTexteV2(a.Cepage)[0]);
+      var cbb = cleCommuneCepageV2(cepagesDuTexteV2(b.Cepage)[0]);
       if (ca !== cbb) { if (!ca) return 1; if (!cbb) return -1; return ca.localeCompare(cbb); }
       return (a.Nom || '').localeCompare(b.Nom || '');
     }
@@ -2049,9 +2049,9 @@ function afficherCartesAchatV2(liste) {
     var entete = '';
     var sectionCle, sectionTexte;
     if (parCepage) {
-      var cep = cepageDominant({ Cepage: w.Cepage });
-      sectionCle = normaliserRechercheV2(cep);
-      sectionTexte = cep || 'Sans cépage';
+      var cep = cepagesDuTexteV2(w.Cepage)[0] || '';
+      sectionCle = cleCommuneCepageV2(cep);
+      sectionTexte = cep ? cepageCommunV2(cep) : 'Sans cépage';
     } else {
       sectionCle = normaliserRechercheV2(w.Pays || '');
       sectionTexte = w.Pays || 'Sans pays';
@@ -2067,7 +2067,7 @@ function afficherCartesAchatV2(liste) {
     var codeSAQ = (w['Code SAQ'] || '').toString().trim();
     var nom = decodeHTML(w.Nom || '—');
     var paysRegion = (w.Pays && w.Region) ? (w.Pays + ' • ' + w.Region) : (w.Pays || w.Region || '');
-    var sousLignes = [paysRegion, w.Cepage || '', w.Appellation || ''];
+    var sousLignes = [paysRegion, annoterCepagesV2(w.Cepage), w.Appellation || ''];
     if (achatV2Mode === 'suggestions') {
       var soms = sommeliersDuVinV2(codeSAQ);
       if (soms.length) sousLignes.push('<span class="color-primary">' + soms.join(', ') + '</span>');
@@ -2498,7 +2498,7 @@ function remplirFiltresRechercheV2() {
 
   var forCouleur = base;
   var forCepage = base.filter(function(i){ return passeFiltreV2(f.couleur, i.Couleur); });
-  var forPays = forCepage.filter(function(i){ return passeFiltreV2(f.cepage, i.Cepage, contientTexteV2); });
+  var forPays = forCepage.filter(function(i){ return passeFiltreV2(f.cepage, i.Cepage, contientCepageV2); });
   var forAppellation = forPays.filter(function(i){ return passeFiltreV2(f.pays, i.Pays); });
   var forAccords = forAppellation.filter(function(i){ return passeFiltreV2(f.appellation, i.Appellation); });
   var forPastille = forAccords.filter(function(i){ return passeFiltreV2(f.accords, i.Accords || '', contientChaineV2); });
@@ -2506,7 +2506,7 @@ function remplirFiltresRechercheV2() {
   var sets = { couleur: {}, cepage: {}, pays: {}, appellation: {}, accords: {}, pastille: {} };
   function retenir(cle, v) { var k = normaliserRechercheV2(v); if (v && !sets[cle][k]) sets[cle][k] = v; }
   forCouleur.forEach(function(i){ retenir('couleur', i.Couleur); });
-  forCepage.forEach(function(i){ (i.Cepage || '').split(',').map(function(x){return x.trim();}).filter(Boolean).forEach(function(x){ retenir('cepage', x); }); });
+  forCepage.forEach(function(i){ cepagesDuTexteV2(i.Cepage).forEach(function(x){ retenir('cepage', cepageCommunV2(x)); }); });
   forPays.forEach(function(i){ retenir('pays', i.Pays); });
   forAppellation.forEach(function(i){ retenir('appellation', i.Appellation); });
   forAccords.forEach(function(i){ (i.Accords || '').split(',').map(function(x){return x.trim();}).filter(Boolean).forEach(function(x){ retenir('accords', x); }); });
@@ -2649,7 +2649,7 @@ function lancerRechercheV2() {
   var trouves = (ALL_DATA || []).filter(function(i) {
     return (!saqSommelier || passeFiltreV2(f.sommelier, !!saqSommelier[(i['Code SAQ'] || '').toString().trim()], function(propose) { return propose; })) &&
       passeFiltreV2(f.couleur, i.Couleur) &&
-      passeFiltreV2(f.cepage, i.Cepage, contientTexteV2) &&
+      passeFiltreV2(f.cepage, i.Cepage, contientCepageV2) &&
       passeFiltreV2(f.pays, i.Pays) &&
       passeFiltreV2(f.appellation, i.Appellation) &&
       passeFiltreV2(f.accords, i.Accords || '', contientChaineV2) &&
@@ -2850,7 +2850,7 @@ function vinsDeLaNoteV2(n, groupes) {
   var q = (n.appelle || '').toString().trim();
   if (!ceps.length && !apps.length && !q) return [];
   var cles = {};
-  ceps.forEach(function(c) { cles[cleCepageMenageV2(cepageCommunMenageV2(c))] = true; });
+  ceps.forEach(function(c) { cles[cleCepageV2(cepageCommunV2(c))] = true; });
   return groupes.filter(function(g) {
     if (estPropositionV2(g.wine)) return false;
     if (filtresNotesV2.cave && !g.count) return false;
@@ -2862,7 +2862,7 @@ function vinsDeLaNoteV2(n, groupes) {
       });
     }
     var cep = decodeHTML(cepageDominant(g.wine));
-    if (cep && cles[cleCepageMenageV2(cepageCommunMenageV2(cep))]) return true;
+    if (cep && cles[cleCepageV2(cepageCommunV2(cep))]) return true;
     return apps.some(function(a) { return memeTexteV2(decodeHTML(g.wine.Appellation || ''), a); });
   });
 }
@@ -3134,7 +3134,8 @@ function uniqueCepagesEmpV2(liste) {
   liste.forEach(function(i){
     var c = cepageDominant(i);
     if (!c) return;
-    var k = normaliserRechercheV2(c);
+    c = cepageCommunV2(decodeHTML(c));
+    var k = cleCepageV2(c);
     if (!vues[k]) { vues[k] = true; out.push(c); }
   });
   out.sort(function(a, b){ return a.localeCompare(b); });
@@ -3144,7 +3145,7 @@ function uniqueCepagesEmpV2(liste) {
 // Cépage · Couleur · Pays · Appellation, appliqués aux vins d'une liste.
 function vinPasseFiltresEmpV2(w) {
   var f = filtresEmpV2;
-  return passeFiltreV2(f.cepage, w.Cepage, contientTexteV2) &&
+  return passeFiltreV2(f.cepage, w.Cepage, contientCepageV2) &&
     passeFiltreV2(f.couleur, w.Couleur) &&
     passeFiltreV2(f.pays, w.Pays) &&
     passeFiltreV2(f.appellation, w.Appellation, memeTexteV2);
@@ -3400,10 +3401,10 @@ function reprendreMenageV2() {
 }
 function oublierMenageV2() { try { localStorage.removeItem(CLE_STOCKAGE_MENAGE_V2); } catch (e) {} }
 
-// Synonymes de cépages (25 oct. 2026) — pour le tri SEULEMENT ; liste tenue ici, à compléter quand
+// Synonymes de cépages (25 oct. 2026 ; PARTOUT dans l'app depuis le 28 oct.) — liste tenue ici, à compléter quand
 // l'utilisateur en signale un. Nom commun (celui le plus présent en cave) : ses autres noms.
 // Restent à part : Garnacha tintorera (= Alicante Bouschet), Grenache blanc, Grenache gris.
-var SYNONYMES_CEPAGES_MENAGE_V2 = {
+var SYNONYMES_CEPAGES_V2 = {
   'Grenache': ['Garnacha', 'Grenache noir', 'Cannonau'],
   'Pinot grigio': ['Pinot gris'],
   'Monastrell': ['Mourvèdre'],
@@ -3419,23 +3420,63 @@ var SYNONYMES_CEPAGES_MENAGE_V2 = {
 };
 
 // Clé de comparaison d'un cépage : sans majuscules, accents ni traits d'union
-function cleCepageMenageV2(nom) { return normaliserRechercheV2(nom).replace(/[-\s]+/g, ' ').trim(); }
+function cleCepageV2(nom) { return normaliserRechercheV2(nom).replace(/[-\s]+/g, ' ').trim(); }
 
 // Nom commun d'un cépage (lui-même s'il n'a pas de synonyme)
-function cepageCommunMenageV2(nom) {
-  var cle = cleCepageMenageV2(nom);
-  var commun = nom;
-  Object.keys(SYNONYMES_CEPAGES_MENAGE_V2).some(function(c) {
-    if (cleCepageMenageV2(c) === cle || SYNONYMES_CEPAGES_MENAGE_V2[c].some(function(s) { return cleCepageMenageV2(s) === cle; })) { commun = c; return true; }
+var COMMUNS_CEPAGES_V2 = {};   // mémoire : clé → nom commun
+function cepageCommunV2(nom) {
+  var cle = cleCepageV2(nom);
+  if (COMMUNS_CEPAGES_V2.hasOwnProperty(cle)) return COMMUNS_CEPAGES_V2[cle] || nom;
+  var commun = '';
+  Object.keys(SYNONYMES_CEPAGES_V2).some(function(c) {
+    if (cleCepageV2(c) === cle || SYNONYMES_CEPAGES_V2[c].some(function(s) { return cleCepageV2(s) === cle; })) { commun = c; return true; }
     return false;
   });
-  return commun;
+  COMMUNS_CEPAGES_V2[cle] = commun;
+  return commun || nom;
+}
+
+// ===== Synonymes partout (28 oct. 2026) : toute comparaison de cépages passe par ces fonctions =====
+// Même cépage, synonymes compris (Cannonau = Garnacha = Grenache)
+function memeCepageV2(a, b) {
+  a = decodeHTML((a || '').toString()).trim(); b = decodeHTML((b || '').toString()).trim();
+  if (!a || !b) return false;
+  return cleCepageV2(cepageCommunV2(a)) === cleCepageV2(cepageCommunV2(b));
+}
+// Les cépages d'un texte (« Grenache 60 %, Syrah ») : les noms seuls
+function cepagesDuTexteV2(texte) {
+  return decodeHTML((texte || '').toString()).split(',').map(function(c) { return c.replace(/\s*\d+\s*%\s*$/, '').trim(); }).filter(Boolean);
+}
+// Une liste de cépages contient-elle ce cépage ? (synonymes compris)
+function contientCepageV2(texte, cep) { return cepagesDuTexteV2(texte).some(function(c) { return memeCepageV2(c, cep); }); }
+// Clé de regroupement d'un cépage : celle de son nom commun
+function cleCommuneCepageV2(nom) { return cleCepageV2(cepageCommunV2(decodeHTML((nom || '').toString()).trim())); }
+// Valeurs d'un menu Cépage : le nom commun une seule fois (« Grenache », jamais aussi « Cannonau »)
+function menuCepagesV2(noms) {
+  var vus = {}, out = [];
+  noms.forEach(function(n) {
+    n = decodeHTML((n || '').toString()).trim();
+    if (!n) return;
+    var commun = cepageCommunV2(n), k = cleCepageV2(commun);
+    if (!vus[k]) { vus[k] = true; out.push(commun); }
+  });
+  return out.sort(function(a, b) { return a.localeCompare(b); });
+}
+// Affichage : chaque synonyme suivi de son nom commun — « Cannonau (Grenache) 85 %, Syrah »
+function annoterCepagesV2(texte) {
+  return decodeHTML((texte || '').toString()).split(',').map(function(c) {
+    var m = c.trim().match(/^(.*?)(\s*\d+\s*%)?$/);
+    var nom = (m[1] || '').trim(), pct = m[2] || '';
+    if (!nom) return c.trim();
+    var commun = cepageCommunV2(nom);
+    return nom + (cleCepageV2(commun) !== cleCepageV2(nom) ? ' (' + commun + ')' : '') + pct;
+  }).filter(Boolean).join(', ');
 }
 
 // « Grenache (Cannonau) » : le nom commun, puis celui de la fiche s'il diffère
 function libelleCepageMenageV2(b) {
   if (!b.cepNom) return '';
-  return majusculeMenageV2(b.cepCommun) + (cleCepageMenageV2(b.cepCommun) !== cleCepageMenageV2(b.cepNom) ? ' (' + b.cepNom + ')' : '');
+  return majusculeMenageV2(b.cepCommun) + (cleCepageV2(b.cepCommun) !== cleCepageV2(b.cepNom) ? ' (' + b.cepNom + ')' : '');
 }
 function majusculeMenageV2(t) { t = (t || '').toString(); return t.charAt(0).toUpperCase() + t.slice(1); }
 
@@ -3486,12 +3527,12 @@ function bouteillesMenageV2() {
   }).map(function(i) {
     var place = (i.Meuble && i.Rangee && i.Espace) ? { meuble: i.Meuble.toString(), rangee: i.Rangee.toString(), espace: i.Espace.toString() } : null;
     var cepNom = decodeHTML(cepageDominant(i));
-    var cepCommun = cepageCommunMenageV2(cepNom);
+    var cepCommun = cepageCommunV2(cepNom);
     var codeSaq = (i['Code SAQ'] || '').toString().trim().replace(/^0+/, '');
     var codeCb = (i['Code-barres'] || '').toString().trim().replace(/^0+/, '');
     var b = {
       w: i, cle: i.row + '|' + i.bottle, vin: cleVinV2(i), lieu: lieuMenageV2(place), place: place, tablette: tabletteMenageV2(place),
-      coul: couleurClasseV2(i.Couleur), cep: cleCepageMenageV2(cepCommun), cepNom: cepNom, cepCommun: cepCommun,
+      coul: couleurClasseV2(i.Couleur), cep: cleCepageV2(cepCommun), cepNom: cepNom, cepCommun: cepCommun,
       app: normaliserRechercheV2(decodeHTML(i.Appellation || '')), appNom: decodeHTML(i.Appellation || ''),
       fam: (i.Famille || '').toString().replace(/^'/, '').replace(/^0+/, ''),
       passe: der[codeSaq] || der[codeCb] || null, arrivee: Date.parse(i['Date d\'ajout'] || '') || 0, doute: '', horsZone: ''
@@ -3856,7 +3897,7 @@ function choixMenageV2Html(g) {
     '<div class="histo-groupe ' + g.coul + '">';
   g.bouteilles.forEach(function(b) {
     var cede = !!M.cedes[b.cle];
-    var autreNom = cleCepageMenageV2(b.cepNom) !== cleCepageMenageV2(b.cepCommun) ? b.cepNom : '';
+    var autreNom = cleCepageV2(b.cepNom) !== cleCepageV2(b.cepCommun) ? b.cepNom : '';
     html += carteMenageV2(b, libellePlaceMenageV2(b.place) + ' · ' + nomMenageV2(b), [autreNom, passeMenageV2(b)].filter(Boolean).join(' · '),
       cocheMenageV2("cederMenageV2('" + b.cle + "', '" + guillemetMenageV2(g.cle) + "')", cede) + '<span class="fs-12">' + (cede ? 'cédé' : 'céder') + '</span>', false);
   });
@@ -4043,8 +4084,8 @@ function afficherListeEmpV2(type) {
     var nomCepL = {};
     groupesFiltresEmpV2(grouperParSaqEmpV2(dansMeubleL)).forEach(function(g){
       var cep = cepageDominant(g.wine) || 'Sans cépage';
-      var k = normaliserRechercheV2(cep);
-      if (!parCepL[k]) { parCepL[k] = []; nomCepL[k] = cep; }
+      var k = cleCommuneCepageV2(cep);
+      if (!parCepL[k]) { parCepL[k] = []; nomCepL[k] = cepageCommunV2(decodeHTML(cep)); }
       parCepL[k].push(g);
     });
     titre = 'Liste du meuble';
@@ -4070,8 +4111,8 @@ function afficherListeEmpV2(type) {
     parCb.forEach(function(g){
       var cep = cepageDominant(g.wine);
       if (!cep) return;
-      var k = normaliserRechercheV2(cep);
-      if (!parCepage[k]) { parCepage[k] = []; nomCepage[k] = cep; }
+      var k = cleCommuneCepageV2(cep);
+      if (!parCepage[k]) { parCepage[k] = []; nomCepage[k] = cepageCommunV2(decodeHTML(cep)); }
       parCepage[k].push(g);
     });
     titre = 'Cépages doubles';
@@ -4090,15 +4131,15 @@ function afficherListeEmpV2(type) {
     titre = 'Cépages manquants';
     var actifsTous = (ALL_DATA || []).filter(function(i){ var s = i.Statut || 'En stock'; return i.bottle && i.bottle > 0 && s !== 'Bu' && s !== 'Sorti'; });
     var cepStock = {};
-    actifsTous.forEach(function(w){ var c = cepageDominant(w); if (c) cepStock[normaliserRechercheV2(c)] = true; });
+    actifsTous.forEach(function(w){ var c = cepageDominant(w); if (c) cepStock[cleCommuneCepageV2(c)] = true; });
     var parCepGlobal = {};
     var nomCepGlobal = {};
     groupesFiltresEmpV2(grouperVinsV2(ALL_DATA || [])).forEach(function(g){
       var cep = cepageDominant(g.wine);
       if (!cep) return;
-      var k = normaliserRechercheV2(cep);
+      var k = cleCommuneCepageV2(cep);
       if (cepStock[k]) return;
-      if (!parCepGlobal[k]) { parCepGlobal[k] = []; nomCepGlobal[k] = cep; }
+      if (!parCepGlobal[k]) { parCepGlobal[k] = []; nomCepGlobal[k] = cepageCommunV2(decodeHTML(cep)); }
       parCepGlobal[k].push(g);
     });
     var clesG = Object.keys(parCepGlobal).sort(function(a,b){ return a.localeCompare(b); });
@@ -4119,14 +4160,14 @@ function afficherListeEmpV2(type) {
       return amont.some(function(m){ return memeTexteV2(m, i.Meuble); });
     }).concat(bouteillesARangerEmpV2());
     var cepDansMeuble = {};
-    dansMeuble2.forEach(function(w){ var c = cepageDominant(w); if (c) cepDansMeuble[normaliserRechercheV2(c)] = true; });
+    dansMeuble2.forEach(function(w){ var c = cepageDominant(w); if (c) cepDansMeuble[cleCommuneCepageV2(c)] = true; });
     var parCepageHors = {};
     var nomCepageHors = {};
     groupesFiltresEmpV2(grouperParSaqEmpV2(horsMeuble)).forEach(function(g){
       var cep = cepageDominant(g.wine);
-      if (!cep || cepDansMeuble[normaliserRechercheV2(cep)]) return;
-      var k = normaliserRechercheV2(cep);
-      if (!parCepageHors[k]) { parCepageHors[k] = []; nomCepageHors[k] = cep; }
+      if (!cep || cepDansMeuble[cleCommuneCepageV2(cep)]) return;
+      var k = cleCommuneCepageV2(cep);
+      if (!parCepageHors[k]) { parCepageHors[k] = []; nomCepageHors[k] = cepageCommunV2(decodeHTML(cep)); }
       parCepageHors[k].push(g);
     });
     titre = 'Cépages manquants';
@@ -4353,7 +4394,7 @@ function valeursFiltreHistoV2(cle, h, w) {
     case 'vin': return [h.nom || ''];
     case 'note': return [String(parseInt(h.bonAccord, 10) || 0)];
     case 'couleur': return [w.Couleur || h.couleur || ''];
-    case 'cepage': return [cepageDominant(w)];
+    case 'cepage': return [cepageDominant(w) ? cepageCommunV2(decodeHTML(cepageDominant(w))) : ''];
     case 'pays': return [w.Pays || ''];
     case 'appellation': return [w.Appellation || ''];
     case 'accord': return (w.Accords || '').split(',').map(function(a) { return a.trim(); });
@@ -4364,7 +4405,7 @@ function valeursFiltreHistoV2(cle, h, w) {
 }
 // Cépage = cépage principal, comme la Cave
 function passeFiltreHistoV2(cle, h, w, choix) {
-  if (cle === 'cepage') return passeFiltreV2(choix, cepageDominant(w), memeTexteV2);
+  if (cle === 'cepage') return passeFiltreV2(choix, cepageDominant(w), memeCepageV2);
   if (cle === 'pastille') return passeFiltreV2(choix, w['Pastille gout'], contientTexteV2);
   return passeFiltreV2(choix, valeursFiltreHistoV2(cle, h, w), listeContientV2);
 }
@@ -4765,7 +4806,7 @@ function couleurClasseV2(couleur) {
 function sousVinV2(w) {
   var pays = w.Pays || '', region = w.Region || '';
   var paysRegion = (pays && region) ? (pays + ' • ' + region) : (pays || region);
-  return [paysRegion, w.Cepage || '', w.Appellation || ''].filter(Boolean).join('<br>');
+  return [paysRegion, annoterCepagesV2(w.Cepage), w.Appellation || ''].filter(Boolean).join('<br>');
 }
 
 function grouperVinsV2(data) {
@@ -4811,7 +4852,7 @@ function afficherCartesCaveV2(data) {
     var pays = w.Pays || '';
     var region = w.Region || '';
     var paysRegion = (pays && region) ? (pays + ' • ' + region) : (pays || region);
-    var cepage = w.Cepage || '';
+    var cepage = annoterCepagesV2(w.Cepage);
     var cepageHtml = cepage ? (cepage + (w.Favori === 'Oui' ? ' <span class="etoile-favori actif">★</span>' : '')) : '';
     var sous = [paysRegion, cepageHtml, w.Appellation || ''].filter(Boolean).join('<br>');
     var photo = w['Photo URL'] ? '<div class="carte-photo"><img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
@@ -4840,7 +4881,7 @@ function remplirFiltresCaveV2() {
 
   var forCouleur = base;
   var forCepage = base.filter(function(i){ return passeFiltreV2(f.couleur, i.Couleur); });
-  var forPays = forCepage.filter(function(i){ return passeFiltreV2(f.cepage, cepageDominant(i), memeTexteV2); });
+  var forPays = forCepage.filter(function(i){ return passeFiltreV2(f.cepage, cepageDominant(i), memeCepageV2); });
   var forAppellation = forPays.filter(function(i){ return passeFiltreV2(f.pays, i.Pays); });
   var forAccords = forAppellation.filter(function(i){ return passeFiltreV2(f.appellation, i.Appellation); });
   var forPastille = forAccords.filter(function(i){ return passeFiltreV2(f.accords, i.Accords || '', contientChaineV2); });
@@ -4849,7 +4890,7 @@ function remplirFiltresCaveV2() {
   var sets = { couleur: {}, cepage: {}, pays: {}, appellation: {}, accords: {}, pastille: {}, acidite: {} };
   function retenir(cle, v) { var k = normaliserRechercheV2(v); if (v && !sets[cle][k]) sets[cle][k] = v; }
   forCouleur.forEach(function(i){ retenir('couleur', i.Couleur); });
-  forCepage.forEach(function(i){ retenir('cepage', cepageDominant(i)); });
+  forCepage.forEach(function(i){ var c = cepageDominant(i); if (c) retenir('cepage', cepageCommunV2(decodeHTML(c))); });
   forPays.forEach(function(i){ retenir('pays', i.Pays); });
   forAppellation.forEach(function(i){ retenir('appellation', i.Appellation); });
   forAccords.forEach(function(i){ (i.Accords || '').split(',').map(function(x){return x.trim();}).filter(Boolean).forEach(function(x){ retenir('accords', x); }); });
@@ -4905,7 +4946,7 @@ function appliquerFiltresCaveV2() {
 
   var filtered = (ALL_DATA || []).filter(function(i) {
     return passeFiltreV2(c, i.Couleur) &&
-      passeFiltreV2(cep, cepageDominant(i), memeTexteV2) &&
+      passeFiltreV2(cep, cepageDominant(i), memeCepageV2) &&
       passeFiltreV2(p, i.Pays) &&
       passeFiltreV2(app, i.Appellation) &&
       passeFiltreV2(a, i.Accords || '', contientChaineV2) &&
@@ -5127,14 +5168,17 @@ function reinitialiserChartierV2() {
 }
 
 
+// Le cépage d'un vin répond-il à un cépage du livre ? Synonymes compris (Cannonau → Grenache), ou le nom qui le contient
+function cepageRepondChartierV2(cepVin, cepLivre) { return memeCepageV2(cepVin, cepLivre) || contientTexteV2(cepVin, cepLivre); }
+
 function couleurCepageChartierV2(cepage) {
-  var item = (ALL_DATA || []).filter(function(i) { return contientTexteV2(cepageDominant(i), cepage); })[0];
+  var item = (ALL_DATA || []).filter(function(i) { return cepageRepondChartierV2(cepageDominant(i), cepage); })[0];
   return item ? couleurClasseV2(item.Couleur) : null;
 }
 
 function vinsDisponiblesPourCepageV2(cepage) {
   return (ALL_DATA || []).filter(function(i) {
-    if (!contientTexteV2(cepageDominant(i), cepage)) return false;
+    if (!cepageRepondChartierV2(cepageDominant(i), cepage)) return false;
     var statut = i.Statut || 'En stock';
     return statut !== 'Bu' && statut !== 'Sorti' && statut !== 'Suggestion';
   }).length > 0;
@@ -5147,9 +5191,9 @@ function calculerResultatsChartierV2() {
 
   if (filtresChartierV2.cepage) {
     var cep = filtresChartierV2.cepage;
-    var aliments = (ALL_ACCORDS || []).filter(function(a) { return memeTexteV2(a.cepage, cep); });
+    var aliments = (ALL_ACCORDS || []).filter(function(a) { return memeCepageV2(a.cepage, cep); });
     if (!aliments.length) { div.innerHTML = '<div class="texte-secondaire">Aucun aliment associé</div>'; return; }
-    var vins = grouperVinsV2((ALL_DATA || []).filter(function(i) { return contientTexteV2(cepageDominant(i), cep); }));
+    var vins = grouperVinsV2((ALL_DATA || []).filter(function(i) { return cepageRepondChartierV2(cepageDominant(i), cep); }));
     if (filtresChartierV2.dispo) vins = vins.filter(function(g) { return g.count > 0; });
     var cartesVins = vins.length ? vins.map(function(g) {
       var w = g.wine;
@@ -5188,7 +5232,7 @@ function calculerResultatsChartierV2() {
   div.innerHTML = liste.map(function(s, i) {
     var entete = s.cepage + (s.nuance ? ' <span class="libelle">(' + s.nuance + ')</span>' : '');
     var vins = grouperVinsV2((ALL_DATA || []).filter(function(it) {
-      return contientTexteV2(cepageDominant(it), s.cepage);
+      return cepageRepondChartierV2(cepageDominant(it), s.cepage);
     }));
     // « En cave » : plus une seule carte de vin que je n'ai plus.
     if (filtresChartierV2.dispo) vins = vins.filter(function(g) { return g.count > 0; });
@@ -5231,7 +5275,7 @@ function autresAlimentsChartierV2(cepage, sauf) {
   var vus = {}, out = [];
   var cleSauf = normaliserRechercheV2(sauf);
   (ALL_ACCORDS || []).forEach(function(a) {
-    if (!a.aliment || !memeTexteV2(a.cepage, cepage)) return;
+    if (!a.aliment || !memeCepageV2(a.cepage, cepage)) return;
     var k = normaliserRechercheV2(a.aliment);
     if (vus[k] || k === cleSauf) return;
     vus[k] = true;
@@ -5538,7 +5582,7 @@ function remplirFiltresCurieuxBeginV2() {
   // Cépage (principal) · Pays · Appellation : puisés dans le mode affiché ; Appellation suit le Pays
   var attrs = (ALL_CURIEUXBEGIN || []).filter(function(a) { return cbDansModeV2(a, infos); }).map(function(a) { return attributsVinCbV2(a, infos); });
   var listes = {
-    cepage: valeursUniquesCbV2(attrs, 'cepage'),
+    cepage: menuCepagesV2(attrs.map(function(x) { return x.cepage; })),
     pays: valeursUniquesCbV2(attrs, 'pays'),
     appellation: valeursUniquesCbV2(attrs.filter(function(x) { return passeFiltreV2(f.pays, x.pays, memeTexteV2); }), 'appellation')
   };
@@ -5635,7 +5679,7 @@ function cbDansModeV2(a, infos) {
 function attributsVinCbV2(a, infos) {
   var w = infos[(a.codeSAQ || '').toString().trim()];
   if (w) return { couleur: couleurClasseV2(w.Couleur), cepage: decodeHTML(cepageDominant(w)), pays: decodeHTML(w.Pays || ''), appellation: decodeHTML(w.Appellation || '') };
-  return { couleur: couleurClasseV2(a.type), cepage: decodeHTML(cepageDominant({ Cepage: a.cepage || '' })), pays: decodeHTML(a.pays || ''), appellation: decodeHTML(a.appellation || '') };
+  return { couleur: couleurClasseV2(a.type), cepage: cepagesDuTexteV2(a.cepage)[0] || '', pays: decodeHTML(a.pays || ''), appellation: decodeHTML(a.appellation || '') };
 }
 
 // Valeurs d'un champ, sans doublon (accents et casse ignorés), triées
@@ -5675,7 +5719,7 @@ function chargerCurieuxBeginV2() {
     if (!passeFiltreV2(f.saison, (a.saison || '').toString().trim())) return false;
     var x = attributsVinCbV2(a, infos);
     if (!passeFiltreV2(f.couleur, x.couleur, function(classe, v) { return classe === couleurClasseV2(v); })) return false;
-    if (!passeFiltreV2(f.cepage, x.cepage, memeTexteV2)) return false;
+    if (!passeFiltreV2(f.cepage, x.cepage, memeCepageV2)) return false;
     if (!passeFiltreV2(f.pays, x.pays, memeTexteV2)) return false;
     if (!passeFiltreV2(f.appellation, x.appellation, memeTexteV2)) return false;
     if (q) {
