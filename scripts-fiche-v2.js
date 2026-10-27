@@ -132,7 +132,9 @@ function afficherFicheV2(result) {
   html += '<h3 class="titre-2">Information</h3>';
  
   var favoriEtoile = wine.Favori === 'Oui' ? '<span id="ficheV2-etoile-favori" class="etoile-favori actif">★</span>' : '';
-  html += wine['Cépage'] ? '<div class="ligne-info"><span class="libelle">Cépages : </span><span id="ficheV2-cepages">' + decodeHTML(wine['Cépage'].toString()) + '</span>' + (favoriEtoile ? ' ' + favoriEtoile : '') + '</div>' : '';
+  // le texte de la fiche est gardé dans data-cepages (les % de la SAQ s'y ajoutent) ; on montre chaque synonyme
+  // suivi de son nom commun — « Cannonau (Grenache) 85 % »
+  html += wine['Cépage'] ? '<div class="ligne-info"><span class="libelle">Cépages : </span><span id="ficheV2-cepages" data-cepages="' + decodeHTML(wine['Cépage'].toString()).replace(/"/g, '&quot;') + '">' + annoterCepagesV2(wine['Cépage']) + '</span>' + (favoriEtoile ? ' ' + favoriEtoile : '') + '</div>' : '';
   html += ligne('Appellation', wine.Appellation);
   html += ligne('Pastille', wine['Pastille gout']);
   html += ligne('Classification', wine.Classification);
@@ -478,7 +480,7 @@ var CHARTIER_FICHE_V2 = {};
 function alimentsCepageChartierV2(cepage) {
   var out = {};
   (ALL_ACCORDS || []).forEach(function(a) {
-    if (a.aliment && memeTexteV2(a.cepage, cepage)) {
+    if (a.aliment && memeCepageV2(a.cepage, cepage)) {
       var k = normaliserRechercheV2(a.aliment);
       if (!out[k]) out[k] = { aliment: a.aliment, nuance: a.nuance || '' };
     }
@@ -526,7 +528,7 @@ function chargerChartierFicheV2(wine) {
     var base, entete;
     if (cepages.length === 1) {
       base = parCepage[0];
-      entete = cepages[0];
+      entete = annoterCepagesV2(cepages[0]);
     } else {
       var inter = {};
       Object.keys(parCepage[0]).forEach(function(k) {
@@ -534,10 +536,10 @@ function chargerChartierFicheV2(wine) {
       });
       if (Object.keys(inter).length) {
         base = inter;
-        entete = 'Communs à ' + cepages.join(', ');
+        entete = 'Communs à ' + annoterCepagesV2(cepages.join(', '));
       } else {
         base = parCepage[0];
-        entete = 'Cépage dominant : ' + cepages[0];
+        entete = 'Cépage dominant : ' + annoterCepagesV2(cepages[0]);
       }
     }
     var alims = Object.keys(base).map(function(k) { return base[k]; });
@@ -785,7 +787,10 @@ function verifierPrixV2(codebarre, codeSAQ) {
     }
     if (res && res.cepages) {
       var elCep = document.getElementById('ficheV2-cepages');
-      if (elCep) elCep.textContent = fusionnerCepagesPourcentV2(elCep.textContent, res.cepages);
+      if (elCep) {
+        elCep.dataset.cepages = fusionnerCepagesPourcentV2(elCep.dataset.cepages || elCep.textContent, res.cepages);
+        elCep.textContent = annoterCepagesV2(elCep.dataset.cepages);
+      }
     }
   }).catch(function() {});
 }
@@ -869,7 +874,7 @@ function ouvrirPhotoEmpV2(cb, liste, row) {
     var origine = [w.Pays, w.Region, w.Appellation].filter(Boolean).join(' · ');
     var lignes = [];
     if (origine) lignes.push(decodeHTML(origine.toString()));
-    if (w.Cepage) lignes.push(decodeHTML(w.Cepage.toString()));
+    if (w.Cepage) lignes.push(annoterCepagesV2(w.Cepage));
     entete.innerHTML = '<h2 class="titre-1">' + decodeHTML((w.Nom || '—').toString()) + '</h2>' +
                        (lignes.length ? '<div class="texte-secondaire">' + lignes.join('<br>') + '</div>' : '');
     entete.style.display = '';
