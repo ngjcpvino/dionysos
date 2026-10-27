@@ -1703,7 +1703,13 @@ function chargerDecouvertesV2() {
     promosDecV2 = promos || [];
     promosDecEnCours = false;
     if (achatV2Ouvert() && achatV2Mode === 'decouvertes') appliquerFiltresAchatV2();
-  }).catch(function() { promosDecEnCours = false; });
+  }).catch(function(e) {
+    promosDecEnCours = false;
+    // sinon le verre tournerait pour rien ; rechoisir la liste relance le chargement
+    if (achatV2Ouvert() && achatV2Mode === 'decouvertes') {
+      document.getElementById('achatV2-cartes').innerHTML = '<div class="texte-secondaire">Découvertes indisponibles' + (e && e.message ? ' : ' + e.message : '') + ' — rechoisis la liste pour réessayer</div>';
+    }
+  });
 }
 
 function promoDuVinV2(w) {
@@ -1928,9 +1934,10 @@ function majEntonnoirAchatV2() {
 
 function appliquerFiltresAchatV2() {
   if (achatV2Mode === 'decouvertes' && !promosDecV2) {
+    chargerDecouvertesV2();
     remplirFiltresAchatV2();
     document.getElementById('achatV2-compte').textContent = '';
-    document.getElementById('achatV2-cartes').innerHTML = '<div class="texte-secondaire">Découvertes en chargement…</div>';
+    document.getElementById('achatV2-cartes').innerHTML = '<div class="spinner-en-ligne">' + verreSpinnerHtmlV2() + '<div class="spinner-texte">Découvertes</div></div>';
     majEntonnoirAchatV2();
     return;
   }
