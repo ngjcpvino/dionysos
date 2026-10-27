@@ -411,11 +411,11 @@
       <input type="text" id="corrigerRecetteV2-nom" class="champ-saisie" placeholder="Nom de la recette">
       <div class="titre-3">Types de plats</div>
       <div id="corrigerRecetteV2-typesPlats-chips"></div>
-      <div class="champ-cliquable" onclick="basculerAjoutCorrigerV2('typesPlats')">+ Ajouter un type de plat</div>
+      <div class="champ-cliquable" onclick="basculerAjoutPastilleV2('corrigerRecetteV2', 'typesPlats')">+ Ajouter un type de plat</div>
       <div id="corrigerRecetteV2-typesPlats-menu" class="menu-liste"></div>
       <div class="titre-3">Ingrédients</div>
       <div id="corrigerRecetteV2-ingredients-chips"></div>
-      <div class="champ-cliquable" onclick="basculerAjoutCorrigerV2('ingredients')">+ Ajouter un ingrédient</div>
+      <div class="champ-cliquable" onclick="basculerAjoutPastilleV2('corrigerRecetteV2', 'ingredients')">+ Ajouter un ingrédient</div>
       <div id="corrigerRecetteV2-ingredients-menu" class="menu-liste"></div>
       <div class="roundel" onclick="sauverCorrigerRecetteV2()">
         <span class="roundel-anneau"></span>
@@ -680,8 +680,15 @@
     <div class="bloc-form">
       <div class="titre-3">Aliments</div>
       <input type="text" id="noteEditV2-aliments" class="champ-saisie">
-      <div class="titre-3">Ça appelle</div>
-      <input type="text" id="noteEditV2-appelle" class="champ-saisie">
+      <div class="titre-3">Ça appelle — cépages</div>
+      <div id="noteEditV2-cepages-chips"></div>
+      <div class="champ-cliquable" onclick="basculerAjoutPastilleV2('noteEditV2', 'cepages')">+ Ajouter un cépage</div>
+      <div id="noteEditV2-cepages-menu" class="menu-liste"></div>
+      <div class="titre-3">Ça appelle — appellations</div>
+      <div id="noteEditV2-appellations-chips"></div>
+      <div class="champ-cliquable" onclick="basculerAjoutPastilleV2('noteEditV2', 'appellations')">+ Ajouter une appellation</div>
+      <div id="noteEditV2-appellations-menu" class="menu-liste"></div>
+      <div id="noteEditV2-ancien" class="texte-secondaire texte-gauche" style="display:none;"></div>
       <div class="titre-3">Qui l'a dit</div>
       <input type="text" id="noteEditV2-source" class="champ-saisie">
       <div class="roundel" onclick="confirmerNoteEditV2()">

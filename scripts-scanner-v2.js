@@ -2658,7 +2658,7 @@ function lancerRechercheV2() {
     var tousVins = grouperVinsV2(ALL_DATA || []);
 
     // --- Mes notes : aliments, ce que ça appelle, qui l'a dit
-    var notes = (ALL_NOTES || []).filter(function(n) { return contient([n.aliments, n.appelle, n.source]); });
+    var notes = (ALL_NOTES || []).filter(function(n) { return contient([n.aliments, n.appelle, n.source, n.cepages, n.appellations]); });
     ajouterSectionRechercheV2(sections, 'Mes notes', notes, function(n) { return groupeNoteV2(n, tousVins, 'recherche'); });
 
     // --- Propositions : sommelier, note, nom du vin
@@ -2823,18 +2823,45 @@ function remplirFiltresNotesV2() {
 
 // Les vins que la note appelle. « Chablis » est une appellation, pas un cépage :
 // on compare aux DEUX, et dans les deux sens (« un chablis bien frais » aussi).
-function vinsDeLaNoteV2(appelle, groupes) {
-  var q = (appelle || '').toString().trim();
-  if (!q) return [];
+// Note d'accord (28 oct. 2026) : ce que ça appelle = des cépages et des appellations, en listes (« ;; » dans le Sheet).
+function listeNoteV2(texte) { return (texte || '').toString().split(';;').map(function(v) { return v.trim(); }).filter(Boolean); }
+
+// Les vins que la note appelle : cépage PRINCIPAL parmi ses cépages (synonymes compris : « Grenache » trouve
+// Cannonau et Garnacha), ou appellation parmi ses appellations. Une ancienne note (texte libre seulement) :
+// le texte est comparé au Cépage ET à l'Appellation, dans les deux sens (« un chablis bien frais »).
+function vinsDeLaNoteV2(n, groupes) {
+  var ceps = listeNoteV2(n.cepages), apps = listeNoteV2(n.appellations);
+  var q = (n.appelle || '').toString().trim();
+  if (!ceps.length && !apps.length && !q) return [];
+  var cles = {};
+  ceps.forEach(function(c) { cles[cleCepageMenageV2(cepageCommunMenageV2(c))] = true; });
   return groupes.filter(function(g) {
     if (estPropositionV2(g.wine)) return false;
     if (filtresNotesV2.cave && !g.count) return false;
-    return [g.wine.Cepage, g.wine.Appellation].some(function(v) {
-      v = (v || '').toString().trim();
-      if (!v) return false;
-      return contientTexteV2(v, q) || contientTexteV2(q, v);
-    });
+    if (!ceps.length && !apps.length) {
+      return [g.wine.Cepage, g.wine.Appellation].some(function(v) {
+        v = (v || '').toString().trim();
+        if (!v) return false;
+        return contientTexteV2(v, q) || contientTexteV2(q, v);
+      });
+    }
+    var cep = decodeHTML(cepageDominant(g.wine));
+    if (cep && cles[cleCepageMenageV2(cepageCommunMenageV2(cep))]) return true;
+    return apps.some(function(a) { return memeTexteV2(decodeHTML(g.wine.Appellation || ''), a); });
   });
+}
+
+// Valeurs connues pour les pastilles d'une note : celles de mes vins (+ cépages de la config), et celles déjà notées
+function valeursConnuesNoteV2(champ) {
+  var vues = {}, out = [];
+  var retenir = function(v) { v = decodeHTML((v || '').toString().trim()); var k = normaliserRechercheV2(v); if (v && !vues[k]) { vues[k] = true; out.push(v); } };
+  (ALL_DATA || []).forEach(function(w) {
+    if (champ === 'cepages') (w.Cepage || '').toString().split(',').forEach(retenir);
+    else retenir(w.Appellation);
+  });
+  if (champ === 'cepages' && CONFIG && CONFIG.couleurs) Object.keys(CONFIG.couleurs).forEach(function(c) { (CONFIG.couleurs[c] || []).forEach(retenir); });
+  (ALL_NOTES || []).forEach(function(n) { listeNoteV2(n[champ]).forEach(retenir); });
+  return out.sort(function(a, b) { return a.localeCompare(b); });
 }
 
 function afficherNotesV2() {
@@ -2843,7 +2870,7 @@ function afficherNotesV2() {
   var src = filtresNotesV2.source;
   var liste = (ALL_NOTES || []).filter(function(n) {
     return passeFiltreV2(src, String(n.source)) &&
-      (!texte || normaliserRechercheV2([n.aliments, n.appelle, n.source].join(' ')).indexOf(texte) !== -1);
+      (!texte || normaliserRechercheV2([n.aliments, n.appelle, n.source, n.cepages, n.appellations].join(' ')).indexOf(texte) !== -1);
   });
 
   var loupe = document.getElementById('notesV2-loupe');
@@ -2861,11 +2888,11 @@ function afficherNotesV2() {
 function groupeNoteV2(n, groupes, provenance) {
   var sous = [n.aliments, n.source].filter(Boolean).join(' · ');
   var carteNote = '<div class="carte histo-vin">' +
-           '<div class="carte-centre"><span class="carte-titre">' + (n.appelle || '—') + '</span><span class="carte-sous">' + sous + '</span></div>' +
+           '<div class="carte-centre"><span class="carte-titre">' + (resumeNoteV2(n) || '—') + '</span><span class="carte-sous">' + sous + '</span></div>' +
            '<div class="carte-droite">' + (n.date || '') +
            '<span class="corriger-crayon" onclick="event.stopPropagation();ouvrirApresTap(function(){ouvrirNoteEditV2(' + n.row + ')})">✎</span>' +
            '</div></div>';
-  var vins = vinsDeLaNoteV2(n.appelle, groupes);
+  var vins = vinsDeLaNoteV2(n, groupes);
   var cartesVins = vins.map(function(g) {
     var w = g.wine;
     var cb = (w['Code-barres'] || '').toString().trim();
@@ -2880,6 +2907,12 @@ function groupeNoteV2(n, groupes, provenance) {
   return '<div class="histo-groupe">' + carteNote + cartesVins + '</div>';
 }
 
+// Titre d'une note : ses cépages · ses appellations ; une ancienne note, son texte
+function resumeNoteV2(n) {
+  var t = [listeNoteV2(n.cepages).join(', '), listeNoteV2(n.appellations).join(', ')].filter(Boolean).join(' · ');
+  return t || n.appelle || '';
+}
+
 function ajouterDepuisNotesV2() {
   fermerFiltresNotesV2();
   ouvrirApresTap(function() { ouvrirNoteEditV2(0); });
@@ -2888,9 +2921,19 @@ function ajouterDepuisNotesV2() {
 // row = 0 → nouvelle note ; sinon correction de la ligne du Sheet.
 function ouvrirNoteEditV2(row) {
   var n = row ? (ALL_NOTES || []).filter(function(x) { return String(x.row) === String(row); })[0] : null;
-  noteEditV2 = { row: row || 0 };
+  // une ancienne note (texte libre seulement) : son texte est rappelé pour le reprendre en cépages / appellations
+  var ancien = n && !listeNoteV2(n.cepages).length && !listeNoteV2(n.appellations).length ? (n.appelle || '') : '';
+  noteEditV2 = { row: row || 0, ancien: ancien };
+  PASTILLES_V2.noteEditV2 = { valeurs: { cepages: listeNoteV2(n && n.cepages), appellations: listeNoteV2(n && n.appellations) }, connues: valeursConnuesNoteV2, champs: ['cepages', 'appellations'] };
+  ['cepages', 'appellations'].forEach(function(champ) {
+    var menu = document.getElementById('noteEditV2-' + champ + '-menu');
+    menu.classList.remove('ouvert'); menu.innerHTML = '';
+    rendrePastillesV2('noteEditV2', champ);
+  });
+  var elAncien = document.getElementById('noteEditV2-ancien');
+  elAncien.textContent = ancien ? 'Avant : « ' + ancien + ' »' : '';
+  elAncien.style.display = ancien ? 'block' : 'none';
   document.getElementById('noteEditV2-aliments').value = n ? (n.aliments || '') : '';
-  document.getElementById('noteEditV2-appelle').value = n ? (n.appelle || '') : '';
   document.getElementById('noteEditV2-source').value = n ? (n.source || '') : '';
   document.getElementById('noteEditV2-btn-supprimer').style.display = n ? 'flex' : 'none';
   document.getElementById('noteEditV2Overlay').style.display = 'flex';
@@ -2903,12 +2946,20 @@ function fermerNoteEditV2() {
 
 function confirmerNoteEditV2() {
   var aliments = document.getElementById('noteEditV2-aliments').value.trim();
-  var appelle = document.getElementById('noteEditV2-appelle').value.trim();
   var source = document.getElementById('noteEditV2-source').value.trim();
+  var listes = PASTILLES_V2.noteEditV2.valeurs;
   if (!aliments) { afficherMessage('Il faut au moins un aliment'); return; }
-  if (!appelle) { afficherMessage('Il manque ce que ça appelle'); return; }
+  // « Appelle » garde le résumé (lisible dans le Sheet, et la note marche même avec un serveur pas redéployé) ;
+  // une ancienne note qu'on ne reprend pas en listes garde son texte
+  var appelle = resumeNoteV2({ cepages: listes.cepages.join(';;'), appellations: listes.appellations.join(';;') }) || noteEditV2.ancien;
+  if (!appelle) { afficherMessage('Il manque ce que ça appelle : un cépage ou une appellation'); return; }
   var route = noteEditV2.row ? 'corrigerNoteAccord' : 'ajouterNoteAccord';
-  appelBackend(route, { row: noteEditV2.row, aliments: aliments, appelle: appelle, source: source }, { spinner: 'Sauvegarde' }).then(function() {
+  var avecListes = listes.cepages.length || listes.appellations.length;
+  var listesIgnorees = false;
+  appelBackend(route, { row: noteEditV2.row, aliments: aliments, appelle: appelle, source: source, cepages: listes.cepages.join(';;'), appellations: listes.appellations.join(';;') }, { spinner: 'Sauvegarde' }).then(function(res) {
+    if (res && res.success === false) throw new Error(res.message || 'refusée');
+    // un serveur pas encore redéployé ignore les listes sans le dire : la note garde au moins le résumé
+    listesIgnorees = avecListes && !(res && res.avecListes);
     ALL_NOTES = [];
     return appelBackend('getNotesAccord', {}, { spinner: 'Sauvegarde' });
   }).then(function(data) {
@@ -2917,7 +2968,7 @@ function confirmerNoteEditV2() {
     remplirFiltresNotesV2();
     afficherNotesV2();
     rafraichirRechercheSiOuverteV2();
-    afficherMessage('Note enregistrée');
+    afficherMessage(listesIgnorees ? 'Note enregistrée, en texte seulement : Code.gs à recoller' : 'Note enregistrée');
   }).catch(function(err) { afficherMessage('Erreur: ' + err); });
 }
 
