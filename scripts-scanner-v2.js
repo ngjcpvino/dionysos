@@ -3329,7 +3329,7 @@ function parcoursMeubleEmpV2(meuble) {
 }
 
 // ==================== TRI ŒNOPHILE (ex-« Ménage de la cave ») — v3 du 26 oct. 2026 ====================
-// Emplacements → Afficher → « Tri œnophile ». L'app calcule et dicte LA TOURNÉE de l'utilisateur, en 7 arrêts —
+// Emplacements → Afficher → « Tri Dionysos ». L'app calcule et dicte LA TOURNÉE de l'utilisateur, en 7 arrêts —
 // 1. au cellier (choisir, sors, déplace) · 2. au Pigeonnier (sors, déplace, place ce qui vient du cellier) ·
 // 3. en bas, à la Réserve (sors, range ce qui est descendu) · 4. « À ranger » (sors, pose) ·
 // 5. à la Réserve en remontant (range ce qui vient d'« À ranger ») · 6. au Pigeonnier (place) · 7. au cellier (place).
@@ -3789,7 +3789,7 @@ function afficherMenageEmpV2(recalculer) {
   if (recalculer || !M.plan) M.plan = calculerMenageV2();
   var plan = M.plan;
   var n = plan.moves.length;
-  document.getElementById('empV2-compte').innerHTML = 'Tri œnophile : ' + n + ' bouteille' + (n > 1 ? 's' : '') + ' à déplacer';
+  document.getElementById('empV2-compte').innerHTML = 'Tri Dionysos : ' + n + ' bouteille' + (n > 1 ? 's' : '') + ' à déplacer';
   var tournee = lignesMenageV2(plan);
   var html = '';
   if (tournee.max) {
@@ -4267,7 +4267,7 @@ function wineResultDepuisMemoireV2(code) {
   };
 }
 
-// Position dans la liste au moment d'ouvrir une fiche : le Tri œnophile y revient en fermant la fiche
+// Position dans la liste au moment d'ouvrir une fiche : le Tri Dionysos y revient en fermant la fiche
 var SCROLL_EMP_V2 = 0;
 function ouvrirFicheDepuisListeEmpV2(code) {
   var c = document.querySelector('#empV2Container .modal-v2-content');
@@ -5929,7 +5929,7 @@ var PANNEAUX_V2 = {
            '<div class="item-liste" id="empV2-mode-cepmanquants" onclick="choisirModeEmpV2(\'cepmanquants\')">Cépages manquants</div>' +
            '<div class="item-liste" id="empV2-mode-appmanquante" onclick="choisirModeEmpV2(\'appmanquante\')">Appellation manquante</div>' +
            '<div class="item-liste" id="empV2-mode-fammanquante" onclick="choisirModeEmpV2(\'fammanquante\')">Familles manquantes</div>' +
-           '<div class="item-liste" id="empV2-mode-menage" onclick="choisirModeEmpV2(\'menage\')">Tri œnophile</div>' +
+           '<div class="item-liste" id="empV2-mode-menage" onclick="choisirModeEmpV2(\'menage\')">Tri Dionysos</div>' +
            '<div class="panneau-separateur"></div>',
     filtres: [['meuble', 'Meuble'], ['rangee', 'Rangée'], ['espace', 'Espace'], ['couleur', 'Couleur'], ['cepage', 'Cépage'], ['pays', 'Pays'], ['appellation', 'Appellation']],
     apresReinit: '<div class="panneau-separateur"></div>' +
