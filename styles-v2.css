@@ -1168,9 +1168,9 @@ input[type="date"].champ-saisie::-webkit-date-and-time-value { text-align: left;
    ========================================= */
 .mt-10 { margin-top: var(--space-s); }
 .mt-20 { margin-top: var(--space-l); }
-/* Petit titre gris aligné à gauche, en lettres normales (« Rien à faire ici » du Tri œnophile). Réutilisable. */
+/* Petit titre gris aligné à gauche, en lettres normales (« Rien à faire ici » du Tri Dionysos). Réutilisable. */
 .texte-secondaire.texte-gauche { text-align: left; margin-bottom: var(--space-s); text-transform: none; letter-spacing: normal; }
-/* Titre de rubrique dans un bloc (Tri œnophile : « Choisir », « Sors », « Déplace »…) : or, en lettres normales,
+/* Titre de rubrique dans un bloc (Tri Dionysos : « Choisir », « Sors », « Déplace »…) : or, en lettres normales,
    sous le titre du bloc (.emp-meuble). Réutilisable. */
 .titre-rubrique { color: var(--gold); font-size: var(--fs-18); text-align: left; margin: var(--space-l) 0 var(--space-s) 0; }
 .emp-meuble + .titre-rubrique { margin-top: 0; }
