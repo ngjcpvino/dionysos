@@ -2887,11 +2887,10 @@ function afficherNotesV2() {
 // La fiche est sous cette page dans le HTML : depuis la page, on la ferme avant d'ouvrir la fiche (le ✕ la rouvre).
 function groupeNoteV2(n, groupes, provenance) {
   var sous = [n.aliments, n.source].filter(Boolean).join(' · ');
-  var carteNote = '<div class="carte histo-vin">' +
+  // toucher la note = la corriger (comme l'Historique et les Propositions)
+  var carteNote = '<div class="carte histo-vin" onclick="ouvrirApresTap(function(){ouvrirNoteEditV2(' + n.row + ')})">' +
            '<div class="carte-centre"><span class="carte-titre">' + (resumeNoteV2(n) || '—') + '</span><span class="carte-sous">' + sous + '</span></div>' +
-           '<div class="carte-droite">' + (n.date || '') +
-           '<span class="corriger-crayon" onclick="event.stopPropagation();ouvrirApresTap(function(){ouvrirNoteEditV2(' + n.row + ')})">✎</span>' +
-           '</div></div>';
+           '<div class="carte-droite">' + (n.date || '') + '</div></div>';
   var vins = vinsDeLaNoteV2(n, groupes);
   var cartesVins = vins.map(function(g) {
     var w = g.wine;
