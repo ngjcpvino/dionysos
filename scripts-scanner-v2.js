@@ -4217,13 +4217,18 @@ function deplacerDepuisEmpV2(code) {
 }
 
 // ==================== HISTORIQUE V2 ====================
-var filtresHistoV2 = { mets: '', vin: '', accord: '', couleur: '', cave: false };
+// Filtres : ce qui est propre à la page (Vin, Appréciation), puis le vin, puis le goût — comme la Cave
+var libellesFiltreHistoV2 = { vin: 'Vin', note: 'Appréciation', couleur: 'Couleur', cepage: 'Cépage', pays: 'Pays', appellation: 'Appellation', accord: 'Accord', pastille: 'Pastille de goût', acidite: 'Acidité' };
+function filtresHistoVidesV2() {
+  return { mets: '', vin: '', note: '', couleur: '', cepage: '', pays: '', appellation: '', accord: '', pastille: '', acidite: '', cave: false };
+}
+var filtresHistoV2 = filtresHistoVidesV2();
 var histoEditV2 = { row: 0, note: 0 };
 
 function ouvrirHistoV2() {
   document.getElementById('histoV2Container').style.display = 'flex';
   remonterScrollV2('histoV2Container');
-  filtresHistoV2 = { mets: '', vin: '', accord: '', couleur: '', cave: false };
+  filtresHistoV2 = filtresHistoVidesV2();
   if (ALL_HISTORIQUE && ALL_HISTORIQUE.length) {
     remplirFiltresHistoV2();
     afficherHistoV2();
@@ -4247,73 +4252,91 @@ function fermerFiltresHistoV2() {
   document.getElementById('histoV2-filtres').classList.remove('ouvert');
 }
 
+// Le vin d'une entrée de l'historique (fiche en mémoire, par code-barres puis code SAQ) — {} s'il n'y est plus
+function indexVinsHistoV2() {
+  var parCb = {}, parSaq = {};
+  (ALL_DATA || []).forEach(function(d) {
+    var cb = (d['Code-barres'] || '').toString().trim();
+    var saq = (d['Code SAQ'] || '').toString().trim();
+    if (cb && !parCb[cb]) parCb[cb] = d;
+    if (saq && !parSaq[saq]) parSaq[saq] = d;
+  });
+  return function(h) { return parCb[(h.codebarre || '').toString().trim()] || parSaq[(h.codeSAQ || '').toString().trim()] || {}; };
+}
+
+// Les valeurs d'une entrée pour un filtre (une liste : un vin peut avoir plusieurs accords) ; appréciation « 0 » = aucune
+function valeursFiltreHistoV2(cle, h, w) {
+  switch (cle) {
+    case 'vin': return [h.nom || ''];
+    case 'note': return [String(parseInt(h.bonAccord, 10) || 0)];
+    case 'couleur': return [w.Couleur || h.couleur || ''];
+    case 'cepage': return [cepageDominant(w)];
+    case 'pays': return [w.Pays || ''];
+    case 'appellation': return [w.Appellation || ''];
+    case 'accord': return (w.Accords || '').split(',').map(function(a) { return a.trim(); });
+    case 'pastille': return [w['Pastille gout'] || ''];
+    case 'acidite': return [w['Acidité'] || ''];
+  }
+  return [];
+}
+// Cépage = cépage principal, comme la Cave
+function passeFiltreHistoV2(cle, h, w, choix) {
+  if (!choix) return true;
+  if (cle === 'cepage') return memeTexteV2(cepageDominant(w), choix);
+  if (cle === 'pastille') return contientTexteV2(w['Pastille gout'], choix);
+  return valeursFiltreHistoV2(cle, h, w).indexOf(choix) !== -1;
+}
+function libelleNoteHistoV2(n) { n = parseInt(n, 10) || 0; return n ? n + ' verre' + (n > 1 ? 's' : '') : 'Sans appréciation'; }
+function filtresHistoActifsV2() {
+  var f = filtresHistoV2;
+  return !!(f.mets || f.cave || Object.keys(libellesFiltreHistoV2).some(function(k) { return f[k]; }));
+}
+
+// En cascade, comme la Cave : un menu ne propose que ce qui reste après les choix faits au-dessus de lui ;
+// les valeurs viennent des vins de l'historique
 function remplirFiltresHistoV2() {
   var f = filtresHistoV2;
+  var vinDe = indexVinsHistoV2();
   var base = ALL_HISTORIQUE || [];
-
-  var vins = uniqueHistoV2(base, 'nom');
-  var accords = [];
-  // Accord = catégorie : on prend les accords des vins concernés via ALL_DATA
-  var cbAccords = {};
-  (ALL_DATA || []).forEach(function(d){
-    var cb = (d['Code-barres'] || '').toString().trim();
-    if (cb && d.Accords) cbAccords[cb] = d.Accords;
-  });
-  var vusAcc = {};
-  base.forEach(function(h){
-    var acc = cbAccords[(h.codebarre || '').toString().trim()];
-    if (!acc) return;
-    acc.split(',').map(function(a){ return a.trim(); }).filter(Boolean).forEach(function(a){
-      if (!vusAcc[a]) { vusAcc[a] = true; accords.push(a); }
+  Object.keys(libellesFiltreHistoV2).forEach(function(cle) {
+    var vus = {};
+    base.forEach(function(h) {
+      valeursFiltreHistoV2(cle, h, vinDe(h)).forEach(function(v) { var k = normaliserRechercheV2(v); if (v && !vus[k]) vus[k] = v; });
     });
-  });
-  accords.sort(function(a, b){ return a.localeCompare(b); });
-
-  var couleurs = uniqueValeursAchat(ALL_DATA || [], 'Couleur');
-
-  var listes = { vin: vins, accord: accords, couleur: couleurs };
-  ['vin','accord','couleur'].forEach(function(cle){
+    var opts = Object.keys(vus).map(function(k) { return vus[k]; });
+    opts.sort(cle === 'note' ? function(a, b) { return b - a; } : function(a, b) { return a.localeCompare(b); });
+    var libelle = function(v) { return cle === 'note' ? libelleNoteHistoV2(v) : v; };
     var cur = f[cle];
     var menu = document.getElementById('histoV2-f-' + cle + '-menu');
-    menu.innerHTML = '<div class="item-liste' + (cur === '' ? ' actif' : '') + '" onclick="choisirFiltreHistoV2(\'' + cle + '\', \'\')">Tous</div>' + listes[cle].map(function(v){
-      return '<div class="item-liste' + (v === cur ? ' actif' : '') + '" onclick="choisirFiltreHistoV2(\'' + cle + '\', \'' + v.replace(/'/g, "\\'") + '\')">' + v + '</div>';
+    menu.innerHTML = '<div class="item-liste' + (cur === '' ? ' actif' : '') + '" onclick="choisirFiltreHistoV2(\'' + cle + '\', \'\')">Tous</div>' + opts.map(function(v){
+      return '<div class="item-liste' + (v === cur ? ' actif' : '') + '" onclick="choisirFiltreHistoV2(\'' + cle + '\', \'' + v.replace(/'/g, "\\'") + '\')">' + libelle(v) + '</div>';
     }).join('');
     var disp = document.getElementById('histoV2-f-' + cle + '-display');
-    if (disp) disp.textContent = cur === '' ? ({vin:'Vin',accord:'Accord',couleur:'Couleur'})[cle] : cur;
+    if (disp) disp.textContent = cur === '' ? libellesFiltreHistoV2[cle] : libelle(cur);
+    base = base.filter(function(h) { return passeFiltreHistoV2(cle, h, vinDe(h), cur); });
   });
 
   var champMets = document.getElementById('histoV2-f-mets');
   if (champMets) champMets.value = f.mets;
 
   var loupe = document.getElementById('histoV2-loupe');
-  if (loupe) loupe.classList.toggle('actif', !!(f.mets || f.vin || f.accord || f.couleur || f.cave));
+  if (loupe) loupe.classList.toggle('actif', filtresHistoActifsV2());
   var caveBtn = document.getElementById('histoV2-cave');
   if (caveBtn) { caveBtn.classList.toggle('actif', f.cave); caveBtn.textContent = f.cave ? '✓' : '✗'; }
-}
-
-function uniqueHistoV2(liste, champ) {
-  var vus = {};
-  var out = [];
-  liste.forEach(function(h){
-    var v = (h[champ] || '').toString().trim();
-    if (v && !vus[v]) { vus[v] = true; out.push(v); }
-  });
-  out.sort(function(a, b){ return a.localeCompare(b); });
-  return out;
 }
 
 function filtrerMetsHistoV2() {
   var champ = document.getElementById('histoV2-f-mets');
   filtresHistoV2.mets = champ ? champ.value.trim() : '';
   var loupe = document.getElementById('histoV2-loupe');
-  if (loupe) loupe.classList.toggle('actif', !!(filtresHistoV2.mets || filtresHistoV2.vin || filtresHistoV2.accord || filtresHistoV2.couleur || filtresHistoV2.cave));
+  if (loupe) loupe.classList.toggle('actif', filtresHistoActifsV2());
   afficherHistoV2();
 }
 
 function basculerFiltreHistoV2(cle) {
   var menu = document.getElementById('histoV2-f-' + cle + '-menu');
   var ouvert = menu.classList.contains('ouvert');
-  ['vin','accord','couleur'].forEach(function(k){
+  Object.keys(libellesFiltreHistoV2).forEach(function(k){
     document.getElementById('histoV2-f-' + k + '-menu').classList.remove('ouvert');
   });
   if (!ouvert) menu.classList.add('ouvert');
@@ -4327,10 +4350,10 @@ function choisirFiltreHistoV2(cle, valeur) {
 }
 
 function reinitialiserFiltresHistoV2() {
-  filtresHistoV2 = { mets: '', vin: '', accord: '', couleur: '', cave: false };
+  filtresHistoV2 = filtresHistoVidesV2();
   var champMets = document.getElementById('histoV2-f-mets');
   if (champMets) champMets.value = '';
-  ['vin','accord','couleur'].forEach(function(k) {
+  Object.keys(libellesFiltreHistoV2).forEach(function(k) {
     document.getElementById('histoV2-f-' + k + '-menu').classList.remove('ouvert');
   });
   remplirFiltresHistoV2();
@@ -4346,20 +4369,13 @@ function toggleCaveHistoV2() {
 
 function afficherHistoV2() {
   var f = filtresHistoV2;
-  var cbAccords = {};
-  (ALL_DATA || []).forEach(function(d){
-    var cb = (d['Code-barres'] || '').toString().trim();
-    if (cb && d.Accords) cbAccords[cb] = d.Accords;
-  });
+  var vinDe = indexVinsHistoV2();
+  var cles = Object.keys(libellesFiltreHistoV2);
 
   var base = (ALL_HISTORIQUE || []).filter(function(h){
     if (f.mets && normaliserRechercheV2(h.plat || '').indexOf(normaliserRechercheV2(f.mets)) === -1) return false;
-    if (f.vin && (h.nom || '') !== f.vin) return false;
-    if (f.accord) {
-      var acc = cbAccords[(h.codebarre || '').toString().trim()] || '';
-      if (acc.indexOf(f.accord) === -1) return false;
-    }
-    if (f.couleur && (h.couleur || '') !== f.couleur) return false;
+    var w = vinDe(h);
+    if (!cles.every(function(k) { return passeFiltreHistoV2(k, h, w, f[k]); })) return false;
     if (f.cave && !vinEnCaveV2(h.codebarre)) return false;
     return true;
   });
@@ -5800,7 +5816,7 @@ var PANNEAUX_V2 = {
   },
   histo: {
     prefixe: 'histoV2', bascule: 'basculerFiltreHistoV2', reinit: 'reinitialiserFiltresHistoV2',
-    filtres: [['vin', 'Vin'], ['couleur', 'Couleur'], ['accord', 'Accord']],
+    filtres: [['vin', 'Vin'], ['note', 'Appréciation'], ['couleur', 'Couleur'], ['cepage', 'Cépage'], ['pays', 'Pays'], ['appellation', 'Appellation'], ['accord', 'Accord'], ['pastille', 'Pastille de goût'], ['acidite', 'Acidité']],
     apres: '<div class="panneau-separateur"></div>' +
            '<input type="text" id="histoV2-f-mets" class="champ-saisie" placeholder="Rechercher un mets" oninput="filtrerMetsHistoV2()">',
     apresReinit: '<div class="roundel" onclick="ouvrirHistoAjoutV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Ajouter</span></div>'
