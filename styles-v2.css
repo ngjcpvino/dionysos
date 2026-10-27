@@ -374,6 +374,8 @@ body::after {
   letter-spacing: var(--ls-wide); text-transform: uppercase;
   font-weight: 300;
 }
+/* Le même verre, posé dans une liste qui charge en fond (Découvertes) : la page reste utilisable. Réutilisable. */
+.spinner-en-ligne { display: flex; flex-direction: column; align-items: center; gap: var(--space-l); margin: var(--space-xl) 0; }
 @keyframes remplir-verre {
   0% { height: 0%; }
   40% { height: 100%; }
