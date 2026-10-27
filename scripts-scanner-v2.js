@@ -4439,8 +4439,23 @@ function afficherHistoV2() {
   }).join('');
 }
 
+// Date du jour « aaaa-mm-jj » (heure locale) — la valeur d'un champ date
+function dateIsoV2(d) {
+  d = d || new Date();
+  return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+}
+// « jj-mm-aaaa » de l'Historique → « aaaa-mm-jj »
+function dateHistoIsoV2(jma) {
+  var m = (jma || '').match(/^(\d{2})-(\d{2})-(\d{4})$/);
+  return m ? m[3] + '-' + m[2] + '-' + m[1] : '';
+}
+
 function ouvrirHistoEditV2(row, plat, note, nom, provenance, codeSAQ, codebarre) {
-  histoEditV2 = { row: row, note: note || 0, provenance: provenance || 'histo' };
+  var entree = (ALL_HISTORIQUE || []).filter(function(h) { return h.row === row; })[0];
+  histoEditV2 = { row: row, note: note || 0, provenance: provenance || 'histo', date: dateHistoIsoV2(entree && entree.date) };
+  var champDate = document.getElementById('histoEditV2-date');
+  champDate.value = histoEditV2.date;
+  champDate.max = dateIsoV2();
   document.getElementById('histoEditV2-vin').textContent = nom || '';
   var w = null;
   if ((provenance || 'histo') === 'fiche') {
@@ -4474,8 +4489,13 @@ function choisirNoteHistoEditV2(note) {
 
 function sauverHistoEditV2() {
   var plat = document.getElementById('histoEditV2-plat').value.trim();
-  appelBackend('corrigerHistorique', { row: histoEditV2.row, plat: plat, note: histoEditV2.note }, { spinner: 'Sauvegarde' }).then(function(res){
+  var date = document.getElementById('histoEditV2-date').value;
+  if (date && date > dateIsoV2()) { afficherMessage('Cette date est dans le futur'); return; }
+  var nouvelleDate = date && date !== histoEditV2.date ? date : '';
+  appelBackend('corrigerHistorique', { row: histoEditV2.row, plat: plat, note: histoEditV2.note || '', date: nouvelleDate }, { spinner: 'Sauvegarde' }).then(function(res){
     if (!res || !res.success) { afficherMessage('Erreur'); return; }
+    // un serveur pas encore redéployé ignore la date sans le dire
+    var dateIgnoree = nouvelleDate && !res.avecDate;
     return appelBackend('getHistorique', {}, { spinner: 'Sauvegarde' }).then(function(data){
       ALL_HISTORIQUE = data || [];
       document.getElementById('histoEditV2Overlay').style.display = 'none';
@@ -4485,7 +4505,7 @@ function sauverHistoEditV2() {
         remplirFiltresHistoV2();
         afficherHistoV2();
       }
-      afficherMessage('Corrigé');
+      afficherMessage(dateIgnoree ? 'Corrigé, sauf la date : Code.gs à recoller' : 'Corrigé');
     });
   }).catch(function(){ retourAccueilV2(); });
 }
@@ -4575,6 +4595,9 @@ function choisirVinHistoAjoutV2(cb, saq, nom) {
   document.getElementById('histoAjoutV2-recherche').style.display = 'none';
   document.getElementById('histoAjoutV2-resultats').innerHTML = '';
   document.getElementById('histoAjoutV2-resultats').classList.remove('ouvert');
+  var champDate = document.getElementById('histoAjoutV2-date');
+  champDate.value = dateIsoV2();
+  champDate.max = dateIsoV2();
 
   var v = document.getElementById('histoAjoutV2-verres');
   v.innerHTML = '';
@@ -4616,11 +4639,15 @@ function majAccordsDisplayHistoAjoutV2() {
 
 function confirmerHistoAjoutV2() {
   if (!histoAjoutV2.codebarre) { afficherMessage('Choisissez un vin'); return; }
+  // plat et appréciation facultatifs : un vin bu il y a longtemps n'a souvent que sa date
   var plat = document.getElementById('histoAjoutV2-plat').value.trim();
-  if (!plat) { afficherMessage('Entrez un plat'); return; }
-  if (histoAjoutV2.note === 0) { afficherMessage('Choisissez une appréciation'); return; }
+  var date = document.getElementById('histoAjoutV2-date').value || dateIsoV2();
+  if (date > dateIsoV2()) { afficherMessage('Cette date est dans le futur'); return; }
+  var dateIgnoree = false;
   var accords = Array.prototype.map.call(document.querySelectorAll('#histoAjoutV2-accords-menu .item-liste.actif'), function(el){ return el.getAttribute('data-accord'); });
-  appelBackend('ajouterHistoriqueManuel', { codebarre: histoAjoutV2.codebarre, plat: plat, note: histoAjoutV2.note }, { spinner: 'Enregistrement' }).then(function(){
+  appelBackend('ajouterHistoriqueManuel', { codebarre: histoAjoutV2.codebarre, plat: plat, note: histoAjoutV2.note || '', date: date }, { spinner: 'Enregistrement' }).then(function(res){
+    // un serveur pas encore redéployé écrit la date du jour sans le dire
+    dateIgnoree = date !== dateIsoV2() && !(res && res.avecDate);
     if (accords.length) {
       return appelBackend('updateWineField', { codebarre: histoAjoutV2.codebarre, field: 'Accords', value: accords.join(', ') }, { spinner: 'Enregistrement' });
     }
@@ -4638,7 +4665,7 @@ function confirmerHistoAjoutV2() {
       remplirFiltresHistoV2();
       afficherHistoV2();
     }
-    afficherMessage('Ajouté au carnet');
+    afficherMessage(dateIgnoree ? 'Ajouté à la date du jour : Code.gs à recoller' : 'Ajouté au carnet');
   }).catch(function(){ retourAccueilV2(); });
 }
 
