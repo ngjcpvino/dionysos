@@ -183,6 +183,7 @@ function traiterResultatScanV2(code) {
   // puis la réponse fraîche du serveur remplace la mémoire en douce si le réseau répond.
   var memoire = wineResultDepuisMemoireV2(code);
   if (memoire) {
+    code = codePrincipalV2(code); // un code secondaire (autre millésime) : la suite parle du code de la fiche
     if (suggestionsV2Attente) {
       terminerAjoutSuggestionV2(code, memoire);
       return;
@@ -194,6 +195,8 @@ function traiterResultatScanV2(code) {
   }
   // Pas dans ma cave, mais dans l'inventaire de la succursale (chargé avec la Liste d'achat) : réponse sans réseau
   var produit = suggestionsV2Attente ? null : produitInventaireParCodeV2(code);
+  // … et c'est un de mes vins sous un autre code-barres (même code SAQ) : mon vin, pas « Vin inconnu »
+  if (produit && vinParCodeSAQV2(produit.codeSAQ) && ouvrirMonVinAutreCodeV2(code, vinParCodeSAQV2(produit.codeSAQ))) return;
   if (produit) {
     afficherVinInconnuV2(code, produit.codeSAQ, produit);
     verifierVinScanneEnFondV2(code);
@@ -316,6 +319,9 @@ function ouvrirVinInconnuV2(code, fond) {
   return appelBackend('chercherProduitSAQ_GRAPHQL_V1', { codebarre: code }, { spinner: fond ? '' : 'Un instant svp', timeout: 15000 }).then(function(codeSAQ) {
     if (fond && !vinInconnuAttendV2(code)) return;
     clearTimeout(VIN_INCONNU_V2_ESSAI);
+    // la SAQ dit que c'est un de mes vins (même code SAQ) sous un autre code-barres : mon vin, jamais un 2e vin créé
+    var mien = codeSAQ ? vinParCodeSAQV2(codeSAQ) : null;
+    if (mien && ouvrirMonVinAutreCodeV2(code, mien)) return;
     if (codeSAQ && suggestionsV2Attente) {
       document.getElementById('vinInconnuV2Container').style.display = 'none';
       creerVinSAQV2(code, codeSAQ);
@@ -323,6 +329,38 @@ function ouvrirVinInconnuV2(code, fond) {
     }
     afficherVinInconnuV2(code, codeSAQ || '');
   });
+}
+
+// Le code-barres scanné n'est pas sur ma fiche, mais la SAQ (ou l'inventaire de la succursale) dit que c'est le même
+// vin (même code SAQ) qu'un des miens (28 oct. 2026) : on ouvre MON vin — ou on y ajoute la proposition — et on retient
+// ce code-barres sur sa fiche, pour qu'il soit reconnu tout de suite la prochaine fois, même sans réseau.
+function ouvrirMonVinAutreCodeV2(code, w) {
+  var principal = (w['Code-barres'] || '').toString().trim();
+  var result = principal ? wineResultDepuisMemoireV2(principal) : null;
+  if (!result) return false;
+  document.getElementById('vinInconnuV2Container').style.display = 'none';
+  if (suggestionsV2Attente) {
+    terminerAjoutSuggestionV2(principal, result);
+  } else {
+    ouvrirMenuActionV2(principal, result);
+    if (result.wine.aime === 'Non') afficherMessageImage('images/ne-pas-racheter.svg');
+    else afficherMessage('Même vin, autre code-barres');
+  }
+  retenirCodeBarreV2(principal, code);
+  return true;
+}
+
+// Feu-et-oublie : un serveur pas redéployé répond « Action inconnue » et rien ne change (le vin s'ouvre quand même)
+function retenirCodeBarreV2(principal, code) {
+  appelBackend('ajouterCodeBarre', { codebarre: principal, nouveau: code }, { spinner: '' }).then(function(res) {
+    if (!res || !res.success) return;
+    // la mémoire l'apprend aussi : reconnu au prochain scan, même sans réseau
+    (ALL_DATA || []).forEach(function(i) {
+      if (!memeCodeV2(i['Code-barres'], principal)) return;
+      var liste = codesBarresDuVinV2(i);
+      if (!liste.some(function(c) { return memeCodeV2(c, code); })) i['Codes-barres'] = liste.concat([code]).join(',');
+    });
+  }).catch(function() {});
 }
 
 // Ni en mémoire ni de réseau : la page s'ouvre quand même, fâchée, et réessaie seule tant qu'elle reste ouverte.
@@ -4291,10 +4329,21 @@ function afficherListeEmpV2(type) {
   div.innerHTML = html;
 }
 
+// Tous les codes-barres d'un vin (« Codes-barres » = la liste de la fiche ; repli : le premier)
+function codesBarresDuVinV2(w) {
+  return (w['Codes-barres'] || w['Code-barres'] || '').toString().split(',').map(function(c) { return c.trim(); }).filter(Boolean);
+}
+// Le code-barres de la fiche pour un code scanné (lui-même s'il l'est déjà, ou s'il est inconnu)
+function codePrincipalV2(code) {
+  var w = (ALL_DATA || []).filter(function(i) { return memeCodeV2(i['Code-barres'], code); })[0] ||
+          (ALL_DATA || []).filter(function(i) { return codesBarresDuVinV2(i).some(function(c) { return memeCodeV2(c, code); }); })[0];
+  return w && w['Code-barres'] ? w['Code-barres'].toString().trim() : code;
+}
+
 function wineResultDepuisMemoireV2(code) {
   var cb = (code || '').toString().trim();
   var items = (ALL_DATA || []).filter(function(i) {
-    return memeCodeV2(i['Code-barres'], cb);
+    return memeCodeV2(i['Code-barres'], cb) || codesBarresDuVinV2(i).some(function(c) { return memeCodeV2(c, cb); });
   });
   if (!items.length) return null;
   var w = items[0];
