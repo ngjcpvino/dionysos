@@ -15,7 +15,7 @@
 - **Base** : Google Sheets « Vino 3.0 » — onglets Vino · Historique · config/CONFIG · Suggestions · Chartier · Recettes · CurieuxBegin · Notes · Erreurs.
 
 ## 📂 Fichiers
-`index-v2.html` · `styles-v2.css` · 10 scripts `scripts-*-v2.js` · `sw.js` (copie hors ligne) · `Code.gs` (Apps Script, hors dépôt) · `outils/garde-fou.py`.
+`index-v2.html` · `styles-v2.css` · 10 scripts `scripts-*-v2.js` · `sw.js` (copie hors ligne) · `lecteur/` (le lecteur de codes-barres zxing, voir 📷) · `Code.gs` (Apps Script, hors dépôt) · `outils/garde-fou.py`.
 - **Ordre de chargement** (`index-v2.html` ET `FICHIERS` de `sw.js`) : socle → communs → scan → cave → achat → recherche → accords → emplacements → historique → fiche.
   - **`scripts-socle-v2.js`** : `API_URL`, `appelBackend` + spinner, globales, utilitaires communs, capteur d'erreurs, mot de passe, démarrage, copie hors ligne.
   - **`scripts-communs-v2.js`** : menu burger (+ mises à jour Curieux Bégin / Accords SAQ), filtres « seulement / sauf », panneaux de filtres, synonymes de cépages, codes-barres d'un vin (`codesBarresDuVinV2`, `codePrincipalV2`, `wineResultDepuisMemoireV2`), regroupement et cartes de vins (`cleVinV2`, `sousVinV2`, `grouperVinsV2`, `caseDroiteV2`).
@@ -184,6 +184,16 @@ La page « Promotions SAQ » n'existe plus : tout est dans la **Liste d'achat** 
 - **Chargement** : la liste s'affiche tout de suite (colonne `Prix`) ; `getPromotionsSAQ` (120 s) en fond puis re-rend (redessine aussi Propositions et Recherche si ouvertes) ; `getToutesPromotionsSAQ` (300 s) à la 1re sélection des Découvertes — verre du spinner **dans la liste** (`.spinner-en-ligne`), compteur « Découvertes · 0:45 » (`COMPTEUR_DEC_V2`, arrêté à l'arrivée ou au changement de page) et « Patience… » ; échec → « Découvertes indisponibles : <cause> — rechoisis la liste pour réessayer ». Jamais de `retourAccueilV2` sur ces appels. Les Découvertes portent appellation, région, pastille et photo (repli sans photo si le schéma la refuse).
 - Pas de vue « tous mes vins en promo » : c'est le découpage voulu (5 listes + interrupteur).
 
+## 📷 Le lecteur de codes-barres (28 oct. 2026, liste 2.0 chantier 2)
+Besoin (utilisateur) : « lent, pas assez de lumière, ça marche pas, lecture erronée ».
+- **zxing** (`zxing-wasm` 3.1.6, version de lecture seule : `lecteur/zxing-wasm-3.1.6.js` + `lecteur/zxing_reader-3.1.6.wasm`, tels quels, licence dans `lecteur/LICENCE.txt`). **Hébergé dans le dépôt** (jamais de CDN : `ZXING_V2.locateFile`), gardé hors ligne par `sw.js` (`FICHIERS`, cache `dionysos-app-v3`). Le même moteur partout (pas le lecteur natif de Chrome) : ce qui est essayé ici est ce qui tourne sur l'iPhone.
+- **Seulement ce que montre le cadre** (`zoneVisibleScanV2` : la vidéo remplit le cadre en « cover »), réduit à 1 280 px de large au plus.
+- **L'image est préparée avant la lecture** : gris + contraste étiré (2e–98e centile, `etirerContrasteScanV2`), puis, une image sur quatre de chaque, lissage **vertical** de plus en plus fort (`lisserBarresScanV2`, `LISSAGES_SCAN_V2 = [0, 8, 16, 32]` : les barres sont verticales, le bruit s'efface sans les brouiller). Essais sur 60 images (net, flou, bougé, petit, incliné, étiquette courbe, reflet, contraste faible, pénombre, cellier sombre et flou) : **60/60, aucune erreur**, contre 44/60 sans préparation. Fausse caméra (Chromium) : net ≈ 0,2 s (Quagga 0,15 s) ; **pénombre ≈ 0,4 s et cellier ≈ 0,9 s, où Quagga ne lisait rien**.
+- **Acceptation** (`lectureScanV2`, commune aux deux lecteurs) : **2 lectures identiques DE SUITE** (`SCAN_THRESHOLD_V2`, une lecture différente remet à zéro) **et** `gtinValide`. Formats EAN-13 (les UPC-A sortent en 13 chiffres avec le 0, comme avant), EAN-8, UPC-A, Code 128.
+- **Caméra** : 1920×1080 idéal, mise au point en continu si possible (`reglerCameraScanV2`). **Rond « Lampe »** (choix de l'utilisateur sur image : **en premier**, sous le cadre) — `#scanV2-lampe`, montré seulement si la caméra annonce la lampe (`torch`) ; le libellé devient « Éteindre » ; fermer le scanner l'éteint. ⚠️ Sur iPhone, Safari pourrait ne pas annoncer la lampe : le rond n'apparaît alors pas (à vérifier à l'essai).
+- **Sessions** (`SESSION_SCAN_V2`) : fermer pendant le démarrage ne laisse jamais une caméra allumée ; `stopScannerV2` coupe le flux, la minuterie, la lampe et vide le cadre.
+- **Secours : l'ancien lecteur Quagga** (`demarrerQuaggaV2`, CDN, `EXTERNES` de `sw.js`) prend la relève si zxing ne démarre pas (fichier absent, `.wasm` introuvable — inscrit au journal des erreurs « Lecteur zxing indisponible »). **À retirer après les essais en succursale** (voir En attente).
+
 ## 🔎 Écran du scan
 Le même écran sert en succursale et à la maison.
 - **4 cas** : (1) vin avec bouteilles · (2) vin à 0 bouteille · (3) proposition (`Racheter` vide) → **menu d'action** ; (4) vin absent du Sheet → **« Vin inconnu »**.
@@ -243,7 +253,7 @@ Une phrase entendue (« asperge et crabe m'amènent un chablis »). 4e mécaniqu
 - **Point doré de rappel** (`.pastille-rappel`) à côté d'OUTILS **et** de « Sans cépage », sans chiffre, tant qu'un vin n'a pas de cépage (`vinsSansCepageV2` : pas de `Cepage`, hors Spiritueux — la même règle que la liste) ; recalculé à chaque ouverture du menu (`toggleMenuV2`).
 
 ## 📴 Hors ligne
-- **L'app** : `sw.js` (enregistré dans `window.onload` du socle). **Réseau d'abord** ; sans réponse en **4 s**, la copie répond. Une copie par fichier, sans le `?v=`. Gardés : les fichiers de l'app (`FICHIERS`), les images de l'interface, Quagga et l'image de fond (`EXTERNES`). Jamais : les POST vers Apps Script, les photos des bouteilles (tranché).
+- **L'app** : `sw.js` (enregistré dans `window.onload` du socle). **Réseau d'abord** ; sans réponse en **4 s**, la copie répond. Une copie par fichier, sans le `?v=`. Gardés : les fichiers de l'app (`FICHIERS`, lecteur zxing compris), les images de l'interface, Quagga (secours) et l'image de fond (`EXTERNES`). Jamais : les POST vers Apps Script, les photos des bouteilles (tranché).
 - **Les données** : `appelBackend` garde en copie (IndexedDB `dionysos`, magasin `copie`) les réponses de `COPIES_V2` (`getConfig`, `getInventoryData`, `getSuggestions`, `getCurieuxBegin`) ; l'inventaire de la succursale aussi.
 - **Démarrage** : avec une copie, on n'attend le serveur que **8 s**, puis `demarrerSurCopieV2` ; l'accueil affiche **« Hors ligne — données de 14 h 05 »** (`#accueilV2-horsligne`) ; `resynchroniserV2` retente toutes les 20 s. Sans réseau, tout ce qui écrit reste impossible (message d'erreur). La 1re copie demande une ouverture avec réseau.
 - ⚠️ **Retirer le hors-ligne** (si les essais en succursale ne sont pas concluants) : ne JAMAIS simplement supprimer `sw.js` (un service worker installé continuerait de tourner). Le code est le commit **`163f25f`** — ⚠️ depuis le découpage du 28 oct., son `git revert` ne s'applique plus tel quel (ce qu'il ajoutait à `scripts-scanner-v2.js` vit maintenant dans le socle et les pages) : retirer à la main ce qu'il ajoutait. Puis :
@@ -266,5 +276,6 @@ Une phrase entendue (« asperge et crabe m'amènent un chablis »). 4e mécaniqu
 ## 📋 En attente
 - **Liste 2.0** (`liste-2.0.md`) : tout le plan de consolidation, un chantier à la fois.
 - **Supprimer `scripts-scanner-v2.js` à partir du 4 nov. 2026** (et la ligne qui le décrit dans 📂 Fichiers).
-- **Essais de la 1.0 en fin de semaine** : tournée du Tri, hors ligne en succursale.
+- **Essais de la 1.0 en fin de semaine** : tournée du Tri, hors ligne en succursale, **et le nouveau lecteur** (au cellier, en succursale ; la lampe sur l'iPhone ?).
+- **Après ces essais, si le lecteur zxing est concluant** : retirer Quagga (balise de `index-v2.html`, `EXTERNES` de `sw.js`, `demarrerQuaggaV2` et son appel).
 - Ne plus proposer les pistes effacées de l'écran du scan (appellations voisines, couleur, « Type » des spiritueux, cépage élargi, Découvertes) tant que le besoin ne revient pas de lui-même (utilisateur, 28 oct.).

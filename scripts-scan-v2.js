@@ -4,9 +4,26 @@
    Le scan, l'écran du scan, le vin inconnu, le menu d'action, Arrivée, Déplacer, Boire, Donner
 ============================================================ */
 
+// ==================== LECTEUR DE CODES-BARRES (28 oct. 2026, liste 2.0 chantier 2) ====================
+// zxing (zxing-wasm, fichiers rangés dans lecteur/) lit l'image de la caméra — seulement ce que montre le cadre.
+// L'image est d'abord préparée (contraste étiré, puis lissée dans le sens des barres, de plus en plus fort d'une image à
+// l'autre) : c'est ce qui lit le flou, le bougé et la pénombre (essais du 28 oct. : 60 images sur 60, contre 44 sans).
+// Un code n'est accepté qu'après SCAN_THRESHOLD_V2 lectures identiques DE SUITE et un chiffre de contrôle valide.
+// Lampe : le rond n'apparaît que si la caméra la permet. Secours : si zxing ne démarre pas, l'ancien lecteur (Quagga).
 let isScanningV2 = false;
-let scanConfirmationsV2 = {};
-const SCAN_THRESHOLD_V2 = 3;
+let scanSuiteV2 = { code: '', n: 0 };
+const SCAN_THRESHOLD_V2 = 2;
+const OPTIONS_SCAN_V2 = { formats: ['EAN-13', 'EAN-8', 'UPC-A', 'Code128'], tryHarder: true, tryRotate: true, tryInvert: true, tryDownscale: true, maxNumberOfSymbols: 1 };
+const LISSAGES_SCAN_V2 = [0, 8, 16, 32];   // une image sur quatre de chaque : sans lissage, puis de plus en plus fort
+// Le .wasm vient du site (et de la copie hors ligne), jamais d'un CDN. Objet unique : zxing ne se recharge pas à chaque scan.
+const ZXING_V2 = { locateFile: function(f, prefixe) { return /\.wasm$/.test(f) ? 'lecteur/zxing_reader-3.1.6.wasm' : prefixe + f; } };
+const CAMERA_INDISPONIBLE_V2 = 'Caméra indisponible — utilisez l\'entrée manuelle';
+const LARGEUR_MAX_SCAN_V2 = 1280;   // au-delà, l'image est réduite avant la lecture (vitesse)
+var SESSION_SCAN_V2 = 0;            // une ouverture du scanner ; un appel en retard d'une session fermée ne fait rien
+var FLUX_SCAN_V2 = null;
+var PASSE_SCAN_V2 = 0;
+var MINUTERIE_SCAN_V2 = null;
+var LAMPE_SCAN_V2 = false;
 
 // Valide le chiffre de contrôle GTIN (EAN-8, UPC-A, EAN-13). Calcul local.
 function gtinValide(code) {
@@ -27,13 +44,148 @@ function startScanFromHomeV2() {
   oublierAjoutSuggestionV2();
   startScannerV2();
 }
- 
+
 function startScannerV2() {
   const container = document.getElementById('scannerV2Container');
   container.style.display = 'flex';
   isScanningV2 = true;
-  scanConfirmationsV2 = {};
+  scanSuiteV2 = { code: '', n: 0 };
+  LAMPE_SCAN_V2 = false;
+  majLampeScanV2(false);
+  demarrerLecteurV2(++SESSION_SCAN_V2);
+}
 
+function texteScanV2(texte) {
+  const feedback = document.getElementById('scanV2-feedback');
+  if (feedback) feedback.textContent = texte;
+}
+
+function demarrerLecteurV2(session) {
+  var api = window.ZXingWASM;
+  if (!api || !navigator.mediaDevices) { demarrerQuaggaV2(); return; }
+  var module = api.prepareZXingModule({ overrides: ZXING_V2, fireImmediately: true });
+  navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } } }).then(function(flux) {
+    if (session !== SESSION_SCAN_V2 || !isScanningV2) { couperFluxV2(flux); return; }
+    FLUX_SCAN_V2 = flux;
+    var zone = document.getElementById('interactiveV2');
+    zone.innerHTML = '<video playsinline muted autoplay></video>';
+    var video = zone.querySelector('video');
+    video.srcObject = flux;
+    video.play().catch(function() {});
+    reglerCameraScanV2(flux);
+    return module.then(function() {
+      if (session !== SESSION_SCAN_V2 || !isScanningV2) return;
+      boucleScanV2(session);
+    }).catch(function(e) {
+      // zxing ne démarre pas : l'ancien lecteur prend la relève (il ouvre sa propre caméra)
+      if (session !== SESSION_SCAN_V2 || !isScanningV2) return;
+      logErreurV2('Lecteur zxing indisponible, secours Quagga : ' + (e && e.message ? e.message : e), 'scan');
+      couperFluxV2(FLUX_SCAN_V2);
+      FLUX_SCAN_V2 = null;
+      demarrerQuaggaV2();
+    });
+  }, function() {
+    if (session === SESSION_SCAN_V2) texteScanV2(CAMERA_INDISPONIBLE_V2);
+  });
+}
+
+// Mise au point en continu et rond « Lampe », si la caméra les permet
+function reglerCameraScanV2(flux) {
+  var piste = flux.getVideoTracks()[0];
+  var possible = (piste && piste.getCapabilities) ? piste.getCapabilities() : {};
+  if ((possible.focusMode || []).indexOf('continuous') !== -1) piste.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }).catch(function() {});
+  majLampeScanV2(!!possible.torch);
+}
+
+function majLampeScanV2(visible) {
+  var rond = document.getElementById('scanV2-lampe');
+  if (!rond) return;
+  rond.style.display = visible ? '' : 'none';
+  rond.querySelector('.roundel-barre').textContent = LAMPE_SCAN_V2 ? 'Éteindre' : 'Lampe';
+}
+
+function basculerLampeScanV2() {
+  var piste = FLUX_SCAN_V2 && FLUX_SCAN_V2.getVideoTracks()[0];
+  if (!piste) return;
+  var allumer = !LAMPE_SCAN_V2;
+  piste.applyConstraints({ advanced: [{ torch: allumer }] }).then(function() {
+    LAMPE_SCAN_V2 = allumer;
+    majLampeScanV2(true);
+  }).catch(function() { afficherMessage('Lampe indisponible sur cet appareil'); });
+}
+
+// La partie de l'image que montre le cadre (la vidéo le remplit en « cover »), réduite au besoin
+function zoneVisibleScanV2(video) {
+  var cadre = document.getElementById('interactiveV2');
+  var vl = video.videoWidth, vh = video.videoHeight;
+  var echelle = Math.max(cadre.clientWidth / vl, cadre.clientHeight / vh) || 1;
+  var l = Math.min(vl, Math.round(cadre.clientWidth / echelle)), h = Math.min(vh, Math.round(cadre.clientHeight / echelle));
+  var reduction = Math.min(1, LARGEUR_MAX_SCAN_V2 / l);
+  return { x: Math.round((vl - l) / 2), y: Math.round((vh - h) / 2), l: l, h: h, lt: Math.round(l * reduction), ht: Math.round(h * reduction) };
+}
+
+function boucleScanV2(session) {
+  if (session !== SESSION_SCAN_V2 || !isScanningV2) return;
+  var video = document.querySelector('#interactiveV2 video');
+  if (!video || video.readyState < 2 || !video.videoWidth) { MINUTERIE_SCAN_V2 = setTimeout(function() { boucleScanV2(session); }, 100); return; }
+  var z = zoneVisibleScanV2(video);
+  var toile = document.createElement('canvas');
+  toile.width = z.lt;
+  toile.height = z.ht;
+  var ctx = toile.getContext('2d', { willReadFrequently: true });
+  ctx.drawImage(video, z.x, z.y, z.l, z.h, 0, 0, z.lt, z.ht);
+  var image = etirerContrasteScanV2(ctx.getImageData(0, 0, z.lt, z.ht));
+  var lissage = LISSAGES_SCAN_V2[PASSE_SCAN_V2++ % LISSAGES_SCAN_V2.length];
+  if (lissage) image = etirerContrasteScanV2(lisserBarresScanV2(image, lissage));
+  window.ZXingWASM.readBarcodes(image, OPTIONS_SCAN_V2).then(function(codes) {
+    (codes || []).some(function(c) { return lectureScanV2(c.text); });
+  }).catch(function() {}).then(function() {
+    if (session === SESSION_SCAN_V2 && isScanningV2) MINUTERIE_SCAN_V2 = setTimeout(function() { boucleScanV2(session); }, 60);
+  });
+}
+
+// Gris, puis contraste étiré entre le 2e et le 98e centile (pénombre, contraste faible, flou) — modifie l'image reçue
+function etirerContrasteScanV2(image) {
+  var d = image.data, n = d.length / 4, hist = new Uint32Array(256), i, v;
+  for (i = 0; i < n; i++) { v = (d[4 * i] * 77 + d[4 * i + 1] * 150 + d[4 * i + 2] * 29) >> 8; d[4 * i] = v; hist[v]++; }
+  var bas = 0, haut = 255, cumul = 0;
+  for (v = 0; v < 256; v++) { cumul += hist[v]; if (cumul >= n * 0.02) { bas = v; break; } }
+  for (cumul = 0, v = 255; v >= 0; v--) { cumul += hist[v]; if (cumul >= n * 0.02) { haut = v; break; } }
+  var k = 255 / Math.max(1, haut - bas);
+  for (i = 0; i < n; i++) { v = (d[4 * i] - bas) * k; d[4 * i] = d[4 * i + 1] = d[4 * i + 2] = v; d[4 * i + 3] = 255; }
+  return image;
+}
+
+// Moyenne VERTICALE sur 2r+1 lignes : les barres sont verticales, le bruit de la pénombre s'efface sans les brouiller
+function lisserBarresScanV2(image, r) {
+  var l = image.width, h = image.height, d = image.data, sortie = new ImageData(l, h), s = sortie.data;
+  for (var x = 0; x < l; x++) {
+    var somme = 0, y;
+    for (y = -r; y <= r; y++) somme += d[4 * (Math.min(h - 1, Math.max(0, y)) * l + x)];
+    for (y = 0; y < h; y++) {
+      var i = 4 * (y * l + x);
+      s[i] = s[i + 1] = s[i + 2] = somme / (2 * r + 1);
+      s[i + 3] = 255;
+      somme += d[4 * (Math.min(h - 1, y + r + 1) * l + x)] - d[4 * (Math.max(0, y - r) * l + x)];
+    }
+  }
+  return sortie;
+}
+
+// Une lecture (des deux lecteurs) : → true si le code est accepté
+function lectureScanV2(code) {
+  if (!isScanningV2 || !code || !gtinValide(code)) return false;
+  scanSuiteV2 = (scanSuiteV2.code === code) ? { code: code, n: scanSuiteV2.n + 1 } : { code: code, n: 1 };
+  texteScanV2('Code détecté : ' + code + ' (' + scanSuiteV2.n + '/' + SCAN_THRESHOLD_V2 + ')');
+  if (scanSuiteV2.n < SCAN_THRESHOLD_V2) return false;
+  stopScannerV2();
+  traiterResultatScanV2(code);
+  return true;
+}
+
+// L'ancien lecteur, gardé en secours jusqu'après les essais en succursale
+function demarrerQuaggaV2() {
+  if (typeof Quagga === 'undefined') { texteScanV2(CAMERA_INDISPONIBLE_V2); return; }
   Quagga.init({
     numOfWorkers: 0,
     inputStream: {
@@ -45,43 +197,31 @@ function startScannerV2() {
     locator: { patchSize: "medium", halfSample: true },
     decoder: { readers: ["ean_reader", "code_128_reader", "upc_reader"] }
   }, function(err) {
-    if (err) {
-      const feedback = document.getElementById('scanV2-feedback');
-      if (feedback) { feedback.textContent = 'Caméra indisponible — utilisez l\'entrée manuelle'; }
-      return;
-    }
-    Quagga.start();
+    if (err) { texteScanV2(CAMERA_INDISPONIBLE_V2); return; }
+    if (isScanningV2) Quagga.start();
   });
-  
   Quagga.offDetected();
-  Quagga.onDetected(function(result) {
-    if (!isScanningV2) return;
-    const code = result.codeResult.code;
-    if (!code) return;
-    if (!gtinValide(code)) return;
-    if (!scanConfirmationsV2[code]) scanConfirmationsV2[code] = 0;
-    scanConfirmationsV2[code]++;
-    const feedback = document.getElementById('scanV2-feedback');
-    if (feedback) {
-      feedback.textContent = 'Code détecté : ' + code + ' (' + scanConfirmationsV2[code] + '/' + SCAN_THRESHOLD_V2 + ')';
-    }
-    if (scanConfirmationsV2[code] >= SCAN_THRESHOLD_V2) {
-      stopScannerV2();
-      traiterResultatScanV2(code);
-    }
-  });
+  Quagga.onDetected(function(result) { lectureScanV2(result && result.codeResult ? result.codeResult.code : ''); });
+}
+
+function couperFluxV2(flux) {
+  if (flux) flux.getTracks().forEach(function(p) { p.stop(); });
 }
 
 function stopScannerV2() {
   isScanningV2 = false;
+  SESSION_SCAN_V2++;
+  clearTimeout(MINUTERIE_SCAN_V2);
+  couperFluxV2(FLUX_SCAN_V2);   // éteint aussi la lampe
+  FLUX_SCAN_V2 = null;
+  LAMPE_SCAN_V2 = false;
+  majLampeScanV2(false);
   if (typeof Quagga !== 'undefined' && Quagga.stop) {
     try { Quagga.stop(); } catch (e) {}
   }
+  document.getElementById('interactiveV2').innerHTML = '';
   document.getElementById('scannerV2Container').style.display = 'none';
-  const feedback = document.getElementById('scanV2-feedback');
-  if (feedback) {
-    feedback.textContent = 'Alignez le code-barres dans le cadre';
-  }
+  texteScanV2('Alignez le code-barres dans le cadre');
 }
 
 function fermerScannerV2() {
@@ -90,9 +230,8 @@ function fermerScannerV2() {
 }
 
 function rescannerV2() {
-  scanConfirmationsV2 = {};
-  const feedback = document.getElementById('scanV2-feedback');
-  if (feedback) { feedback.textContent = 'Alignez le code-barres dans le cadre'; }
+  scanSuiteV2 = { code: '', n: 0 };
+  texteScanV2('Alignez le code-barres dans le cadre');
   if (!isScanningV2) { startScannerV2(); }
 }
 

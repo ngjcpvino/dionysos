@@ -111,6 +111,10 @@
       <div class="scan-v2-viseur"></div>
     </div>
     <p id="scanV2-feedback" class="texte-secondaire">Alignez le code-barres dans le cadre</p>
+    <div id="scanV2-lampe" class="roundel" style="display:none;" onclick="basculerLampeScanV2()">
+      <span class="roundel-anneau"></span>
+      <span class="roundel-barre">Lampe</span>
+    </div>
     <div class="roundel" onclick="rescannerV2()">
       <span class="roundel-anneau"></span>
       <span class="roundel-barre">Rescanner</span>
@@ -714,6 +718,8 @@
   </div>
 </div>
 
+<script src="lecteur/zxing-wasm-3.1.6.js"></script>
+<!-- Ancien lecteur, en secours seulement jusqu'après les essais en succursale (liste 2.0, chantier 2) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
 <script>
 (function() {

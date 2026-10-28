@@ -6,7 +6,7 @@
    Ne touche jamais au backend (POST vers Apps Script) ni aux photos des bouteilles (SAQ).
 ============================================================ */
 
-var CACHE_APP = 'dionysos-app-v2';   // v2 (28 oct. 2026) : scripts-scanner-v2.js découpé en 8 fichiers
+var CACHE_APP = 'dionysos-app-v3';   // v3 (28 oct. 2026) : le lecteur de codes-barres rangé dans lecteur/
 var DELAI_RESEAU = 4000; // au-delà, la copie répond
 
 // Gardés dès l'installation : l'app elle-même et ce qu'elle affiche sans réseau
@@ -15,9 +15,10 @@ var FICHIERS = [
   'scripts-cave-v2.js', 'scripts-achat-v2.js', 'scripts-recherche-v2.js', 'scripts-accords-v2.js',
   'scripts-emplacements-v2.js', 'scripts-historique-v2.js', 'scripts-fiche-v2.js',
   'images/scan.png', 'images/saq1.PNG', 'images/partager-spinner-3.svg', 'images/ne-pas-racheter.svg',
-  'images/icone-ipad.png', 'images/vin.ico'
+  'images/icone-ipad.png', 'images/vin.ico',
+  'lecteur/zxing-wasm-3.1.6.js', 'lecteur/zxing_reader-3.1.6.wasm'
 ];
-// Hors du site, mais nécessaires sans réseau : le lecteur de codes-barres et l'image de fond
+// Hors du site, mais nécessaires sans réseau : l'ancien lecteur de codes-barres (secours) et l'image de fond
 var EXTERNES = [
   'https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js',
   'https://res.cloudinary.com/dym93w23h/image/upload/v1780614859/fond_k08qtb.jpg'

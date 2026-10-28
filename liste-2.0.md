@@ -43,6 +43,7 @@ Rien ne change à l'écran. On enlève ce qui ne sert plus, pour que la suite pa
 **Tout le reste du scan ne bouge pas** : `traiterResultatScanV2` reçoit un code comme avant (mémoire, inventaire de la succursale, autre code-barres, propositions…).
 **Vérification** : test automatique avec une **fausse caméra** (Chromium lit une vidéo de code-barres : on mesure le temps de lecture avant / après), puis l'essai de l'utilisateur au cellier et en succursale (béton, faible lumière).
 **Quand** : je recommande **après** les essais de la 1.0 en fin de semaine (tournée du Tri, hors ligne en succursale), pour ne pas changer ce qu'on s'apprête à tester — sauf si l'utilisateur préfère tester le nouveau scanner en même temps.
+**Fait le 28 oct. 2026** (l'utilisateur : « lent, pas assez de lumière, ça marche pas, lecture erronée » ; publié AVANT les essais, pour l'essayer en vrai) : `zxing-wasm` directement (plus simple que `barcode-detector`, même moteur) + préparation de l'image (contraste, lissage vertical) → 60/60 images de test, pénombre comprise ; 2 lectures de suite ; rond « Lampe » en premier (choix sur image, A) ; Quagga en secours automatique. Détail : `mise-a-jour.md` 📷. **Reste** : l'essai de l'utilisateur, puis retirer Quagga.
 
 ## Chantier 3 — Le style, uniformisé en images *(moyen ; chaque famille = un choix sur image)*
 Chaque famille : Claude montre toutes les variantes **côte à côte, telles qu'à l'écran** ; l'utilisateur choisit les modèles ; on remplace partout ; on supprime le reste.
@@ -99,6 +100,6 @@ Chaque famille : Claude montre toutes les variantes **côte à côte, telles qu'
 
 ## Décisions à prendre par l'utilisateur (une à la fois, au bon moment)
 - ~~Chantier 1 : activer l'API Apps Script et donner l'accès, oui ou non ?~~ **Oui, clé complète** (28 oct.) — reste à faire à l'ordinateur.
-- Chantier 2 : nouveau scanner avant ou après les essais de fin de semaine ?
+- ~~Chantier 2 : nouveau scanner avant ou après les essais de fin de semaine ?~~ **Avant** (28 oct.) — publié, à essayer en fin de semaine.
 - Chantier 3 : les modèles de chaque famille (sur image) ; titres en or ou blancs ?
 - Chantier 5 : le découpage des fichiers du serveur (la liste ci-dessus, ou autrement ?).
