@@ -85,7 +85,6 @@ html, body {
   --space-15: 15px;
   --space-20: 20px;
   --space-25: 25px;
-  --space-8: 8px;
   --space-7: 7px;
   --taille-44: 44px;
   --taille-9: 9px;
@@ -529,7 +528,7 @@ body::after {
 .emp-rangee:not(.ouvert) .emp-espace-num { display: none; }
 
 
-.cercle:active {
+.cercle:active, .btn-fermer:active {
   background: var(--gold-20);
 }
 .cercle.desactive {
@@ -545,24 +544,6 @@ body::after {
   position: relative;
 }
 
-.btn-fermer {
-  position: fixed;
-  top: var(--space-10); right: var(--space-10);
-  width: var(--taille-44);
-  height: var(--taille-44);
-  border-radius: 50%;
-  border: var(--largeur-bordure-1) solid var(--gold);
-  background: var(--noir-50);
-  color: var(--white);
-  font-size: var(--fs-20);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 10002;
-  -webkit-tap-highlight-color: transparent;
-}
-.btn-fermer:active { background: var(--gold-20); }
 
 /* Bouton icône en haut à droite (Partager), au-dessus de la modale. Réutilisable. */
 .btn-partager {
@@ -917,11 +898,11 @@ input[type="date"].champ-saisie::-webkit-date-and-time-value { text-align: left;
 /* Item dont le libellé peut être long (ex. « Appellation … — 2 en cave ») : il replie au lieu de déborder. Réutilisable. */
 .item-liste.multiligne { white-space: normal; }
 /* Icône devant le libellé d'un item de menu (Curieux Bégin, Données) — partagée, pas de style en ligne */
-.item-icone { display: inline-block; vertical-align: middle; margin-right: var(--space-8); }
+.item-icone { display: inline-block; vertical-align: middle; margin-right: var(--space-10); }
 .panneau-gauche .menu-liste { margin-left: auto; margin-right: 0; margin-top: 0; } /* l'espace du haut vient déjà du gap du panneau : on ne le double pas */
 
-/* ===== CERCLE — rond générique V2 (bordure or, fond sombre, centré) ===== */
-.cercle {
+/* ===== CERCLE — rond générique V2 (bordure or, fond sombre, centré) ; le ✕ (.btn-fermer) en est un ===== */
+.cercle, .btn-fermer {
   width: var(--taille-44);
   height: var(--taille-44);
   flex: none;
@@ -936,6 +917,13 @@ input[type="date"].champ-saisie::-webkit-date-and-time-value { text-align: left;
   cursor: pointer;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
+}
+/* Le ✕ : le rond générique (.cercle, juste au-dessus), posé en haut à droite */
+.btn-fermer {
+  position: fixed;
+  top: var(--space-10); right: var(--space-10);
+  font-size: var(--fs-20);
+  z-index: 10002;
 }
 .cercle.actif { background: var(--gold); border-color: var(--gold); }
 /* Rond de choix (J'aime / J'aime pas…) : atténué tant qu'il n'est pas actif. Réutilisable. */
