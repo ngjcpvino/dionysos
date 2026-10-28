@@ -119,6 +119,7 @@ html, body {
   --space-8: 8px;
   --espace-accordeon: 7px;
   --taille-tactile: 44px;
+  --taille-9: 9px;
   --ls-tight: 1px;
   --ls-normal: 1.5px;
   --ls-wide: 2px;
@@ -913,6 +914,9 @@ input[type="date"].champ-saisie::-webkit-date-and-time-value { text-align: left;
 .item-liste.actif { background: var(--gold-30); }
 /* Filtre « sauf » : la valeur exclue (2e tap sur une valeur d'un menu de filtre), barrée en rouge. Réutilisable. */
 .item-liste.exclu { color: var(--red); text-decoration: line-through; }
+/* Pastille de rappel : petit point doré collé à un libellé (ex. OUTILS tant qu'il reste des vins sans cépage). Réutilisable. */
+.pastille-rappel { display: none; width: var(--taille-9); height: var(--taille-9); border-radius: 50%; background: var(--gold); margin-left: var(--space-s); vertical-align: middle; }
+.pastille-rappel.visible { display: inline-block; }
 .panneau-gauche .item-liste { white-space: normal; }
 /* Enfants directs du panneau (onglets de mode) : espacés par le gap du panneau, pas de marge en double */
 .panneau-gauche > .item-liste { margin-bottom: 0; }

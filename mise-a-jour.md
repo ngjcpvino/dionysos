@@ -249,6 +249,14 @@ Il ne reprenait que l'inventaire (et vidait l'historique) : ce que l'autre tél�
 - ⚠️ **Règle** : toute nouvelle liste gardée en mémoire doit être ajoutée à ce bouton, sinon elle vieillit en silence sur l'autre téléphone.
 - **Porte de sortie (24 oct. 2026)** : après une synchro réussie, le bouton vide aussi l'inventaire de la succursale (et sa copie), oublie la copie de l'app (`mettreAJourAppV2` : mise à jour du service worker + caches `dionysos-app-*` effacés) et **recharge l'app** — au cas où elle resterait coincée sur une vieille version. Sans réseau, la synchro échoue et rien n'est effacé.
 
+## 🟠 Pastille de rappel sur OUTILS (28 oct. 2026)
+Demande de l'utilisateur : « J'aimerais avoir quelque chose qui m'indique que je dois aller voir le sans cépage. Sinon je vais oublier. »
+- **Choix de l'utilisateur (sur image) : point doré plein**, **seulement à côté d'OUTILS** (rien sur « Sans cépage »), **sans chiffre**.
+- Il est là tant qu'au moins un vin n'a pas de cépage. La règle est la même que pour la liste « Sans cépage » (`vinsSansCepageV2` : pas de `Cepage`, hors Spiritueux), et la liste comme la pastille passent par cette fonction.
+- Recalculé **à chaque ouverture du menu** (`toggleMenuV2`). Dès que le dernier vin a reçu son cépage, la pastille a disparu à l'ouverture suivante.
+- Classe réutilisable `.pastille-rappel` (9 px, `--taille-9`, or, cachée par défaut ; `.visible` l'affiche) ; le point est le `span#burgerV2-pastille-outils` dans le libellé OUTILS.
+- Vérifié sur les vraies données : 1 vin sans cépage → point affiché ; tous les cépages remplis → point caché.
+
 ## ⭕ Ronds à cocher sur le placement (20 septembre 2026)
 Une bouteille ne partait pas parce que l'**espace** n'avait pas été choisi, et rien ne le disait (le déplacement ne part qu'au choix de l'espace). Sur **Ajouter** et **Déplacer**, chaque **choix** des listes Meuble · Rangée · Espace porte donc le rond vide de la Liste d'achat (`.coche-panier`), coché sur la valeur prise.
 - **Le rond est sur les lignes de choix, PAS à côté du roundel** (essayé le 20 sept., refusé : ça défaisait le look).
