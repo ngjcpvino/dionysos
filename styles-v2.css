@@ -31,6 +31,7 @@ html, body {
 
   /* ===== BORDURES — largeurs ===== */
   --largeur-bordure-1: 1px;
+  --largeur-bordure-1-5: 1.5px;
   --largeur-bordure-2: 2px;
   --largeur-bordure-3: 3px;
   --largeur-bordure-4: 4px;
@@ -366,7 +367,7 @@ body::after {
 .spinner-trace {
   position: absolute; top: 0; left: 0;
   width: 100%; height: 100%;
-  fill: none; stroke: var(--gold); stroke-width: var(--largeur-bordure-3);
+  fill: none; stroke: var(--gold); stroke-width: var(--largeur-bordure-1-5);
   stroke-linecap: round; stroke-linejoin: round;
 }
 .spinner-texte {
