@@ -24,7 +24,7 @@ function gtinValide(code) {
 }
 
 function startScanFromHomeV2() {
-  suggestionsV2Attente = false;
+  oublierAjoutSuggestionV2();
   startScannerV2();
 }
  
@@ -86,11 +86,7 @@ function stopScannerV2() {
 
 function fermerScannerV2() {
   stopScannerV2();
-  if (suggestionsV2Attente) {
-    suggestionsV2Attente = false;
-    cacherToutesPagesV2();
-    ouvrirApresTap(ouvrirSuggestionsV2);
-  }
+  abandonnerAjoutSuggestionV2();
 }
 
 function rescannerV2() {
@@ -170,11 +166,7 @@ function validerSaisieManuelleV2() {
 
 function fermerSaisieManuelleV2() {
   document.getElementById('saisieManuelleV2Container').style.display = 'none';
-  if (suggestionsV2Attente) {
-    suggestionsV2Attente = false;
-    cacherToutesPagesV2();
-    ouvrirApresTap(ouvrirSuggestionsV2);
-  }
+  abandonnerAjoutSuggestionV2();
 }
 
 function traiterResultatScanV2(code) {
@@ -391,11 +383,7 @@ function vinInconnuAttendV2(code) {
 function fermerVinInconnuV2() {
   clearTimeout(VIN_INCONNU_V2_ESSAI);
   document.getElementById('vinInconnuV2Container').style.display = 'none';
-  if (suggestionsV2Attente) {
-    suggestionsV2Attente = false;
-    cacherToutesPagesV2();
-    ouvrirApresTap(ouvrirSuggestionsV2);
-  }
+  abandonnerAjoutSuggestionV2();
 }
 
 // ==================== ÉCRAN DU SCAN : sommeliers · Curieux Bégin · Comparables ====================
@@ -548,7 +536,7 @@ function enchainerMenuApresCreationV2(code, mode) {
 }
 
 function terminerAjoutSuggestionV2(code, wineResult) {
-  suggestionsV2Attente = false;
+  oublierAjoutSuggestionV2();
   var codeSAQ = (wineResult && wineResult.wine && wineResult.wine.codeSAQ) ? wineResult.wine.codeSAQ.toString().trim() : '';
   cacherToutesPagesV2();
   ouvrirApresTap(function() {
@@ -559,6 +547,22 @@ function terminerAjoutSuggestionV2(code, wineResult) {
       afficherMessage('Aucun code SAQ : proposition non ajoutée');
     }
   });
+}
+
+// Fermé en cours de route (scanner, saisie manuelle, vin inconnu, erreur) : retour aux Propositions, avec le message.
+// Vrai si un ajout était en cours (l'appelant s'arrête là).
+function abandonnerAjoutSuggestionV2(message) {
+  if (!suggestionsV2Attente) return false;
+  oublierAjoutSuggestionV2();
+  cacherToutesPagesV2();
+  if (message) afficherMessage(message);
+  ouvrirApresTap(ouvrirSuggestionsV2);
+  return true;
+}
+
+// Le parcours a pris une autre route (scan de l'accueil, menu, bouteille mise en cave) : ce n'est plus une proposition
+function oublierAjoutSuggestionV2() {
+  suggestionsV2Attente = false;
 }
 
 function voirSAQVinInconnuV2() {
@@ -711,13 +715,7 @@ function cacherToutesPagesV2() {
 function retourAccueilV2(message) {
   var texte = message || 'Un problème est survenu, veuillez recommencer';
   logErreurV2(texte, 'retourAccueil');
-  if (suggestionsV2Attente) {
-    suggestionsV2Attente = false;
-    cacherToutesPagesV2();
-    afficherMessage(texte);
-    ouvrirApresTap(ouvrirSuggestionsV2);
-    return;
-  }
+  if (abandonnerAjoutSuggestionV2(texte)) return;
   cacherToutesPagesV2();
   menuActionV2Context = null;
   afficherMessage(texte);
@@ -1316,6 +1314,7 @@ function fermerDonnerV2() {
 function ajouterBouteilleArrivee(meuble, rangee, espace) {
   var code = menuActionV2Context ? menuActionV2Context.code : null;
   if (!code) { afficherMessage('Vin introuvable'); return; }
+  oublierAjoutSuggestionV2(); // une bouteille entre en cave : c'est un achat (le « + » d'un vin inconnu), plus une proposition
   // Vin neuf (« + » du vin inconnu) : c'est ici, et seulement ici, qu'il s'inscrit — avec sa bouteille
   var neuf = menuActionV2Context.nouveau;
   var appel = neuf
