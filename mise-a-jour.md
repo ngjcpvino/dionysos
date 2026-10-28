@@ -69,7 +69,7 @@
 - **Ordre d'affichage des emplacements** : `comparerEmplacementsV2` trie **Cellier → Pigeonnier → Réserve** (`ORDRE_MEUBLES_V2`), « À ranger » toujours en dernier, partout. C'est l'INVERSE de `CHAINE_MEUBLES_V2` (l'ordre de remplissage).
 
 **Erreurs**
-- Tout nouveau `.catch()` passe un message parlant à `retourAccueilV2(message)`. La phrase passe-partout cache les vraies causes.
+- Tout nouveau `.catch()` passe un message parlant à `retourAccueilV2('Quoi : ' + causeV2(err))`. La phrase passe-partout cache les vraies causes. **Un appel de fond** (la page reste utilisable) : `.catch(journaliserV2('Quoi'))` — rien à l'écran, une trace dans l'onglet « Erreurs ». Jamais un `catch(function() {})` qui avale une panne (seuls exemptés : caméra, copie hors ligne, service worker, le journal lui-même).
 - Toast : ne jamais poser `display:none` en ligne sans le retirer à l'affichage suivant (signature : « marche au premier essai, mort ensuite »).
 - **Journal des erreurs** : chaque erreur (capteurs `window error` / `unhandledrejection` + `retourAccueilV2`) appelle `logErreurV2` → route `logErreur` → onglet **« Erreurs »** (Date · Message · Page · Code), créé au besoin. Feu-et-oublie, jamais bloquant. Pas de fichier GitHub (le front ne peut pas écrire dans le dépôt).
 

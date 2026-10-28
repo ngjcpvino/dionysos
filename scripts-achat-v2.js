@@ -290,7 +290,7 @@ function chargerPromosMesV2() {
     var sugg = document.getElementById('suggestionsV2Container');
     if (sugg && sugg.style.display !== 'none') afficherSuggestionsV2();
     rafraichirRechercheSiOuverteV2();
-  }).catch(function() {});
+  }).catch(journaliserV2('Promotions de mes vins'));
 }
 
 function chargerDecouvertesV2() {
@@ -332,7 +332,7 @@ function ouvrirAchatV2() {
     appelBackend('getSuccursales', {}, { spinner: '' }).then(function(succ) {
       succursalesAchatV2 = succ || [];
       remplirFiltresAchatV2();
-    }).catch(function() {});
+    }).catch(journaliserV2('Succursales'));
   }
   chargerPromosMesV2();
   remplirFiltresAchatV2();
