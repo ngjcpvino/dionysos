@@ -11,7 +11,8 @@
   - Vérif simple d'un collage : le numéro de la dernière ligne de `Code.gs` dans Apps Script (**2 405 lignes** depuis la consolidation du 28 oct., liste 2.0 chantier 5 ; 3 011 après le ménage, 3 131 avant).
   - ⚠️ La copie `Dionysos/Code.gs` du Google Drive est **la copie de l'utilisateur** (faite en collant, 25 oct.) : l'IA ne la met pas à jour. La coller = « aucun changement ».
   - Lire le projet sans copier-coller : export par le connecteur Drive (`application/vnd.google-apps.script+json`, fichier `Code`). Projet « Vino 3.0 » = identifiant `1HYkvpL3PhuZrzgVwYDP2KRcBEOikrxTA-QbVQX-tC5ey7nDP9YX-h8Pd`.
-  - **Mise en ligne sans copier-coller : `outils/deployer.py` du dépôt `dionysos-serveur`** (`etat` · `essai` · `publier "…"` · `revenir N`) — **prêt (28 oct.), en attente de la clé** de l'utilisateur (variable d'environnement `CLASPRC_JSON`, mode d'emploi dans le `README.md` de ce dépôt). Tant qu'elle manque, le collage à la main reste la règle. Le réseau de l'environnement bloque `script.google.com` (l'adresse de l'app) : la vérification finale se fait dans l'app, sauf si l'utilisateur l'ajoute aux domaines permis ; `script.googleapis.com` (l'API) passe.
+  - **Mise en ligne sans copier-coller : `outils/deployer.py` du dépôt `dionysos-serveur`** (`etat` · `essai` · `publier "…"` · `revenir N`). **La clé est installée (28 oct.)** sur l'ordinateur de l'utilisateur (`~/.clasprc.json`, par `clasp login`) avec **seulement** les accès Apps Script `script.projects` + `script.deployments` (décision de l'utilisateur : rien de Drive, de Google Cloud, des services ni des journaux) — ils suffisent. **Essai réussi (28 oct.)** : code lu, repoussé tel quel, relu identique ; déploiement remis sur sa version 1140, accepté ; l'app répond (mot de passe demandé). Depuis l'ordinateur, `script.google.com` passe (la vérification finale se fait donc aussi). ⚠️ **Python n'est pas installé sur cet ordinateur** (seul le raccourci du Microsoft Store répond) : `deployer.py` et `garde-fou.py` n'y tournent pas tant qu'il manque.
+  - Le `Code.gs` de cet ordinateur est en fins de ligne Windows (CRLF) : une comparaison avec ce qui est en ligne doit les ignorer (Python le fait seul à la lecture).
 - **Base** : Google Sheets « Vino 3.0 » — onglets Vino · Historique · config/CONFIG · Suggestions · Chartier · Recettes · CurieuxBegin · Notes · Erreurs.
 
 ## 📂 Fichiers
@@ -301,7 +302,7 @@ Une phrase entendue (« asperge et crabe m'amènent un chablis »). 4e mécaniqu
 
 ## 📋 En attente
 - **Liste 2.0** (`liste-2.0.md`) : tout le plan de consolidation, un chantier à la fois.
-- **À recoller par l'utilisateur, à l'ordinateur** : `Code.gs` du dépôt privé (**2 405 lignes** : ménage du chantier 0 + consolidation du chantier 5), puis Déployer → Gérer les déploiements → ✏️ → **Nouvelle version**. Aucun changement de l'app n'en dépend : l'ancien et le nouveau serveur répondent pareil. (Ou installer la clé du chantier 1 : Claude le met en ligne lui-même.)
+- **Python sur l'ordinateur de l'utilisateur** (pour `deployer.py` et le garde-fou) — à installer.
 - **Supprimer `scripts-scanner-v2.js` à partir du 4 nov. 2026** (et la ligne qui le décrit dans 📂 Fichiers).
 - **Essais de la 1.0 en fin de semaine** : tournée du Tri, hors ligne en succursale, **et le nouveau lecteur** (au cellier, en succursale ; la lampe sur l'iPhone ?).
 - **Après ces essais, si le lecteur zxing est concluant** : retirer Quagga (balise de `index-v2.html`, `EXTERNES` de `sw.js`, `demarrerQuaggaV2` et son appel).
