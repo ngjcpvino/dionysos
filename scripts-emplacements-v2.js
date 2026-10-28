@@ -5,7 +5,7 @@
 ============================================================ */
 
 // ==================== EMPLACEMENTS V2 ====================
-var filtresEmpV2 = { meuble: '', rangee: '', espace: '', cepage: '', couleur: '', pays: '', appellation: '' };
+var filtresEmpV2 = filtresVidesV2('empV2');
 // Mode d'affichage de la page (section « Afficher » du panneau) : le plan des
 // meubles, ou l'une des six listes. La PORTÉE des listes vient du filtre Meuble.
 var empV2Mode = 'plan';
@@ -14,7 +14,7 @@ var MODES_EMP_V2 = ['plan', 'doubles', 'cepdoubles', 'listemeuble', 'cepmanquant
 function ouvrirEmpV2() {
   document.getElementById('empV2Container').style.display = 'flex';
   remonterScrollV2('empV2Container');
-  filtresEmpV2 = { meuble: '', rangee: '', espace: '', cepage: '', couleur: '', pays: '', appellation: '' };
+  filtresEmpV2 = filtresVidesV2('empV2');
   empV2Mode = 'plan';
   remplirFiltresEmpV2();
   rendreEmpV2();
@@ -31,18 +31,12 @@ function choisirModeEmpV2(mode) {
   empV2Mode = mode;
   remplirFiltresEmpV2();
   if (mode === 'menage') ouvrirMenageEmpV2(); else rendreEmpV2();
-  fermerFiltresEmpV2();
+  fermerFiltresV2('empV2');
 }
 
 function fermerEmpV2() {
-  fermerFiltresEmpV2();
+  fermerFiltresV2('empV2');
   document.getElementById('empV2Container').style.display = 'none';
-}
-
-function ouvrirFiltresEmpV2() { clicLoupeV2('empV2', reinitialiserFiltresEmpV2); }
-function fermerFiltresEmpV2() {
-  document.getElementById('empV2-filtres-voile').classList.remove('ouvert');
-  document.getElementById('empV2-filtres').classList.remove('ouvert');
 }
 
 // Bouteilles rangées (statut actif + emplacement complet)
@@ -61,6 +55,17 @@ function bouteillesARangerEmpV2() {
     if (statut === 'Bu' || statut === 'Sorti' || statut === 'Suggestion') return false;
     return i.bottle && i.bottle > 0 && !(i.Meuble && i.Rangee && i.Espace);
   });
+}
+
+// Après un choix dans le panneau (moteur commun : choisirFiltreV2) — ce qui est propre aux Emplacements
+function apresChoixFiltreEmpV2(cle) {
+  // Nouveau pays : une appellation qui n'y existe pas se vide (jamais une liste vide sans raison)
+  if (cle === 'pays' && filtresEmpV2.appellation &&
+      !appellationsEmpV2(baseFiltresVinEmpV2()).some(function(a){ return memeTexteV2(a, valeurChoixV2(filtresEmpV2.appellation)); })) {
+    filtresEmpV2.appellation = '';
+  }
+  // Deux modes n'existent que dans un meuble : sans meuble, retour au plan.
+  if (!filtresEmpV2.meuble && (empV2Mode === 'cepdoubles' || empV2Mode === 'listemeuble')) empV2Mode = 'plan';
 }
 
 function remplirFiltresEmpV2() {
@@ -82,15 +87,7 @@ function remplirFiltresEmpV2() {
   var listes = { meuble: meubles, rangee: rangees, espace: espaces,
                  cepage: uniqueCepagesEmpV2(baseVin), couleur: uniqueValeursAchat(baseVin, 'Couleur'), pays: uniqueValeursAchat(baseVin, 'Pays'),
                  appellation: appellationsEmpV2(baseVin) };
-  ['meuble','rangee','espace','cepage','couleur','pays','appellation'].forEach(function(cle){
-    var cur = f[cle];
-    var menu = document.getElementById('empV2-f-' + cle + '-menu');
-    menu.innerHTML = '<div class="item-liste' + (cur === '' ? ' actif' : '') + '" onclick="choisirFiltreEmpV2(\'' + cle + '\', \'\')">Tous</div>' + listes[cle].map(function(v){
-      return '<div class="item-liste' + classeChoixV2(String(v), String(cur)) + '" onclick="choisirFiltreEmpV2(\'' + cle + '\', \'' + String(v).replace(/'/g, "\\'") + '\')">' + v + '</div>';
-    }).join('');
-    var disp = document.getElementById('empV2-f-' + cle + '-display');
-    if (disp) disp.textContent = libelleChoixV2(cur, ({meuble:'Meuble',rangee:'Rangée',espace:'Espace',cepage:'Cépage',couleur:'Couleur',pays:'Pays',appellation:'Appellation'})[cle]);
-  });
+  Object.keys(listes).forEach(function(cle){ remplirMenuFiltreV2('empV2', cle, listes[cle]); });
 
   // Afficher : le mode courant est allumé ; les deux modes « dans un meuble »
   // n'apparaissent que si un meuble est choisi.
@@ -154,45 +151,6 @@ function vinPasseFiltresEmpV2(w) {
 }
 function groupesFiltresEmpV2(groupes) {
   return groupes.filter(function(g){ return vinPasseFiltresEmpV2(g.wine); });
-}
-
-function basculerFiltreEmpV2(cle) {
-  var menu = document.getElementById('empV2-f-' + cle + '-menu');
-  var ouvert = menu.classList.contains('ouvert');
-  ['meuble','rangee','espace','cepage','couleur','pays','appellation'].forEach(function(k){
-    var m = document.getElementById('empV2-f-' + k + '-menu');
-    if (m) m.classList.remove('ouvert');
-  });
-  if (!ouvert) { menu.classList.add('ouvert'); annulerFermetureMenuV2(menu.id); }
-}
-
-function choisirFiltreEmpV2(cle, valeur) {
-  // Meuble · Rangée · Espace décident de ce qui est dessiné : « seulement » (pas de « sauf »)
-  filtresEmpV2[cle] = (cle === 'meuble' || cle === 'rangee' || cle === 'espace') ? valeur : cycleFiltreV2(filtresEmpV2[cle], valeur);
-  fermerMenuApresV2('empV2-f-' + cle + '-menu');
-  if (cle === 'meuble') { filtresEmpV2.rangee = ''; filtresEmpV2.espace = ''; }
-  if (cle === 'rangee') { filtresEmpV2.espace = ''; }
-  // Nouveau pays : une appellation qui n'y existe pas se vide (jamais une liste vide sans raison)
-  if (cle === 'pays' && filtresEmpV2.appellation &&
-      !appellationsEmpV2(baseFiltresVinEmpV2()).some(function(a){ return memeTexteV2(a, valeurChoixV2(filtresEmpV2.appellation)); })) {
-    filtresEmpV2.appellation = '';
-  }
-  // Deux modes n'existent que dans un meuble : sans meuble, retour au plan.
-  if (!filtresEmpV2.meuble && (empV2Mode === 'cepdoubles' || empV2Mode === 'listemeuble')) empV2Mode = 'plan';
-  remplirFiltresEmpV2();
-  rendreEmpV2();
-}
-
-function reinitialiserFiltresEmpV2() {
-  filtresEmpV2 = { meuble: '', rangee: '', espace: '', cepage: '', couleur: '', pays: '', appellation: '' };
-  empV2Mode = 'plan';
-  ['meuble','rangee','espace','cepage','couleur','pays','appellation'].forEach(function(k) {
-    var m = document.getElementById('empV2-f-' + k + '-menu');
-    if (m) m.classList.remove('ouvert');
-  });
-  remplirFiltresEmpV2();
-  rendreEmpV2();
-  fermerFiltresEmpV2();
 }
 
 function empCarteVinV2(w, droite, versFiche) {

@@ -7,16 +7,13 @@
 // ==================== HISTORIQUE V2 ====================
 // Filtres : ce qui est propre à la page (Vin, Appréciation), puis le vin, puis le goût — comme la Cave
 var libellesFiltreHistoV2 = { vin: 'Vin', note: 'Appréciation', couleur: 'Couleur', cepage: 'Cépage', pays: 'Pays', appellation: 'Appellation', accord: 'Accord', pastille: 'Pastille de goût', acidite: 'Acidité' };
-function filtresHistoVidesV2() {
-  return { mets: '', vin: '', note: '', couleur: '', cepage: '', pays: '', appellation: '', accord: '', pastille: '', acidite: '', cave: false };
-}
-var filtresHistoV2 = filtresHistoVidesV2();
+var filtresHistoV2 = filtresVidesV2('histoV2');
 var histoEditV2 = { row: 0, note: 0 };
 
 function ouvrirHistoV2() {
   document.getElementById('histoV2Container').style.display = 'flex';
   remonterScrollV2('histoV2Container');
-  filtresHistoV2 = filtresHistoVidesV2();
+  filtresHistoV2 = filtresVidesV2('histoV2');
   if (ALL_HISTORIQUE && ALL_HISTORIQUE.length) {
     remplirFiltresHistoV2();
     afficherHistoV2();
@@ -30,14 +27,8 @@ function ouvrirHistoV2() {
 }
 
 function fermerHistoV2() {
-  fermerFiltresHistoV2();
+  fermerFiltresV2('histoV2');
   document.getElementById('histoV2Container').style.display = 'none';
-}
-
-function ouvrirFiltresHistoV2() { clicLoupeV2('histoV2', reinitialiserFiltresHistoV2); }
-function fermerFiltresHistoV2() {
-  document.getElementById('histoV2-filtres-voile').classList.remove('ouvert');
-  document.getElementById('histoV2-filtres').classList.remove('ouvert');
 }
 
 // Le vin d'une entrée de l'historique (fiche en mémoire, par code-barres puis code SAQ) — {} s'il n'y est plus
@@ -92,14 +83,8 @@ function remplirFiltresHistoV2() {
     });
     var opts = Object.keys(vus).map(function(k) { return vus[k]; });
     opts.sort(cle === 'note' ? function(a, b) { return b - a; } : function(a, b) { return a.localeCompare(b); });
-    var libelle = function(v) { return cle === 'note' ? libelleNoteHistoV2(v) : v; };
     var cur = f[cle];
-    var menu = document.getElementById('histoV2-f-' + cle + '-menu');
-    menu.innerHTML = '<div class="item-liste' + (cur === '' ? ' actif' : '') + '" onclick="choisirFiltreHistoV2(\'' + cle + '\', \'\')">Tous</div>' + opts.map(function(v){
-      return '<div class="item-liste' + classeChoixV2(v, cur) + '" onclick="choisirFiltreHistoV2(\'' + cle + '\', \'' + v.replace(/'/g, "\\'") + '\')">' + libelle(v) + '</div>';
-    }).join('');
-    var disp = document.getElementById('histoV2-f-' + cle + '-display');
-    if (disp) disp.textContent = libelleChoixV2(cur, libellesFiltreHistoV2[cle], libelle);
+    remplirMenuFiltreV2('histoV2', cle, opts, cle === 'note' ? libelleNoteHistoV2 : null);
     base = base.filter(function(h) { return passeFiltreHistoV2(cle, h, vinDe(h), cur); });
   });
 
@@ -118,34 +103,6 @@ function filtrerMetsHistoV2() {
   var loupe = document.getElementById('histoV2-loupe');
   if (loupe) loupe.classList.toggle('actif', filtresHistoActifsV2());
   afficherHistoV2();
-}
-
-function basculerFiltreHistoV2(cle) {
-  var menu = document.getElementById('histoV2-f-' + cle + '-menu');
-  var ouvert = menu.classList.contains('ouvert');
-  Object.keys(libellesFiltreHistoV2).forEach(function(k){
-    document.getElementById('histoV2-f-' + k + '-menu').classList.remove('ouvert');
-  });
-  if (!ouvert) { menu.classList.add('ouvert'); annulerFermetureMenuV2(menu.id); }
-}
-
-function choisirFiltreHistoV2(cle, valeur) {
-  filtresHistoV2[cle] = cycleFiltreV2(filtresHistoV2[cle], valeur);
-  fermerMenuApresV2('histoV2-f-' + cle + '-menu');
-  remplirFiltresHistoV2();
-  afficherHistoV2();
-}
-
-function reinitialiserFiltresHistoV2() {
-  filtresHistoV2 = filtresHistoVidesV2();
-  var champMets = document.getElementById('histoV2-f-mets');
-  if (champMets) champMets.value = '';
-  Object.keys(libellesFiltreHistoV2).forEach(function(k) {
-    document.getElementById('histoV2-f-' + k + '-menu').classList.remove('ouvert');
-  });
-  remplirFiltresHistoV2();
-  afficherHistoV2();
-  fermerFiltresHistoV2();
 }
 
 function toggleCaveHistoV2() {
@@ -323,7 +280,7 @@ function ouvrirHistoAjoutDepuisFicheV2() {
 }
 
 function ouvrirHistoAjoutV2() {
-  fermerFiltresHistoV2();
+  fermerFiltresV2('histoV2');
   histoAjoutV2 = { codebarre: '', codeSAQ: '', nom: '', note: 0, provenance: 'histo' };
   document.getElementById('histoAjoutV2-vin').textContent = 'Ajouter à l\'historique';
   document.getElementById('histoAjoutV2-action').textContent = 'Choisir un vin';

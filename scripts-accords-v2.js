@@ -8,71 +8,30 @@
 // Une phrase entendue (« asperge et crabe m'amènent un chablis »), notée telle
 // quelle : des aliments, ce que ça appelle, qui l'a dit. Aucun lien avec un vin
 // précis — c'est ce qui la distingue des Propositions.
-var filtresNotesV2 = { source: '', cave: false };
+var filtresNotesV2 = filtresVidesV2('notesV2');
 var noteEditV2 = { row: 0 };
 
 function ouvrirNotesV2() {
-  document.getElementById('notesV2Container').style.display = 'flex';
-  remonterScrollV2('notesV2Container');
-  filtresNotesV2 = { source: '', cave: false };
-  var champ = document.getElementById('notesV2-f-texte');
-  if (champ) champ.value = '';
-  if (ALL_NOTES && ALL_NOTES.length) { remplirFiltresNotesV2(); afficherNotesV2(); return; }
-  appelBackend('getNotesAccord', {}, { spinner: ' ' }).then(function(data) {
-    ALL_NOTES = data || [];
-    remplirFiltresNotesV2();
-    afficherNotesV2();
-  }).catch(function(err) { retourAccueilV2('Notes d\'accord : ' + err); });
+  ouvrirPageFiltreeV2('notesV2', (ALL_NOTES && ALL_NOTES.length) ? null : function() {
+    return appelBackend('getNotesAccord', {}, { spinner: ' ' }).then(function(data) { ALL_NOTES = data || []; });
+  }, 'Notes d\'accord');
 }
 
 function fermerNotesV2() {
-  fermerFiltresNotesV2();
+  fermerFiltresV2('notesV2');
   document.getElementById('notesV2Container').style.display = 'none';
 }
 
-function ouvrirFiltresNotesV2() { clicLoupeV2('notesV2', reinitialiserFiltresNotesV2); }
-function fermerFiltresNotesV2() {
-  document.getElementById('notesV2-filtres-voile').classList.remove('ouvert');
-  document.getElementById('notesV2-filtres').classList.remove('ouvert');
-}
-function basculerFiltreNotesV2(cle) {
-  var menu = document.getElementById('notesV2-f-' + cle + '-menu');
-  menu.classList.toggle('ouvert');
-  annulerFermetureMenuV2(menu.id);
-}
-function choisirFiltreNotesV2(cle, valeur) {
-  filtresNotesV2[cle] = cycleFiltreV2(filtresNotesV2[cle], valeur);
-  fermerMenuApresV2('notesV2-f-' + cle + '-menu');
-  remplirFiltresNotesV2();
-  afficherNotesV2();
-}
 function toggleCaveNotesV2() {
   filtresNotesV2.cave = !filtresNotesV2.cave;
   remplirFiltresNotesV2();
   afficherNotesV2();
 }
 
-function reinitialiserFiltresNotesV2() {
-  filtresNotesV2 = { source: '', cave: false };
-  var champ = document.getElementById('notesV2-f-texte');
-  if (champ) champ.value = '';
-  document.getElementById('notesV2-f-source-menu').classList.remove('ouvert');
-  remplirFiltresNotesV2();
-  afficherNotesV2();
-  fermerFiltresNotesV2();
-}
-
 function remplirFiltresNotesV2() {
   var cur = filtresNotesV2.source;
   var sources = uniqueValeursAchat(ALL_NOTES || [], 'source');
-  var menu = document.getElementById('notesV2-f-source-menu');
-  if (menu) {
-    menu.innerHTML = '<div class="item-liste' + (cur === '' ? ' actif' : '') + '" onclick="choisirFiltreNotesV2(\'source\', \'\')">Tous</div>' + sources.map(function(v) {
-      return '<div class="item-liste' + classeChoixV2(String(v), cur) + '" onclick="choisirFiltreNotesV2(\'source\', \'' + String(v).replace(/'/g, "\\'") + '\')">' + v + '</div>';
-    }).join('');
-  }
-  var disp = document.getElementById('notesV2-f-source-display');
-  if (disp) disp.textContent = libelleChoixV2(cur, 'Qui l\'a dit');
+  remplirMenuFiltreV2('notesV2', 'source', sources);
   var btnCave = document.getElementById('notesV2-cave');
   if (btnCave) { btnCave.classList.toggle('actif', filtresNotesV2.cave); btnCave.textContent = filtresNotesV2.cave ? '✓' : '✗'; }
 }
@@ -169,7 +128,7 @@ function resumeNoteV2(n) {
 }
 
 function ajouterDepuisNotesV2() {
-  fermerFiltresNotesV2();
+  fermerFiltresV2('notesV2');
   ouvrirApresTap(function() { ouvrirNoteEditV2(0); });
 }
 
@@ -285,16 +244,11 @@ function ouvrirChartierV2() {
 }
 
 function fermerChartierV2() {
-  fermerFiltresChartierV2();
+  fermerFiltresV2('chartierV2');
   document.getElementById('chartierV2Container').style.display = 'none';
 }
 
 function ouvrirFiltresChartierV2() { clicLoupeV2('chartierV2', reinitialiserChartierV2); }
-function fermerFiltresChartierV2() {
-  document.getElementById('chartierV2-filtres-voile').classList.remove('ouvert');
-  document.getElementById('chartierV2-filtres').classList.remove('ouvert');
-}
-
 function alimentsDisponiblesChartierV2(cle) {
   var vus = {};
   (ALL_ACCORDS || []).forEach(function(a) { if (a.aliment) vus[normaliserRechercheV2(a.aliment)] = true; });
@@ -391,7 +345,7 @@ function choisirAlimentChartierV2(aliment) {
   }
   majSelectionChartierV2();
   calculerResultatsChartierV2();
-  fermerFiltresChartierV2();
+  fermerFiltresV2('chartierV2');
   remonterScrollV2('chartierV2Container');
 }
 
@@ -431,7 +385,7 @@ function reinitialiserChartierV2() {
   construirePanneauChartierV2();
   majSelectionChartierV2();
   calculerResultatsChartierV2();
-  fermerFiltresChartierV2();
+  fermerFiltresV2('chartierV2');
 }
 
 
@@ -587,16 +541,11 @@ function ouvrirSelonSaqV2() {
 }
 
 function fermerSelonSaqV2() {
-  fermerFiltresSelonSaqV2();
+  fermerFiltresV2('selonSaqV2');
   document.getElementById('selonSaqV2Container').style.display = 'none';
 }
 
 function ouvrirFiltresSelonSaqV2() { clicLoupeV2('selonSaqV2', reinitialiserSelonSaqV2); }
-function fermerFiltresSelonSaqV2() {
-  document.getElementById('selonSaqV2-filtres-voile').classList.remove('ouvert');
-  document.getElementById('selonSaqV2-filtres').classList.remove('ouvert');
-}
-
 // Seules les recettes des familles présentes en cave
 function recettesUtilesSelonSaqV2() {
   var fams = {};
@@ -688,7 +637,7 @@ function reinitialiserSelonSaqV2() {
   selonSaqV2RecettesDe = null;
   construirePanneauSelonSaqV2();
   calculerSelonSaqV2();
-  fermerFiltresSelonSaqV2();
+  fermerFiltresV2('selonSaqV2');
 }
 
 function toggleCaveSelonSaqV2() {
@@ -784,7 +733,7 @@ function calculerSelonSaqV2() {
 // Ouvre le volet « les recettes » d'une valeur (depuis la ligne sous une valeur sélectionnée)
 function voirRecettesSelonSaqV2(el) {
   selonSaqV2RecettesDe = { champ: el.getAttribute('data-champ'), valeur: el.getAttribute('data-valeur') };
-  fermerFiltresSelonSaqV2();
+  fermerFiltresV2('selonSaqV2');
   calculerSelonSaqV2();
   remonterScrollV2('selonSaqV2Container');
 }
@@ -798,31 +747,31 @@ function retourVinsSelonSaqV2() {
 // ==================== SELON CURIEUX BÉGIN V2 ====================
 // Page façon « Suggestions » : une section par saison (la plus récente en haut), groupée par vin dedans
 // (carte du vin → sa fiche), puis les recettes dessous (→ la recette).
-var filtresCurieuxBeginV2 = { saison: '', couleur: '', cepage: '', pays: '', appellation: '', cave: false, mode: 'mesvins' };
+var filtresCurieuxBeginV2 = filtresVidesV2('curieuxBeginV2');
 
 function ouvrirCurieuxBeginV2() {
-  document.getElementById('curieuxBeginV2Container').style.display = 'flex';
-  remonterScrollV2('curieuxBeginV2Container');
-  filtresCurieuxBeginV2 = { saison: '', couleur: '', cepage: '', pays: '', appellation: '', cave: false, mode: 'mesvins' };
-  var champ = document.getElementById('curieuxBeginV2-f-texte');
-  if (champ) champ.value = '';
-  if (ALL_CURIEUXBEGIN) { remplirFiltresCurieuxBeginV2(); chargerCurieuxBeginV2(); return; }
-  appelBackend('getCurieuxBegin', {}, { spinner: ' ' }).then(function(data) {
-    ALL_CURIEUXBEGIN = data || [];
-    remplirFiltresCurieuxBeginV2();
-    chargerCurieuxBeginV2();
-  }).catch(function() { retourAccueilV2(); });
+  ouvrirPageFiltreeV2('curieuxBeginV2', ALL_CURIEUXBEGIN ? null : function() {
+    return appelBackend('getCurieuxBegin', {}, { spinner: ' ' }).then(function(data) { ALL_CURIEUXBEGIN = data || []; });
+  }, 'Curieux Bégin');
 }
 
 function fermerCurieuxBeginV2() {
-  fermerFiltresCurieuxBeginV2();
+  fermerFiltresV2('curieuxBeginV2');
   document.getElementById('curieuxBeginV2Container').style.display = 'none';
 }
 
-function ouvrirFiltresCurieuxBeginV2() { clicLoupeV2('curieuxBeginV2', reinitialiserFiltresCurieuxBeginV2); }
-function fermerFiltresCurieuxBeginV2() {
-  document.getElementById('curieuxBeginV2-filtres-voile').classList.remove('ouvert');
-  document.getElementById('curieuxBeginV2-filtres').classList.remove('ouvert');
+// Après un choix dans le panneau (moteur commun : choisirFiltreV2) — nouveau pays : une appellation qui n'y
+// existe pas se vide (jamais une liste vide sans raison)
+function apresChoixFiltreCurieuxBeginV2(cle) {
+  var f = filtresCurieuxBeginV2;
+  if (cle !== 'pays' || !f.appellation) return;
+  var infos = saqInfosV2();
+  var garde = (ALL_CURIEUXBEGIN || []).some(function(a) {
+    if (!cbDansModeV2(a, infos)) return false;
+    var x = attributsVinCbV2(a, infos);
+    return passeFiltreV2(f.pays, x.pays, memeTexteV2) && memeTexteV2(x.appellation, valeurChoixV2(f.appellation));
+  });
+  if (!garde) f.appellation = '';
 }
 
 function remplirFiltresCurieuxBeginV2() {
@@ -837,14 +786,7 @@ function remplirFiltresCurieuxBeginV2() {
   });
   saisons.sort(function(a, b) { return numeroCbV2(b) - numeroCbV2(a); });
   if (f.saison && !vuesSaison[valeurChoixV2(f.saison)]) f.saison = '';
-  var menuSaison = document.getElementById('curieuxBeginV2-f-saison-menu');
-  if (menuSaison) {
-    menuSaison.innerHTML = saisons.map(function(v) {
-      return '<div class="item-liste' + classeChoixV2(v, f.saison) + '" onclick="choisirFiltreCurieuxBeginV2(\'saison\', \'' + v.replace(/'/g, "\\'") + '\')">Saison ' + v + '</div>';
-    }).join('');
-  }
-  var dispSaison = document.getElementById('curieuxBeginV2-f-saison-display');
-  if (dispSaison) dispSaison.textContent = libelleChoixV2(f.saison, 'Saison', function(v) { return 'Saison ' + v; });
+  remplirMenuFiltreV2('curieuxBeginV2', 'saison', saisons, function(v) { return 'Saison ' + v; });
 
   // Cépage (principal) · Pays · Appellation : puisés dans le mode affiché ; Appellation suit le Pays
   var attrs = (ALL_CURIEUXBEGIN || []).filter(function(a) { return cbDansModeV2(a, infos); }).map(function(a) { return attributsVinCbV2(a, infos); });
@@ -853,27 +795,8 @@ function remplirFiltresCurieuxBeginV2() {
     pays: valeursUniquesCbV2(attrs, 'pays'),
     appellation: valeursUniquesCbV2(attrs.filter(function(x) { return passeFiltreV2(f.pays, x.pays, memeTexteV2); }), 'appellation')
   };
-  var libelles = { cepage: 'Cépage', pays: 'Pays', appellation: 'Appellation' };
-  ['cepage', 'pays', 'appellation'].forEach(function(cle) {
-    var menu = document.getElementById('curieuxBeginV2-f-' + cle + '-menu');
-    if (menu) {
-      menu.innerHTML = listes[cle].map(function(v) {
-        return '<div class="item-liste' + classeChoixV2(v, f[cle]) + '" onclick="choisirFiltreCurieuxBeginV2(\'' + cle + '\', \'' + v.replace(/'/g, "\\'") + '\')">' + v + '</div>';
-      }).join('');
-    }
-    var disp = document.getElementById('curieuxBeginV2-f-' + cle + '-display');
-    if (disp) disp.textContent = libelleChoixV2(f[cle], libelles[cle]);
-  });
-
-  var couleurs = uniqueValeursAchat(ALL_DATA || [], 'Couleur');
-  var menuCoul = document.getElementById('curieuxBeginV2-f-couleur-menu');
-  if (menuCoul) {
-    menuCoul.innerHTML = couleurs.map(function(v) {
-      return '<div class="item-liste' + classeChoixV2(v, f.couleur) + '" onclick="choisirFiltreCurieuxBeginV2(\'couleur\', \'' + v.replace(/'/g, "\\'") + '\')">' + v + '</div>';
-    }).join('');
-  }
-  var dispCoul = document.getElementById('curieuxBeginV2-f-couleur-display');
-  if (dispCoul) dispCoul.textContent = libelleChoixV2(f.couleur, 'Couleur');
+  Object.keys(listes).forEach(function(cle) { remplirMenuFiltreV2('curieuxBeginV2', cle, listes[cle]); });
+  remplirMenuFiltreV2('curieuxBeginV2', 'couleur', uniqueValeursAchat(ALL_DATA || [], 'Couleur'));
   var btnCave = document.getElementById('curieuxBeginV2-cave');
   if (btnCave) { btnCave.classList.toggle('actif', f.cave); btnCave.textContent = f.cave ? '✓' : '✗'; }
   var elMes = document.getElementById('curieuxBeginV2-mode-mesvins');
@@ -889,50 +812,10 @@ function choisirModeCurieuxBeginV2(mode) {
   chargerCurieuxBeginV2();
 }
 
-function basculerFiltreCurieuxBeginV2(cle) {
-  var menu = document.getElementById('curieuxBeginV2-f-' + cle + '-menu');
-  var ouvert = menu.classList.contains('ouvert');
-  ['saison', 'couleur', 'cepage', 'pays', 'appellation'].forEach(function(k) {
-    document.getElementById('curieuxBeginV2-f-' + k + '-menu').classList.remove('ouvert');
-  });
-  if (!ouvert) { menu.classList.add('ouvert'); annulerFermetureMenuV2(menu.id); }
-}
-
-function choisirFiltreCurieuxBeginV2(cle, valeur) {
-  var f = filtresCurieuxBeginV2;
-  f[cle] = cycleFiltreV2(f[cle], valeur);
-  fermerMenuApresV2('curieuxBeginV2-f-' + cle + '-menu');
-  // Nouveau pays : une appellation qui n'y existe pas se vide (jamais une liste vide sans raison)
-  if (cle === 'pays' && f.appellation) {
-    var infos = saqInfosV2();
-    var garde = (ALL_CURIEUXBEGIN || []).some(function(a) {
-      if (!cbDansModeV2(a, infos)) return false;
-      var x = attributsVinCbV2(a, infos);
-      return passeFiltreV2(f.pays, x.pays, memeTexteV2) && memeTexteV2(x.appellation, valeurChoixV2(f.appellation));
-    });
-    if (!garde) f.appellation = '';
-  }
-  remplirFiltresCurieuxBeginV2();
-  chargerCurieuxBeginV2();
-}
-
 function toggleCaveCurieuxBeginV2() {
   filtresCurieuxBeginV2.cave = !filtresCurieuxBeginV2.cave;
   remplirFiltresCurieuxBeginV2();
   chargerCurieuxBeginV2();
-}
-
-function reinitialiserFiltresCurieuxBeginV2() {
-  filtresCurieuxBeginV2 = { saison: '', couleur: '', cepage: '', pays: '', appellation: '', cave: false, mode: 'mesvins' };
-  var champ = document.getElementById('curieuxBeginV2-f-texte');
-  if (champ) champ.value = '';
-  ['saison', 'couleur', 'cepage', 'pays', 'appellation'].forEach(function(k) {
-    var menu = document.getElementById('curieuxBeginV2-f-' + k + '-menu');
-    if (menu) menu.classList.remove('ouvert');
-  });
-  remplirFiltresCurieuxBeginV2();
-  chargerCurieuxBeginV2();
-  fermerFiltresCurieuxBeginV2();
 }
 
 // Vrai si l'accord appartient au mode affiché : « Mes vins » = j'ai ce code SAQ ; « Vins à découvrir » = je ne l'ai pas.

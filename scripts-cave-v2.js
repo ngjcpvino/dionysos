@@ -15,9 +15,9 @@ function ouvrirCaveV2() {
 }
 
 function fermerCaveV2() {
-  fermerFiltresCaveV2();
+  fermerFiltresV2('caveV2');
   document.getElementById('caveV2Container').style.display = 'none';
-  reinitialiserFiltresCaveV2();
+  reinitialiserFiltresV2('caveV2');
 }
 
 // ==================== À RANGER V2 ====================
@@ -127,14 +127,7 @@ function afficherCartesCaveV2(data) {
   }).join('');
 }
 
-function ouvrirFiltresCaveV2() { clicLoupeV2('caveV2', reinitialiserFiltresCaveV2); }
-function fermerFiltresCaveV2() {
-  document.getElementById('caveV2-filtres-voile').classList.remove('ouvert');
-  document.getElementById('caveV2-filtres').classList.remove('ouvert');
-}
-
-var filtresCaveV2 = { couleur: '', cepage: '', pays: '', appellation: '', accords: '', pastille: '', acidite: '', dispo: false };
-var libellesFiltreCaveV2 = { couleur: 'Couleur', cepage: 'Cépage', pays: 'Pays', appellation: 'Appellation', accords: 'Accord', pastille: 'Pastille de goût', acidite: 'Acidité' };
+var filtresCaveV2 = filtresVidesV2('caveV2');
 
 function remplirFiltresCaveV2() {
   var f = filtresCaveV2;
@@ -159,31 +152,8 @@ function remplirFiltresCaveV2() {
   forAcidite.forEach(function(i){ retenir('acidite', i['Acidité']); });
 
   Object.keys(sets).forEach(function(cle) {
-    var menu = document.getElementById('caveV2-f-' + cle + '-menu');
-    if (!menu) return;
-    var opts = Object.keys(sets[cle]).map(function(k){ return sets[cle][k]; }).sort(function(a,b){ return a.localeCompare(b); });
-    var cur = filtresCaveV2[cle];
-    menu.innerHTML = '<div class="item-liste' + (cur === '' ? ' actif' : '') + '" onclick="choisirFiltreCaveV2(\'' + cle + '\', \'\')">Tous</div>' + opts.map(function(v) {
-      return '<div class="item-liste' + classeChoixV2(v, cur) + '" onclick="choisirFiltreCaveV2(\'' + cle + '\', \'' + v.replace(/'/g, "\\'") + '\')">' + v + '</div>';
-    }).join('');
-    var disp = document.getElementById('caveV2-f-' + cle + '-display');
-    if (disp) disp.textContent = libelleChoixV2(cur, libellesFiltreCaveV2[cle]);
+    remplirMenuFiltreV2('caveV2', cle, Object.keys(sets[cle]).map(function(k){ return sets[cle][k]; }).sort(function(a,b){ return a.localeCompare(b); }));
   });
-}
-
-function basculerFiltreCaveV2(cle) {
-  var menu = document.getElementById('caveV2-f-' + cle + '-menu');
-  var ouvert = menu.classList.contains('ouvert');
-  ['couleur','cepage','pays','appellation','accords','pastille','acidite'].forEach(function(k) {
-    document.getElementById('caveV2-f-' + k + '-menu').classList.remove('ouvert');
-  });
-  if (!ouvert) { menu.classList.add('ouvert'); annulerFermetureMenuV2(menu.id); }
-}
-
-function choisirFiltreCaveV2(cle, valeur) {
-  filtresCaveV2[cle] = cycleFiltreV2(filtresCaveV2[cle], valeur);
-  fermerMenuApresV2('caveV2-f-' + cle + '-menu');
-  appliquerFiltresCaveV2();
 }
 
 function toggleDispoCaveV2() {
@@ -224,14 +194,3 @@ function appliquerFiltresCaveV2() {
   if (loupe) loupe.classList.toggle('actif', !!(c || cep || p || app || a || past || acid || nom));
 }
 
-function reinitialiserFiltresCaveV2() {
-  filtresCaveV2 = { couleur: '', cepage: '', pays: '', appellation: '', accords: '', pastille: '', acidite: '', dispo: false };
-  var dispoBtn = document.getElementById('caveV2-dispo');
-  if (dispoBtn) { dispoBtn.classList.remove('actif'); dispoBtn.textContent = '✗'; }
-  document.getElementById('caveV2-f-nom').value = '';
-  ['couleur','cepage','pays','appellation','accords','pastille','acidite'].forEach(function(k) {
-    document.getElementById('caveV2-f-' + k + '-menu').classList.remove('ouvert');
-  });
-  appliquerFiltresCaveV2();
-  fermerFiltresCaveV2();
-}

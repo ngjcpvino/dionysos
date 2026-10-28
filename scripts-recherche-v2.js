@@ -10,7 +10,7 @@ function ouvrirRechercheV2() {
   remonterScrollV2('rechercheV2Container');
   var champ = document.getElementById('rechercheV2-champ');
   champ.value = '';
-  filtresRechercheV2 = { sommelier: '', couleur: '', cepage: '', pays: '', appellation: '', accords: '', pastille: '', cave: false };
+  filtresRechercheV2 = filtresVidesV2('rechercheV2');
   remplirFiltresRechercheV2();
   document.getElementById('rechercheV2-compte').textContent = '';
   document.getElementById('rechercheV2-cartes').innerHTML = '<div class="texte-secondaire">Tape un mot : vin, producteur, arôme, aliment, sommelier, recette…</div>';
@@ -19,18 +19,11 @@ function ouvrirRechercheV2() {
 }
 
 function fermerRechercheV2() {
-  fermerFiltresRechercheV2();
+  fermerFiltresV2('rechercheV2');
   document.getElementById('rechercheV2Container').style.display = 'none';
 }
 
-var filtresRechercheV2 = { sommelier: '', couleur: '', cepage: '', pays: '', appellation: '', accords: '', pastille: '', cave: false };
-var libellesFiltreRechercheV2 = { sommelier: 'Sommelier', couleur: 'Couleur', cepage: 'Cépage', pays: 'Pays', appellation: 'Appellation', accords: 'Accords', pastille: 'Pastille de goût' };
-
-function ouvrirFiltresRechercheV2() { clicLoupeV2('rechercheV2', reinitialiserFiltresRechercheV2); }
-function fermerFiltresRechercheV2() {
-  document.getElementById('rechercheV2-filtres-voile').classList.remove('ouvert');
-  document.getElementById('rechercheV2-filtres').classList.remove('ouvert');
-}
+var filtresRechercheV2 = filtresVidesV2('rechercheV2');
 
 function remplirFiltresRechercheV2() {
   var f = filtresRechercheV2;
@@ -46,14 +39,7 @@ function remplirFiltresRechercheV2() {
     if (v && !vusSom[k]) { vusSom[k] = true; sommeliers.push(v); }
   });
   sommeliers.sort(function(a, b) { return a.localeCompare(b); });
-  var menuSom = document.getElementById('rechercheV2-f-sommelier-menu');
-  if (menuSom) {
-    menuSom.innerHTML = '<div class="item-liste' + (f.sommelier === '' ? ' actif' : '') + '" onclick="choisirFiltreRechercheV2(\'sommelier\', \'\')">Tous</div>' + sommeliers.map(function(v) {
-      return '<div class="item-liste' + classeChoixV2(v, f.sommelier) + '" onclick="choisirFiltreRechercheV2(\'sommelier\', \'' + v.replace(/'/g, "\\'") + '\')">' + v + '</div>';
-    }).join('');
-  }
-  var dispSom = document.getElementById('rechercheV2-f-sommelier-display');
-  if (dispSom) dispSom.textContent = libelleChoixV2(f.sommelier, 'Sommelier');
+  remplirMenuFiltreV2('rechercheV2', 'sommelier', sommeliers);
 
   var forCouleur = base;
   var forCepage = base.filter(function(i){ return passeFiltreV2(f.couleur, i.Couleur); });
@@ -72,42 +58,8 @@ function remplirFiltresRechercheV2() {
   forPastille.forEach(function(i){ retenir('pastille', i['Pastille gout']); });
 
   Object.keys(sets).forEach(function(cle) {
-    var menu = document.getElementById('rechercheV2-f-' + cle + '-menu');
-    if (!menu) return;
-    var opts = Object.keys(sets[cle]).map(function(k){ return sets[cle][k]; }).sort(function(a,b){ return a.localeCompare(b); });
-    var cur = filtresRechercheV2[cle];
-    menu.innerHTML = '<div class="item-liste' + (cur === '' ? ' actif' : '') + '" onclick="choisirFiltreRechercheV2(\'' + cle + '\', \'\')">Tous</div>' + opts.map(function(v) {
-      return '<div class="item-liste' + classeChoixV2(v, cur) + '" onclick="choisirFiltreRechercheV2(\'' + cle + '\', \'' + v.replace(/'/g, "\\'") + '\')">' + v + '</div>';
-    }).join('');
-    var disp = document.getElementById('rechercheV2-f-' + cle + '-display');
-    if (disp) disp.textContent = libelleChoixV2(cur, libellesFiltreRechercheV2[cle]);
+    remplirMenuFiltreV2('rechercheV2', cle, Object.keys(sets[cle]).map(function(k){ return sets[cle][k]; }).sort(function(a,b){ return a.localeCompare(b); }));
   });
-}
-
-function basculerFiltreRechercheV2(cle) {
-  var menu = document.getElementById('rechercheV2-f-' + cle + '-menu');
-  var ouvert = menu.classList.contains('ouvert');
-  ['sommelier','couleur','cepage','pays','appellation','accords','pastille'].forEach(function(k) {
-    document.getElementById('rechercheV2-f-' + k + '-menu').classList.remove('ouvert');
-  });
-  if (!ouvert) { menu.classList.add('ouvert'); annulerFermetureMenuV2(menu.id); }
-}
-
-function choisirFiltreRechercheV2(cle, valeur) {
-  filtresRechercheV2[cle] = cycleFiltreV2(filtresRechercheV2[cle], valeur);
-  fermerMenuApresV2('rechercheV2-f-' + cle + '-menu');
-  remplirFiltresRechercheV2();
-  lancerRechercheV2();
-}
-
-function reinitialiserFiltresRechercheV2() {
-  filtresRechercheV2 = { sommelier: '', couleur: '', cepage: '', pays: '', appellation: '', accords: '', pastille: '', cave: false };
-  ['sommelier','couleur','cepage','pays','appellation','accords','pastille'].forEach(function(k) {
-    document.getElementById('rechercheV2-f-' + k + '-menu').classList.remove('ouvert');
-  });
-  remplirFiltresRechercheV2();
-  lancerRechercheV2();
-  fermerFiltresRechercheV2();
 }
 
 function normaliserRechercheV2(t) {
