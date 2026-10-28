@@ -327,7 +327,7 @@ function basculerPlatFicheV2(i, type) {
     .sort(function(a, b) { return a.nom.localeCompare(b.nom); })
     .map(function(r) {
       var skuEsc = r.sku.replace(/'/g, "\\'");
-      return '<div class="item-liste accordeon-2 corriger-ligne">' +
+      return '<div class="item-liste accordeon-2 choix-placement">' +
                '<span class="corriger-nom" onclick="window.open(\'https://www.saq.com/fr/' + r.sku + '\', \'_blank\')">' + r.nom + '</span>' +
                '<span class="corriger-crayon" onclick="event.stopPropagation();ouvrirApresTap(function(){ouvrirCorrigerRecetteV2(\'' + skuEsc + '\')})">✎</span>' +
              '</div>';

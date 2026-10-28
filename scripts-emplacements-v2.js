@@ -277,7 +277,7 @@ function afficherEmpV2() {
       var rangeeEstompee = (filtreVin && !repondent) ? ' estompee' : '';
       html += '<div class="emp-rangee' + rangeeEstompee + '" data-meuble="' + meuble + '" data-rangee="' + rangee + '">' +
                 '<span class="emp-rangee-nom">Rangée ' + rangee + '</span>' +
-                '<div class="emp-ronds">' + lignes + '</div>' +
+                '<div class="emp-ronds colonne-centree">' + lignes + '</div>' +
                 '<span class="emp-compte' + compteClasse + '">' + occ + '/' + nb + '</span>' +
               '</div>';
     });
@@ -293,7 +293,7 @@ function afficherEmpV2() {
     }).join('');
     html += '<div class="emp-bloc"><div class="titre-2">À ranger</div>' +
             '<div class="emp-rangee a-ranger">' +
-              '<div class="emp-ronds"><div class="ligne-ronds">' + rondsAR + '</div></div>' +
+              '<div class="emp-ronds colonne-centree"><div class="ligne-ronds">' + rondsAR + '</div></div>' +
               '<span class="emp-compte">' + aRanger.length + '</span>' +
             '</div></div>';
   }

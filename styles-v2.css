@@ -477,7 +477,6 @@ body::after {
 .emp-compte { color: var(--white-60); font-size: var(--fs-11); }
 .emp-compte-libre { color: var(--red); }
 .emp-rangee-nom { color: var(--white-60); font-size: var(--fs-13); }
-.emp-ronds { display: flex; flex-direction: column; align-items: center; }
 
 /* rangée fermée : tout sur une ligne */
 .emp-rangee:not(.ouvert) {
@@ -807,8 +806,8 @@ body::after {
 }
 .coche-panier.actif { background: var(--gold-30); }
 .coche-panier.actif::after { content: '✓'; color: var(--gold-2); font-size: var(--fs-14); }
-/* Le même rond dans une ligne de choix (Meuble · Rangée · Espace des écrans de
-   placement) : la ligne garde son texte, le rond se pose à droite. */
+/* Ligne de choix : le texte à gauche, un contrôle à droite — le rond à cocher des écrans de placement
+   (Meuble · Rangée · Espace), le ✎ du correcteur de recettes. Réutilisable. */
 .item-liste.choix-placement {
   display: flex;
   align-items: center;
@@ -958,11 +957,11 @@ input[type="date"].champ-saisie::-webkit-date-and-time-value { text-align: left;
   z-index: 10000;
 }
 .panneau-voile.ouvert { display: block; }
-.panneau-gauche {
+/* Les deux panneaux qui glissent : filtres à gauche, menu burger à droite — le même panneau, seul le côté change */
+.panneau-gauche, .panneau-droite {
   position: fixed;
-  top: 0; left: 0; bottom: 0;
+  top: 0; bottom: 0;
   width: var(--taille-280);
-  transform: translateX(-100%);
   transition: transform 0.3s ease-out;
   background: transparent;
   backdrop-filter: var(--flou-8);
@@ -975,27 +974,10 @@ input[type="date"].champ-saisie::-webkit-date-and-time-value { text-align: left;
   flex-direction: column;
   gap: var(--space-10);
 }
-.panneau-gauche::-webkit-scrollbar { display: none; }
-.panneau-gauche.ouvert { transform: translateX(0); }
-.panneau-droite {
-  position: fixed;
-  top: 0; right: 0; bottom: 0;
-  width: var(--taille-280);
-  transform: translateX(100%);
-  transition: transform 0.3s ease-out;
-  background: transparent;
-  backdrop-filter: var(--flou-8);
-  z-index: 10001;
-  padding: var(--taille-60) var(--space-20) var(--space-20);
-  overflow-y: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-10);
-}
-.panneau-droite::-webkit-scrollbar { display: none; }
-.panneau-droite.ouvert { transform: translateX(0); }
+.panneau-gauche { left: 0; transform: translateX(-100%); }
+.panneau-droite { right: 0; transform: translateX(100%); }
+.panneau-gauche::-webkit-scrollbar, .panneau-droite::-webkit-scrollbar { display: none; }
+.panneau-gauche.ouvert, .panneau-droite.ouvert { transform: translateX(0); }
 .panneau-droite .item-liste {
   font-size: var(--fs-14);
   font-weight: 300;
@@ -1179,7 +1161,6 @@ input[type="date"].champ-saisie::-webkit-date-and-time-value { text-align: left;
   white-space: nowrap;
 }
 /* Recette corrigeable (fiche SAQ) : le nom ouvre la fiche SAQ, le crayon ouvre la correction */
-.corriger-ligne { display: flex; align-items: center; justify-content: space-between; gap: var(--space-10); }
 .corriger-nom { flex: 1; cursor: pointer; }
 .corriger-crayon { flex: none; cursor: pointer; color: var(--gold-2); padding-left: var(--space-10); }
 .etoile-favori { color: var(--white-15); cursor: pointer; -webkit-tap-highlight-color: transparent; }
