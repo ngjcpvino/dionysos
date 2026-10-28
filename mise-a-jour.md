@@ -8,7 +8,7 @@
 ## 📁 Architecture
 - **Frontend** : GitHub Pages, dépôt public `ngjcpvino/dionysos`. Adresse : `.../index-v2.html` (l'adresse de base donne « page introuvable » — assumé, ce n'est PAS une protection).
 - **Backend** : Google Apps Script, projet « Vino 3.0 », `Code.gs`. **La version de référence vit dans le dépôt PRIVÉ `ngjcpvino/dionysos-serveur`** (`Code.gs`, `appsscript.json` — celui du dépôt public est périmé —, `README.md` : coller, vérifier la dernière ligne, redéployer, revenir en arrière). Copie de travail gitignorée ici. Tout changement du backend y est poussé (branche `main`) et envoyé en pièce jointe ; l'utilisateur colle tout le fichier puis redéploie.
-  - Vérif simple d'un collage : le numéro de la dernière ligne de `Code.gs` dans Apps Script (**3 131 lignes** au 28 oct.).
+  - Vérif simple d'un collage : le numéro de la dernière ligne de `Code.gs` dans Apps Script (**3 039 lignes** depuis le ménage du 28 oct. ; 3 131 avant).
   - ⚠️ La copie `Dionysos/Code.gs` du Google Drive est **la copie de l'utilisateur** (faite en collant, 25 oct.) : l'IA ne la met pas à jour. La coller = « aucun changement ».
   - Lire le projet sans copier-coller : export par le connecteur Drive (`application/vnd.google-apps.script+json`, fichier `Code`). Le sens inverse reste manuel (voir liste 2.0, chantier 1).
 - **Base** : Google Sheets « Vino 3.0 » — onglets Vino · Historique · config/CONFIG · Suggestions · Chartier · Recettes · CurieuxBegin · Notes · Erreurs.
