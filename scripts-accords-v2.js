@@ -236,7 +236,7 @@ function ouvrirChartierV2() {
     construirePanneauChartierV2();
     majSelectionChartierV2();
     calculerResultatsChartierV2();
-  }).catch(function() { retourAccueilV2(); });
+  }).catch(function(err) { retourAccueilV2('Chartier : ' + causeV2(err)); });
 }
 
 function fermerChartierV2() {
@@ -530,7 +530,7 @@ function ouvrirSelonSaqV2() {
     ALL_RECETTES = data || [];
     construirePanneauSelonSaqV2();
     calculerSelonSaqV2();
-  }).catch(function() { retourAccueilV2(); });
+  }).catch(function(err) { retourAccueilV2('Recettes SAQ : ' + causeV2(err)); });
 }
 
 function fermerSelonSaqV2() {

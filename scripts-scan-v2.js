@@ -295,8 +295,8 @@ function validerSaisieManuelleV2() {
       } else {
         afficherVinInconnuV2(cup, codeSAQ);
       }
-    }).catch(function() {
-      retourAccueilV2();
+    }).catch(function(err) {
+      retourAccueilV2('Recherche du code : ' + causeV2(err));
     });
   }).catch(function() {
     afficherMessage('Erreur, réessayez');
@@ -415,7 +415,7 @@ function remplirEnteteVinInconnuV2(codeSAQ, produit) {
     // Réponse d'un scan précédent arrivée en retard : on ne la mélange pas au vin affiché
     if ((document.getElementById('vinInconnuV2-codesaq').value || '').replace(/\D/g, '').trim() !== codeSAQ.toString().trim()) return;
     if (res && res.success && res.data) appliquerFicheSaqVinInconnuV2(codeSAQ, res.data);
-  }).catch(function() {});
+  }).catch(journaliserV2('Fiche SAQ du vin inconnu'));
 }
 
 // d = fiche SAQ (noms de lireFicheSAQ — l'inventaire de la succursale porte les mêmes) : en-tête, bloc du scan, Dégustation
@@ -491,7 +491,7 @@ function retenirCodeBarreV2(principal, code) {
       var liste = codesBarresDuVinV2(i);
       if (!liste.some(function(c) { return memeCodeV2(c, code); })) i['Codes-barres'] = liste.concat([code]).join(',');
     });
-  }).catch(function() {});
+  }).catch(journaliserV2('Autre code-barres non retenu'));
 }
 
 // Ni en mémoire ni de réseau : la page s'ouvre quand même, fâchée, et réessaie seule tant qu'elle reste ouverte.

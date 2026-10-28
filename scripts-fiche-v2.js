@@ -357,7 +357,7 @@ function chargerRecettesFicheV2(famille) {
   appelBackend('getRecettes', {}, { spinner: '' }).then(function(data) {
     ALL_RECETTES = data || [];
     rendre();
-  }).catch(function() {});
+  }).catch(journaliserV2('Recettes SAQ de la fiche'));
 }
 
 // ==================== Corriger une recette SAQ (depuis la fiche) ====================
@@ -562,7 +562,7 @@ function chargerChartierFicheV2(wine) {
   appelBackend('getChartier', {}, { spinner: '' }).then(function(data) {
     ALL_ACCORDS = data || [];
     rendre();
-  }).catch(function() {});
+  }).catch(journaliserV2('Chartier de la fiche'));
 }
 
 // « Accords selon… → Curieux Bégin » : plats où ce vin a été proposé sur l'émission (match par Code SAQ)
@@ -581,7 +581,7 @@ function chargerCurieuxBeginFicheV2(wine) {
     }).join('');
   }
   if (ALL_CURIEUXBEGIN) { rendre(); return; }
-  appelBackend('getCurieuxBegin', {}, { spinner: '' }).then(function(data) { ALL_CURIEUXBEGIN = data || []; rendre(); }).catch(function() {});
+  appelBackend('getCurieuxBegin', {}, { spinner: '' }).then(function(data) { ALL_CURIEUXBEGIN = data || []; rendre(); }).catch(journaliserV2('Curieux Bégin de la fiche'));
 }
 
 // Accordéon du bloc « Accords selon… » — un seul volet ouvert
@@ -790,7 +790,7 @@ function verifierPrixV2(codebarre, codeSAQ) {
         elCep.textContent = annoterCepagesV2(elCep.dataset.cepages);
       }
     }
-  }).catch(function() {});
+  }).catch(journaliserV2('Prix SAQ de la fiche'));
 }
 
 function chargerPlatsV2(codebarre) {
@@ -823,7 +823,7 @@ function chargerPlatsV2(codebarre) {
   appelBackend('getHistorique', {}, { spinner: '' }).then(function(data) {
     ALL_HISTORIQUE = data || [];
     rendrePlats(ALL_HISTORIQUE);
-  }).catch(function() {});
+  }).catch(journaliserV2('Plats de la fiche'));
 }
 
 var PHOTO_V2_MODE = 'fiche';

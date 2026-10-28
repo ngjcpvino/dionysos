@@ -635,7 +635,7 @@ function ouvrirMenageEmpV2() {
   document.getElementById('empV2-cartes').innerHTML = '<div class="texte-secondaire">Un instant…</div>';
   appelBackend('getHistorique', {}, { spinner: ' ' }).then(function(data) {
     ALL_HISTORIQUE = data || [];
-  }).catch(function() {}).then(function() { if (empV2Mode === 'menage') afficherMenageEmpV2(true); });
+  }).catch(journaliserV2('Historique du Tri')).then(function() { if (empV2Mode === 'menage') afficherMenageEmpV2(true); });
 }
 
 // « bu le 27 mars ★★★★ » quand l'Historique le sait, sinon « arrivée le 20 févr. »

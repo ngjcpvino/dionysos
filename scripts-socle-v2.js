@@ -61,6 +61,9 @@ function rechargerVinEnCoursV2(spinner) {
 }
 // La cause d'un échec, en clair
 function causeV2(err) { return err && err.message ? err.message : String(err); }
+// Un appel de fond qui échoue ne dérange pas l'écran (la page reste utilisable), mais laisse sa trace dans le journal
+// des erreurs (onglet « Erreurs ») : jamais une panne avalée en silence. Usage : .catch(journaliserV2('Promotions'))
+function journaliserV2(quoi) { return function(err) { logErreurV2(quoi + ' : ' + causeV2(err), 'fond'); }; }
 
 // Une page s'ouvre pareil partout : affichée, remontée en haut…
 function montrerPageV2(id) {

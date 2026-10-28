@@ -11,18 +11,9 @@ var filtresHistoV2 = filtresVidesV2('histoV2');
 var histoEditV2 = { row: 0, note: 0 };
 
 function ouvrirHistoV2() {
-  montrerPageV2('histoV2Container');
-  filtresHistoV2 = filtresVidesV2('histoV2');
-  if (ALL_HISTORIQUE && ALL_HISTORIQUE.length) {
-    remplirFiltresHistoV2();
-    afficherHistoV2();
-    return;
-  }
-  appelBackend('getHistorique', {}, { spinner: ' ' }).then(function(data) {
-    ALL_HISTORIQUE = data || [];
-    remplirFiltresHistoV2();
-    afficherHistoV2();
-  }).catch(function() { retourAccueilV2(); });
+  ouvrirPageFiltreeV2('histoV2', (ALL_HISTORIQUE && ALL_HISTORIQUE.length) ? null : function() {
+    return appelBackend('getHistorique', {}, { spinner: ' ' }).then(function(data) { ALL_HISTORIQUE = data || []; });
+  }, 'Historique');
 }
 
 function fermerHistoV2() {
@@ -226,7 +217,7 @@ function sauverHistoEditV2() {
       }
       afficherMessage(dateIgnoree ? 'Corrigé, sauf la date : Code.gs à recoller' : 'Corrigé');
     });
-  }).catch(function(){ retourAccueilV2(); });
+  }).catch(function(err) { retourAccueilV2('Correction : ' + causeV2(err)); });
 }
 
 function supprimerHistoEditV2() {
@@ -243,7 +234,7 @@ function supprimerHistoEditV2() {
       }
       afficherMessage('Supprimé');
     });
-  }).catch(function(){ retourAccueilV2(); });
+  }).catch(function(err) { retourAccueilV2('Suppression : ' + causeV2(err)); });
 }
 
 function fermerHistoEditV2() {
@@ -379,5 +370,5 @@ function confirmerHistoAjoutV2() {
       afficherHistoV2();
     }
     afficherMessage(dateIgnoree ? 'Ajouté à la date du jour : Code.gs à recoller' : 'Ajouté au carnet');
-  }).catch(function(){ retourAccueilV2(); });
+  }).catch(function(err) { retourAccueilV2('Ajout à l\'historique : ' + causeV2(err)); });
 }
