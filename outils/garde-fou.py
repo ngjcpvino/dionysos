@@ -28,7 +28,7 @@ def lire(chemin, base=None):
     if base is None:
         p = os.path.join(RACINE, chemin)
         return open(p, encoding='utf-8').read() if os.path.exists(p) else ''
-    r = subprocess.run(['git', 'show', base + ':' + chemin], cwd=RACINE, capture_output=True, text=True)
+    r = subprocess.run(['git', 'show', base + ':' + chemin], cwd=RACINE, capture_output=True, text=True, encoding='utf-8')
     return r.stdout if r.returncode == 0 else ''
 
 def fichiers_js(base=None):
@@ -218,6 +218,7 @@ def verifier(base, tout=False):
 
 
 def main():
+    for f in (sys.stdin, sys.stdout, sys.stderr): f.reconfigure(encoding='utf-8')   # Windows : sinon les accents et « → » plantent
     args = sys.argv[1:]
     if '--hook' in args:
         try: entree = json.load(sys.stdin)
