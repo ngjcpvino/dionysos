@@ -42,23 +42,6 @@ function remplirFiltresSuggestionsV2() {
   majToggleHautV2('suggestionsV2-cave', f.cave);
 }
 
-function bouteillesEnCaveParSAQV2(codeSAQ) {
-  var saq = (codeSAQ || '').toString().trim();
-  return (ALL_DATA || []).some(function(i) {
-    var statut = i.Statut || 'En stock';
-    return (i['Code SAQ'] || '').toString().trim() === saq && i.bottle && i.bottle > 0 && statut !== 'Bu' && statut !== 'Sorti';
-  });
-}
-
-// Vrai si le vin (par code-barres) a au moins une bouteille active en cave
-function vinEnCaveV2(codebarre) {
-  var cb = (codebarre || '').toString().trim();
-  return (ALL_DATA || []).some(function(i) {
-    var statut = i.Statut || 'En stock';
-    return memeCodeV2(i['Code-barres'], cb) && i.bottle && i.bottle > 0 && statut !== 'Bu' && statut !== 'Sorti';
-  });
-}
-
 function afficherSuggestionsV2() {
   var f = filtresSuggestionsV2;
   var champTexte = document.getElementById('suggestionsV2-f-texte');
@@ -73,7 +56,7 @@ function afficherSuggestionsV2() {
     if (texte && normaliserRechercheV2(s.note).indexOf(texte) === -1) return false;
     var info = infos[s.codeSAQ] || {};
     if (!passeFiltreV2(f.couleur, info.Couleur)) return false;
-    if (f.cave && !bouteillesEnCaveParSAQV2(s.codeSAQ)) return false;
+    if (f.cave && !vinEnCaveV2(s.codeSAQ, 'Code SAQ')) return false;
     return true;
   });
 
@@ -174,7 +157,7 @@ function confirmerAjoutSommelierV2() {
     CONFIG.sommeliers.push(valeur);
     CONFIG.sommeliers.sort(function(a, b) { return normaliserRechercheV2(a).localeCompare(normaliserRechercheV2(b)); });
     choisirSommelierSuggestionV2(valeur);
-  }).catch(function() { afficherMessage('Erreur, réessayez'); });
+  }).catch(signalerErreurV2);
 }
 
 function fermerSuggestionEditV2() {
@@ -203,7 +186,7 @@ function confirmerSuggestionEditV2() {
       cacherToutesPagesV2();
       if (cb) ouvrirApresTap(function() { ouvrirFicheV2(cb, 'suggestions'); });
     }
-  }).catch(function() { afficherMessage('Erreur, réessayez'); });
+  }).catch(signalerErreurV2);
 }
 
 function ajouterDepuisSuggestionsV2() {
@@ -335,8 +318,7 @@ function baseAchatV2() {
   (ALL_DATA || []).forEach(function(item) {
     var key = cleVinV2(item);
     if (!grouped[key]) grouped[key] = { wine: item, count: 0 };
-    var statut = item.Statut || 'En stock';
-    if (statut !== 'Bu' && statut !== 'Sorti') grouped[key].count++;
+    if (bouteilleEnCaveV2(item)) grouped[key].count++;
   });
   var arr = Object.keys(grouped).map(function(k) { return grouped[k]; });
   var out;
@@ -773,7 +755,7 @@ function rendreGererFavoritesV2() {
   if (!menu) return;
   var html = '<div class="item-liste actif" onclick="finirGererFavoritesV2()">Terminé</div>';
   html += succursalesAchatV2.map(function(s) {
-    return '<div class="item-liste" onclick="retirerFavoriteV2(\'' + s.numero + '\')">' + s.nom + '<span class="fav-x">✗</span></div>';
+    return '<div class="item-liste" onclick="changerFavoriteV2(\'' + s.numero + '\')">' + s.nom + '<span class="fav-x">✗</span></div>';
   }).join('');
   html += '<input type="text" id="gererFavV2-filtre" class="champ-saisie" placeholder="Chercher une ville" oninput="filtrerGererFavoritesV2()">';
   html += '<div id="gererFavV2-liste"></div>';
@@ -794,22 +776,18 @@ function filtrerGererFavoritesV2() {
     return normaliserRechercheV2(s.ville + ' ' + s.adresse).indexOf(terme) !== -1;
  }).map(function(s) {
     var nom = (s.ville + ' — ' + s.adresse);
-    return '<div class="item-liste" onclick="ajouterFavoriteV2(\'' + s.numero + '\', \'' + nom.replace(/'/g, "\\'") + '\')">+ ' + nom + '</div>';
+    return '<div class="item-liste" onclick="changerFavoriteV2(\'' + s.numero + '\', \'' + nom.replace(/'/g, "\\'") + '\')">+ ' + nom + '</div>';
   }).join('');
 }
 
-function ajouterFavoriteV2(numero, nom) {
-  appelBackend('ajouterSuccursale', { nom: nom, numero: numero }, { spinner: 'Ajout' }).then(function() {
-    succursalesAchatV2.push({ nom: nom, numero: numero });
-    rendreGererFavoritesV2();
-  }).catch(function(err) { afficherMessage('Erreur: ' + err); });
-}
-
-function retirerFavoriteV2(numero) {
-  appelBackend('supprimerSuccursale', { numero: numero }, { spinner: 'Retrait' }).then(function() {
+// Une succursale favorite : ajoutée (avec son nom) ou retirée (sans nom), puis la liste redessinée
+function changerFavoriteV2(numero, nom) {
+  var appel = nom ? ['ajouterSuccursale', { nom: nom, numero: numero }, 'Ajout'] : ['supprimerSuccursale', { numero: numero }, 'Retrait'];
+  appelBackend(appel[0], appel[1], { spinner: appel[2] }).then(function() {
     succursalesAchatV2 = succursalesAchatV2.filter(function(s) { return s.numero !== numero; });
+    if (nom) succursalesAchatV2.push({ nom: nom, numero: numero });
     rendreGererFavoritesV2();
-  }).catch(function(err) { afficherMessage('Erreur: ' + err); });
+  }).catch(signalerErreurV2);
 }
 
 function finirGererFavoritesV2() {
@@ -934,8 +912,7 @@ function confirmerRecuVinV2() {
         statutEl.textContent = (res && res.message) || 'Erreur d\'ajout';
         return;
       }
-      return appelBackend('getInventoryData', {}, { spinner: 'Ajout' }).then(function(data) {
-        if (data) ALL_DATA = data;
+      return rechargerInventaireV2('Ajout').then(function() {
         if (platsCurieuxBeginV2(codeSAQ).length) RECU_V2_BINGOS++;
         RECU_V2_INDEX++;
         afficherProchainRecuVinV2();

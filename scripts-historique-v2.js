@@ -200,35 +200,31 @@ function sauverHistoEditV2() {
     if (!res || !res.success) { afficherMessage('Erreur'); return; }
     // un serveur pas encore redéployé ignore la date sans le dire
     var dateIgnoree = nouvelleDate && !res.avecDate;
-    return appelBackend('getHistorique', {}, { spinner: 'Sauvegarde' }).then(function(data){
-      ALL_HISTORIQUE = data || [];
-      document.getElementById('histoEditV2Overlay').style.display = 'none';
-      if (histoEditV2.provenance === 'fiche') {
-        chargerPlatsV2(CURRENT_WINE_CODEBARRE);
-      } else {
-        remplirFiltresHistoV2();
-        afficherHistoV2();
-      }
-      afficherMessage(dateIgnoree ? 'Corrigé, sauf la date : Code.gs à recoller' : 'Corrigé');
-    });
+    return rechargerHistoriqueV2('histoEditV2Overlay', histoEditV2.provenance, 'Sauvegarde', dateIgnoree ? 'Corrigé, sauf la date : Code.gs à recoller' : 'Corrigé');
   }).catch(function(err) { retourAccueilV2('Correction : ' + causeV2(err)); });
 }
 
 function supprimerHistoEditV2() {
   appelBackend('supprimerHistorique', { row: histoEditV2.row }, { spinner: 'Suppression' }).then(function(res){
     if (!res || !res.success) { afficherMessage('Erreur'); return; }
-    return appelBackend('getHistorique', {}, { spinner: 'Suppression' }).then(function(data){
-      ALL_HISTORIQUE = data || [];
-      document.getElementById('histoEditV2Overlay').style.display = 'none';
-      if (histoEditV2.provenance === 'fiche') {
-        chargerPlatsV2(CURRENT_WINE_CODEBARRE);
-      } else {
-        remplirFiltresHistoV2();
-        afficherHistoV2();
-      }
-      afficherMessage('Supprimé');
-    });
+    return rechargerHistoriqueV2('histoEditV2Overlay', histoEditV2.provenance, 'Suppression', 'Supprimé');
   }).catch(function(err) { retourAccueilV2('Suppression : ' + causeV2(err)); });
+}
+
+// Après une écriture dans l'historique : relu, l'éditeur (overlay) fermé, puis la fiche (provenance 'fiche')
+// ou l'Historique redessinés, et le message
+function rechargerHistoriqueV2(overlay, provenance, spinner, message) {
+  return appelBackend('getHistorique', {}, { spinner: spinner }).then(function(data) {
+    ALL_HISTORIQUE = data || [];
+    document.getElementById(overlay).style.display = 'none';
+    if (provenance === 'fiche') {
+      chargerPlatsV2(CURRENT_WINE_CODEBARRE);
+    } else {
+      remplirFiltresHistoV2();
+      afficherHistoV2();
+    }
+    afficherMessage(message);
+  });
 }
 
 function fermerHistoEditV2() {
@@ -350,19 +346,8 @@ function confirmerHistoAjoutV2() {
       return appelBackend('updateWineField', { codebarre: histoAjoutV2.codebarre, field: 'Accords', value: accords.join(', ') }, { spinner: 'Enregistrement' });
     }
   }).then(function(){
-    return appelBackend('getInventoryData', {}, { spinner: 'Enregistrement' });
-  }).then(function(data){
-    if (data) ALL_DATA = data;
-    return appelBackend('getHistorique', {}, { spinner: 'Enregistrement' });
-  }).then(function(data){
-    ALL_HISTORIQUE = data || [];
-    document.getElementById('histoAjoutV2Overlay').style.display = 'none';
-    if (histoAjoutV2.provenance === 'fiche') {
-      chargerPlatsV2(CURRENT_WINE_CODEBARRE);
-    } else {
-      remplirFiltresHistoV2();
-      afficherHistoV2();
-    }
-    afficherMessage(dateIgnoree ? 'Ajouté à la date du jour : Code.gs à recoller' : 'Ajouté au carnet');
+    return rechargerInventaireV2('Enregistrement');
+  }).then(function(){
+    return rechargerHistoriqueV2('histoAjoutV2Overlay', histoAjoutV2.provenance, 'Enregistrement', dateIgnoree ? 'Ajouté à la date du jour : Code.gs à recoller' : 'Ajouté au carnet');
   }).catch(function(err) { retourAccueilV2('Ajout à l\'historique : ' + causeV2(err)); });
 }

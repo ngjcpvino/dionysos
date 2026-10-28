@@ -160,36 +160,32 @@ function confirmerNoteEditV2() {
   if (!appelle) { afficherMessage('Il manque ce que ça appelle : un cépage ou une appellation'); return; }
   var route = noteEditV2.row ? 'corrigerNoteAccord' : 'ajouterNoteAccord';
   var avecListes = listes.cepages.length || listes.appellations.length;
-  var listesIgnorees = false;
   appelBackend(route, { row: noteEditV2.row, aliments: aliments, appelle: appelle, source: source, cepages: listes.cepages.join(';;'), appellations: listes.appellations.join(';;') }, { spinner: 'Sauvegarde' }).then(function(res) {
     if (res && res.success === false) throw new Error(res.message || 'refusée');
     // un serveur pas encore redéployé ignore les listes sans le dire : la note garde au moins le résumé
-    listesIgnorees = avecListes && !(res && res.avecListes);
-    ALL_NOTES = [];
-    return appelBackend('getNotesAccord', {}, { spinner: 'Sauvegarde' });
-  }).then(function(data) {
-    ALL_NOTES = data || [];
-    fermerNoteEditV2();
-    remplirFiltresNotesV2();
-    afficherNotesV2();
-    rafraichirRechercheSiOuverteV2();
-    afficherMessage(listesIgnorees ? 'Note enregistrée, en texte seulement : Code.gs à recoller' : 'Note enregistrée');
-  }).catch(function(err) { afficherMessage('Erreur: ' + err); });
+    var listesIgnorees = avecListes && !(res && res.avecListes);
+    return rechargerNotesV2('Sauvegarde', listesIgnorees ? 'Note enregistrée, en texte seulement : Code.gs à recoller' : 'Note enregistrée');
+  }).catch(signalerErreurV2);
 }
 
 function supprimerNoteEditV2() {
   if (!noteEditV2.row) return;
   appelBackend('supprimerNoteAccord', { row: noteEditV2.row }, { spinner: 'Suppression' }).then(function() {
-    ALL_NOTES = [];
-    return appelBackend('getNotesAccord', {}, { spinner: 'Suppression' });
-  }).then(function(data) {
+    return rechargerNotesV2('Suppression', 'Note supprimée');
+  }).catch(signalerErreurV2);
+}
+
+// Après une écriture dans Nos notes : les notes relues, l'éditeur fermé, la page et la Recherche redessinées, puis le message
+function rechargerNotesV2(spinner, message) {
+  ALL_NOTES = [];
+  return appelBackend('getNotesAccord', {}, { spinner: spinner }).then(function(data) {
     ALL_NOTES = data || [];
     fermerNoteEditV2();
     remplirFiltresNotesV2();
     afficherNotesV2();
     rafraichirRechercheSiOuverteV2();
-    afficherMessage('Note supprimée');
-  }).catch(function(err) { afficherMessage('Erreur: ' + err); });
+    afficherMessage(message);
+  });
 }
 
 // ==================== ACCORDS METS-VINS V2 ====================
@@ -281,11 +277,7 @@ function couleurCepageChartierV2(cepage) {
 }
 
 function vinsDisponiblesPourCepageV2(cepage) {
-  return (ALL_DATA || []).filter(function(i) {
-    if (!cepageRepondChartierV2(cepageDominant(i), cepage)) return false;
-    var statut = i.Statut || 'En stock';
-    return statut !== 'Bu' && statut !== 'Sorti' && statut !== 'Suggestion';
-  }).length > 0;
+  return bouteillesEnCaveV2().some(function(i) { return cepageRepondChartierV2(cepageDominant(i), cepage); });
 }
 
 function calculerResultatsChartierV2() {
@@ -439,16 +431,6 @@ function recettesUtilesSelonSaqV2() {
   });
 }
 
-function valeursSelonSaqV2(champ) {
-  var comptes = {};
-  recettesUtilesSelonSaqV2().forEach(function(r) {
-    (r[champ] || []).forEach(function(v) { comptes[v] = (comptes[v] || 0) + 1; });
-  });
-  return Object.keys(comptes).sort(function(a, b) { return a.localeCompare(b); }).map(function(v) {
-    return { valeur: v, compte: comptes[v] };
-  });
-}
-
 function construirePanneauSelonSaqV2() {
   var html = '';
   majToggleHautV2('selonSaqV2-cave', selonSaqV2Cave);
@@ -471,7 +453,7 @@ function basculerListeSelonSaqV2(cle) {
   selonSaqV2Ouverte = cle;
   var champ = (cle === 'ingredients') ? 'ingredients' : 'typesPlats';
   var div = document.getElementById('selonSaqV2-liste-' + cle);
-  div.innerHTML = '<div class="item-liste' + (Object.keys(selonSaqV2Selection[cle]).length === 0 ? ' actif' : '') + '" onclick="tousSelonSaqV2(\'' + cle + '\')">Tous</div>' + valeursSelonSaqV2(champ).map(function(v) {
+  div.innerHTML = '<div class="item-liste' + (Object.keys(selonSaqV2Selection[cle]).length === 0 ? ' actif' : '') + '" onclick="tousSelonSaqV2(\'' + cle + '\')">Tous</div>' + comptesRecettesV2(recettesUtilesSelonSaqV2(), champ).map(function(v) {
     var sel = selonSaqV2Selection[cle][v.valeur];
     var vEsc = v.valeur.replace(/"/g, '&quot;');
     return '<div class="item-liste' + (sel ? ' actif' : '') + '" data-valeur="' + vEsc + '" onclick="toggleSelonSaqV2(this, \'' + cle + '\')">' + v.valeur + '</div>' +
@@ -726,7 +708,7 @@ function chargerCurieuxBeginV2() {
     var possede = !!w;
     // modes exclusifs : « Mes vins » = mes vins ; « Vins à découvrir » = les autres
     if (!cbDansModeV2(a, infos)) return false;
-    if (possede && f.cave && !bouteillesEnCaveParSAQV2(cs)) return false;
+    if (possede && f.cave && !vinEnCaveV2(cs, 'Code SAQ')) return false;
     if (!passeFiltreV2(f.saison, (a.saison || '').toString().trim())) return false;
     var x = attributsVinCbV2(a, infos);
     if (!passeFiltreV2(f.couleur, x.couleur, function(classe, v) { return classe === couleurClasseV2(v); })) return false;

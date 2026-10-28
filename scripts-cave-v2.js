@@ -28,11 +28,7 @@ function fermerARangerV2() {
 }
 
 function afficherCartesARangerV2() {
-  var aRanger = (ALL_DATA || []).filter(function(i) {
-    var statut = i.Statut || 'En stock';
-    if (statut === 'Bu' || statut === 'Sorti' || statut === 'Suggestion') return false;
-    return !(i.Meuble && i.Rangee && i.Espace);
-  });
+  var aRanger = bouteillesEnCaveV2('aranger');
   var div = document.getElementById('aRangerV2-cartes');
   var groups = grouperVinsV2(aRanger);
   document.getElementById('aRangerV2-compte').textContent = groups.length + ' vin' + (groups.length > 1 ? 's' : '');
@@ -42,18 +38,11 @@ function afficherCartesARangerV2() {
     var nom = decodeHTML(w.Nom || '—');
     var sous = sousVinV2(w);
     var photo = w['Photo URL'] ? '<div class="carte-photo"><img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
-    var onclick = g.cb ? ' onclick="deplacerDepuisARangerV2(\'' + g.cb + '\')"' : '';
+    var onclick = g.cb ? ' onclick="deplacerDepuisListeV2(\'' + g.cb + '\', \'aranger\')"' : '';
     return '<div class="carte ' + couleurClasseV2(w.Couleur) + '"' + onclick + '>' + photo +
            '<div class="carte-centre"><span class="carte-titre">' + nom + '</span><span class="carte-sous">' + sous + '</span></div>' +
            '<div class="carte-droite">' + caseDroiteV2(w, g.count) + '</div></div>';
   }).join('');
-}
-
-function deplacerDepuisARangerV2(code) {
-  var result = wineResultDepuisMemoireV2(code);
-  if (!result) { afficherMessage('Vin introuvable'); return; }
-  menuActionV2Context = { code: code, wineResult: result, retour: 'aranger' };
-  naviguerV2(ouvrirDeplacerV2);
 }
 
 // ==================== SANS CÉPAGE V2 ====================

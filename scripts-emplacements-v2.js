@@ -37,24 +37,6 @@ function fermerEmpV2() {
   cacherPageV2('empV2Container');
 }
 
-// Bouteilles rangées (statut actif + emplacement complet)
-function bouteillesRangeesEmpV2() {
-  return (ALL_DATA || []).filter(function(i){
-    var statut = i.Statut || 'En stock';
-    if (statut === 'Bu' || statut === 'Sorti') return false;
-    return !!(i.Meuble && i.Rangee && i.Espace);
-  });
-}
-
-// Bouteilles à ranger (actives, sans emplacement complet)
-function bouteillesARangerEmpV2() {
-  return (ALL_DATA || []).filter(function(i){
-    var statut = i.Statut || 'En stock';
-    if (statut === 'Bu' || statut === 'Sorti' || statut === 'Suggestion') return false;
-    return i.bottle && i.bottle > 0 && !(i.Meuble && i.Rangee && i.Espace);
-  });
-}
-
 // Après un choix dans le panneau (moteur commun : choisirFiltreV2) — ce qui est propre aux Emplacements
 function apresChoixFiltreEmpV2(cle) {
   // Nouveau pays : une appellation qui n'y existe pas se vide (jamais une liste vide sans raison)
@@ -68,10 +50,10 @@ function apresChoixFiltreEmpV2(cle) {
 
 function remplirFiltresEmpV2() {
   var f = filtresEmpV2;
-  var base = bouteillesRangeesEmpV2();
+  var base = bouteillesEnCaveV2('rangees');
 
   var meubles = valeursUniquesV2(base, 'Meuble');
-  if (bouteillesARangerEmpV2().length) meubles.push('À ranger');
+  if (bouteillesEnCaveV2('aranger').length) meubles.push('À ranger');
   var forRangee = f.meuble ? base.filter(function(i){ return String(i.Meuble) === String(f.meuble); }) : base;
   var rangees = valeursUniquesV2(forRangee, 'Rangee');
   var forEspace = base.filter(function(i){
@@ -116,8 +98,8 @@ function baseFiltresVinEmpV2() {
   if (empV2Mode === 'cepmanquants' || empV2Mode === 'appmanquante' || empV2Mode === 'fammanquante') {
     return (ALL_DATA || []).filter(function(i){ return !estPropositionV2(i); });
   }
-  if (f.meuble === 'À ranger') return bouteillesARangerEmpV2();
-  return bouteillesRangeesEmpV2().filter(function(i){
+  if (f.meuble === 'À ranger') return bouteillesEnCaveV2('aranger');
+  return bouteillesEnCaveV2('rangees').filter(function(i){
     return (!f.meuble || String(i.Meuble) === String(f.meuble)) &&
       (!f.rangee || String(i.Rangee) === String(f.rangee)) &&
       (!f.espace || String(i.Espace) === String(f.espace));
@@ -156,7 +138,7 @@ function empCarteVinV2(w, droite, versFiche) {
   var nom = decodeHTML(w.Nom || '—');
   var sous = sousVinV2(w);
   var photo = w['Photo URL'] ? '<div class="carte-photo"><img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
-  var onclick = cb ? ' onclick="' + (versFiche ? 'ouvrirFicheDepuisListeEmpV2' : 'deplacerDepuisEmpV2') + '(\'' + cb + '\')"' : '';
+  var onclick = cb ? ' onclick="' + (versFiche ? 'ouvrirFicheDepuisListeEmpV2(\'' + cb + '\')' : 'deplacerDepuisListeV2(\'' + cb + '\', \'emplacements\')') + '"' : '';
   return '<div class="carte ' + couleurClasseV2(w.Couleur) + '"' + onclick + '>' + photo +
          '<div class="carte-centre"><span class="carte-titre">' + nom + '</span><span class="carte-sous">' + sous + '</span></div>' +
          '<div class="carte-droite">' + (droite || '') + '</div></div>';
@@ -167,9 +149,9 @@ function afficherEmpV2() {
   empV2Mode = 'plan';
   var f = filtresEmpV2;
   var modeARanger = (f.meuble === 'À ranger');
-  var aRanger = bouteillesARangerEmpV2();
+  var aRanger = bouteillesEnCaveV2('aranger');
   var montrerARanger = aRanger.length && (modeARanger || (!f.meuble && !f.rangee && !f.espace));
-  var base = modeARanger ? [] : bouteillesRangeesEmpV2().filter(function(i){
+  var base = modeARanger ? [] : bouteillesEnCaveV2('rangees').filter(function(i){
     return (!f.meuble || String(i.Meuble) === String(f.meuble)) &&
       (!f.rangee || String(i.Rangee) === String(f.rangee)) &&
       (!f.espace || String(i.Espace) === String(f.espace));
@@ -278,7 +260,7 @@ function brancherTirerRangeesEmpV2() {
             var rowRond = c.getAttribute('data-row');
             c.addEventListener('click', function(ev){
               ev.stopPropagation();
-              var liste = el.classList.contains('a-ranger') ? bouteillesARangerEmpV2() : parcoursMeubleEmpV2(el.getAttribute('data-meuble'));
+              var liste = el.classList.contains('a-ranger') ? bouteillesEnCaveV2('aranger') : parcoursMeubleEmpV2(el.getAttribute('data-meuble'));
               ouvrirApresTap(function(){ ouvrirPhotoEmpV2(cb, liste, rowRond); });
             });
           } else {
@@ -295,7 +277,7 @@ function brancherTirerRangeesEmpV2() {
 
 // Parcours d'un meuble en ordre physique : rangée puis espace
 function parcoursMeubleEmpV2(meuble) {
-  return bouteillesRangeesEmpV2().filter(function(i){
+  return bouteillesEnCaveV2('rangees').filter(function(i){
     return String(i.Meuble) === String(meuble);
   }).sort(function(a, b){
     if (parseInt(a.Rangee) !== parseInt(b.Rangee)) return parseInt(a.Rangee) - parseInt(b.Rangee);
@@ -407,10 +389,7 @@ function zoneMenageV2(p) {
 // ce qui la rend douteuse, et si elle est hors de sa zone de couleur.
 function bouteillesMenageV2() {
   var der = derniersPassagesMenageV2();
-  return (ALL_DATA || []).filter(function(i) {
-    var statut = i.Statut || 'En stock';
-    return i.bottle && i.bottle > 0 && statut !== 'Bu' && statut !== 'Sorti';
-  }).map(function(i) {
+  return bouteillesEnCaveV2().map(function(i) {
     var place = (i.Meuble && i.Rangee && i.Espace) ? { meuble: i.Meuble.toString(), rangee: i.Rangee.toString(), espace: i.Espace.toString() } : null;
     var cepNom = decodeHTML(cepageDominant(i));
     var cepCommun = cepageCommunV2(cepNom);
@@ -873,7 +852,7 @@ function enregistrerMenageV2() {
   }).catch(function(e) {
     // une partie a pu s'écrire : on reprend l'inventaire pour ne pas mentir (les cases restent gardées)
     appelBackend('getInventoryData', {}, { spinner: '' }).then(function(data) { if (data) ALL_DATA = data; }).catch(function() {});
-    retourAccueilV2('Tri : ' + faits + ' sur ' + dep.length + ' enregistré(s) — ' + (e && e.message ? e.message : 'erreur inconnue'));
+    retourAccueilV2('Tri : ' + faits + ' sur ' + dep.length + ' enregistré(s) — ' + causeV2(e));
   });
 }
 
@@ -935,7 +914,7 @@ function grouperParSaqEmpV2(liste) {
 function afficherListeEmpV2(type) {
   empV2Mode = type;
   var f = filtresEmpV2;
-  var tousRanges = bouteillesRangeesEmpV2();
+  var tousRanges = bouteillesEnCaveV2('rangees');
   var div = document.getElementById('empV2-cartes');
   var html = '';
   var titre = '';
@@ -1000,7 +979,7 @@ function afficherListeEmpV2(type) {
   } else if (type === 'cepmanquants' && !f.meuble) {
     // Global : cépages de ma liste de vins absents du stock actif (pour prioriser les achats)
     titre = 'Cépages manquants';
-    var actifsTous = (ALL_DATA || []).filter(function(i){ var s = i.Statut || 'En stock'; return i.bottle && i.bottle > 0 && s !== 'Bu' && s !== 'Sorti'; });
+    var actifsTous = bouteillesEnCaveV2();
     var cepStock = {};
     actifsTous.forEach(function(w){ var c = cepageDominant(w); if (c) cepStock[cleCommuneCepageV2(c)] = true; });
     var parCepGlobal = {};
@@ -1029,7 +1008,7 @@ function afficherListeEmpV2(type) {
     var amont = meublesAmontV2(f.meuble);
     var horsMeuble = tousRanges.filter(function(i){
       return amont.some(function(m){ return memeTexteV2(m, i.Meuble); });
-    }).concat(bouteillesARangerEmpV2());
+    }).concat(bouteillesEnCaveV2('aranger'));
     var cepDansMeuble = {};
     dansMeuble2.forEach(function(w){ var c = cepageDominant(w); if (c) cepDansMeuble[cleCommuneCepageV2(c)] = true; });
     var parCepageHors = {};
@@ -1055,7 +1034,7 @@ function afficherListeEmpV2(type) {
   } else if (type === 'fammanquante' && !f.meuble) {
     // Global : familles de ma liste de vins absentes du stock actif
     titre = 'Familles manquantes';
-    var actifsTousFam = (ALL_DATA || []).filter(function(i){ var s = i.Statut || 'En stock'; return i.bottle && i.bottle > 0 && s !== 'Bu' && s !== 'Sorti'; });
+    var actifsTousFam = bouteillesEnCaveV2();
     var famStock = {};
     actifsTousFam.forEach(function(w){ var fa = (w.Famille || '').toString().trim(); if (fa) famStock[fa] = true; });
     var parFamGlobal = {};
@@ -1081,7 +1060,7 @@ function afficherListeEmpV2(type) {
     var amontFam = meublesAmontV2(f.meuble);
     var horsMeubleFam = tousRanges.filter(function(i){
       return amontFam.some(function(m){ return memeTexteV2(m, i.Meuble); });
-    }).concat(bouteillesARangerEmpV2());
+    }).concat(bouteillesEnCaveV2('aranger'));
     var famDansMeuble = {};
     dansMeubleFam.forEach(function(w){ var fa = (w.Famille || '').toString().trim(); if (fa) famDansMeuble[fa] = true; });
     var parFamHors = {};
@@ -1105,7 +1084,7 @@ function afficherListeEmpV2(type) {
   } else if (type === 'appmanquante' && !f.meuble) {
     // Global : appellations de ma liste de vins absentes du stock actif
     titre = 'Appellation manquante';
-    var actifsTousApp = (ALL_DATA || []).filter(function(i){ var s = i.Statut || 'En stock'; return i.bottle && i.bottle > 0 && s !== 'Bu' && s !== 'Sorti'; });
+    var actifsTousApp = bouteillesEnCaveV2();
     var appStock = {};
     actifsTousApp.forEach(function(w){ var a = (w.Appellation || '').toString().trim(); if (a) appStock[normaliserRechercheV2(a)] = true; });
     var parAppGlobal = {};
@@ -1134,7 +1113,7 @@ function afficherListeEmpV2(type) {
     var amontApp = meublesAmontV2(f.meuble);
     var horsMeubleApp = tousRanges.filter(function(i){
       return amontApp.some(function(m){ return memeTexteV2(m, i.Meuble); });
-    }).concat(bouteillesARangerEmpV2());
+    }).concat(bouteillesEnCaveV2('aranger'));
     var appDansMeuble = {};
     dansMeuble3.forEach(function(w){ var a = (w.Appellation || '').toString().trim(); if (a) appDansMeuble[normaliserRechercheV2(a)] = true; });
     var parAppHors = {};
@@ -1171,9 +1150,3 @@ function ouvrirFicheDepuisListeEmpV2(code) {
   ouvrirApresTap(function(){ ouvrirFicheV2(code, 'empliste'); });
 }
 
-function deplacerDepuisEmpV2(code) {
-  var result = wineResultDepuisMemoireV2(code);
-  if (!result) { afficherMessage('Vin introuvable'); return; }
-  menuActionV2Context = { code: code, wineResult: result, retour: 'emplacements' };
-  naviguerV2(ouvrirDeplacerV2);
-}

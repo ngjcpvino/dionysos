@@ -90,7 +90,7 @@ function chargerSourcesRechercheV2() {
   chaine.then(function() {
     if (document.getElementById('rechercheV2Container').style.display !== 'none') lancerRechercheV2();
   }).catch(function(err) {
-    afficherMessage('Recherche : ' + ((err && err.message) ? err.message : err));
+    afficherMessage('Recherche : ' + causeV2(err));
   });
 }
 
