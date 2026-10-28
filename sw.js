@@ -6,12 +6,14 @@
    Ne touche jamais au backend (POST vers Apps Script) ni aux photos des bouteilles (SAQ).
 ============================================================ */
 
-var CACHE_APP = 'dionysos-app-v1';
+var CACHE_APP = 'dionysos-app-v2';   // v2 (28 oct. 2026) : scripts-scanner-v2.js découpé en 8 fichiers
 var DELAI_RESEAU = 4000; // au-delà, la copie répond
 
 // Gardés dès l'installation : l'app elle-même et ce qu'elle affiche sans réseau
 var FICHIERS = [
-  'index-v2.html', 'styles-v2.css', 'scripts-socle-v2.js', 'scripts-scanner-v2.js', 'scripts-fiche-v2.js',
+  'index-v2.html', 'styles-v2.css', 'scripts-socle-v2.js', 'scripts-communs-v2.js', 'scripts-scan-v2.js',
+  'scripts-cave-v2.js', 'scripts-achat-v2.js', 'scripts-recherche-v2.js', 'scripts-accords-v2.js',
+  'scripts-emplacements-v2.js', 'scripts-historique-v2.js', 'scripts-fiche-v2.js',
   'images/scan.png', 'images/saq1.PNG', 'images/partager-spinner-3.svg', 'images/ne-pas-racheter.svg',
   'images/icone-ipad.png', 'images/vin.ico'
 ];
