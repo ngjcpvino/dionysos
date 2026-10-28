@@ -10,7 +10,8 @@
 - **Backend** : Google Apps Script, projet « Vino 3.0 », `Code.gs`. **La version de référence vit dans le dépôt PRIVÉ `ngjcpvino/dionysos-serveur`** (`Code.gs`, `appsscript.json` — celui du dépôt public est périmé —, `README.md` : coller, vérifier la dernière ligne, redéployer, revenir en arrière). Copie de travail gitignorée ici. Tout changement du backend y est poussé (branche `main`) et envoyé en pièce jointe ; l'utilisateur colle tout le fichier puis redéploie.
   - Vérif simple d'un collage : le numéro de la dernière ligne de `Code.gs` dans Apps Script (**3 011 lignes** depuis le ménage du 28 oct. ; 3 131 avant).
   - ⚠️ La copie `Dionysos/Code.gs` du Google Drive est **la copie de l'utilisateur** (faite en collant, 25 oct.) : l'IA ne la met pas à jour. La coller = « aucun changement ».
-  - Lire le projet sans copier-coller : export par le connecteur Drive (`application/vnd.google-apps.script+json`, fichier `Code`). Le sens inverse reste manuel (voir liste 2.0, chantier 1).
+  - Lire le projet sans copier-coller : export par le connecteur Drive (`application/vnd.google-apps.script+json`, fichier `Code`). Projet « Vino 3.0 » = identifiant `1HYkvpL3PhuZrzgVwYDP2KRcBEOikrxTA-QbVQX-tC5ey7nDP9YX-h8Pd`.
+  - **Mise en ligne sans copier-coller : `outils/deployer.py` du dépôt `dionysos-serveur`** (`etat` · `essai` · `publier "…"` · `revenir N`) — **prêt (28 oct.), en attente de la clé** de l'utilisateur (variable d'environnement `CLASPRC_JSON`, mode d'emploi dans le `README.md` de ce dépôt). Tant qu'elle manque, le collage à la main reste la règle. Le réseau de l'environnement bloque `script.google.com` (l'adresse de l'app) : la vérification finale se fait dans l'app, sauf si l'utilisateur l'ajoute aux domaines permis ; `script.googleapis.com` (l'API) passe.
 - **Base** : Google Sheets « Vino 3.0 » — onglets Vino · Historique · config/CONFIG · Suggestions · Chartier · Recettes · CurieuxBegin · Notes · Erreurs.
 
 ## 📂 Fichiers
