@@ -262,7 +262,7 @@ Il ne reprenait que l'inventaire (et vidait l'historique) : ce que l'autre tél�
 
 ## 🟠 Pastille de rappel sur OUTILS (28 oct. 2026)
 Demande de l'utilisateur : « J'aimerais avoir quelque chose qui m'indique que je dois aller voir le sans cépage. Sinon je vais oublier. »
-- **Choix de l'utilisateur (sur image) : point doré plein**, **seulement à côté d'OUTILS** (rien sur « Sans cépage »), **sans chiffre**.
+- **Choix de l'utilisateur (sur image) : point doré plein**, **sans chiffre**, à côté d'OUTILS — **et aussi à côté de « Sans cépage »** dans le sous-menu (ajouté le 28 oct. à sa demande ; d'abord « seulement sur OUTILS »). Les deux s'allument et s'éteignent ensemble (`span#burgerV2-pastille-sanscepage`).
 - Il est là tant qu'au moins un vin n'a pas de cépage. La règle est la même que pour la liste « Sans cépage » (`vinsSansCepageV2` : pas de `Cepage`, hors Spiritueux), et la liste comme la pastille passent par cette fonction.
 - Recalculé **à chaque ouverture du menu** (`toggleMenuV2`). Dès que le dernier vin a reçu son cépage, la pastille a disparu à l'ouverture suivante.
 - Classe réutilisable `.pastille-rappel` (9 px, `--taille-9`, or, cachée par défaut ; `.visible` l'affiche) ; le point est le `span#burgerV2-pastille-outils` dans le libellé OUTILS.

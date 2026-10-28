@@ -184,9 +184,12 @@ function toggleMenuV2() {
   if (ouvert) {  // à l'ouverture, replier les accordéons (Accord selon… / Outils)
     var acc = document.getElementById('burgerV2-accord'); if (acc) acc.style.display = 'none';
     var out = document.getElementById('burgerV2-outils'); if (out) out.style.display = 'none';
-    // pastille dorée sur OUTILS tant qu'il reste des vins sans cépage
-    var pastille = document.getElementById('burgerV2-pastille-outils');
-    if (pastille) pastille.classList.toggle('visible', vinsSansCepageV2().length > 0);
+    // pastille dorée sur OUTILS et sur « Sans cépage » tant qu'il reste des vins sans cépage
+    var reste = vinsSansCepageV2().length > 0;
+    ['burgerV2-pastille-outils', 'burgerV2-pastille-sanscepage'].forEach(function(id) {
+      var pastille = document.getElementById(id);
+      if (pastille) pastille.classList.toggle('visible', reste);
+    });
   }
 }
 
