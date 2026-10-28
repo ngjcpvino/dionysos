@@ -1380,10 +1380,15 @@ function fermerSansCepageV2() {
   document.getElementById('sansCepageV2Container').style.display = 'none';
 }
 
-function afficherCartesSansCepageV2() {
-    var sansCepage = (ALL_DATA || []).filter(function(i) {
+// Vins sans cépage (hors spiritueux) — la liste « Sans cépage » et la pastille d'OUTILS
+function vinsSansCepageV2() {
+  return (ALL_DATA || []).filter(function(i) {
     return !(i.Cepage || '').toString().trim() && i.Couleur !== 'Spiritueux';
   });
+}
+
+function afficherCartesSansCepageV2() {
+  var sansCepage = vinsSansCepageV2();
 
   var div = document.getElementById('sansCepageV2-cartes');
   var groups = grouperVinsV2(sansCepage);
@@ -5883,6 +5888,9 @@ function toggleMenuV2() {
   if (ouvert) {  // à l'ouverture, replier les accordéons (Accord selon… / Outils)
     var acc = document.getElementById('burgerV2-accord'); if (acc) acc.style.display = 'none';
     var out = document.getElementById('burgerV2-outils'); if (out) out.style.display = 'none';
+    // pastille dorée sur OUTILS tant qu'il reste des vins sans cépage
+    var pastille = document.getElementById('burgerV2-pastille-outils');
+    if (pastille) pastille.classList.toggle('visible', vinsSansCepageV2().length > 0);
   }
 }
 
