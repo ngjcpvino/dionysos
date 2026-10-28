@@ -35,6 +35,7 @@ Rien ne change à l'écran. On enlève ce qui ne sert plus, pour que la suite pa
 **Ce qu'on ferait** : l'API Apps Script (`projects.updateContent` → `versions.create` → `deployments.update`) pousse le code et redéploie la **même** adresse que `API_URL`. Claude le fait lui-même, vérifie, et l'utilisateur ne touche plus à rien.
 **Ce qu'il faut de l'utilisateur, une fois** : activer « API Google Apps Script » dans ses réglages Apps Script, et donner un accès (jeton Google rangé dans les **secrets de l'environnement**, jamais dans le dépôt). ⚠️ À dire franchement : ce jeton permet de modifier ses projets Apps Script — c'est son choix. Sans ce chantier, le chantier 5 reste possible, mais le collage à la main se multiplie (un fichier par partie).
 **Vérification** : un aller-retour (lire le projet, pousser une copie identique, comparer), puis une vraie mise à jour suivie d'un appel à l'app.
+**Décision (28 oct.)** : oui — « c'est ben juste du vin » : la **clé complète** (outil officiel de Google, `clasp`), la plus simple. À faire **à l'ordinateur** : (1) activer « API Google Apps Script » (`script.google.com/home/usersettings`, faisable aussi au téléphone) ; (2) `npx @google/clasp login` (Node.js requis) ; (3) recopier le fichier `.clasprc.json` dans les secrets de l'environnement Claude (variable `CLASPRC_JSON`), jamais dans la conversation. Prise en compte à la séance suivante.
 
 ## Chantier 2 — Le scanner *(moyen ; à tester en succursale et au cellier)*
 **Constat** : la lecture repose sur **QuaggaJS 0.12.1** — version de **2017** d'une bibliothèque **abandonnée** (le projet ne bouge plus depuis ; une relève existe, `quagga2`). Signes de fragilité dans notre code : il faut **3 lectures identiques** pour accepter un code (`SCAN_THRESHOLD_V2`, parade aux mauvaises lectures) ; tout le décodage tourne sur le fil principal (`numOfWorkers: 0`) ; la bibliothèque est réinitialisée à chaque ouverture ; elle vient d'un CDN (gardée hors ligne par `sw.js`, `EXTERNES`) ; pas de lampe de poche.
@@ -97,7 +98,7 @@ Chaque famille : Claude montre toutes les variantes **côte à côte, telles qu'
 6. **Chantier 6** au fil de l'eau.
 
 ## Décisions à prendre par l'utilisateur (une à la fois, au bon moment)
-- Chantier 1 : activer l'API Apps Script et donner l'accès, oui ou non ?
+- ~~Chantier 1 : activer l'API Apps Script et donner l'accès, oui ou non ?~~ **Oui, clé complète** (28 oct.) — reste à faire à l'ordinateur.
 - Chantier 2 : nouveau scanner avant ou après les essais de fin de semaine ?
 - Chantier 3 : les modèles de chaque famille (sur image) ; titres en or ou blancs ?
 - Chantier 5 : le découpage des fichiers du serveur (la liste ci-dessus, ou autrement ?).
