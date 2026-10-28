@@ -288,9 +288,9 @@ function lancerRechercheV2() {
   div.innerHTML = sections.map(function(sec, i) {
     var reste = sec.total - sec.montres;
     var coupe = reste > 0 ? '<div class="texte-secondaire">' + reste + ' de plus — précise ton mot</div>' : '';
-    if (!sec.pliable) return '<div class="emp-meuble">' + sec.titre + '</div>' + sec.html + coupe;
+    if (!sec.pliable) return '<div class="titre-2">' + sec.titre + '</div>' + sec.html + coupe;
     var ouvert = (sec.titre === titreOuvert);
-    return '<div class="emp-meuble emp-meuble-pliable' + (ouvert ? ' ouvert' : '') + '" onclick="basculerSectionRechercheV2(' + i + ')">' + sec.titre + '</div>' +
+    return '<div class="titre-2 emp-meuble-pliable' + (ouvert ? ' ouvert' : '') + '" onclick="basculerSectionRechercheV2(' + i + ')">' + sec.titre + '</div>' +
            '<div id="rechercheV2-section-' + i + '" class="menu-liste' + (ouvert ? ' ouvert' : '') + '" data-titre="' + sec.titre + '">' + sec.html + coupe + '</div>';
   }).join('');
   RECHERCHE_V2_SECTION_OUVERTE = titreOuvert;

@@ -23,7 +23,6 @@ html, body {
   --gold-2: #ffd036;
   --gold-20: rgba(201,129,60,0.2);
   --gold-30: rgba(201,129,60,0.3);
-  --gold-70: rgba(201,129,60,0.7);
 
   /* ===== BORDURES — largeurs ===== */
   --largeur-bordure-1: 1px;
@@ -413,19 +412,14 @@ body::after {
   left: 15%; right: 15%;
   border-top: var(--largeur-bordure-1) solid var(--couleur-bordure-tres-claire);
 }
-.emp-bloc .emp-meuble { position: relative; }
-.emp-bloc .emp-meuble::after {
+/* Dans un bloc, le titre de section porte un trait dessous */
+.emp-bloc .titre-2 { position: relative; margin-bottom: var(--space-l); }
+.emp-bloc .titre-2::after {
   content: '';
   position: absolute;
   bottom: calc(-1 * var(--space-s));
   left: 15%; right: 15%;
   border-top: var(--largeur-bordure-1) solid var(--couleur-bordure-tres-claire);
-}
-.emp-meuble {
-  color: var(--white);
-  font-size: var(--fs-22);
-  letter-spacing: var(--ls-tight);
-  margin: 0 0 var(--space-l) 0;
 }
 /* Titre de section qui se plie (sections « Accord selon… » de la recherche) :
    même titre, plus un chevron qui tourne quand la section est ouverte. */
@@ -505,16 +499,6 @@ body::after {
   position: relative;
 }
 
-.titre-action {
-  color: var(--white);
-  font-size: var(--fs-14);
-  font-weight: 400;
-  letter-spacing: var(--ls-wide);
-  text-transform: uppercase;
-  text-align: center;
-  margin: var(--space-l) 0 var(--space-s) 0;
-}
-
 .btn-fermer {
   position: fixed;
   top: var(--space-s); right: var(--space-s);
@@ -554,22 +538,27 @@ body::after {
   text-align: center;
   margin: 0 0 var(--space-s) 0;
 }
+/* TROIS titres, partout (28 oct. 2026, liste 2.0 chantier 3) — un titre s'écrit pareil partout :
+   .titre-1 = la page (blanc, majuscules) ; .titre-2 = une section (or, minuscules : fiche, listes, Tri…) ;
+   .titre-3 = un petit titre (or, petites majuscules espacées : l'action d'une page de vin, l'étiquette
+   d'un champ ou d'un menu, une rubrique sous une section). Le nom sur une carte : .carte-titre. */
 .titre-2 {
+  color: var(--gold);
+  font-size: var(--fs-18);
+  font-weight: 400;
+  margin: var(--space-l) 0 var(--space-s) 0;
+}
+.titre-2:first-child { margin-top: 0; }
+
+.titre-3 {
   color: var(--gold);
   font-size: var(--fs-14);
   font-weight: 400;
   letter-spacing: var(--ls-wide);
   text-transform: uppercase;
-  margin: var(--space-l) 0 var(--space-s) 0;
-}
-
-.titre-3 {
-  color: var(--gold-70);
-  font-size: var(--fs-13);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-wide);
   margin: var(--space-m) 0 var(--space-xs) 0;
 }
+.titre-2 + .titre-3 { margin-top: 0; }
 
 .texte-secondaire {
   color: var(--white-60);
@@ -1119,12 +1108,6 @@ input[type="date"].champ-saisie::-webkit-date-and-time-value { text-align: left;
 .mt-20 { margin-top: var(--space-l); }
 /* Petit titre gris aligné à gauche, en lettres normales (« Rien à faire ici » du Tri Dionysos). Réutilisable. */
 .texte-secondaire.texte-gauche { text-align: left; margin-bottom: var(--space-s); text-transform: none; letter-spacing: normal; }
-/* Titre de rubrique dans un bloc (Tri Dionysos : « Choisir », « Sors », « Déplace »…) : or, en lettres normales,
-   sous le titre du bloc (.emp-meuble). Réutilisable. */
-.titre-rubrique { color: var(--gold); font-size: var(--fs-18); text-align: left; margin: var(--space-l) 0 var(--space-s) 0; }
-.emp-meuble + .titre-rubrique { margin-top: 0; }
-/* Titre posé AU-DESSUS d'un groupe coloré (.histo-groupe), sous une rubrique (« Pinot grigio : tu en as 3… »). Réutilisable. */
-.titre-groupe { color: var(--white); font-size: var(--fs-16); text-align: left; margin: var(--space-m) 0 var(--space-s) 0; }
 .text-center    { text-align: center; }
 .color-primary  { color: var(--gold); }
 .color-white    { color: var(--white); }
