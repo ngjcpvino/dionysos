@@ -418,14 +418,7 @@ function rendreBlocsScanV2(scan) {
       cites += '<div class="citation"><span class="color-primary">' + (s.sommelier || '—') + '</span>' +
         (s.note ? '<span class="citation-texte">« ' + s.note + ' »</span>' : '') + '</div>';
     });
-    var plats = platsCurieuxBeginV2(saq);
-    if (plats.length) {
-      cites += '<div class="citation"><span class="color-primary">Curieux Bégin</span>' + plats.map(function(a) {
-        var url = 'https://cuisinez.telequebec.tv/recettes/' + a.recetteId + '/' + a.slug;
-        var saison = a.saison ? ' — Saison ' + a.saison + (a.episode ? '-' + a.episode : '') : '';
-        return '<span class="citation-texte" onclick="window.open(\'' + url + '\', \'_blank\')">' + decodeHTML(a.plat || '') + saison + '</span>';
-      }).join('') + '</div>';
-    }
+    cites += citationCurieuxBeginV2(saq);
   }
   if (cites) html += '<div class="citations">' + cites + '</div>';
 
@@ -470,6 +463,17 @@ function basculerComparablesV2(prefixe, quel) {
   });
 }
 
+// Le bloc « Curieux Bégin » d'un vin : le plat et la saison → la recette. Écran du scan, et « Bingo ! » de la Facture SAQ.
+function citationCurieuxBeginV2(saq, titre) {
+  var plats = platsCurieuxBeginV2(saq);
+  if (!plats.length) return '';
+  return '<div class="citation"><span class="color-primary">' + (titre || 'Curieux Bégin') + '</span>' + plats.map(function(a) {
+    var url = 'https://cuisinez.telequebec.tv/recettes/' + a.recetteId + '/' + a.slug;
+    var saison = a.saison ? ' — Saison ' + a.saison + (a.episode ? '-' + a.episode : '') : '';
+    return '<span class="citation-texte" onclick="window.open(\'' + url + '\', \'_blank\')">' + decodeHTML(a.plat || '') + saison + '</span>';
+  }).join('') + '</div>';
+}
+
 // Recettes Curieux Bégin où ce vin a été proposé (par code SAQ), la saison la plus récente d'abord
 function platsCurieuxBeginV2(codeSAQ) {
   return (ALL_CURIEUXBEGIN || []).filter(function(a) { return (a.codeSAQ || '').toString().trim() === codeSAQ; }).sort(function(a, b) {
@@ -479,17 +483,21 @@ function platsCurieuxBeginV2(codeSAQ) {
 
 // Curieux Bégin n'est chargé qu'à la demande : on le charge en fond, et on redessine seulement si ce vin y figure
 var CB_SCAN_V2_EN_COURS = false;
-function chargerCurieuxBeginScanV2() {
+var CB_SCAN_V2_APRES = [];   // à faire une fois chargé (ex. le bingo de la Facture SAQ)
+function chargerCurieuxBeginScanV2(apres) {
+  if (apres) CB_SCAN_V2_APRES.push(apres);
   if (CB_SCAN_V2_EN_COURS) return;
   CB_SCAN_V2_EN_COURS = true;
   appelBackend('getCurieuxBegin', {}, { spinner: '' }).then(function(data) {
     CB_SCAN_V2_EN_COURS = false;
     ALL_CURIEUXBEGIN = data || [];
+    var apresChargement = CB_SCAN_V2_APRES; CB_SCAN_V2_APRES = [];
+    apresChargement.forEach(function(f) { f(); });
     var s = SCAN_V2_COURANT;
     var div = s ? document.getElementById(s.prefixe + 'V2-scan') : null;
     var page = div ? div.closest('.modal-v2-fullscreen') : null;
     if (s && page && page.style.display !== 'none' && platsCurieuxBeginV2((s.codeSAQ || '').toString().trim()).length) rendreBlocsScanV2(s);
-  }).catch(function() { CB_SCAN_V2_EN_COURS = false; });
+  }).catch(function() { CB_SCAN_V2_EN_COURS = false; CB_SCAN_V2_APRES = []; });
 }
 
 // Une proposition (💡) n'a jamais été achetée : son « Racheter » est vide (le Statut 'Suggestion' n'existe pas dans les données)
@@ -2373,10 +2381,21 @@ function finirGererFavoritesV2() {
 // ==================== FACTURE SAQ V2 ====================
 var RECU_V2_ITEMS = [];
 var RECU_V2_INDEX = 0;
+var RECU_V2_BINGOS = 0;   // vins de la facture proposés dans Curieux Bégin (« Facture traitée — 2 bingos »)
 
 function ouvrirRecuV2() {
   document.getElementById('recuV2-fichier').value = '';
   document.getElementById('recuV2Container').style.display = 'flex';
+  RECU_V2_BINGOS = 0;
+  if (!ALL_CURIEUXBEGIN || !ALL_CURIEUXBEGIN.length) chargerCurieuxBeginScanV2(majBingoRecuV2);
+}
+
+// 🎉 Bingo ! le vin à valider a été proposé dans Curieux Bégin : le plat et la saison → la recette
+function majBingoRecuV2() {
+  var div = document.getElementById('recuValidationV2-bingo');
+  if (!div) return;
+  var saq = (document.getElementById('recuValidationV2-codesaq').value || '').replace(/\D/g, '').trim();
+  div.innerHTML = saq ? citationCurieuxBeginV2(saq, '🎉 Bingo ! Curieux Bégin') : '';
 }
 
 function fermerRecuV2() {
@@ -2384,6 +2403,7 @@ function fermerRecuV2() {
   document.getElementById('recuValidationV2Container').style.display = 'none';
   RECU_V2_ITEMS = [];
   RECU_V2_INDEX = 0;
+  RECU_V2_BINGOS = 0;
 }
 
 function traiterPhotoRecuV2(input) {
@@ -2418,8 +2438,9 @@ function traiterPhotoRecuV2(input) {
 
 function afficherProchainRecuVinV2() {
   if (RECU_V2_INDEX >= RECU_V2_ITEMS.length) {
+    var bingos = RECU_V2_BINGOS;
     fermerRecuV2();
-    afficherMessage('Facture traitée');
+    afficherMessage(bingos ? 'Facture traitée — ' + bingos + ' bingo' + (bingos > 1 ? 's' : '') + ' 🎉' : 'Facture traitée');
     return;
   }
   var item = RECU_V2_ITEMS[RECU_V2_INDEX];
@@ -2427,6 +2448,7 @@ function afficherProchainRecuVinV2() {
   document.getElementById('recuValidationV2-codesaq').value = item.codeSAQ || '';
   document.getElementById('recuValidationV2-qte').value = (item.qte && item.qte > 0) ? item.qte : 1;
   document.getElementById('recuValidationV2-statut').textContent = '';
+  majBingoRecuV2();
 
   var codeSAQ = (item.codeSAQ || '').toString().trim();
   document.getElementById('recuValidationV2-nom').value = codeSAQ ? 'Recherche...' : '';
@@ -2474,6 +2496,7 @@ function confirmerRecuVinV2() {
       }
       return appelBackend('getInventoryData', {}, { spinner: 'Ajout' }).then(function(data) {
         if (data) ALL_DATA = data;
+        if (platsCurieuxBeginV2(codeSAQ).length) RECU_V2_BINGOS++;
         RECU_V2_INDEX++;
         afficherProchainRecuVinV2();
       });

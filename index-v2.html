@@ -580,7 +580,8 @@
     <h2 class="titre-1">Valider l'achat</h2>
     <div id="recuValidationV2-compte" class="texte-secondaire"></div>
     <input type="text" id="recuValidationV2-nom" class="champ-saisie" placeholder="Nom du vin">
-    <input type="text" id="recuValidationV2-codesaq" class="champ-saisie" placeholder="Code SAQ" inputmode="numeric">
+    <input type="text" id="recuValidationV2-codesaq" class="champ-saisie" placeholder="Code SAQ" inputmode="numeric" oninput="majBingoRecuV2()">
+    <div id="recuValidationV2-bingo" class="text-center"></div>
     <input type="number" id="recuValidationV2-qte" class="champ-saisie" placeholder="Quantité" inputmode="numeric" min="1" value="1">
     <div id="recuValidationV2-statut" class="texte-secondaire"></div>
     <div class="roundel" onclick="confirmerRecuVinV2()">
