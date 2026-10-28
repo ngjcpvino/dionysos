@@ -86,12 +86,6 @@ function filtrerMetsHistoV2() {
   afficherHistoV2();
 }
 
-function toggleCaveHistoV2() {
-  filtresHistoV2.cave = !filtresHistoV2.cave;
-  remplirFiltresHistoV2();
-  afficherHistoV2();
-}
-
 function afficherHistoV2() {
   var f = filtresHistoV2;
   var vinDe = indexVinsHistoV2();

@@ -177,7 +177,7 @@ function afficherFicheV2(result) {
   }).join('');
   html += '<div class="controle"><span class="libelle">Accords</span>' +
           '<div id="ficheV2-accords-display" class="champ-cliquable" onclick="basculerMenuAccordsV2()">' + (accordsActuels.length ? accordsActuels.join(', ') : 'Aucun') + '</div></div>';
-  itemsAccords += '<div class="item-liste" id="ficheV2-accord-ajouter" onclick="ouvrirAjoutAccordV2()">+ Ajouter</div>';
+  itemsAccords += '<div class="item-liste" id="ficheV2-accord-ajouter" onclick="ouvrirChampAjoutV2(\'ficheV2-accord\', \'Nouvel accord\', confirmerAjoutAccordV2)">+ Ajouter</div>';
   html += '<div id="ficheV2-accords-menu" class="menu-liste">' + itemsAccords + '</div>';
 
   var aime = wine.Racheter || '';
@@ -216,16 +216,16 @@ function afficherFicheV2(result) {
   html += '<div class="section">';
   html += '<h3 class="titre-2">Accords selon…</h3>';
   html += '<div class="menu-liste ouvert">';
-  html += '<div class="item-liste" id="ficheV2-selon-som-titre" onclick="basculerAccordsSelonV2(\'som\')">Les sommeliers</div>';
+  html += '<div class="item-liste" id="ficheV2-selon-som-titre" onclick="basculerVoletsV2(\'ficheV2-selon-\', \'som\')">Les sommeliers</div>';
   html += '<div id="ficheV2-selon-som" style="display:none;">';
   html += '<div id="ficheV2-suggestions"></div>';
-  html += '<div class="ligne-ajout"><div class="cercle" onclick="ouvrirSuggestionAjoutV2(\'' + (wine['Code SAQ'] || '').toString().trim() + '\', \'fiche\')">+</div></div>';
+  html += '<div class="ligne-ajout"><div class="cercle" onclick="ouvrirSuggestionV2(\'' + (wine['Code SAQ'] || '').toString().trim() + '\', \'fiche\')">+</div></div>';
   html += '</div>';
-  html += '<div class="item-liste" id="ficheV2-selon-cb-titre" onclick="basculerAccordsSelonV2(\'cb\')">Curieux Bégin</div>';
+  html += '<div class="item-liste" id="ficheV2-selon-cb-titre" onclick="basculerVoletsV2(\'ficheV2-selon-\', \'cb\')">Curieux Bégin</div>';
   html += '<div id="ficheV2-selon-cb" style="display:none;"></div>';
-  html += '<div class="item-liste" id="ficheV2-selon-chartier-titre" onclick="basculerAccordsSelonV2(\'chartier\')">Chartier</div>';
+  html += '<div class="item-liste" id="ficheV2-selon-chartier-titre" onclick="basculerVoletsV2(\'ficheV2-selon-\', \'chartier\')">Chartier</div>';
   html += '<div id="ficheV2-selon-chartier" style="display:none;"><div class="texte-secondaire">En développement</div></div>';
-  html += '<div class="item-liste" id="ficheV2-selon-saq-titre" onclick="basculerAccordsSelonV2(\'saq\')">SAQ</div>';
+  html += '<div class="item-liste" id="ficheV2-selon-saq-titre" onclick="basculerVoletsV2(\'ficheV2-selon-\', \'saq\')">SAQ</div>';
   html += '<div id="ficheV2-selon-saq" style="display:none;"><div id="ficheV2-recettes"></div></div>';
   html += '</div>';
   html += '</div>';
@@ -584,18 +584,6 @@ function chargerCurieuxBeginFicheV2(wine) {
   appelBackend('getCurieuxBegin', {}, { spinner: '' }).then(function(data) { ALL_CURIEUXBEGIN = data || []; rendre(); }).catch(journaliserV2('Curieux Bégin de la fiche'));
 }
 
-// Accordéon du bloc « Accords selon… » — un seul volet ouvert
-function basculerAccordsSelonV2(quel) {
-  ['som', 'cb', 'chartier', 'saq'].forEach(function(k) {
-    var volet = document.getElementById('ficheV2-selon-' + k);
-    var titre = document.getElementById('ficheV2-selon-' + k + '-titre');
-    if (!volet) return;
-    var ouvrir = (k === quel) && volet.style.display === 'none';
-    volet.style.display = ouvrir ? '' : 'none';
-    if (titre) titre.classList.toggle('actif', ouvrir);
-  });
-}
-
 function chargerSuggestionsFicheV2(codeSAQ) {
   var conteneur = document.getElementById('ficheV2-suggestions');
   if (!conteneur) return;
@@ -606,7 +594,7 @@ function chargerSuggestionsFicheV2(codeSAQ) {
   conteneur.innerHTML = items.map(function(s) {
     var somEsc = (s.sommelier || '').replace(/'/g, "\\'");
     var noteEsc = (s.note || '').replace(/'/g, "\\'");
-    return '<div class="carte histo-mets" onclick="ouvrirApresTap(function(){ouvrirSuggestionEditV2(' + s.row + ', \'' + somEsc + '\', \'' + noteEsc + '\', \'' + nomEsc + '\', \'' + saq + '\', \'fiche\')})"><div class="carte-centre"><span class="carte-titre">' + (s.sommelier || '—') + '</span><span class="carte-sous">' + (s.note || '') + '</span></div><div class="carte-droite">' + (s.date || '') + '</div></div>';
+    return '<div class="carte histo-mets" onclick="ouvrirApresTap(function(){ouvrirSuggestionV2(\'' + saq + '\', \'fiche\', ' + s.row + ', \'' + somEsc + '\', \'' + noteEsc + '\', \'' + nomEsc + '\')})"><div class="carte-centre"><span class="carte-titre">' + (s.sommelier || '—') + '</span><span class="carte-sous">' + (s.note || '') + '</span></div><div class="carte-droite">' + (s.date || '') + '</div></div>';
   }).join('');
 }
 
@@ -627,19 +615,10 @@ function basculerMenuAccordsV2() {
   if (!ouvert) remettreAjoutAccordV2();
 }
 
-function ouvrirAjoutAccordV2() {
-  var item = document.getElementById('ficheV2-accord-ajouter');
-  if (!item) return;
-  item.outerHTML = '<input type="text" id="ficheV2-accord-champ" class="champ-saisie" placeholder="Nouvel accord (Entrée pour confirmer)">';
-  var champ = document.getElementById('ficheV2-accord-champ');
-  champ.onkeydown = function(e) { if (e.key === 'Enter') { e.preventDefault(); confirmerAjoutAccordV2(); } };
-  champ.focus();
-}
-
 function remettreAjoutAccordV2() {
   var champ = document.getElementById('ficheV2-accord-champ');
   if (!champ) return;
-  champ.outerHTML = '<div class="item-liste" id="ficheV2-accord-ajouter" onclick="ouvrirAjoutAccordV2()">+ Ajouter</div>';
+  champ.outerHTML = '<div class="item-liste" id="ficheV2-accord-ajouter" onclick="ouvrirChampAjoutV2(\'ficheV2-accord\', \'Nouvel accord\', confirmerAjoutAccordV2)">+ Ajouter</div>';
 }
 
 function cocherAccordV2(accord) {
@@ -667,7 +646,7 @@ function confirmerAjoutAccordV2() {
     menu.innerHTML = CONFIG.accords.map(function(acc) {
       var sel = selectionnes.indexOf(acc) !== -1;
       return '<div class="item-liste' + (sel ? ' actif' : '') + '" onclick="toggleAccordV2(this)" data-accord="' + acc + '">' + acc + '</div>';
-    }).join('') + '<div class="item-liste" id="ficheV2-accord-ajouter" onclick="ouvrirAjoutAccordV2()">+ Ajouter</div>';
+    }).join('') + '<div class="item-liste" id="ficheV2-accord-ajouter" onclick="ouvrirChampAjoutV2(\'ficheV2-accord\', \'Nouvel accord\', confirmerAjoutAccordV2)">+ Ajouter</div>';
     cocherAccordV2(valeur);
   }).catch(function() {
     afficherMessage('Erreur, réessayez');

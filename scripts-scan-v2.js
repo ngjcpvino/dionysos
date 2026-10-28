@@ -569,25 +569,13 @@ function rendreBlocsScanV2(scan) {
       if (!l.vins.length) { html += '<div class="item-liste multiligne">' + libelle + '</div>'; return; }
       // ceux qui ont des bouteilles d'abord, puis (voilés) ceux déjà eus
       var tries = l.vins.filter(function(g) { return g.count > 0; }).concat(l.vins.filter(function(g) { return !g.count; }));
-      html += '<div class="item-liste multiligne" id="' + p + 'V2-comp-' + i + '-titre" onclick="basculerComparablesV2(\'' + p + '\', ' + i + ')">' + libelle + '</div>';
+      html += '<div class="item-liste multiligne" id="' + p + 'V2-comp-' + i + '-titre" onclick="basculerVoletsV2(\'' + p + 'V2-comp-\', ' + i + ')">' + libelle + '</div>';
       html += '<div id="' + p + 'V2-comp-' + i + '" style="display:none;">' + tries.map(function(g) { return carteGroupeVinV2(g, scan.provenance); }).join('') + '</div>';
     });
     html += '</div></div>';
   }
   div.innerHTML = html;
   if (saq && ALL_CURIEUXBEGIN === null) chargerCurieuxBeginScanV2();
-}
-
-// Une seule liste de Comparables ouverte à la fois
-function basculerComparablesV2(prefixe, quel) {
-  [0, 1].forEach(function(k) {
-    var volet = document.getElementById(prefixe + 'V2-comp-' + k);
-    var titre = document.getElementById(prefixe + 'V2-comp-' + k + '-titre');
-    if (!volet) return;
-    var ouvrir = (k === quel) && volet.style.display === 'none';
-    volet.style.display = ouvrir ? '' : 'none';
-    if (titre) titre.classList.toggle('actif', ouvrir);
-  });
 }
 
 // Le bloc « Curieux Bégin » d'un vin : le plat et la saison → la recette. Écran du scan, et « Bingo ! » de la Facture SAQ.
@@ -681,7 +669,7 @@ function terminerAjoutSuggestionV2(code, wineResult) {
   ouvrirApresTap(function() {
     ouvrirFicheV2(code, 'suggestions');
     if (codeSAQ) {
-      ouvrirSuggestionAjoutV2(codeSAQ, 'fiche');
+      ouvrirSuggestionV2(codeSAQ, 'fiche');
     } else {
       afficherMessage('Aucun code SAQ : proposition non ajoutée');
     }
