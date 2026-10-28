@@ -6,8 +6,7 @@
 
 // ==================== RECHERCHE V2 ====================
 function ouvrirRechercheV2() {
-  document.getElementById('rechercheV2Container').style.display = 'flex';
-  remonterScrollV2('rechercheV2Container');
+  montrerPageV2('rechercheV2Container');
   var champ = document.getElementById('rechercheV2-champ');
   champ.value = '';
   filtresRechercheV2 = filtresVidesV2('rechercheV2');
@@ -19,47 +18,23 @@ function ouvrirRechercheV2() {
 }
 
 function fermerRechercheV2() {
-  fermerFiltresV2('rechercheV2');
-  document.getElementById('rechercheV2Container').style.display = 'none';
+  cacherPageV2('rechercheV2Container');
 }
 
 var filtresRechercheV2 = filtresVidesV2('rechercheV2');
 
 function remplirFiltresRechercheV2() {
   var f = filtresRechercheV2;
-  var caveBtn = document.getElementById('rechercheV2-cave');
-  if (caveBtn) { caveBtn.classList.toggle('actif', f.cave); caveBtn.textContent = f.cave ? '✓' : '✗'; }
-  var base = (ALL_DATA || []);
-
-  var vusSom = {};
-  var sommeliers = [];
-  (ALL_SUGGESTIONS || []).forEach(function(s) {
-    var v = (s.sommelier || '').toString().trim();
-    var k = normaliserRechercheV2(v);
-    if (v && !vusSom[k]) { vusSom[k] = true; sommeliers.push(v); }
-  });
-  sommeliers.sort(function(a, b) { return a.localeCompare(b); });
-  remplirMenuFiltreV2('rechercheV2', 'sommelier', sommeliers);
-
-  var forCouleur = base;
-  var forCepage = base.filter(function(i){ return passeFiltreV2(f.couleur, i.Couleur); });
-  var forPays = forCepage.filter(function(i){ return passeFiltreV2(f.cepage, i.Cepage, contientCepageV2); });
-  var forAppellation = forPays.filter(function(i){ return passeFiltreV2(f.pays, i.Pays); });
-  var forAccords = forAppellation.filter(function(i){ return passeFiltreV2(f.appellation, i.Appellation); });
-  var forPastille = forAccords.filter(function(i){ return passeFiltreV2(f.accords, i.Accords || '', contientChaineV2); });
-
-  var sets = { couleur: {}, cepage: {}, pays: {}, appellation: {}, accords: {}, pastille: {} };
-  function retenir(cle, v) { var k = normaliserRechercheV2(v); if (v && !sets[cle][k]) sets[cle][k] = v; }
-  forCouleur.forEach(function(i){ retenir('couleur', i.Couleur); });
-  forCepage.forEach(function(i){ cepagesDuTexteV2(i.Cepage).forEach(function(x){ retenir('cepage', cepageCommunV2(x)); }); });
-  forPays.forEach(function(i){ retenir('pays', i.Pays); });
-  forAppellation.forEach(function(i){ retenir('appellation', i.Appellation); });
-  forAccords.forEach(function(i){ (i.Accords || '').split(',').map(function(x){return x.trim();}).filter(Boolean).forEach(function(x){ retenir('accords', x); }); });
-  forPastille.forEach(function(i){ retenir('pastille', i['Pastille gout']); });
-
-  Object.keys(sets).forEach(function(cle) {
-    remplirMenuFiltreV2('rechercheV2', cle, Object.keys(sets[cle]).map(function(k){ return sets[cle][k]; }).sort(function(a,b){ return a.localeCompare(b); }));
-  });
+  majToggleHautV2('rechercheV2-cave', f.cave);
+  remplirMenuFiltreV2('rechercheV2', 'sommelier', sommeliersConnusV2());
+  var listes = valeursEnCascadeV2(ALL_DATA || [], f, [
+    critereChampV2('couleur', 'Couleur'),
+    ['cepage', function(i) { return cepagesDuTexteV2(i.Cepage).map(function(x) { return cepageCommunV2(x); }); },
+               function(i, choix) { return passeFiltreV2(choix, i.Cepage, contientCepageV2); }],
+    critereChampV2('pays', 'Pays'), critereChampV2('appellation', 'Appellation'), CRITERE_ACCORDS_V2,
+    critereChampV2('pastille', 'Pastille gout', contientTexteV2)
+  ]);
+  Object.keys(listes).forEach(function(cle) { remplirMenuFiltreV2('rechercheV2', cle, listes[cle]); });
 }
 
 function normaliserRechercheV2(t) {

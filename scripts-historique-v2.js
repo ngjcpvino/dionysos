@@ -11,8 +11,7 @@ var filtresHistoV2 = filtresVidesV2('histoV2');
 var histoEditV2 = { row: 0, note: 0 };
 
 function ouvrirHistoV2() {
-  document.getElementById('histoV2Container').style.display = 'flex';
-  remonterScrollV2('histoV2Container');
+  montrerPageV2('histoV2Container');
   filtresHistoV2 = filtresVidesV2('histoV2');
   if (ALL_HISTORIQUE && ALL_HISTORIQUE.length) {
     remplirFiltresHistoV2();
@@ -27,8 +26,7 @@ function ouvrirHistoV2() {
 }
 
 function fermerHistoV2() {
-  fermerFiltresV2('histoV2');
-  document.getElementById('histoV2Container').style.display = 'none';
+  cacherPageV2('histoV2Container');
 }
 
 // Le vin d'une entrée de l'historique (fiche en mémoire, par code-barres puis code SAQ) — {} s'il n'y est plus
@@ -75,26 +73,18 @@ function filtresHistoActifsV2() {
 function remplirFiltresHistoV2() {
   var f = filtresHistoV2;
   var vinDe = indexVinsHistoV2();
-  var base = ALL_HISTORIQUE || [];
-  Object.keys(libellesFiltreHistoV2).forEach(function(cle) {
-    var vus = {};
-    base.forEach(function(h) {
-      valeursFiltreHistoV2(cle, h, vinDe(h)).forEach(function(v) { var k = normaliserRechercheV2(v); if (v && !vus[k]) vus[k] = v; });
-    });
-    var opts = Object.keys(vus).map(function(k) { return vus[k]; });
-    opts.sort(cle === 'note' ? function(a, b) { return b - a; } : function(a, b) { return a.localeCompare(b); });
-    var cur = f[cle];
-    remplirMenuFiltreV2('histoV2', cle, opts, cle === 'note' ? libelleNoteHistoV2 : null);
-    base = base.filter(function(h) { return passeFiltreHistoV2(cle, h, vinDe(h), cur); });
-  });
+  var listes = valeursEnCascadeV2(ALL_HISTORIQUE || [], f, Object.keys(libellesFiltreHistoV2).map(function(cle) {
+    return [cle, function(h) { return valeursFiltreHistoV2(cle, h, vinDe(h)); }, function(h, choix) { return passeFiltreHistoV2(cle, h, vinDe(h), choix); },
+            cle === 'note' ? function(a, b) { return b - a; } : null];
+  }));
+  Object.keys(listes).forEach(function(cle) { remplirMenuFiltreV2('histoV2', cle, listes[cle], cle === 'note' ? libelleNoteHistoV2 : null); });
 
   var champMets = document.getElementById('histoV2-f-mets');
   if (champMets) champMets.value = f.mets;
 
   var loupe = document.getElementById('histoV2-loupe');
   if (loupe) loupe.classList.toggle('actif', filtresHistoActifsV2());
-  var caveBtn = document.getElementById('histoV2-cave');
-  if (caveBtn) { caveBtn.classList.toggle('actif', f.cave); caveBtn.textContent = f.cave ? '✓' : '✗'; }
+  majToggleHautV2('histoV2-cave', f.cave);
 }
 
 function filtrerMetsHistoV2() {
