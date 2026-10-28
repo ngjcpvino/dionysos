@@ -331,23 +331,40 @@ function libelleChoixV2(choix, defaut, montrer) {
   return estSaufV2(choix) ? 'Sauf ' + v : v;
 }
 
-// ==================== PANNEAUX DE FILTRES (générés) ====================
+// ==================== PANNEAUX DE FILTRES — LE MOTEUR COMMUN (28 oct. 2026, liste 2.0 chantier 4) ====================
+// Les 8 panneaux passent par les MÊMES gestes (fonctions ci-dessous) : ouvrir, fermer, basculer un menu, choisir une
+// valeur, tout remettre à zéro, remplir un menu. Chaque panneau ne dit que ce qui lui est propre :
+//   etat()        l'objet de ses filtres (filtresCaveV2…), modifié sur place ;
+//   vide          ce même objet remis à zéro — l'ouverture de la page ET la remise à zéro s'en servent (mêmes clés, toujours) ;
+//   rafraichir()  refaire ses menus et sa liste après un choix ;
+//   sansSauf      les menus où retaper ne fait pas « sauf » ; vider : { cle: [menus vidés quand cle change] } (cascades) ;
+//   apresChoix(cle), remiseAZero()  ce qu'un choix ou la remise à zéro font en plus ; champs : les recherches à vider.
+// Un nouveau panneau = une entrée ici, rien d'autre (jamais de basculer/choisir/réinitialiser propres à une page).
 var PANNEAUX_V2 = {
   cave: {
-    prefixe: 'caveV2', bascule: 'basculerFiltreCaveV2', reinit: 'reinitialiserFiltresCaveV2',
+    prefixe: 'caveV2',
+    etat: function() { return filtresCaveV2; }, vide: { couleur: '', cepage: '', pays: '', appellation: '', accords: '', pastille: '', acidite: '', dispo: false },
+    rafraichir: function() { appliquerFiltresCaveV2(); }, champs: ['caveV2-f-nom'],
+    remiseAZero: function() { majToggleHautV2('caveV2-dispo', false); },
     filtres: [['couleur', 'Couleur'], ['cepage', 'Cépage'], ['pays', 'Pays'], ['appellation', 'Appellation'], ['accords', 'Accord'], ['pastille', 'Pastille de goût'], ['acidite', 'Acidité']],
     apres: '<div class="panneau-separateur"></div>' +
            '<input type="text" id="caveV2-f-nom" class="champ-saisie" placeholder="Rechercher par nom" oninput="appliquerFiltresCaveV2()">'
   },
   histo: {
-    prefixe: 'histoV2', bascule: 'basculerFiltreHistoV2', reinit: 'reinitialiserFiltresHistoV2',
+    prefixe: 'histoV2',
+    etat: function() { return filtresHistoV2; }, vide: { mets: '', vin: '', note: '', couleur: '', cepage: '', pays: '', appellation: '', accord: '', pastille: '', acidite: '', cave: false },
+    rafraichir: function() { remplirFiltresHistoV2(); afficherHistoV2(); }, champs: ['histoV2-f-mets'],
     filtres: [['vin', 'Vin'], ['note', 'Appréciation'], ['couleur', 'Couleur'], ['cepage', 'Cépage'], ['pays', 'Pays'], ['appellation', 'Appellation'], ['accord', 'Accord'], ['pastille', 'Pastille de goût'], ['acidite', 'Acidité']],
     apres: '<div class="panneau-separateur"></div>' +
            '<input type="text" id="histoV2-f-mets" class="champ-saisie" placeholder="Rechercher un mets" oninput="filtrerMetsHistoV2()">',
     apresReinit: '<div class="roundel" onclick="ouvrirHistoAjoutV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Ajouter</span></div>'
   },
   emp: {
-    prefixe: 'empV2', bascule: 'basculerFiltreEmpV2', reinit: 'reinitialiserFiltresEmpV2',
+    prefixe: 'empV2',
+    etat: function() { return filtresEmpV2; }, vide: { meuble: '', rangee: '', espace: '', cepage: '', couleur: '', pays: '', appellation: '' },
+    rafraichir: function() { remplirFiltresEmpV2(); rendreEmpV2(); },
+    sansSauf: ['meuble', 'rangee', 'espace'], vider: { meuble: ['rangee', 'espace'], rangee: ['espace'] },
+    apresChoix: function(cle) { apresChoixFiltreEmpV2(cle); }, remiseAZero: function() { empV2Mode = 'plan'; },
     avant: '<div class="titre-3">Afficher</div>' +
            '<div class="item-liste" id="empV2-mode-plan" onclick="choisirModeEmpV2(\'plan\')">Plan des meubles</div>' +
            '<div class="item-liste" id="empV2-mode-doubles" onclick="choisirModeEmpV2(\'doubles\')">Vins en double</div>' +
@@ -360,12 +377,16 @@ var PANNEAUX_V2 = {
            '<div class="panneau-separateur"></div>',
     filtres: [['meuble', 'Meuble'], ['rangee', 'Rangée'], ['espace', 'Espace'], ['couleur', 'Couleur'], ['cepage', 'Cépage'], ['pays', 'Pays'], ['appellation', 'Appellation']],
     apresReinit: '<div class="panneau-separateur"></div>' +
-           '<div class="roundel" onclick="reinitialiserFiltresEmpV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Réinitialiser</span></div>'
+           '<div class="roundel" onclick="reinitialiserFiltresV2(\'empV2\')"><span class="roundel-anneau"></span><span class="roundel-barre">Réinitialiser</span></div>'
   },
   achat: {
-    prefixe: 'achatV2', bascule: 'basculerFiltreAchatV2', reinit: 'reinitialiserFiltresAchatV2',
+    prefixe: 'achatV2',
+    etat: function() { return filtresAchatV2; }, vide: { couleur: '', pays: '', cepage: '', appellation: '', pastille: '', succ: '', sommelier: '' },
+    rafraichir: function() { remplirFiltresAchatV2(); appliquerFiltresAchatV2(); },
+    sansSauf: ['succ'], vider: { couleur: ['pays', 'cepage', 'appellation', 'pastille'], pays: ['cepage', 'appellation', 'pastille'], cepage: ['appellation', 'pastille'], appellation: ['pastille'] },
+    remiseAZero: function() { achatV2PromoSeul = false; },
     avant: '<div class="titre-3">Succursale</div>' +
-           '<div class="champ-cliquable" id="achatV2-f-succ-display" onclick="basculerFiltreAchatV2(\'succ\')">Succursale</div>' +
+           '<div class="champ-cliquable" id="achatV2-f-succ-display" onclick="basculerFiltreV2(\'achatV2\', \'succ\')">Succursale</div>' +
            '<div id="achatV2-f-succ-menu" class="menu-liste"></div>' +
            '<div class="panneau-separateur"></div>' +
            '<div class="titre-3">Afficher</div>' +
@@ -378,25 +399,34 @@ var PANNEAUX_V2 = {
     filtres: [['sommelier', 'Sommelier'], ['couleur', 'Couleur'], ['cepage', 'Cépage'], ['pays', 'Pays'], ['appellation', 'Appellation'], ['pastille', 'Pastille de goût']]
   },
   recherche: {
-    prefixe: 'rechercheV2', bascule: 'basculerFiltreRechercheV2', reinit: 'reinitialiserFiltresRechercheV2',
+    prefixe: 'rechercheV2',
+    etat: function() { return filtresRechercheV2; }, vide: { sommelier: '', couleur: '', cepage: '', pays: '', appellation: '', accords: '', pastille: '', cave: false },
+    rafraichir: function() { remplirFiltresRechercheV2(); lancerRechercheV2(); },
     filtres: [['sommelier', 'Sommelier'], ['couleur', 'Couleur'], ['cepage', 'Cépage'], ['pays', 'Pays'], ['appellation', 'Appellation'], ['accords', 'Accord'], ['pastille', 'Pastille de goût']]
   },
   notes: {
-    prefixe: 'notesV2', bascule: 'basculerFiltreNotesV2', reinit: 'reinitialiserFiltresNotesV2',
+    prefixe: 'notesV2',
+    etat: function() { return filtresNotesV2; }, vide: { source: '', cave: false },
+    rafraichir: function() { remplirFiltresNotesV2(); afficherNotesV2(); }, champs: ['notesV2-f-texte'],
     filtres: [['source', 'Qui l\'a dit']],
     apres: '<div class="panneau-separateur"></div>' +
            '<input type="text" id="notesV2-f-texte" class="champ-saisie" placeholder="Chercher un aliment" oninput="afficherNotesV2()">',
     apresReinit: '<div class="roundel" onclick="ajouterDepuisNotesV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Ajouter</span></div>'
   },
   suggestions: {
-    prefixe: 'suggestionsV2', bascule: 'basculerFiltreSuggestionsV2', reinit: 'reinitialiserFiltresSuggestionsV2',
+    prefixe: 'suggestionsV2',
+    etat: function() { return filtresSuggestionsV2; }, vide: { sommelier: '', couleur: '', cave: false },
+    rafraichir: function() { remplirFiltresSuggestionsV2(); afficherSuggestionsV2(); }, champs: ['suggestionsV2-f-texte'],
     filtres: [['sommelier', 'Sommelier'], ['couleur', 'Couleur']],
     apres: '<div class="panneau-separateur"></div>' +
            '<input type="text" id="suggestionsV2-f-texte" class="champ-saisie" placeholder="Chercher dans les notes" oninput="afficherSuggestionsV2()">',
     apresReinit: '<div class="roundel" onclick="ajouterDepuisSuggestionsV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Ajouter</span></div>'
   },
   curieuxbegin: {
-    prefixe: 'curieuxBeginV2', bascule: 'basculerFiltreCurieuxBeginV2', reinit: 'reinitialiserFiltresCurieuxBeginV2',
+    prefixe: 'curieuxBeginV2',
+    etat: function() { return filtresCurieuxBeginV2; }, vide: { saison: '', couleur: '', cepage: '', pays: '', appellation: '', cave: false, mode: 'mesvins' },
+    rafraichir: function() { remplirFiltresCurieuxBeginV2(); chargerCurieuxBeginV2(); }, champs: ['curieuxBeginV2-f-texte'],
+    apresChoix: function(cle) { apresChoixFiltreCurieuxBeginV2(cle); },
     avant: '<div class="titre-3">Afficher</div>' +
            '<div class="item-liste" id="curieuxBeginV2-mode-mesvins" onclick="choisirModeCurieuxBeginV2(\'mesvins\')">Mes vins</div>' +
            '<div class="item-liste" id="curieuxBeginV2-mode-horscave" onclick="choisirModeCurieuxBeginV2(\'horscave\')">Vins à découvrir</div>' +
@@ -428,6 +458,72 @@ function clicLoupeV2(prefixe, reinitFn) {
   if (panneau) panneau.classList.add('ouvert');
 }
 
+function panneauV2(prefixe) {
+  return PANNEAUX_V2[Object.keys(PANNEAUX_V2).filter(function(k) { return PANNEAUX_V2[k].prefixe === prefixe; })[0]];
+}
+function filtresVidesV2(prefixe) { return Object.assign({}, panneauV2(prefixe).vide); }
+function ouvrirFiltresV2(prefixe) { clicLoupeV2(prefixe, function() { reinitialiserFiltresV2(prefixe); }); }
+function fermerFiltresV2(prefixe) {
+  ['-filtres-voile', '-filtres'].forEach(function(s) { var el = document.getElementById(prefixe + s); if (el) el.classList.remove('ouvert'); });
+}
+function fermerMenusFiltreV2(prefixe) {
+  Array.prototype.forEach.call(document.querySelectorAll('#' + prefixe + '-filtres .menu-liste.ouvert'), function(m) { m.classList.remove('ouvert'); });
+}
+// Un menu à la fois : ouvrir l'un referme les autres ; le retaper le referme
+function basculerFiltreV2(prefixe, cle) {
+  var menu = document.getElementById(prefixe + '-f-' + cle + '-menu');
+  var ouvert = menu.classList.contains('ouvert');
+  fermerMenusFiltreV2(prefixe);
+  if (!ouvert) { menu.classList.add('ouvert'); annulerFermetureMenuV2(menu.id); }
+}
+function choisirFiltreV2(prefixe, cle, valeur) {
+  var p = panneauV2(prefixe), f = p.etat();
+  f[cle] = (p.sansSauf || []).indexOf(cle) !== -1 ? valeur : cycleFiltreV2(f[cle], valeur);
+  fermerMenuApresV2(prefixe + '-f-' + cle + '-menu');
+  ((p.vider || {})[cle] || []).forEach(function(k) { f[k] = ''; });
+  if (p.apresChoix) p.apresChoix(cle);
+  p.rafraichir();
+}
+// Les filtres et les recherches texte à zéro, sans rien redessiner
+function viderFiltresV2(prefixe) {
+  var p = panneauV2(prefixe), f = p.etat();
+  Object.keys(f).forEach(function(k) { delete f[k]; });
+  Object.assign(f, p.vide);
+  (p.champs || []).forEach(function(id) { var champ = document.getElementById(id); if (champ) champ.value = ''; });
+}
+function reinitialiserFiltresV2(prefixe) {
+  var p = panneauV2(prefixe);
+  viderFiltresV2(prefixe);
+  fermerMenusFiltreV2(prefixe);
+  if (p.remiseAZero) p.remiseAZero();
+  p.rafraichir();
+  fermerFiltresV2(prefixe);
+}
+// Ouvrir une page à panneau : la page, remontée en haut, ses filtres à zéro, puis sa liste — tout de suite si ses
+// données sont là (charger = null), sinon après charger() (une promesse). Échec → l'accueil, avec la vraie cause.
+function ouvrirPageFiltreeV2(prefixe, charger, nom) {
+  document.getElementById(prefixe + 'Container').style.display = 'flex';
+  remonterScrollV2(prefixe + 'Container');
+  viderFiltresV2(prefixe);
+  var p = panneauV2(prefixe);
+  if (!charger) { p.rafraichir(); return; }
+  charger().then(function() { p.rafraichir(); }).catch(function(err) {
+    retourAccueilV2(nom + ' : ' + (err && err.message ? err.message : err));
+  });
+}
+// Un menu de filtre : « Tous », puis chaque valeur (seulement / sauf) ; le menu fermé dit le choix. montrer(v) = son libellé.
+function remplirMenuFiltreV2(prefixe, cle, valeurs, montrer) {
+  var p = panneauV2(prefixe), cur = String(p.etat()[cle] || '');
+  var defaut = (p.filtres.filter(function(x) { return x[0] === cle; })[0] || [cle, cle])[1];
+  var appel = function(v) { return 'choisirFiltreV2(\'' + prefixe + '\', \'' + cle + '\', \'' + String(v).replace(/'/g, "\\'") + '\')'; };
+  var menu = document.getElementById(prefixe + '-f-' + cle + '-menu');
+  if (menu) menu.innerHTML = '<div class="item-liste' + (cur === '' ? ' actif' : '') + '" onclick="' + appel('') + '">Tous</div>' + valeurs.map(function(v) {
+    return '<div class="item-liste' + classeChoixV2(String(v), cur) + '" onclick="' + appel(v) + '">' + (montrer ? montrer(v) : v) + '</div>';
+  }).join('');
+  var disp = document.getElementById(prefixe + '-f-' + cle + '-display');
+  if (disp) disp.textContent = libelleChoixV2(cur, defaut, montrer);
+}
+
 function construirePanneauxV2() {
   Object.keys(PANNEAUX_V2).forEach(function(k) {
     var p = PANNEAUX_V2[k];
@@ -436,7 +532,7 @@ function construirePanneauxV2() {
     var html = p.avant || '';
     html += '<div class="titre-3">Filtrer</div>';
     p.filtres.forEach(function(f) {
-      html += '<div class="champ-cliquable" id="' + p.prefixe + '-f-' + f[0] + '-display" onclick="' + p.bascule + '(\'' + f[0] + '\')">' + f[1] + '</div>' +
+      html += '<div class="champ-cliquable" id="' + p.prefixe + '-f-' + f[0] + '-display" onclick="basculerFiltreV2(\'' + p.prefixe + '\', \'' + f[0] + '\')">' + f[1] + '</div>' +
               '<div id="' + p.prefixe + '-f-' + f[0] + '-menu" class="menu-liste"></div>';
     });
     html += p.apres || '';
