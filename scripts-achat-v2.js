@@ -6,6 +6,9 @@
 
 // ==================== SUGGESTIONS V2 ====================
 var filtresSuggestionsV2 = { sommelier: '', couleur: '', cave: false };
+// Ajout d'une proposition par scan : vrai pendant tout le parcours (scanner → vin connu ou inconnu → fiche).
+// Posé par ajouterDepuisSuggestionsV2 ; retiré SEULEMENT par terminerAjoutSuggestionV2 (proposition ouverte),
+// abandonnerAjoutSuggestionV2 (fermé ou erreur : retour aux Propositions) et oublierAjoutSuggestionV2 (autre route).
 var suggestionsV2Attente = false;
 
 function ouvrirSuggestionsV2() {

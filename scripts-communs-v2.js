@@ -206,6 +206,7 @@ function basculerSousMenuV2(id) {
 
 function burgerV2Click(cible) {
   fermerMenuBurgerV2();
+  oublierAjoutSuggestionV2(); // partir par le menu abandonne un ajout de proposition par scan
   if (cible === 'accueil') {
     cacherToutesPagesV2();
     menuActionV2Context = null;
