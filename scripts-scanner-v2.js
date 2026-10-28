@@ -2390,12 +2390,12 @@ function ouvrirRecuV2() {
   if (!ALL_CURIEUXBEGIN || !ALL_CURIEUXBEGIN.length) chargerCurieuxBeginScanV2(majBingoRecuV2);
 }
 
-// 🎉 Bingo ! le vin à valider a été proposé dans Curieux Bégin : le plat et la saison → la recette
+// Bingo ! le vin à valider a été proposé dans Curieux Bégin : le plat et la saison → la recette
 function majBingoRecuV2() {
   var div = document.getElementById('recuValidationV2-bingo');
   if (!div) return;
   var saq = (document.getElementById('recuValidationV2-codesaq').value || '').replace(/\D/g, '').trim();
-  div.innerHTML = saq ? citationCurieuxBeginV2(saq, '🎉 Bingo ! Curieux Bégin') : '';
+  div.innerHTML = saq ? citationCurieuxBeginV2(saq, 'Bingo ! Curieux Bégin') : '';
 }
 
 function fermerRecuV2() {
@@ -2440,7 +2440,7 @@ function afficherProchainRecuVinV2() {
   if (RECU_V2_INDEX >= RECU_V2_ITEMS.length) {
     var bingos = RECU_V2_BINGOS;
     fermerRecuV2();
-    afficherMessage(bingos ? 'Facture traitée — ' + bingos + ' bingo' + (bingos > 1 ? 's' : '') + ' 🎉' : 'Facture traitée');
+    afficherMessage(bingos ? 'Facture traitée — ' + bingos + ' bingo' + (bingos > 1 ? 's' : '') : 'Facture traitée');
     return;
   }
   var item = RECU_V2_ITEMS[RECU_V2_INDEX];
