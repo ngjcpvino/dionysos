@@ -340,35 +340,37 @@ window.addEventListener('unhandledrejection', function(e) {
 });
 
 // ==================== MESSAGES ====================
-function afficherMessage(m) {
+// Le toast : un seul, réutilisé — montré avec son contenu, puis caché en fondu
+function montrerToastV2(html) {
   let t = document.getElementById('toast') || document.createElement('div');
   t.id = 'toast';
   t.className = 'toast';
   document.body.appendChild(t);
   t.style.display = '';
-  t.textContent = m;
+  t.innerHTML = html;
   t.classList.add('show');
-  setTimeout(function() {
-    t.classList.remove('show');
-    setTimeout(function() { t.style.display = 'none'; }, 400);
-  }, 3000);
+  return t;
+}
+function cacherToastV2(t) {
+  t.classList.remove('show');
+  setTimeout(function() { t.style.display = 'none'; }, 400);
 }
 
+function afficherMessage(m) {
+  var t = montrerToastV2('');
+  t.textContent = m;
+  setTimeout(function() { cacherToastV2(t); }, 3000);
+}
+
+// Une image (« Ne pas racheter ») : reste jusqu'au prochain toucher
 function afficherMessageImage(src) {
-  let t = document.getElementById('toast') || document.createElement('div');
-  t.id = 'toast';
-  t.className = 'toast';
-  document.body.appendChild(t);
-  t.style.display = '';
-  t.innerHTML = '<img src="' + src + '" alt="" class="toast-img">';
-  t.classList.add('show');
+  var t = montrerToastV2('<img src="' + src + '" alt="" class="toast-img">');
   var fermer = function(ev) {
     ev.preventDefault();
     ev.stopPropagation();
     document.removeEventListener('touchstart', fermer, true);
     document.removeEventListener('click', fermer, true);
-    t.classList.remove('show');
-    setTimeout(function() { t.style.display = 'none'; }, 400);
+    cacherToastV2(t);
   };
   setTimeout(function() {
     document.addEventListener('touchstart', fermer, { capture: true, passive: false });

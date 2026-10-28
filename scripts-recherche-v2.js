@@ -49,12 +49,6 @@ function contientTexteV2(texte, morceau) {
   return normaliserRechercheV2(texte).indexOf(normaliserRechercheV2(morceau)) !== -1;
 }
 
-function toggleCaveRechercheV2() {
-  filtresRechercheV2.cave = !filtresRechercheV2.cave;
-  remplirFiltresRechercheV2();
-  lancerRechercheV2();
-}
-
 // Carte d'un vin groupé (grouperVinsV2) : photo, nom, origine, « X btl » + emplacements, voilée à 0 bouteille → sa fiche.
 // Même carte dans la recherche et dans Comparables (écran du scan).
 // Provenance 'comparable' (menu d'action, AU-DESSUS de la fiche) : naviguerV2 masque le menu, le ✕ de la fiche le rouvre.
@@ -104,9 +98,7 @@ function chargerSourcesRechercheV2() {
 function ouvrirChartierCepageV2(cep) {
   cacherToutesPagesV2();
   ouvrirChartierV2();
-  filtresChartierV2.cepage = cep;
-  remplirCepageMenuChartierV2();
-  calculerResultatsChartierV2();
+  choisirFiltreV2('chartierV2', 'cepage', cep);
 }
 
 // La recherche fouille TOUT : vins, notes, propositions, Chartier, recettes SAQ,

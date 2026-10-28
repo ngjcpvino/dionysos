@@ -345,13 +345,14 @@ function libelleChoixV2(choix, defaut, montrer) {
 }
 
 // ==================== PANNEAUX DE FILTRES — LE MOTEUR COMMUN (28 oct. 2026, liste 2.0 chantier 4) ====================
-// Les 8 panneaux passent par les MÊMES gestes (fonctions ci-dessous) : ouvrir, fermer, basculer un menu, choisir une
+// Les 9 panneaux passent par les MÊMES gestes (fonctions ci-dessous) : ouvrir, fermer, basculer un menu, choisir une
 // valeur, tout remettre à zéro, remplir un menu. Chaque panneau ne dit que ce qui lui est propre :
 //   etat()        l'objet de ses filtres (filtresCaveV2…), modifié sur place ;
 //   vide          ce même objet remis à zéro — l'ouverture de la page ET la remise à zéro s'en servent (mêmes clés, toujours) ;
 //   rafraichir()  refaire ses menus et sa liste après un choix ;
 //   sansSauf      les menus où retaper ne fait pas « sauf » ; vider : { cle: [menus vidés quand cle change] } (cascades) ;
 //   apresChoix(cle), remiseAZero()  ce qu'un choix ou la remise à zéro font en plus ; champs : les recherches à vider.
+// L'interrupteur « en haut » (✓/✗, id prefixe-cle) est une clé vraie/fausse de l'état : basculerInterrupteurV2.
 // Un nouveau panneau = une entrée ici, rien d'autre (jamais de basculer/choisir/réinitialiser propres à une page).
 var PANNEAUX_V2 = {
   cave: {
@@ -447,6 +448,14 @@ var PANNEAUX_V2 = {
     filtres: [['saison', 'Saison'], ['couleur', 'Couleur'], ['cepage', 'Cépage'], ['pays', 'Pays'], ['appellation', 'Appellation']],
     apres: '<div class="panneau-separateur"></div>' +
            '<input type="text" id="curieuxBeginV2-f-texte" class="champ-saisie" placeholder="Chercher un plat ou un vin" oninput="chargerCurieuxBeginV2()">'
+  },
+  chartier: {
+    prefixe: 'chartierV2',
+    etat: function() { return filtresChartierV2; }, vide: { couleur: '', cepage: '', dispo: false },
+    rafraichir: function() { remplirFiltresChartierV2(); majSelectionChartierV2(); calculerResultatsChartierV2(); },
+    sansSauf: ['couleur', 'cepage'], remiseAZero: function() { chartierV2Aliment = ''; },
+    avant: '<div class="titre-3">Aliment</div><div id="chartierV2-aliments" style="display:contents;"></div><div class="panneau-separateur"></div>',
+    filtres: [['couleur', 'Couleur'], ['cepage', 'Cépage']]
   }
 };
 
@@ -489,6 +498,13 @@ function basculerFiltreV2(prefixe, cle) {
   fermerMenusFiltreV2(prefixe);
   if (!ouvert) { menu.classList.add('ouvert'); annulerFermetureMenuV2(menu.id); }
 }
+// L'interrupteur « en haut » d'une page (en cave, disponibles) : ✓ ↔ ✗, puis la liste
+function basculerInterrupteurV2(prefixe, cle) {
+  var p = panneauV2(prefixe), f = p.etat();
+  f[cle] = !f[cle];
+  majToggleHautV2(prefixe + '-' + cle, f[cle]);
+  p.rafraichir();
+}
 function choisirFiltreV2(prefixe, cle, valeur) {
   var p = panneauV2(prefixe), f = p.etat();
   f[cle] = (p.sansSauf || []).indexOf(cle) !== -1 ? valeur : cycleFiltreV2(f[cle], valeur);
@@ -520,7 +536,7 @@ function ouvrirPageFiltreeV2(prefixe, charger, nom) {
   var p = panneauV2(prefixe);
   if (!charger) { p.rafraichir(); return; }
   charger().then(function() { p.rafraichir(); }).catch(function(err) {
-    retourAccueilV2(nom + ' : ' + (err && err.message ? err.message : err));
+    retourAccueilV2(nom + ' : ' + causeV2(err));
   });
 }
 // Les valeurs d'un champ, une fois chacune (sans tenir compte des majuscules ni des accents), triées
@@ -584,4 +600,26 @@ function construirePanneauxV2() {
   });
 }
 document.addEventListener('DOMContentLoaded', construirePanneauxV2);
+
+// Un accordéon à volets (Comparables, « Accords selon… ») : ids base+clé (le volet) et base+clé+'-titre' (son titre).
+// Taper un titre ouvre son volet et referme les autres ; le retaper le referme.
+function basculerVoletsV2(base, quel) {
+  Array.prototype.forEach.call(document.querySelectorAll('[id^="' + base + '"][id$="-titre"]'), function(titre) {
+    var volet = document.getElementById(titre.id.slice(0, -'-titre'.length));
+    if (!volet) return;
+    var ouvrir = volet.id === base + quel && volet.style.display === 'none';
+    volet.style.display = ouvrir ? '' : 'none';
+    titre.classList.toggle('actif', ouvrir);
+  });
+}
+
+// « + Ajouter » d'un menu devient un champ (ids base-ajouter → base-champ) ; Entrée appelle confirmer()
+function ouvrirChampAjoutV2(base, invite, confirmer) {
+  var item = document.getElementById(base + '-ajouter');
+  if (!item) return;
+  item.outerHTML = '<input type="text" id="' + base + '-champ" class="champ-saisie" placeholder="' + invite + ' (Entrée pour confirmer)">';
+  var champ = document.getElementById(base + '-champ');
+  champ.onkeydown = function(e) { if (e.key === 'Enter') { e.preventDefault(); confirmer(); } };
+  champ.focus();
+}
 

@@ -135,12 +135,6 @@ function remplirFiltresCaveV2() {
   Object.keys(listes).forEach(function(cle) { remplirMenuFiltreV2('caveV2', cle, listes[cle]); });
 }
 
-function toggleDispoCaveV2() {
-  filtresCaveV2.dispo = !filtresCaveV2.dispo;
-  majToggleHautV2('caveV2-dispo', filtresCaveV2.dispo);
-  appliquerFiltresCaveV2();
-}
-
 function appliquerFiltresCaveV2() {
   var c = filtresCaveV2.couleur;
   var cep = filtresCaveV2.cepage;

@@ -42,12 +42,6 @@ function remplirFiltresSuggestionsV2() {
   majToggleHautV2('suggestionsV2-cave', f.cave);
 }
 
-function toggleCaveSuggestionsV2() {
-  filtresSuggestionsV2.cave = !filtresSuggestionsV2.cave;
-  remplirFiltresSuggestionsV2();
-  afficherSuggestionsV2();
-}
-
 function bouteillesEnCaveParSAQV2(codeSAQ) {
   var saq = (codeSAQ || '').toString().trim();
   return (ALL_DATA || []).some(function(i) {
@@ -115,7 +109,7 @@ function groupeSuggestionV2(g) {
     var somEsc = (s.sommelier || '').replace(/'/g, "\\'");
     var noteEsc = (s.note || '').replace(/'/g, "\\'");
     var nomEsc = nom.replace(/'/g, "\\'");
-    return '<div class="carte histo-mets" onclick="ouvrirApresTap(function(){ouvrirSuggestionEditV2(' + s.row + ', \'' + somEsc + '\', \'' + noteEsc + '\', \'' + nomEsc + '\', \'' + g.codeSAQ + '\', \'liste\')})">' +
+    return '<div class="carte histo-mets" onclick="ouvrirApresTap(function(){ouvrirSuggestionV2(\'' + g.codeSAQ + '\', \'liste\', ' + s.row + ', \'' + somEsc + '\', \'' + noteEsc + '\', \'' + nomEsc + '\')})">' +
       '<div class="carte-centre"><span class="carte-titre">' + (s.sommelier || '—') + '</span><span class="carte-sous">' + (s.note || '') + '</span></div>' +
       '<div class="carte-droite">' + (s.date || '') + '</div></div>';
   }).join('');
@@ -126,23 +120,15 @@ function groupeSuggestionV2(g) {
 // ---------- Overlay Ajout/Correction suggestion ----------
 var suggestionEditV2 = { row: 0, codeSAQ: '', retour: null };
 
-function ouvrirSuggestionAjoutV2(codeSAQ, retour) {
-  suggestionEditV2 = { row: 0, codeSAQ: codeSAQ, retour: retour || null };
-  var w = vinParCodeSAQV2(codeSAQ) || {};
-  document.getElementById('suggestionEditV2-nom').textContent = decodeHTML(w.Nom || 'Vin');
-  document.getElementById('suggestionEditV2-origine').textContent = [w.Pays, w.Region, w.Appellation].filter(Boolean).map(decodeHTML).join(' • ');
-  document.getElementById('suggestionEditV2-note').value = '';
-  remplirMenuSommelierSuggestionV2('', true);
-  document.getElementById('suggestionEditV2Overlay').style.display = 'flex';
-}
-
-function ouvrirSuggestionEditV2(row, sommelier, note, nomVin, codeSAQ, retour) {
-  suggestionEditV2 = { row: row, codeSAQ: codeSAQ, retour: retour || 'liste' };
+// Une proposition : nouvelle (sans row : le sommelier se choisit) ou à corriger (row, sommelier, note, nom du vin).
+// retour : la page où revenir ('fiche', 'liste'…).
+function ouvrirSuggestionV2(codeSAQ, retour, row, sommelier, note, nomVin) {
+  suggestionEditV2 = { row: row || 0, codeSAQ: codeSAQ, retour: retour || null };
   var w = vinParCodeSAQV2(codeSAQ) || {};
   document.getElementById('suggestionEditV2-nom').textContent = nomVin || decodeHTML(w.Nom || 'Vin');
   document.getElementById('suggestionEditV2-origine').textContent = [w.Pays, w.Region, w.Appellation].filter(Boolean).map(decodeHTML).join(' • ');
   document.getElementById('suggestionEditV2-note').value = note || '';
-  remplirMenuSommelierSuggestionV2(sommelier, false);
+  remplirMenuSommelierSuggestionV2(sommelier || '', !row);
   document.getElementById('suggestionEditV2Overlay').style.display = 'flex';
 }
 
@@ -156,7 +142,7 @@ function remplirMenuSommelierSuggestionV2(actuel, modifiable) {
     var sommeliers = (CONFIG && CONFIG.sommeliers) ? CONFIG.sommeliers : [];
     menu.innerHTML = sommeliers.map(function(s) {
       return '<div class="item-liste' + (s === actuel ? ' actif' : '') + '" onclick="choisirSommelierSuggestionV2(\'' + s.replace(/'/g, "\\'") + '\')">' + s + '</div>';
-    }).join('') + '<div class="item-liste" id="suggestionEditV2-sommelier-ajouter" onclick="ouvrirAjoutSommelierV2()">+ Ajouter un sommelier</div>';
+    }).join('') + '<div class="item-liste" id="suggestionEditV2-sommelier-ajouter" onclick="ouvrirChampAjoutV2(\'suggestionEditV2-sommelier\', \'Nouveau sommelier\', confirmerAjoutSommelierV2)">+ Ajouter un sommelier</div>';
     display.classList.add('champ-cliquable');
     display.classList.remove('ligne-info');
     display.onclick = basculerMenuSommelierSuggestionV2;
@@ -175,15 +161,6 @@ function basculerMenuSommelierSuggestionV2() {
 function choisirSommelierSuggestionV2(valeur) {
   document.getElementById('suggestionEditV2-sommelier-menu').classList.remove('ouvert');
   remplirMenuSommelierSuggestionV2(valeur);
-}
-
-function ouvrirAjoutSommelierV2() {
-  var item = document.getElementById('suggestionEditV2-sommelier-ajouter');
-  if (!item) return;
-  item.outerHTML = '<input type="text" id="suggestionEditV2-sommelier-champ" class="champ-saisie" placeholder="Nouveau sommelier (Entrée pour confirmer)">';
-  var champ = document.getElementById('suggestionEditV2-sommelier-champ');
-  champ.onkeydown = function(e) { if (e.key === 'Enter') { e.preventDefault(); confirmerAjoutSommelierV2(); } };
-  champ.focus();
 }
 
 function confirmerAjoutSommelierV2() {
