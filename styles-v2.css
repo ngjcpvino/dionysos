@@ -21,33 +21,19 @@ html, body {
 :root {
   --gold: #c9813c;
   --gold-2: #ffd036;
-  --gold-hover: #C98D4F;
   --gold-20: rgba(201,129,60,0.2);
   --gold-30: rgba(201,129,60,0.3);
-  --gold-40: rgba(201,129,60,0.4);
-  --gold-50: rgba(201,129,60,0.5);
-  --gold-60: rgba(201,129,60,0.6);
   --gold-70: rgba(201,129,60,0.7);
 
   /* ===== BORDURES — largeurs ===== */
   --largeur-bordure-1: 1px;
   --largeur-bordure-1-5: 1.5px;
-  --largeur-bordure-2: 2px;
   --largeur-bordure-3: 3px;
-  --largeur-bordure-4: 4px;
-  --largeur-bordure-5: 5px;
-  --largeur-bordure-6: 6px;
-  --largeur-bordure-7: 7px;
   --largeur-bordure-8: 8px;
-  --largeur-bordure-9: 9px;
-  --largeur-bordure-10: 10px;
 
   /* ===== BORDURES — couleurs ===== */
   --couleur-bordure-or: var(--gold);
-  --couleur-bordure-claire: var(--white-15);
   --couleur-bordure-tres-claire: var(--white-10);
-  --couleur-bordure-subtile: var(--white-05);
-  --couleur-bordure-pale: var(--white-70);
 
   /* ===== COULEURS DE VIN (bordure gauche des cartes) ===== */
   --vin-rouge: #8B0000;
@@ -73,30 +59,19 @@ html, body {
 
   --black: #000;
   --white: #fff;
-  --white-70: rgba(255,255,255,0.9);
   --white-60: rgba(255,255,255,0.7);
   --white-50: rgba(255,255,255,0.6);
   --white-15: rgba(255,255,255,0.15);
   --white-10: rgba(255,255,255,0.1);
   --white-05: rgba(255,255,255,0.05);
   --white-03: rgba(255,255,255,0.03);
-  --bg-overlay: rgba(0,0,0,0.85);
   --bg-card: rgba(0,0,0,0.50);
-  --bg-panel: rgba(20,20,20,0.95);
-  --bg-panel-light: rgba(20,20,20,0.70);
   --red: #c0392b;
-  --green: #27ae60;
-  --orange: #e67e22;
   --error: #f44336;
   --success: #4caf50;
-  --info: #2196f3;
-  --warning: #ffc107;
   --menu-width: 280px;
   --image-fond: url("https://res.cloudinary.com/dym93w23h/image/upload/v1780614859/fond_k08qtb.jpg");
   --voile-standard: rgba(0,0,0,0.50);
-  --shadow-sm: rgba(0,0,0,0.3);
-  --shadow-md: rgba(0,0,0,0.5);
-  --shadow-lg: rgba(0,0,0,0.7);
   --fs-burger: 40px;
   
   
@@ -126,8 +101,6 @@ html, body {
   --ls-wider: 3px;
   --ls-9: 9px;
   --police-titre: "Montserrat", sans-serif;
-  --fw-light: 300;
-  --fw-normal: 400;
   --fw-bold: 600;
 }
 
@@ -250,7 +223,6 @@ body::after {
 
 /* ===== Position générique (parent en position:relative) ===== */
 .gauche { position: absolute; top: var(--space-s); left: var(--space-s); }
-.centre { position: absolute; top: var(--space-s); left: 50%; transform: translateX(-50%); }
 .droite { position: absolute; top: var(--space-s); right: var(--space-s); }
 
 /* Une loupe est une loupe : toutes les loupes de filtres, fixées en haut à gauche */
@@ -270,14 +242,6 @@ body::after {
   font-weight: var(--fw-bold);
   line-height: 1;
 }
-.ligne-dispo {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: var(--space-l);
-  margin: -45px 0 var(--space-l) 0;
-}
-.ligne-dispo .libelle { color: var(--white); font-size: var(--fs-14); }
 
 /* Passe par-dessus les autres modales : classe .modal-v2-avant (définie sous .modal-v2-fullscreen) */
 .photo-grande { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
@@ -590,13 +554,6 @@ body::after {
   text-align: center;
   margin: 0 0 var(--space-s) 0;
 }
-.lien-titre,
-.lien-titre:link,
-.lien-titre:visited {
-  color: var(--white);
-  text-decoration: none;
-}
-
 .titre-2 {
   color: var(--gold);
   font-size: var(--fs-14);
@@ -1093,20 +1050,6 @@ input[type="date"].champ-saisie::-webkit-date-and-time-value { text-align: left;
   border: var(--largeur-bordure-1) solid var(--couleur-bordure-tres-claire);
 }
 
-.emp-entete-meuble {
-  position: sticky;
-  top: 0;
-  z-index: 5;
-  background: var(--black);
-  color: var(--white);
-  font-size: var(--fs-13);
-  letter-spacing: var(--ls-wide);
-  text-transform: uppercase;
-  padding: var(--space-xs) var(--space-s);
-  margin-top: var(--space-m);
-  text-align: center; 
-  border-bottom: 1px solid var(--gold); 
-}
 .histo-groupe {
   margin-bottom: var(--space-xl);
   border-left: var(--largeur-bordure-1) solid transparent;
@@ -1173,7 +1116,6 @@ input[type="date"].champ-saisie::-webkit-date-and-time-value { text-align: left;
 /* =========================================
    UTILITAIRES
    ========================================= */
-.mt-10 { margin-top: var(--space-s); }
 .mt-20 { margin-top: var(--space-l); }
 /* Petit titre gris aligné à gauche, en lettres normales (« Rien à faire ici » du Tri Dionysos). Réutilisable. */
 .texte-secondaire.texte-gauche { text-align: left; margin-bottom: var(--space-s); text-transform: none; letter-spacing: normal; }
@@ -1183,14 +1125,9 @@ input[type="date"].champ-saisie::-webkit-date-and-time-value { text-align: left;
 .emp-meuble + .titre-rubrique { margin-top: 0; }
 /* Titre posé AU-DESSUS d'un groupe coloré (.histo-groupe), sous une rubrique (« Pinot grigio : tu en as 3… »). Réutilisable. */
 .titre-groupe { color: var(--white); font-size: var(--fs-16); text-align: left; margin: var(--space-m) 0 var(--space-s) 0; }
-.mt-40 { margin-top: 40px; }
-.mb-20 { margin-bottom: var(--space-l); }
 .text-center    { text-align: center; }
-.text-uppercase { text-transform: uppercase; }
 .color-primary  { color: var(--gold); }
 .color-white    { color: var(--white); }
-.color-muted    { color: var(--white-60); }
-.color-error    { color: var(--error); }
 .fs-11 { font-size: var(--fs-11); }
 .fs-12 { font-size: var(--fs-12); }
 .dispo-oui { color: var(--success); }

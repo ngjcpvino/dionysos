@@ -627,11 +627,6 @@ function creerVinNomV2(code, nom, mode) {
 
 let menuActionV2Context = null;
 
-function codeSAQDepuisBarcodeV2(code) {
-  var item = (ALL_DATA || []).filter(function(i) { return memeCodeV2(i['Code-barres'], code); })[0];
-  return item ? (item['Code SAQ'] || '').toString().trim() : '';
-}
-
 function barcodeDepuisSAQV2(codeSAQ) {
   var saq = (codeSAQ || '').toString().trim();
   var item = (ALL_DATA || []).filter(function(i) { return (i['Code SAQ'] || '').toString().trim() === saq; })[0];

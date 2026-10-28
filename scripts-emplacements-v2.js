@@ -940,21 +940,6 @@ function comparerEmplacementsV2(a, b) {
   return (parseInt(pa[2], 10) || 0) - (parseInt(pb[2], 10) || 0);
 }
 
-// Regroupe par code-barres : { wine, emplacements:[], count }
-function grouperParCbEmpV2(liste) {
-  var grouped = {};
-  liste.forEach(function(w){
-    var cb = (w['Code-barres'] || '').toString().trim().replace(/\s+/g, '');
-    var key = cb || ('SANS_' + w.Nom);
-    if (!grouped[key]) grouped[key] = { wine: w, emplacements: [], count: 0 };
-    grouped[key].count++;
-    grouped[key].emplacements.push(w.Meuble.toString().substring(0,1).toUpperCase() + '-' + w.Rangee + '-' + w.Espace);
-  });
-  var arr = Object.values(grouped);
-  arr.forEach(function(g){ g.emplacements.sort(comparerEmplacementsV2); });
-  return arr;
-}
-
 // Chaîne à sens unique : un meuble ne se remplit que par les meubles en amont.
 // Noms venant de l'onglet Config du Sheet — si un meuble est renommé, corriger ici.
 var CHAINE_MEUBLES_V2 = ['Réserve', 'Pigeonnier', 'Cellier'];

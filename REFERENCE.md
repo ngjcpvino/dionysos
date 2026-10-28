@@ -44,6 +44,8 @@
 ## Le `.md` d'état
 - L'IA le met à jour directement dans le fichier (comme le code) ; pas besoin de le recopier en entier dans la conversation.
 - Les règles de travail ne vivent QUE dans ce REFERENCE.md, pas dans le `.md` d'état (éviter le doublon).
+- Un changement présenté mais sans « ok » reçu N'EST PAS appliqué : ne jamais l'écrire comme fait.
+- Le `.md` d'état reste court (ce qui est en vigueur) ; le récit daté va dans `archives/` (journal), jamais dans l'état.
 
 ## Contexte GLOBAL obligatoire — jamais en vase clos
 - Rien ne se conçoit isolément : chaque écran, classe ou fonction fait partie d'un TOUT. Avant de créer, regarder comment le reste de l'app le fait déjà, et faire PAREIL.
