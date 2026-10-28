@@ -579,7 +579,7 @@ function chargerCurieuxBeginFicheV2(wine) {
     conteneur.innerHTML = accords.map(function(a) {
       var url = 'https://cuisinez.telequebec.tv/recettes/' + a.recetteId + '/' + a.slug;
       var saison = a.saison ? 'Saison ' + a.saison + (a.episode ? '-' + a.episode : '') : '';
-      return '<div class="carte fiche-mets" onclick="window.open(\'' + url + '\', \'_blank\')"><div class="carte-centre"><span class="carte-titre">' + decodeHTML(a.plat || '') + '</span><span class="carte-sous">Curieux Bégin</span></div><div class="carte-droite">' + saison + '</div></div>';
+      return '<div class="carte histo-mets" onclick="window.open(\'' + url + '\', \'_blank\')"><div class="carte-centre"><span class="carte-titre">' + decodeHTML(a.plat || '') + '</span><span class="carte-sous">Curieux Bégin</span></div><div class="carte-droite">' + saison + '</div></div>';
     }).join('');
   }
   if (ALL_CURIEUXBEGIN) { rendre(); return; }
@@ -608,7 +608,7 @@ function chargerSuggestionsFicheV2(codeSAQ) {
   conteneur.innerHTML = items.map(function(s) {
     var somEsc = (s.sommelier || '').replace(/'/g, "\\'");
     var noteEsc = (s.note || '').replace(/'/g, "\\'");
-    return '<div class="carte fiche-mets" onclick="ouvrirApresTap(function(){ouvrirSuggestionEditV2(' + s.row + ', \'' + somEsc + '\', \'' + noteEsc + '\', \'' + nomEsc + '\', \'' + saq + '\', \'fiche\')})"><div class="carte-centre"><span class="carte-titre">' + (s.sommelier || '—') + '</span><span class="carte-sous">' + (s.note || '') + '</span></div><div class="carte-droite">' + (s.date || '') + '</div></div>';
+    return '<div class="carte histo-mets" onclick="ouvrirApresTap(function(){ouvrirSuggestionEditV2(' + s.row + ', \'' + somEsc + '\', \'' + noteEsc + '\', \'' + nomEsc + '\', \'' + saq + '\', \'fiche\')})"><div class="carte-centre"><span class="carte-titre">' + (s.sommelier || '—') + '</span><span class="carte-sous">' + (s.note || '') + '</span></div><div class="carte-droite">' + (s.date || '') + '</div></div>';
   }).join('');
 }
 
@@ -813,7 +813,7 @@ function chargerPlatsV2(codebarre) {
       var classeNote = (note >= 1 && note <= 5) ? ' note-' + note : '';
       var platEsc = (m.plat || '').replace(/'/g, "\\'");
       var nomEsc = decodeHTML((CURRENT_WINE_DATA && CURRENT_WINE_DATA.Nom) || '').replace(/'/g, "\\'");
-      return '<div class="carte fiche-mets' + classeNote + '" onclick="ouvrirApresTap(function(){ouvrirHistoEditV2(' + m.row + ', \'' + platEsc + '\', ' + note + ', \'' + nomEsc + '\', \'fiche\')})"><div class="carte-centre"><span class="carte-titre">' + (m.plat || '—') + '</span></div><div class="carte-droite">' + (m.date || '') + '</div></div>';
+      return '<div class="carte histo-mets' + classeNote + '" onclick="ouvrirApresTap(function(){ouvrirHistoEditV2(' + m.row + ', \'' + platEsc + '\', ' + note + ', \'' + nomEsc + '\', \'fiche\')})"><div class="carte-centre"><span class="carte-titre">' + (m.plat || '—') + '</span></div><div class="carte-droite">' + (m.date || '') + '</div></div>';
     }).join('');
     conteneur.innerHTML = cartes;
   }

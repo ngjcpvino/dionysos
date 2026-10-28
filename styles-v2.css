@@ -94,6 +94,7 @@ html, body {
   --espace-accordeon: 7px;
   --taille-tactile: 44px;
   --taille-9: 9px;
+  --taille-60: 60px;
   --ls-tight: 1px;
   --ls-normal: 1.5px;
   --ls-wide: 2px;
@@ -182,7 +183,7 @@ body::after {
   width: 100%;
   max-width: 700px;
   margin: 0 auto;
-  min-height: 60px;
+  min-height: var(--taille-60);
   /* un cran sous le haut de l'écran : l'encoche PUIS un espace (19 sept. 2026) */
   padding-top: calc(env(safe-area-inset-top, 0px) + var(--space-l));
   z-index: 1000;
@@ -495,7 +496,7 @@ body::after {
 /* ===== Éléments génériques de modale V2 ===== */
 .modale-haut {
   justify-content: flex-start;
-  padding-top: 60px;
+  padding-top: var(--taille-60);
   position: relative;
 }
 
@@ -654,14 +655,14 @@ body::after {
 }
 .carte-photo {
   flex: 0 0 auto;
-  width: 60px;
+  width: var(--taille-60);
   display: flex;
   align-items: center;
   justify-content: center;
   background: transparent;
 }
 .carte-photo img {
-  height: 60px;
+  height: var(--taille-60);
   width: auto;
   object-fit: contain;
   display: block;
@@ -732,7 +733,7 @@ body::after {
 }
 #photoV2Overlay.photo-ronde .modal-v2-content {
   justify-content: flex-start;
-  padding-top: 60px;
+  padding-top: var(--taille-60);
 }
 #photoV2Overlay.photo-ronde .photo-entete {
   width: 100%;
@@ -922,7 +923,7 @@ input[type="date"].champ-saisie::-webkit-date-and-time-value { text-align: left;
   background: transparent;
   backdrop-filter: blur(8px);
   z-index: 10001;
-  padding: 60px var(--space-l) var(--space-l);
+  padding: var(--taille-60) var(--space-l) var(--space-l);
   overflow-y: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -941,7 +942,7 @@ input[type="date"].champ-saisie::-webkit-date-and-time-value { text-align: left;
   background: transparent;
   backdrop-filter: blur(8px);
   z-index: 10001;
-  padding: 60px var(--space-l) var(--space-l);
+  padding: var(--taille-60) var(--space-l) var(--space-l);
   overflow-y: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -1052,19 +1053,10 @@ input[type="date"].champ-saisie::-webkit-date-and-time-value { text-align: left;
 .histo-vin {
   padding-top: var(--space-s);
 }
-.histo-mets {
-  margin-left: 60px;
-  width: auto;
-  border-bottom: none;
-  border-left: var(--largeur-bordure-3) solid transparent;
-}
-.histo-mets.bordure-gauche-1 { border-left-color: var(--note-1); }
-.histo-mets.bordure-gauche-2 { border-left-color: var(--note-2); }
-.histo-mets.bordure-gauche-3 { border-left-color: var(--note-3); }
-.histo-mets.bordure-gauche-4 { border-left-color: var(--note-4); }
-.histo-mets.bordure-gauche-5 { border-left-color: var(--note-5); }
-.fiche-mets { margin-left: 60px; width: calc(100% - 60px); }
-.histo-mets .carte-droite, .fiche-mets .carte-droite { align-items: flex-start; }
+/* Carte en retrait sous un vin (plat noté, recette, note de sommelier…) : la carte universelle, bande en bas
+   (appréciation .note-1…5 ou couleur du vin). Une seule classe partout : fiche, Historique, Propositions, notes, Curieux Bégin. */
+.histo-mets { margin-left: var(--taille-60); width: calc(100% - var(--taille-60)); }
+.histo-mets .carte-droite { align-items: flex-start; }
 
 
 

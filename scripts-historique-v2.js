@@ -206,7 +206,7 @@ function afficherHistoV2() {
     var mets = g.mets.slice().sort(function(a, b){ return (parseInt(b.bonAccord) || 0) - (parseInt(a.bonAccord) || 0); });
     var cartesMets = mets.map(function(m){
       var note = parseInt(m.bonAccord) || 0;
-      var classeNote = (note >= 1 && note <= 5) ? ' bordure-gauche-' + note : '';
+      var classeNote = (note >= 1 && note <= 5) ? ' note-' + note : '';
       var platEsc = (m.plat || '').replace(/'/g, "\\'");
       return '<div class="carte histo-mets' + classeNote + '" onclick="ouvrirApresTap(function(){ouvrirHistoEditV2(' + m.row + ', \'' + platEsc + '\', ' + note + ', \'' + nom.replace(/'/g, "\\'") + '\', \'histo\', \'' + (m.codeSAQ || '') + '\', \'' + (m.codebarre || '') + '\')})">' +
         '<div class="carte-centre"><span class="carte-titre">' + (m.plat || '—') + '</span></div>' +
