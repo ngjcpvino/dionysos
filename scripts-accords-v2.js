@@ -708,7 +708,7 @@ function carteRecetteSaqV2(r) {
   var sous = [cls, ing].filter(Boolean).join('<br>');
   var sku = (r.sku || '').toString();
   var oc = sku ? ' onclick="window.open(\'https://www.saq.com/fr/' + sku + '\', \'_blank\')"' : '';
-  return '<div class="carte fiche-mets"' + oc + '><div class="carte-centre"><span class="carte-titre">' + nomR + '</span><span class="carte-sous">' + sous + '</span></div></div>';
+  return '<div class="carte histo-mets"' + oc + '><div class="carte-centre"><span class="carte-titre">' + nomR + '</span><span class="carte-sous">' + sous + '</span></div></div>';
 }
 
 function calculerSelonSaqV2() {

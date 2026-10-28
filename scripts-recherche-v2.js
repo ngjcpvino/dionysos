@@ -253,7 +253,7 @@ function lancerRechercheV2() {
       var sousCh = [a.cepage, a.nuance, a.source].filter(Boolean).join(' · ');
       var cepEsc = (a.cepage || '').replace(/'/g, "\\'");
       var oc = a.cepage ? ' onclick="ouvrirApresTap(function(){ouvrirChartierCepageV2(\'' + cepEsc + '\')})"' : '';
-      return '<div class="carte fiche-mets"' + oc + '><div class="carte-centre"><span class="carte-titre">' + (a.aliment || '—') + '</span><span class="carte-sous">' + sousCh + '</span></div></div>';
+      return '<div class="carte histo-mets"' + oc + '><div class="carte-centre"><span class="carte-titre">' + (a.aliment || '—') + '</span><span class="carte-sous">' + sousCh + '</span></div></div>';
     });
 
     // --- Recettes SAQ : nom, types de plats, ingrédients
