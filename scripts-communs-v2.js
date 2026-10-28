@@ -141,7 +141,57 @@ function couleurClasseV2(couleur) {
 function sousVinV2(w) {
   var pays = w.Pays || '', region = w.Region || '';
   var paysRegion = (pays && region) ? (pays + ' • ' + region) : (pays || region);
-  return [paysRegion, annoterCepagesV2(w.Cepage), w.Appellation || ''].filter(Boolean).join('<br>');
+  var cepage = annoterCepagesV2(w.Cepage);
+  if (cepage && w.Favori === 'Oui') cepage += ' <span class="etoile-favori actif">★</span>';   // vin pour cépage favori
+  return [paysRegion, cepage, w.Appellation || ''].filter(Boolean).join('<br>');
+}
+
+// ==================== LA CARTE — une seule façon de la dessiner (28 oct. 2026, liste 2.0 chantier 4) ====================
+// c = { classes : après « carte » (couleur du vin, histo-vin / histo-mets dans un groupe, carte-vide…) ; onclick : le JS du tap ;
+//       photo : URL (placePhoto : la place gardée même sans photo) ; titre ; sous et droite : facultatifs (null : pas de ligne,
+//       pas de case) ; droiteClasses : carte-droite-empilee… }
+function carteV2(c) {
+  var img = c.photo ? '<img src="' + c.photo + '" alt="" loading="lazy" onerror="' + (c.placePhoto ? 'this' : 'this.parentNode') + '.style.display=\'none\'">' : '';
+  return '<div class="carte' + (c.classes ? ' ' + c.classes : '') + '"' + (c.onclick ? ' onclick="' + c.onclick + '"' : '') + '>' +
+    (img || c.placePhoto ? '<div class="carte-photo">' + img + '</div>' : '') +
+    '<div class="carte-centre"><span class="carte-titre">' + c.titre + '</span>' + (c.sous == null ? '' : '<span class="carte-sous">' + c.sous + '</span>') + '</div>' +
+    (c.droite == null ? '' : '<div class="carte-droite' + (c.droiteClasses ? ' ' + c.droiteClasses : '') + '">' + c.droite + '</div>') + '</div>';
+}
+
+// Le tap qui ouvre la fiche d'un vin (le JS d'un onclick) ; avant : ce qui se fait d'abord (fermer la page : la fiche est dessous).
+// Provenance 'comparable' (menu d'action, AU-DESSUS de la fiche) : naviguerV2 masque le menu, le ✕ de la fiche le rouvre.
+function tapFicheV2(cb, provenance, avant) {
+  if (!cb) return '';
+  return (provenance === 'comparable' ? 'naviguerV2' : 'ouvrirApresTap') + '(function(){' + (avant || '') + 'ouvrirFicheV2(\'' + cb + '\', \'' + provenance + '\')})';
+}
+
+// La carte d'un vin groupé (grouperVinsV2) — la même partout : couleur, voilée à 0 bouteille, photo, nom, origine (sousVinV2),
+// « X btl » et ses emplacements. onclick : le JS du tap ; classes : en plus, devant la couleur (histo-mets dans un groupe).
+function carteGroupeVinV2(g, onclick, classes) {
+  var w = g.wine;
+  var emp = (g.emplacements && g.emplacements.length) ? '<br>' + g.emplacements.join('<br>') : '';
+  return carteV2({ classes: (classes ? classes + ' ' : '') + couleurClasseV2(w.Couleur) + (g.count === 0 ? ' carte-vide' : ''), onclick: onclick,
+    photo: w['Photo URL'], titre: decodeHTML(w.Nom || '—'), sous: sousVinV2(w), droite: caseDroiteV2(w, g.count) + emp });
+}
+
+// Une carte de groupe (un vin en tête, ses plats / propositions dessous) : un plat de l'historique → le corriger
+function carteMetHistoV2(m, nom, provenance) {
+  var note = parseInt(m.bonAccord) || 0;
+  var esc = function(v) { return (v || '').toString().replace(/'/g, "\\'"); };
+  return carteV2({ classes: 'histo-mets' + ((note >= 1 && note <= 5) ? ' note-' + note : ''), titre: m.plat || '—', droite: m.date || '',
+    onclick: 'ouvrirApresTap(function(){ouvrirHistoEditV2(' + m.row + ', \'' + esc(m.plat) + '\', ' + note + ', \'' + esc(nom) + '\', \'' + provenance + '\', \'' + (m.codeSAQ || '') + '\', \'' + (m.codebarre || '') + '\')})' });
+}
+// …une proposition d'un sommelier → la corriger (retour : la page où revenir)
+function carteSuggestionV2(s, codeSAQ, nom, retour) {
+  var esc = function(v) { return (v || '').toString().replace(/'/g, "\\'"); };
+  return carteV2({ classes: 'histo-mets', titre: s.sommelier || '—', sous: s.note || '', droite: s.date || '',
+    onclick: 'ouvrirApresTap(function(){ouvrirSuggestionV2(\'' + codeSAQ + '\', \'' + retour + '\', ' + s.row + ', \'' + esc(s.sommelier) + '\', \'' + esc(s.note) + '\', \'' + esc(nom) + '\')})' });
+}
+// …un plat de Curieux Bégin → sa recette sur le site de l'émission
+function cartePlatCurieuxBeginV2(a, sous) {
+  var url = 'https://cuisinez.telequebec.tv/recettes/' + a.recetteId + '/' + a.slug;
+  return carteV2({ classes: 'histo-mets', onclick: 'window.open(\'' + url + '\', \'_blank\')', titre: decodeHTML(a.plat || ''), sous: sous,
+    droite: a.saison ? 'Saison ' + a.saison + (a.episode ? '-' + a.episode : '') : '' });
 }
 
 // Une bouteille encore en cave : ni bue, ni sortie. (Le serveur rend un vin sans bouteille active en « Bu »,

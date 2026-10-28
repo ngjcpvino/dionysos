@@ -570,7 +570,7 @@ function rendreBlocsScanV2(scan) {
       // ceux qui ont des bouteilles d'abord, puis (voilés) ceux déjà eus
       var tries = l.vins.filter(function(g) { return g.count > 0; }).concat(l.vins.filter(function(g) { return !g.count; }));
       html += '<div class="item-liste multiligne" id="' + p + 'V2-comp-' + i + '-titre" onclick="basculerVoletsV2(\'' + p + 'V2-comp-\', ' + i + ')">' + libelle + '</div>';
-      html += '<div id="' + p + 'V2-comp-' + i + '" style="display:none;">' + tries.map(function(g) { return carteGroupeVinV2(g, scan.provenance); }).join('') + '</div>';
+      html += '<div id="' + p + 'V2-comp-' + i + '" style="display:none;">' + tries.map(function(g) { return carteGroupeVinV2(g, tapFicheV2(g.cb, scan.provenance)); }).join('') + '</div>';
     });
     html += '</div></div>';
   }

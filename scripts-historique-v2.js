@@ -128,22 +128,9 @@ function afficherHistoV2() {
 
   div.innerHTML = groupes.map(function(g){
     var nom = decodeHTML(g.nom || '—');
-    var info = cbInfos[g.cb] || {};
-    var sous = sousVinV2(info);
-    var onclick = g.cb ? ' onclick="ouvrirApresTap(function(){ouvrirFicheV2(\'' + g.cb + '\', \'histo\')})"' : '';
-    var photo = g.photo ? '<div class="carte-photo"><img src="' + g.photo + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
-    var carteVin = '<div class="carte histo-vin ' + couleurClasseV2(g.couleur) + '"' + onclick + '>' + photo +
-      '<div class="carte-centre"><span class="carte-titre">' + nom + '</span><span class="carte-sous">' + sous + '</span></div></div>';
-
+    var carteVin = carteV2({ classes: 'histo-vin ' + couleurClasseV2(g.couleur), onclick: tapFicheV2(g.cb, 'histo'), photo: g.photo, titre: nom, sous: sousVinV2(cbInfos[g.cb] || {}) });
     var mets = g.mets.slice().sort(function(a, b){ return (parseInt(b.bonAccord) || 0) - (parseInt(a.bonAccord) || 0); });
-    var cartesMets = mets.map(function(m){
-      var note = parseInt(m.bonAccord) || 0;
-      var classeNote = (note >= 1 && note <= 5) ? ' note-' + note : '';
-      var platEsc = (m.plat || '').replace(/'/g, "\\'");
-      return '<div class="carte histo-mets' + classeNote + '" onclick="ouvrirApresTap(function(){ouvrirHistoEditV2(' + m.row + ', \'' + platEsc + '\', ' + note + ', \'' + nom.replace(/'/g, "\\'") + '\', \'histo\', \'' + (m.codeSAQ || '') + '\', \'' + (m.codebarre || '') + '\')})">' +
-        '<div class="carte-centre"><span class="carte-titre">' + (m.plat || '—') + '</span></div>' +
-        '<div class="carte-droite">' + (m.date || '') + '</div></div>';
-    }).join('');
+    var cartesMets = mets.map(function(m){ return carteMetHistoV2(m, nom, 'histo'); }).join('');
 
     return '<div class="histo-groupe ' + couleurClasseV2(g.couleur) + '">' + carteVin + cartesMets + '</div>';
   }).join('');

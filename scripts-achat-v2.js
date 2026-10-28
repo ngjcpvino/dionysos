@@ -79,23 +79,11 @@ function groupeSuggestionV2(g) {
   var w = g.wine;
   var cb = (w['Code-barres'] || '').toString().trim();
   var nom = decodeHTML(w.Nom || '—');
-  var sous = sousVinV2(w);
-  var photo = w['Photo URL'] ? '<div class="carte-photo"><img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
-  var onclick = cb ? ' onclick="ouvrirApresTap(function(){ouvrirFicheV2(\'' + cb + '\', \'suggestions\')})"' : '';
   // le prix SAQ, comme dans la Liste d'achat (promo : prix barré, prix promo, points bonis)
   var prix = blocPrixAchatV2(w);
-  var carteVin = '<div class="carte histo-vin ' + couleurClasseV2(w.Couleur) + '"' + onclick + '>' + photo +
-    '<div class="carte-centre"><span class="carte-titre">' + nom + '</span><span class="carte-sous">' + sous + '</span></div>' +
-    (prix ? '<div class="carte-droite carte-droite-empilee">' + prix + '</div>' : '') + '</div>';
-
-  var cartesSugg = g.items.map(function(s) {
-    var somEsc = (s.sommelier || '').replace(/'/g, "\\'");
-    var noteEsc = (s.note || '').replace(/'/g, "\\'");
-    var nomEsc = nom.replace(/'/g, "\\'");
-    return '<div class="carte histo-mets" onclick="ouvrirApresTap(function(){ouvrirSuggestionV2(\'' + g.codeSAQ + '\', \'liste\', ' + s.row + ', \'' + somEsc + '\', \'' + noteEsc + '\', \'' + nomEsc + '\')})">' +
-      '<div class="carte-centre"><span class="carte-titre">' + (s.sommelier || '—') + '</span><span class="carte-sous">' + (s.note || '') + '</span></div>' +
-      '<div class="carte-droite">' + (s.date || '') + '</div></div>';
-  }).join('');
+  var carteVin = carteV2({ classes: 'histo-vin ' + couleurClasseV2(w.Couleur), onclick: tapFicheV2(cb, 'suggestions'), photo: w['Photo URL'], titre: nom,
+    sous: sousVinV2(w), droite: prix || null, droiteClasses: 'carte-droite-empilee' });
+  var cartesSugg = g.items.map(function(s) { return carteSuggestionV2(s, g.codeSAQ, nom, 'liste'); }).join('');
 
   return '<div class="histo-groupe ' + couleurClasseV2(w.Couleur) + '">' + carteVin + cartesSugg + '</div>';
 }
@@ -534,27 +522,23 @@ function afficherCartesAchatV2(liste) {
     var cb = (w['Code-barres'] || '').toString().trim().replace(/\s+/g, '');
     var codeSAQ = (w['Code SAQ'] || '').toString().trim();
     var nom = decodeHTML(w.Nom || '—');
-    var paysRegion = (w.Pays && w.Region) ? (w.Pays + ' • ' + w.Region) : (w.Pays || w.Region || '');
-    var sousLignes = [paysRegion, annoterCepagesV2(w.Cepage), w.Appellation || ''];
+    var sous = sousVinV2(w);
     if (achatV2Mode === 'suggestions') {
       var soms = sommeliersDuVinV2(codeSAQ);
-      if (soms.length) sousLignes.push('<span class="color-primary">' + soms.join(', ') + '</span>');
+      if (soms.length) sous = [sous, '<span class="color-primary">' + soms.join(', ') + '</span>'].filter(Boolean).join('<br>');
     }
-    var sous = sousLignes.filter(Boolean).join('<br>');
-    var photo = w['Photo URL'] ? '<div class="carte-photo"><img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
-    var onclick = '';
-    if (f.succ === 'TOUTES' && codeSAQ) onclick = ' onclick="dispoProchesAchatV2(\'' + codeSAQ + '\')"';
-    else if (w.__decouverte) onclick = codeSAQ ? ' onclick="window.open(\'https://www.saq.com/fr/' + codeSAQ + '\')"' : '';
-    else if (cb) onclick = ' onclick="ouvrirApresTap(function(){ouvrirFicheV2(\'' + cb + '\', \'achat\')})"';
+    var onclick;
+    if (f.succ === 'TOUTES' && codeSAQ) onclick = 'dispoProchesAchatV2(\'' + codeSAQ + '\')';
+    else if (w.__decouverte) onclick = codeSAQ ? 'window.open(\'https://www.saq.com/fr/' + codeSAQ + '\')' : '';
+    else onclick = tapFicheV2(cb, 'achat');
     var cocheHtml = '<span class="coche-panier' + (coche ? ' actif' : '') + '" onclick="togglePanierSessionV2(\'' + cle.replace(/'/g, "\\'") + '\', event)"></span>';
     var prixHtml = blocPrixAchatV2(w);
     var btl = (achatV2Mode === 'favoris' && typeof w.__count === 'number') ? '<div class="fs-12">' + w.__count + ' btl</div>' : '';
     var dispo = (f.succ && f.succ !== 'TOUTES' && codeSAQ) ? '<div id="achatV2-dispo-' + codeSAQ + '">…</div>' : '';
     var proches = codeSAQ ? '<span id="achatV2-proches-' + codeSAQ + '"></span>' : '';
     var cellier = (w.Cellier === 'Oui') ? ' <span class="color-primary fs-11">Espace Cellier</span>' : '';
-    return entete + '<div class="carte ' + couleurClasseV2(w.Couleur) + (coche ? ' carte-vide' : '') + '"' + onclick + '>' + photo +
-           '<div class="carte-centre"><span class="carte-titre">' + nom + cellier + '</span><span class="carte-sous">' + sous + '</span></div>' +
-           '<div class="carte-droite carte-droite-empilee">' + cocheHtml + prixHtml + btl + dispo + proches + '</div></div>';
+    return entete + carteV2({ classes: couleurClasseV2(w.Couleur) + (coche ? ' carte-vide' : ''), onclick: onclick, photo: w['Photo URL'], titre: nom + cellier,
+      sous: sous, droite: cocheHtml + prixHtml + btl + dispo + proches, droiteClasses: 'carte-droite-empilee' });
   }).join('');
 
   if (f.succ) chargerDispoAchatV2(liste);

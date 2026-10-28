@@ -49,23 +49,6 @@ function contientTexteV2(texte, morceau) {
   return normaliserRechercheV2(texte).indexOf(normaliserRechercheV2(morceau)) !== -1;
 }
 
-// Carte d'un vin groupé (grouperVinsV2) : photo, nom, origine, « X btl » + emplacements, voilée à 0 bouteille → sa fiche.
-// Même carte dans la recherche et dans Comparables (écran du scan).
-// Provenance 'comparable' (menu d'action, AU-DESSUS de la fiche) : naviguerV2 masque le menu, le ✕ de la fiche le rouvre.
-function carteGroupeVinV2(g, provenance) {
-  var w = g.wine;
-  var nom = decodeHTML(w.Nom || '—');
-  var sous = sousVinV2(w);
-  var photo = w['Photo URL'] ? '<div class="carte-photo"><img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
-  var ouvrir = provenance === 'comparable' ? 'naviguerV2' : 'ouvrirApresTap';
-  var onclick = g.cb ? ' onclick="' + ouvrir + '(function(){ouvrirFicheV2(\'' + g.cb + '\', \'' + provenance + '\')})"' : '';
-  var vide = g.count === 0 ? ' carte-vide' : '';
-  var emp = (g.emplacements && g.emplacements.length) ? '<br>' + g.emplacements.join('<br>') : '';
-  return '<div class="carte ' + couleurClasseV2(w.Couleur) + vide + '"' + onclick + '>' + photo +
-         '<div class="carte-centre"><span class="carte-titre">' + nom + '</span><span class="carte-sous">' + sous + '</span></div>' +
-         '<div class="carte-droite">' + caseDroiteV2(w, g.count) + emp + '</div></div>';
-}
-
 // Limite d'affichage par section : au-delà, le mot est trop large pour être utile.
 var MAX_SECTION_RECHERCHE_V2 = 50;
 // Section d'accords dépliée (par son titre) : elle survit aux frappes suivantes.
@@ -142,7 +125,7 @@ function lancerRechercheV2() {
 
   var sections = [];
   if (groups.length) {
-    sections.push({ titre: 'Vins', pliable: false, total: groups.length, montres: groups.length, html: groups.map(function(g) { return carteGroupeVinV2(g, 'recherche'); }).join('') });
+    sections.push({ titre: 'Vins', pliable: false, total: groups.length, montres: groups.length, html: groups.map(function(g) { return carteGroupeVinV2(g, tapFicheV2(g.cb, 'recherche')); }).join('') });
   }
 
   if (terme.length >= 2) {
@@ -171,8 +154,7 @@ function lancerRechercheV2() {
     ajouterSectionRechercheV2(sections, 'Chartier', ch, function(a) {
       var sousCh = [a.cepage, a.nuance, a.source].filter(Boolean).join(' · ');
       var cepEsc = (a.cepage || '').replace(/'/g, "\\'");
-      var oc = a.cepage ? ' onclick="ouvrirApresTap(function(){ouvrirChartierCepageV2(\'' + cepEsc + '\')})"' : '';
-      return '<div class="carte histo-mets"' + oc + '><div class="carte-centre"><span class="carte-titre">' + (a.aliment || '—') + '</span><span class="carte-sous">' + sousCh + '</span></div></div>';
+      return carteV2({ classes: 'histo-mets', onclick: a.cepage ? 'ouvrirApresTap(function(){ouvrirChartierCepageV2(\'' + cepEsc + '\')})' : '', titre: a.aliment || '—', sous: sousCh });
     });
 
     // --- Recettes SAQ : nom, types de plats, ingrédients

@@ -562,11 +562,7 @@ function chargerCurieuxBeginFicheV2(wine) {
     if (!codeSAQ) { conteneur.innerHTML = '<div class="texte-secondaire">Aucun code SAQ</div>'; return; }
     var accords = (ALL_CURIEUXBEGIN || []).filter(function(a) { return (a.codeSAQ || '').toString().trim() === codeSAQ; });
     if (!accords.length) { conteneur.innerHTML = '<div class="texte-secondaire">Aucun accord Curieux Bégin</div>'; return; }
-    conteneur.innerHTML = accords.map(function(a) {
-      var url = 'https://cuisinez.telequebec.tv/recettes/' + a.recetteId + '/' + a.slug;
-      var saison = a.saison ? 'Saison ' + a.saison + (a.episode ? '-' + a.episode : '') : '';
-      return '<div class="carte histo-mets" onclick="window.open(\'' + url + '\', \'_blank\')"><div class="carte-centre"><span class="carte-titre">' + decodeHTML(a.plat || '') + '</span><span class="carte-sous">Curieux Bégin</span></div><div class="carte-droite">' + saison + '</div></div>';
-    }).join('');
+    conteneur.innerHTML = accords.map(function(a) { return cartePlatCurieuxBeginV2(a, 'Curieux Bégin'); }).join('');
   }
   if (ALL_CURIEUXBEGIN) { rendre(); return; }
   appelBackend('getCurieuxBegin', {}, { spinner: '' }).then(function(data) { ALL_CURIEUXBEGIN = data || []; rendre(); }).catch(journaliserV2('Curieux Bégin de la fiche'));
@@ -578,12 +574,8 @@ function chargerSuggestionsFicheV2(codeSAQ) {
   var saq = (codeSAQ || '').toString().trim();
   var items = (ALL_SUGGESTIONS || []).filter(function(s) { return s.codeSAQ === saq; });
   if (!items.length) { conteneur.innerHTML = '<div class="texte-secondaire">Aucune proposition</div>'; return; }
-  var nomEsc = decodeHTML((CURRENT_WINE_DATA && CURRENT_WINE_DATA.Nom) || '').replace(/'/g, "\\'");
-  conteneur.innerHTML = items.map(function(s) {
-    var somEsc = (s.sommelier || '').replace(/'/g, "\\'");
-    var noteEsc = (s.note || '').replace(/'/g, "\\'");
-    return '<div class="carte histo-mets" onclick="ouvrirApresTap(function(){ouvrirSuggestionV2(\'' + saq + '\', \'fiche\', ' + s.row + ', \'' + somEsc + '\', \'' + noteEsc + '\', \'' + nomEsc + '\')})"><div class="carte-centre"><span class="carte-titre">' + (s.sommelier || '—') + '</span><span class="carte-sous">' + (s.note || '') + '</span></div><div class="carte-droite">' + (s.date || '') + '</div></div>';
-  }).join('');
+  var nom = decodeHTML((CURRENT_WINE_DATA && CURRENT_WINE_DATA.Nom) || '');
+  conteneur.innerHTML = items.map(function(s) { return carteSuggestionV2(s, saq, nom, 'fiche'); }).join('');
 }
 
 function ouvrirActionDepuisFicheV2() {
@@ -767,13 +759,8 @@ function chargerPlatsV2(codebarre) {
     mets.sort(function(a, b) {
       return (parseInt(b.bonAccord) || 0) - (parseInt(a.bonAccord) || 0);
     });
-    var cartes = mets.map(function(m) {
-      var note = parseInt(m.bonAccord) || 0;
-      var classeNote = (note >= 1 && note <= 5) ? ' note-' + note : '';
-      var platEsc = (m.plat || '').replace(/'/g, "\\'");
-      var nomEsc = decodeHTML((CURRENT_WINE_DATA && CURRENT_WINE_DATA.Nom) || '').replace(/'/g, "\\'");
-      return '<div class="carte histo-mets' + classeNote + '" onclick="ouvrirApresTap(function(){ouvrirHistoEditV2(' + m.row + ', \'' + platEsc + '\', ' + note + ', \'' + nomEsc + '\', \'fiche\')})"><div class="carte-centre"><span class="carte-titre">' + (m.plat || '—') + '</span></div><div class="carte-droite">' + (m.date || '') + '</div></div>';
-    }).join('');
+    var nom = decodeHTML((CURRENT_WINE_DATA && CURRENT_WINE_DATA.Nom) || '');
+    var cartes = mets.map(function(m) { return carteMetHistoV2(m, nom, 'fiche'); }).join('');
     conteneur.innerHTML = cartes;
   }
 
@@ -992,7 +979,7 @@ function trouverCeVinV2() {
         var sousInfo = [s.adresse, s.ville].filter(Boolean).join(', ');
         var droite = [s.quantite + ' btl', s.distance].filter(Boolean).join('<br>');
         var adresseMaps = encodeURIComponent([s.adresse, s.ville, 'QC'].filter(Boolean).join(', '));
-        return '<div class="carte" onclick="window.open(\'https://maps.apple.com/?daddr=' + adresseMaps + '\', \'_blank\')"><div class="carte-centre"><span class="carte-titre">' + s.nom + '</span><span class="carte-sous">' + sousInfo + '</span></div><div class="carte-droite">' + droite + '</div></div>';
+        return carteV2({ onclick: 'window.open(\'https://maps.apple.com/?daddr=' + adresseMaps + '\', \'_blank\')', titre: s.nom, sous: sousInfo, droite: droite });
       }).join('');
     }).catch(function(err) { div.innerHTML = '<div class="texte-secondaire">Erreur : ' + err + '</div>'; });
   }
