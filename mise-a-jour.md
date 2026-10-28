@@ -60,7 +60,7 @@
 - **Une proposition se reconnaît à son `Racheter` VIDE** → **`estPropositionV2(w)`**. Le Statut `'Suggestion'` n'existe pas dans les données (voir Backend — pièges). Ne s'applique PAS aux bouteilles présentes (le Tri compte toutes les bouteilles, même au `Racheter` vide).
 
 **Navigation**
-- Toute nouvelle page : l'ajouter à `cacherToutesPagesV2()` ET appeler `remonterScrollV2` à son ouverture. `#secretV2Container` est HORS de `cacherToutesPagesV2()` — voulu.
+- Une page s'ouvre par **`montrerPageV2(id)`** (affichée + remontée en haut) et se ferme par **`cacherPageV2(id)`** (son panneau, puis elle). `cacherToutesPagesV2()` lit toutes les `.modal-v2-fullscreen` dans la page (28 oct. : plus de liste à tenir à la main) — sauf `#secretV2Container`, voulu.
 - Masquer une page puis en ouvrir une autre → **`naviguerV2(ouvrir)`** (spinner → `cacherToutesPagesV2` → `ouvrirApresTap`) : l'accueil n'apparaît jamais entre deux pages. Ce qui se pose PAR-DESSUS une page (carte → fiche, mets → éditeur, photo ronde) garde `ouvrirApresTap` (anti double-clic).
 - Overlay par-dessus un autre : z-index supérieur, l'ordre HTML ne suffit pas.
 - **Fiche cachée derrière une page** : `ficheV2Overlay` a le même z-index que les pages et vient AVANT Chartier, Selon SAQ, Curieux Bégin et Nos notes dans le HTML. Depuis ces pages, une carte ferme la page avant d'ouvrir la fiche (`fermerXxxV2(); ouvrirFicheV2(cb, provenance)`), et le ✕ de la fiche la rouvre. Les cartes partagées avec la Recherche (`groupeCurieuxBeginV2`, `groupeNoteV2`) reçoivent la provenance `'recherche'` : rien n'est fermé, le ✕ ramène à la Recherche. Toute nouvelle page placée après la fiche dans le HTML suit ce patron.

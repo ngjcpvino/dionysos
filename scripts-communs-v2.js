@@ -502,8 +502,7 @@ function reinitialiserFiltresV2(prefixe) {
 // Ouvrir une page à panneau : la page, remontée en haut, ses filtres à zéro, puis sa liste — tout de suite si ses
 // données sont là (charger = null), sinon après charger() (une promesse). Échec → l'accueil, avec la vraie cause.
 function ouvrirPageFiltreeV2(prefixe, charger, nom) {
-  document.getElementById(prefixe + 'Container').style.display = 'flex';
-  remonterScrollV2(prefixe + 'Container');
+  montrerPageV2(prefixe + 'Container');
   viderFiltresV2(prefixe);
   var p = panneauV2(prefixe);
   if (!charger) { p.rafraichir(); return; }
@@ -511,6 +510,37 @@ function ouvrirPageFiltreeV2(prefixe, charger, nom) {
     retourAccueilV2(nom + ' : ' + (err && err.message ? err.message : err));
   });
 }
+// Les valeurs d'un champ, une fois chacune (sans tenir compte des majuscules ni des accents), triées
+function valeursUniquesV2(liste, champ) {
+  var vues = {};
+  var out = [];
+  liste.forEach(function(x) {
+    var v = (x[champ] || '').toString().trim();
+    var k = normaliserRechercheV2(v);
+    if (v && !vues[k]) { vues[k] = true; out.push(v); }
+  });
+  return out.sort(function(a, b) { return a.localeCompare(b); });
+}
+// Les sommeliers connus (ceux des propositions)
+function sommeliersConnusV2() { return valeursUniquesV2(ALL_SUGGESTIONS || [], 'sommelier'); }
+// Les valeurs de chaque menu, EN CASCADE : un menu ne propose que ce qui reste après les choix des menus au-dessus.
+// criteres : [[cle, valeurs(x) → liste, passe(x, choix) → vrai/faux, tri (facultatif)], …] dans l'ordre des menus.
+function valeursEnCascadeV2(base, f, criteres) {
+  var listes = {};
+  criteres.forEach(function(c) {
+    var vus = {};
+    base.forEach(function(x) { c[1](x).forEach(function(v) { var k = normaliserRechercheV2(v); if (v && !vus[k]) vus[k] = v; }); });
+    listes[c[0]] = Object.keys(vus).map(function(k) { return vus[k]; }).sort(c[3] || function(a, b) { return a.localeCompare(b); });
+    base = base.filter(function(x) { return c[2](x, f[c[0]]); });
+  });
+  return listes;
+}
+// Critère d'un champ du vin, comparé par egal (égalité stricte par défaut) ; celui des accords (« Poulet, Fromage »)
+function critereChampV2(cle, champ, egal) {
+  return [cle, function(i) { return [i[champ]]; }, function(i, choix) { return passeFiltreV2(choix, i[champ], egal); }];
+}
+var CRITERE_ACCORDS_V2 = ['accords', function(i) { return (i.Accords || '').split(',').map(function(x) { return x.trim(); }).filter(Boolean); },
+  function(i, choix) { return passeFiltreV2(choix, i.Accords || '', contientChaineV2); }];
 // Un menu de filtre : « Tous », puis chaque valeur (seulement / sauf) ; le menu fermé dit le choix. montrer(v) = son libellé.
 function remplirMenuFiltreV2(prefixe, cle, valeurs, montrer) {
   var p = panneauV2(prefixe), cur = String(p.etat()[cle] || '');

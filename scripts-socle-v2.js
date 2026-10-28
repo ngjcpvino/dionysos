@@ -48,6 +48,17 @@ function ouvrirSAQV2(codeSAQ) {
   }
 }
 
+// Une page s'ouvre pareil partout : affichée, remontée en haut…
+function montrerPageV2(id) {
+  document.getElementById(id).style.display = 'flex';
+  remonterScrollV2(id);
+}
+// …et se ferme pareil : son panneau de filtres (si elle en a un), puis la page
+function cacherPageV2(id) {
+  fermerFiltresV2(id.replace(/(Container|Overlay)$/, ''));
+  document.getElementById(id).style.display = 'none';
+}
+
 function remonterScrollV2(containerId) {
   var c = document.querySelector('#' + containerId + ' .modal-v2-content');
   if (c) c.scrollTop = 0;

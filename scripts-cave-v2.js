@@ -6,24 +6,20 @@
 
 // ==================== CAVE À VIN V2 ====================
 function ouvrirCaveV2() {
-  document.getElementById('caveV2Container').style.display = 'flex';
-  remonterScrollV2('caveV2Container');
-  var dispoBtn = document.getElementById('caveV2-dispo');
-  if (dispoBtn) { dispoBtn.classList.toggle('actif', filtresCaveV2.dispo); dispoBtn.textContent = filtresCaveV2.dispo ? '✓' : '✗'; }
+  montrerPageV2('caveV2Container');
+  majToggleHautV2('caveV2-dispo', filtresCaveV2.dispo);
   remplirFiltresCaveV2();
   appliquerFiltresCaveV2();
 }
 
 function fermerCaveV2() {
-  fermerFiltresV2('caveV2');
-  document.getElementById('caveV2Container').style.display = 'none';
+  cacherPageV2('caveV2Container');
   reinitialiserFiltresV2('caveV2');
 }
 
 // ==================== À RANGER V2 ====================
 function ouvrirARangerV2() {
-  document.getElementById('aRangerV2Container').style.display = 'flex';
-  remonterScrollV2('aRangerV2Container');
+  montrerPageV2('aRangerV2Container');
   afficherCartesARangerV2();
 }
 
@@ -62,8 +58,7 @@ function deplacerDepuisARangerV2(code) {
 
 // ==================== SANS CÉPAGE V2 ====================
 function ouvrirSansCepageV2() {
-  document.getElementById('sansCepageV2Container').style.display = 'flex';
-  remonterScrollV2('sansCepageV2Container');
+  montrerPageV2('sansCepageV2Container');
   afficherCartesSansCepageV2();
 }
 
@@ -130,36 +125,19 @@ function afficherCartesCaveV2(data) {
 var filtresCaveV2 = filtresVidesV2('caveV2');
 
 function remplirFiltresCaveV2() {
-  var f = filtresCaveV2;
-  var base = (ALL_DATA || []);
-
-  var forCouleur = base;
-  var forCepage = base.filter(function(i){ return passeFiltreV2(f.couleur, i.Couleur); });
-  var forPays = forCepage.filter(function(i){ return passeFiltreV2(f.cepage, cepageDominant(i), memeCepageV2); });
-  var forAppellation = forPays.filter(function(i){ return passeFiltreV2(f.pays, i.Pays); });
-  var forAccords = forAppellation.filter(function(i){ return passeFiltreV2(f.appellation, i.Appellation); });
-  var forPastille = forAccords.filter(function(i){ return passeFiltreV2(f.accords, i.Accords || '', contientChaineV2); });
-  var forAcidite = forPastille.filter(function(i){ return passeFiltreV2(f.pastille, i['Pastille gout'], contientTexteV2); });
-
-  var sets = { couleur: {}, cepage: {}, pays: {}, appellation: {}, accords: {}, pastille: {}, acidite: {} };
-  function retenir(cle, v) { var k = normaliserRechercheV2(v); if (v && !sets[cle][k]) sets[cle][k] = v; }
-  forCouleur.forEach(function(i){ retenir('couleur', i.Couleur); });
-  forCepage.forEach(function(i){ var c = cepageDominant(i); if (c) retenir('cepage', cepageCommunV2(decodeHTML(c))); });
-  forPays.forEach(function(i){ retenir('pays', i.Pays); });
-  forAppellation.forEach(function(i){ retenir('appellation', i.Appellation); });
-  forAccords.forEach(function(i){ (i.Accords || '').split(',').map(function(x){return x.trim();}).filter(Boolean).forEach(function(x){ retenir('accords', x); }); });
-  forPastille.forEach(function(i){ retenir('pastille', i['Pastille gout']); });
-  forAcidite.forEach(function(i){ retenir('acidite', i['Acidité']); });
-
-  Object.keys(sets).forEach(function(cle) {
-    remplirMenuFiltreV2('caveV2', cle, Object.keys(sets[cle]).map(function(k){ return sets[cle][k]; }).sort(function(a,b){ return a.localeCompare(b); }));
-  });
+  var listes = valeursEnCascadeV2(ALL_DATA || [], filtresCaveV2, [
+    critereChampV2('couleur', 'Couleur'),
+    ['cepage', function(i) { var c = cepageDominant(i); return c ? [cepageCommunV2(decodeHTML(c))] : []; },
+               function(i, choix) { return passeFiltreV2(choix, cepageDominant(i), memeCepageV2); }],
+    critereChampV2('pays', 'Pays'), critereChampV2('appellation', 'Appellation'), CRITERE_ACCORDS_V2,
+    critereChampV2('pastille', 'Pastille gout', contientTexteV2), critereChampV2('acidite', 'Acidité')
+  ]);
+  Object.keys(listes).forEach(function(cle) { remplirMenuFiltreV2('caveV2', cle, listes[cle]); });
 }
 
 function toggleDispoCaveV2() {
   filtresCaveV2.dispo = !filtresCaveV2.dispo;
-  var btn = document.getElementById('caveV2-dispo');
-  if (btn) { btn.classList.toggle('actif', filtresCaveV2.dispo); btn.textContent = filtresCaveV2.dispo ? '✓' : '✗'; }
+  majToggleHautV2('caveV2-dispo', filtresCaveV2.dispo);
   appliquerFiltresCaveV2();
 }
 

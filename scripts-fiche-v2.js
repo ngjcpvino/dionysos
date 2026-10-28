@@ -7,8 +7,7 @@
 function ouvrirFicheV2(codebarre, provenance) {
   FICHE_V2_PROVENANCE = provenance || null;
   CURRENT_WINE_CODEBARRE = codebarre;
-  document.getElementById('ficheV2Overlay').style.display = 'flex';
-  remonterScrollV2('ficheV2Overlay');
+  montrerPageV2('ficheV2Overlay');
   document.getElementById('ficheV2-nom').textContent = 'Chargement...';
   document.getElementById('ficheV2-origine').innerHTML = '';
   document.getElementById('ficheV2-corps').innerHTML = '';
@@ -382,8 +381,7 @@ function ouvrirCorrigerRecetteV2(sku) {
     menu.classList.remove('ouvert'); menu.innerHTML = '';
     rendrePastillesV2('corrigerRecetteV2', champ);
   });
-  document.getElementById('corrigerRecetteV2Overlay').style.display = 'flex';
-  remonterScrollV2('corrigerRecetteV2Overlay');
+  montrerPageV2('corrigerRecetteV2Overlay');
 }
 
 function fermerCorrigerRecetteV2() {
@@ -983,46 +981,36 @@ function fermerFicheV2() {
     // fiche d'un vin de Comparables : retour au menu d'action du vin scanné
     if (menuActionV2Context) ouvrirMenuActionV2(menuActionV2Context.code, menuActionV2Context.wineResult);
   } else if (FICHE_V2_PROVENANCE === 'cave') {
-    document.getElementById('caveV2Container').style.display = 'flex';
-    remonterScrollV2('caveV2Container');
+    montrerPageV2('caveV2Container');
   } else if (FICHE_V2_PROVENANCE === 'achat') {
-    document.getElementById('achatV2Container').style.display = 'flex';
-    remonterScrollV2('achatV2Container');
+    montrerPageV2('achatV2Container');
     appliquerFiltresAchatV2();
   } else if (FICHE_V2_PROVENANCE === 'histo') {
     ouvrirHistoV2();
   } else if (FICHE_V2_PROVENANCE === 'recherche') {
-    document.getElementById('rechercheV2Container').style.display = 'flex';
-    remonterScrollV2('rechercheV2Container');
+    montrerPageV2('rechercheV2Container');
   } else if (FICHE_V2_PROVENANCE === 'empliste') {
-    document.getElementById('empV2Container').style.display = 'flex';
-    remonterScrollV2('empV2Container');
+    montrerPageV2('empV2Container');
     rendreEmpV2();
     // le Tri Dionysos : on revient au même endroit du parcours
     if (empV2Mode === 'menage') document.querySelector('#empV2Container .modal-v2-content').scrollTop = SCROLL_EMP_V2;
   } else if (FICHE_V2_PROVENANCE === 'emplacements') {
     ouvrirEmpV2();
   } else if (FICHE_V2_PROVENANCE === 'sanscepage') {
-    document.getElementById('sansCepageV2Container').style.display = 'flex';
-    remonterScrollV2('sansCepageV2Container');
+    montrerPageV2('sansCepageV2Container');
     } else if (FICHE_V2_PROVENANCE === 'suggestions') {
-    document.getElementById('suggestionsV2Container').style.display = 'flex';
-    remonterScrollV2('suggestionsV2Container');
+    montrerPageV2('suggestionsV2Container');
     afficherSuggestionsV2();
   } else if (FICHE_V2_PROVENANCE === 'accords') {
-    document.getElementById('chartierV2Container').style.display = 'flex';
-    remonterScrollV2('chartierV2Container');
+    montrerPageV2('chartierV2Container');
   } else if (FICHE_V2_PROVENANCE === 'selonsaq') {
-    document.getElementById('selonSaqV2Container').style.display = 'flex';
-    remonterScrollV2('selonSaqV2Container');
+    montrerPageV2('selonSaqV2Container');
     calculerSelonSaqV2();
   } else if (FICHE_V2_PROVENANCE === 'curieuxbegin') {
-    document.getElementById('curieuxBeginV2Container').style.display = 'flex';
-    remonterScrollV2('curieuxBeginV2Container');
+    montrerPageV2('curieuxBeginV2Container');
     chargerCurieuxBeginV2();
   } else if (FICHE_V2_PROVENANCE === 'notes') {
-    document.getElementById('notesV2Container').style.display = 'flex';
-    remonterScrollV2('notesV2Container');
+    montrerPageV2('notesV2Container');
     afficherNotesV2();
   }
 
@@ -1136,8 +1124,7 @@ function ouvrirEditFicheV2() {
           '<div class="bloc-favori"><div class="cercle' + (wine.Favori === 'Oui' ? ' actif' : '') + '" id="editV2-favori" onclick="this.classList.toggle(\'actif\');this.textContent=this.classList.contains(\'actif\')?\'✓\':\'\';">' + (wine.Favori === 'Oui' ? '✓' : '') + '</div></div>';
   html += '<div class="roundel" onclick="photoSAQDepuisEditV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Photo SAQ</span></div>';
   document.getElementById('editFicheV2-corps').innerHTML = html;
-  document.getElementById('editFicheV2Overlay').style.display = 'flex';
-  remonterScrollV2('editFicheV2Overlay');
+  montrerPageV2('editFicheV2Overlay');
 }
 
 function fermerEditFicheV2() {

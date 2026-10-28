@@ -12,8 +12,7 @@ var empV2Mode = 'plan';
 var MODES_EMP_V2 = ['plan', 'doubles', 'cepdoubles', 'listemeuble', 'cepmanquants', 'appmanquante', 'fammanquante', 'menage'];
 
 function ouvrirEmpV2() {
-  document.getElementById('empV2Container').style.display = 'flex';
-  remonterScrollV2('empV2Container');
+  montrerPageV2('empV2Container');
   filtresEmpV2 = filtresVidesV2('empV2');
   empV2Mode = 'plan';
   remplirFiltresEmpV2();
@@ -35,8 +34,7 @@ function choisirModeEmpV2(mode) {
 }
 
 function fermerEmpV2() {
-  fermerFiltresV2('empV2');
-  document.getElementById('empV2Container').style.display = 'none';
+  cacherPageV2('empV2Container');
 }
 
 // Bouteilles rangées (statut actif + emplacement complet)
@@ -72,20 +70,20 @@ function remplirFiltresEmpV2() {
   var f = filtresEmpV2;
   var base = bouteillesRangeesEmpV2();
 
-  var meubles = uniqueValeursAchat(base, 'Meuble');
+  var meubles = valeursUniquesV2(base, 'Meuble');
   if (bouteillesARangerEmpV2().length) meubles.push('À ranger');
   var forRangee = f.meuble ? base.filter(function(i){ return String(i.Meuble) === String(f.meuble); }) : base;
-  var rangees = uniqueValeursAchat(forRangee, 'Rangee');
+  var rangees = valeursUniquesV2(forRangee, 'Rangee');
   var forEspace = base.filter(function(i){
     return (!f.meuble || String(i.Meuble) === String(f.meuble)) && (!f.rangee || String(i.Rangee) === String(f.rangee));
   });
-  var espaces = uniqueValeursAchat(forEspace, 'Espace');
+  var espaces = valeursUniquesV2(forEspace, 'Espace');
 
   // Cépage / Couleur / Pays / Appellation : puisés dans ce que le mode courant peut montrer.
   // Appellation suit le Pays : un pays choisi → seulement ses appellations.
   var baseVin = baseFiltresVinEmpV2();
   var listes = { meuble: meubles, rangee: rangees, espace: espaces,
-                 cepage: uniqueCepagesEmpV2(baseVin), couleur: uniqueValeursAchat(baseVin, 'Couleur'), pays: uniqueValeursAchat(baseVin, 'Pays'),
+                 cepage: uniqueCepagesEmpV2(baseVin), couleur: valeursUniquesV2(baseVin, 'Couleur'), pays: valeursUniquesV2(baseVin, 'Pays'),
                  appellation: appellationsEmpV2(baseVin) };
   Object.keys(listes).forEach(function(cle){ remplirMenuFiltreV2('empV2', cle, listes[cle]); });
 
@@ -108,7 +106,7 @@ function remplirFiltresEmpV2() {
 // Appellations du menu : celles du pays choisi seulement (cascade Pays → Appellation)
 function appellationsEmpV2(baseVin) {
   var p = filtresEmpV2.pays;
-  return uniqueValeursAchat(baseVin.filter(function(i){ return passeFiltreV2(p, i.Pays); }), 'Appellation');
+  return valeursUniquesV2(baseVin.filter(function(i){ return passeFiltreV2(p, i.Pays); }), 'Appellation');
 }
 
 // Les vins dans lesquels puiser les valeurs de Cépage / Couleur / Pays.

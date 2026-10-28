@@ -18,8 +18,7 @@ function ouvrirNotesV2() {
 }
 
 function fermerNotesV2() {
-  fermerFiltresV2('notesV2');
-  document.getElementById('notesV2Container').style.display = 'none';
+  cacherPageV2('notesV2Container');
 }
 
 function toggleCaveNotesV2() {
@@ -30,10 +29,9 @@ function toggleCaveNotesV2() {
 
 function remplirFiltresNotesV2() {
   var cur = filtresNotesV2.source;
-  var sources = uniqueValeursAchat(ALL_NOTES || [], 'source');
+  var sources = valeursUniquesV2(ALL_NOTES || [], 'source');
   remplirMenuFiltreV2('notesV2', 'source', sources);
-  var btnCave = document.getElementById('notesV2-cave');
-  if (btnCave) { btnCave.classList.toggle('actif', filtresNotesV2.cave); btnCave.textContent = filtresNotesV2.cave ? '✓' : '✗'; }
+  majToggleHautV2('notesV2-cave', filtresNotesV2.cave);
 }
 
 // Les vins que la note appelle. « Chablis » est une appellation, pas un cépage :
@@ -150,8 +148,7 @@ function ouvrirNoteEditV2(row) {
   document.getElementById('noteEditV2-aliments').value = n ? (n.aliments || '') : '';
   document.getElementById('noteEditV2-source').value = n ? (n.source || '') : '';
   document.getElementById('noteEditV2-btn-supprimer').style.display = n ? 'flex' : 'none';
-  document.getElementById('noteEditV2Overlay').style.display = 'flex';
-  remonterScrollV2('noteEditV2Overlay');
+  montrerPageV2('noteEditV2Overlay');
 }
 
 function fermerNoteEditV2() {
@@ -224,8 +221,7 @@ var CATEGORIES_CHARTIER_V2 = {
 var LIBELLES_CATEGORIES_CHARTIER_V2 = { fruits:'Fruits', legumes:'Légumes', epices:'Épices, aromates et condiments', fromages:'Fromages', viandes:'Viandes et charcuteries', poissons:'Poissons et fruits de mer', cereales:'Céréales, noix et graines', autres:'Autres' };
 
 function ouvrirChartierV2() {
-  document.getElementById('chartierV2Container').style.display = 'flex';
-  remonterScrollV2('chartierV2Container');
+  montrerPageV2('chartierV2Container');
   chartierV2Aliment = '';
   chartierV2CategorieOuverte = null;
   filtresChartierV2 = { couleur: '', cepage: '', dispo: false };
@@ -244,8 +240,7 @@ function ouvrirChartierV2() {
 }
 
 function fermerChartierV2() {
-  fermerFiltresV2('chartierV2');
-  document.getElementById('chartierV2Container').style.display = 'none';
+  cacherPageV2('chartierV2Container');
 }
 
 function ouvrirFiltresChartierV2() { clicLoupeV2('chartierV2', reinitialiserChartierV2); }
@@ -309,8 +304,7 @@ function choisirCepageChartierV2(val) {
 
 function toggleDispoChartierV2() {
   filtresChartierV2.dispo = !filtresChartierV2.dispo;
-  var btn = document.getElementById('chartierV2-dispo');
-  if (btn) { btn.classList.toggle('actif', filtresChartierV2.dispo); btn.textContent = filtresChartierV2.dispo ? '✓' : '✗'; }
+  majToggleHautV2('chartierV2-dispo', filtresChartierV2.dispo);
   calculerResultatsChartierV2();
 }
 
@@ -526,8 +520,7 @@ var selonSaqV2Cave = false;
 var selonSaqV2RecettesDe = null; // { champ, valeur } quand on affiche « les recettes » d'une valeur ; null = liste des vins
 
 function ouvrirSelonSaqV2() {
-  document.getElementById('selonSaqV2Container').style.display = 'flex';
-  remonterScrollV2('selonSaqV2Container');
+  montrerPageV2('selonSaqV2Container');
   selonSaqV2Selection = { ingredients: {}, plats: {} };
   selonSaqV2Ouverte = null;
   selonSaqV2Cave = false;
@@ -541,8 +534,7 @@ function ouvrirSelonSaqV2() {
 }
 
 function fermerSelonSaqV2() {
-  fermerFiltresV2('selonSaqV2');
-  document.getElementById('selonSaqV2Container').style.display = 'none';
+  cacherPageV2('selonSaqV2Container');
 }
 
 function ouvrirFiltresSelonSaqV2() { clicLoupeV2('selonSaqV2', reinitialiserSelonSaqV2); }
@@ -643,8 +635,7 @@ function reinitialiserSelonSaqV2() {
 function toggleCaveSelonSaqV2() {
   selonSaqV2RecettesDe = null;
   selonSaqV2Cave = !selonSaqV2Cave;
-  var btn = document.getElementById('selonSaqV2-cave');
-  if (btn) { btn.classList.toggle('actif', selonSaqV2Cave); btn.textContent = selonSaqV2Cave ? '✓' : '✗'; }
+  majToggleHautV2('selonSaqV2-cave', selonSaqV2Cave);
   calculerSelonSaqV2();
 }
 
@@ -756,8 +747,7 @@ function ouvrirCurieuxBeginV2() {
 }
 
 function fermerCurieuxBeginV2() {
-  fermerFiltresV2('curieuxBeginV2');
-  document.getElementById('curieuxBeginV2Container').style.display = 'none';
+  cacherPageV2('curieuxBeginV2Container');
 }
 
 // Après un choix dans le panneau (moteur commun : choisirFiltreV2) — nouveau pays : une appellation qui n'y
@@ -792,13 +782,12 @@ function remplirFiltresCurieuxBeginV2() {
   var attrs = (ALL_CURIEUXBEGIN || []).filter(function(a) { return cbDansModeV2(a, infos); }).map(function(a) { return attributsVinCbV2(a, infos); });
   var listes = {
     cepage: menuCepagesV2(attrs.map(function(x) { return x.cepage; })),
-    pays: valeursUniquesCbV2(attrs, 'pays'),
-    appellation: valeursUniquesCbV2(attrs.filter(function(x) { return passeFiltreV2(f.pays, x.pays, memeTexteV2); }), 'appellation')
+    pays: valeursUniquesV2(attrs, 'pays'),
+    appellation: valeursUniquesV2(attrs.filter(function(x) { return passeFiltreV2(f.pays, x.pays, memeTexteV2); }), 'appellation')
   };
   Object.keys(listes).forEach(function(cle) { remplirMenuFiltreV2('curieuxBeginV2', cle, listes[cle]); });
-  remplirMenuFiltreV2('curieuxBeginV2', 'couleur', uniqueValeursAchat(ALL_DATA || [], 'Couleur'));
-  var btnCave = document.getElementById('curieuxBeginV2-cave');
-  if (btnCave) { btnCave.classList.toggle('actif', f.cave); btnCave.textContent = f.cave ? '✓' : '✗'; }
+  remplirMenuFiltreV2('curieuxBeginV2', 'couleur', valeursUniquesV2(ALL_DATA || [], 'Couleur'));
+  majToggleHautV2('curieuxBeginV2-cave', f.cave);
   var elMes = document.getElementById('curieuxBeginV2-mode-mesvins');
   var elHors = document.getElementById('curieuxBeginV2-mode-horscave');
   if (elMes) elMes.classList.toggle('actif', f.mode !== 'horscave');
@@ -833,17 +822,6 @@ function attributsVinCbV2(a, infos) {
 }
 
 // Valeurs d'un champ, sans doublon (accents et casse ignorés), triées
-function valeursUniquesCbV2(attrs, champ) {
-  var vues = {};
-  var out = [];
-  attrs.forEach(function(x) {
-    var v = (x[champ] || '').toString().trim();
-    var k = normaliserRechercheV2(v);
-    if (v && !vues[k]) { vues[k] = true; out.push(v); }
-  });
-  return out.sort(function(a, b) { return a.localeCompare(b); });
-}
-
 // Numéro de saison ou d'épisode (texte ou nombre du Sheet) ; vide → -1, classé en dernier.
 function numeroCbV2(v) {
   var n = parseInt(v, 10);
