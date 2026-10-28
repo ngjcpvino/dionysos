@@ -718,7 +718,9 @@
 <script>
 (function() {
   var v = Math.floor(Date.now() / 3600000);
-  ['scripts-socle-v2.js', 'scripts-scanner-v2.js', 'scripts-fiche-v2.js'].forEach(function(f) {
+  ['scripts-socle-v2.js', 'scripts-communs-v2.js', 'scripts-scan-v2.js', 'scripts-cave-v2.js', 'scripts-achat-v2.js',
+   'scripts-recherche-v2.js', 'scripts-accords-v2.js', 'scripts-emplacements-v2.js', 'scripts-historique-v2.js',
+   'scripts-fiche-v2.js'].forEach(function(f) {
     document.write('<script src="' + f + '?v=' + v + '"><\/script>');
   });
 })();

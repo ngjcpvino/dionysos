@@ -7,6 +7,6 @@
 **3. Pas de discours.** Pas d'étapes de recherche affichées à l'écran, pas de « je vais lire… », pas de remplissage ni de souhaits temporels. Réponses courtes. Décris le plan en clair, attends le OK, puis applique.
 
 ## Repères techniques (pour ne pas les redemander)
-- **Frontend** : dépôt public `ngjcpvino/dionysos`, servi par GitHub Pages (`index-v2.html` · `styles-v2.css` · `scripts-socle-v2.js` · `scripts-scanner-v2.js` · `scripts-fiche-v2.js` · `sw.js` — copie hors ligne). Anti-cache : jusqu'à ~1 h avant qu'une publication soit visible.
+- **Frontend** : dépôt public `ngjcpvino/dionysos`, servi par GitHub Pages (`index-v2.html` · `styles-v2.css` · `scripts-*-v2.js` : socle, communs, scan, cave, achat, recherche, accords, emplacements, historique, fiche — rôle de chacun dans `mise-a-jour.md` « Fichiers » · `sw.js` — copie hors ligne). Anti-cache : jusqu'à ~1 h avant qu'une publication soit visible.
 - **Backend** : Google Apps Script `Code.gs` — hors de ce dépôt public : il vit dans le dépôt **PRIVÉ `ngjcpvino/dionysos-serveur`** (historique de chaque version ; copie de travail gitignorée ici). Une modif du backend = la pousser là, puis l'utilisateur recopie tout `Code.gs` dans Apps Script **et redéploie** (Gérer les déploiements → Nouvelle version), à la main.
 - Le front parle au backend par `appelBackend(...)` → `API_URL`. **Publier = commit + push sur `main`** (routine autorisée, ne pas redemander).
