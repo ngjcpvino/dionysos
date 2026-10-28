@@ -262,7 +262,7 @@ function afficherEmpV2() {
         var estompe = (filtreVin && !passe) ? ' estompe' : '';
         var photo = (w && w['Photo URL']) ? w['Photo URL'] : '';
         var cb = (w && w['Code-barres']) ? w['Code-barres'].toString().trim().replace(/\s+/g, '') : '';
-        var coul = w ? 'var(--' + couleurClasseV2(w.Couleur) + ')' : '';
+        var coul = w ? couleurClasseV2(w.Couleur) : '';
         ronds.push('<div class="emp-espace"><div class="cercle' + estompe + '" data-photo="' + photo + '" data-cb="' + cb + '" data-row="' + (w ? w.row : '') + '" data-couleur="' + coul + '"></div><span class="emp-espace-num">' + esp + '</span></div>');
       });
       // 7 espaces = quinconce réel : bas 1-3-5-7, haut 2-4-6
@@ -287,7 +287,7 @@ function afficherEmpV2() {
     var rondsAR = aRanger.map(function(w){
       var photo = w['Photo URL'] || '';
       var cb = (w['Code-barres'] || '').toString().trim().replace(/\s+/g, '');
-      var coul = 'var(--' + couleurClasseV2(w.Couleur) + ')';
+      var coul = couleurClasseV2(w.Couleur);
       var estompe = (filtreVin && !vinPasseFiltresEmpV2(w)) ? ' estompe' : '';
       return '<div class="cercle' + estompe + '" data-photo="' + photo + '" data-cb="' + cb + '" data-row="' + w.row + '" data-couleur="' + coul + '"></div>';
     }).join('');
@@ -309,14 +309,14 @@ function brancherTirerRangeesEmpV2() {
       var dejaOuvert = el.classList.contains('ouvert');
       Array.prototype.forEach.call(rangees, function(r){
         r.classList.remove('ouvert');
-        Array.prototype.forEach.call(r.querySelectorAll('.cercle'), function(c){ c.innerHTML = ''; c.style.borderColor = ''; });
+        Array.prototype.forEach.call(r.querySelectorAll('.cercle'), function(c){ c.innerHTML = ''; if (c.getAttribute('data-couleur')) c.classList.remove(c.getAttribute('data-couleur')); });
       });
       if (!dejaOuvert) {
         el.classList.add('ouvert');
         Array.prototype.forEach.call(el.querySelectorAll('.cercle'), function(c){
           var p = c.getAttribute('data-photo');
           c.innerHTML = p ? '<img src="' + p + '" alt="">' : '';
-          c.style.borderColor = c.getAttribute('data-couleur') || '';
+          if (c.getAttribute('data-couleur')) c.classList.add(c.getAttribute('data-couleur'));   // contour à la couleur du vin
           var cb = c.getAttribute('data-cb');
           if (cb) {
             var rowRond = c.getAttribute('data-row');
@@ -700,7 +700,7 @@ function guillemetMenageV2(v) { return (v || '').toString().replace(/'/g, "\\'")
 function carteMenageV2(b, titre, sous, droite, voile) {
   var w = b.w;
   var cb = (w['Code-barres'] || '').toString().trim();
-  var photo = '<div class="carte-photo">' + (w['Photo URL'] ? '<img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.style.visibility=\'hidden\'">' : '') + '</div>';
+  var photo = '<div class="carte-photo">' + (w['Photo URL'] ? '<img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' : '') + '</div>';
   return '<div class="carte ' + b.coul + (voile ? ' carte-vide' : '') + '"' + (cb ? ' onclick="ouvrirFicheDepuisListeEmpV2(\'' + guillemetMenageV2(cb) + '\')"' : '') + '>' + photo +
     '<div class="carte-centre"><span class="carte-titre">' + titre + '</span><span class="carte-sous">' + sous + '</span></div>' +
     '<div class="carte-droite carte-droite-empilee">' + droite + '</div></div>';

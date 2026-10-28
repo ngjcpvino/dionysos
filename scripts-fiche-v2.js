@@ -845,7 +845,7 @@ function ouvrirPhotoV2(url) {
   var empFiche = document.getElementById('photoV2-emplacement');
   if (empFiche) empFiche.style.display = 'none';
   var pg = document.querySelector('#photoV2Overlay .photo-grande');
-  if (pg) pg.style.borderColor = '';
+  if (pg) pg.className = 'photo-grande';
   overlay.style.display = 'flex';
 }
 
@@ -892,7 +892,7 @@ function ouvrirPhotoEmpV2(cb, liste, row) {
     nom.style.display = '';
   }
   var pg = document.querySelector('#photoV2Overlay .photo-grande');
-  if (pg) pg.style.borderColor = 'var(--' + couleurClasseV2(w.Couleur) + ')';
+  if (pg) pg.className = 'photo-grande ' + couleurClasseV2(w.Couleur);   // contour à la couleur du vin
   var emp = document.getElementById('photoV2-emplacement');
   if (emp) {
     var bc = (PHOTO_V2_LISTE && PHOTO_V2_INDEX >= 0) ? PHOTO_V2_LISTE[PHOTO_V2_INDEX] : null;
