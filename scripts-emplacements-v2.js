@@ -133,15 +133,10 @@ function groupesFiltresEmpV2(groupes) {
   return groupes.filter(function(g){ return vinPasseFiltresEmpV2(g.wine); });
 }
 
-function empCarteVinV2(w, droite, versFiche) {
-  var cb = (w['Code-barres'] || '').toString().trim().replace(/\s+/g, '');
-  var nom = decodeHTML(w.Nom || '—');
-  var sous = sousVinV2(w);
-  var photo = w['Photo URL'] ? '<div class="carte-photo"><img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
-  var onclick = cb ? ' onclick="' + (versFiche ? 'ouvrirFicheDepuisListeEmpV2(\'' + cb + '\')' : 'deplacerDepuisListeV2(\'' + cb + '\', \'emplacements\')') + '"' : '';
-  return '<div class="carte ' + couleurClasseV2(w.Couleur) + '"' + onclick + '>' + photo +
-         '<div class="carte-centre"><span class="carte-titre">' + nom + '</span><span class="carte-sous">' + sous + '</span></div>' +
-         '<div class="carte-droite">' + (droite || '') + '</div></div>';
+// La carte d'un vin des Emplacements (la carte commune) : le toucher ouvre sa fiche (versFiche) ou son Déplacer
+function empCarteVinV2(g, versFiche) {
+  var cb = (g.wine['Code-barres'] || '').toString().trim().replace(/\s+/g, '');
+  return carteGroupeVinV2(g, cb ? (versFiche ? 'ouvrirFicheDepuisListeEmpV2(\'' + cb + '\')' : 'deplacerDepuisListeV2(\'' + cb + '\', \'emplacements\')') : '');
 }
 
 // Vue par défaut : groupé meuble → rangée → cartes
@@ -633,12 +628,9 @@ function guillemetMenageV2(v) { return (v || '').toString().replace(/'/g, "\\'")
 // Carte d'une bouteille : la photo (place gardée même sans photo), le texte, à droite la case et la destination.
 // Toucher la carte = la fiche du vin.
 function carteMenageV2(b, titre, sous, droite, voile) {
-  var w = b.w;
-  var cb = (w['Code-barres'] || '').toString().trim();
-  var photo = '<div class="carte-photo">' + (w['Photo URL'] ? '<img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' : '') + '</div>';
-  return '<div class="carte ' + b.coul + (voile ? ' carte-vide' : '') + '"' + (cb ? ' onclick="ouvrirFicheDepuisListeEmpV2(\'' + guillemetMenageV2(cb) + '\')"' : '') + '>' + photo +
-    '<div class="carte-centre"><span class="carte-titre">' + titre + '</span><span class="carte-sous">' + sous + '</span></div>' +
-    '<div class="carte-droite carte-droite-empilee">' + droite + '</div></div>';
+  var cb = (b.w['Code-barres'] || '').toString().trim();
+  return carteV2({ classes: b.coul + (voile ? ' carte-vide' : ''), onclick: cb ? 'ouvrirFicheDepuisListeEmpV2(\'' + guillemetMenageV2(cb) + '\')' : '',
+    photo: b.w['Photo URL'], placePhoto: true, titre: titre, sous: sous, droite: droite, droiteClasses: 'carte-droite-empilee' });
 }
 
 function cocheMenageV2(onclick, actif) {
@@ -925,7 +917,7 @@ function afficherListeEmpV2(type) {
     var groupes = groupesFiltresEmpV2(grouperParSaqEmpV2(portee)).filter(function(g){ return g.count >= 2; });
     titre = 'Vins en double';
     if (groupes.length === 0) { html = '<div class="texte-secondaire">Aucun vin en double</div>'; }
-    else { html = groupes.map(function(g){ return empCarteVinV2(g.wine, g.count + ' btl<br>' + g.emplacements.join(', ')); }).join(''); }
+    else { html = groupes.map(function(g){ return empCarteVinV2(g); }).join(''); }
 
   } else if (type === 'listemeuble') {
     // Tout le meuble choisi, en sections par cépage dominant
@@ -947,7 +939,7 @@ function afficherListeEmpV2(type) {
           return normaliserRechercheV2(decodeHTML(a.wine.Nom || '')).localeCompare(normaliserRechercheV2(decodeHTML(b.wine.Nom || '')));
         });
         return '<div class="titre-2">' + nomCepL[k] + '</div>' + vins.map(function(g){
-          return empCarteVinV2(g.wine, g.count + ' btl<br>' + g.emplacements.join(', '), true);
+          return empCarteVinV2(g, true);
         }).join('');
       }).join('');
     }
@@ -971,7 +963,7 @@ function afficherListeEmpV2(type) {
     else {
       html = cles.map(function(cep){
         return '<div class="titre-2">' + nomCepage[cep] + '</div>' + parCepage[cep].map(function(g){
-          return empCarteVinV2(g.wine, g.count + ' btl<br>' + g.emplacements.join(', '), true);
+          return empCarteVinV2(g, true);
         }).join('');
       }).join('');
     }
@@ -997,7 +989,7 @@ function afficherListeEmpV2(type) {
     else {
       html = clesG.map(function(cep){
         return '<div class="titre-2">' + nomCepGlobal[cep] + '</div>' + parCepGlobal[cep].map(function(g){
-          return empCarteVinV2(g.wine, '0 btl', true);
+          return empCarteVinV2(g, true);
         }).join('');
       }).join('');
     }
@@ -1026,7 +1018,7 @@ function afficherListeEmpV2(type) {
     else {
       html = cles2.map(function(cep){
         return '<div class="titre-2">' + nomCepageHors[cep] + '</div>' + parCepageHors[cep].map(function(g){
-          return empCarteVinV2(g.wine, g.count + ' btl<br>' + g.emplacements.join(', '), true);
+          return empCarteVinV2(g, true);
         }).join('');
       }).join('');
     }
@@ -1049,7 +1041,7 @@ function afficherListeEmpV2(type) {
     else {
       html = clesFamG.map(function(fam){
         return '<div class="titre-2">' + fam + '</div>' + parFamGlobal[fam].map(function(g){
-          return empCarteVinV2(g.wine, '0 btl', true);
+          return empCarteVinV2(g, true);
         }).join('');
       }).join('');
     }
@@ -1076,7 +1068,7 @@ function afficherListeEmpV2(type) {
     else {
       html = clesFam2.map(function(fam){
         return '<div class="titre-2">' + fam + '</div>' + parFamHors[fam].map(function(g){
-          return empCarteVinV2(g.wine, g.count + ' btl<br>' + g.emplacements.join(', '), true);
+          return empCarteVinV2(g, true);
         }).join('');
       }).join('');
     }
@@ -1102,7 +1094,7 @@ function afficherListeEmpV2(type) {
     else {
       html = clesAG.map(function(app){
         return '<div class="titre-2">' + nomAppGlobal[app] + '</div>' + parAppGlobal[app].map(function(g){
-          return empCarteVinV2(g.wine, '0 btl', true);
+          return empCarteVinV2(g, true);
         }).join('');
       }).join('');
     }
@@ -1131,7 +1123,7 @@ function afficherListeEmpV2(type) {
     else {
       html = clesA2.map(function(app){
         return '<div class="titre-2">' + nomAppHors[app] + '</div>' + parAppHors[app].map(function(g){
-          return empCarteVinV2(g.wine, g.count + ' btl<br>' + g.emplacements.join(', '), true);
+          return empCarteVinV2(g, true);
         }).join('');
       }).join('');
     }

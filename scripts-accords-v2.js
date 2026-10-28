@@ -95,19 +95,10 @@ function afficherNotesV2() {
 function groupeNoteV2(n, groupes, provenance) {
   var sous = [n.aliments, n.source].filter(Boolean).join(' · ');
   // toucher la note = la corriger (comme l'Historique et les Propositions)
-  var carteNote = '<div class="carte histo-vin" onclick="ouvrirApresTap(function(){ouvrirNoteEditV2(' + n.row + ')})">' +
-           '<div class="carte-centre"><span class="carte-titre">' + (resumeNoteV2(n) || '—') + '</span><span class="carte-sous">' + sous + '</span></div>' +
-           '<div class="carte-droite">' + (n.date || '') + '</div></div>';
+  var carteNote = carteV2({ classes: 'histo-vin', onclick: 'ouvrirApresTap(function(){ouvrirNoteEditV2(' + n.row + ')})', titre: resumeNoteV2(n) || '—', sous: sous, droite: n.date || '' });
   var vins = vinsDeLaNoteV2(n, groupes);
   var cartesVins = vins.map(function(g) {
-    var w = g.wine;
-    var cb = (w['Code-barres'] || '').toString().trim();
-    var ouvrir = provenance === 'recherche' ? 'ouvrirFicheV2(\'' + cb + '\', \'recherche\')' : 'fermerNotesV2();ouvrirFicheV2(\'' + cb + '\', \'notes\')';
-    var onclick = cb ? ' onclick="ouvrirApresTap(function(){' + ouvrir + '})"' : '';
-    var photo = w['Photo URL'] ? '<div class="carte-photo"><img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
-    return '<div class="carte histo-mets ' + couleurClasseV2(w.Couleur) + '"' + onclick + '>' + photo +
-      '<div class="carte-centre"><span class="carte-titre">' + decodeHTML(w.Nom || '—') + '</span><span class="carte-sous">' + sousVinV2(w) + '</span></div>' +
-      '<div class="carte-droite">' + caseDroiteV2(w, g.count) + '</div></div>';
+    return carteGroupeVinV2(g, provenance === 'recherche' ? tapFicheV2(g.cb, 'recherche') : tapFicheV2(g.cb, 'notes', 'fermerNotesV2();'), 'histo-mets');
   }).join('');
   if (!cartesVins) cartesVins = '<div class="carte histo-mets"><div class="carte-centre"><span class="carte-sous">Aucun vin</span></div></div>';
   return '<div class="histo-groupe">' + carteNote + cartesVins + '</div>';
@@ -280,6 +271,14 @@ function vinsDisponiblesPourCepageV2(cepage) {
   return bouteillesEnCaveV2().some(function(i) { return cepageRepondChartierV2(cepageDominant(i), cepage); });
 }
 
+// Les cartes des vins d'un cépage du livre (synonymes compris) ; « En cave » : plus une seule carte de vin que je n'ai plus
+function cartesVinsChartierV2(cepage) {
+  var vins = grouperVinsV2((ALL_DATA || []).filter(function(i) { return cepageRepondChartierV2(cepageDominant(i), cepage); }));
+  if (filtresChartierV2.dispo) vins = vins.filter(function(g) { return g.count > 0; });
+  if (!vins.length) return '<div class="texte-secondaire">Aucun vin de ce cépage</div>';
+  return vins.map(function(g) { return carteGroupeVinV2(g, tapFicheV2(g.cb, 'accords', 'fermerChartierV2();')); }).join('');
+}
+
 function calculerResultatsChartierV2() {
   var div = document.getElementById('chartierV2-resultats');
   var loupe = document.getElementById('chartierV2-loupe');
@@ -289,15 +288,7 @@ function calculerResultatsChartierV2() {
     var cep = filtresChartierV2.cepage;
     var aliments = (ALL_ACCORDS || []).filter(function(a) { return memeCepageV2(a.cepage, cep); });
     if (!aliments.length) { div.innerHTML = '<div class="texte-secondaire">Aucun aliment associé</div>'; return; }
-    var vins = grouperVinsV2((ALL_DATA || []).filter(function(i) { return cepageRepondChartierV2(cepageDominant(i), cep); }));
-    if (filtresChartierV2.dispo) vins = vins.filter(function(g) { return g.count > 0; });
-    var cartesVins = vins.length ? vins.map(function(g) {
-      var w = g.wine;
-      var nom = decodeHTML(w.Nom || '—');
-      var onclick = g.cb ? ' onclick="ouvrirApresTap(function(){fermerChartierV2();ouvrirFicheV2(\'' + g.cb + '\', \'accords\')})"' : '';
-      var vide = g.count === 0 ? ' carte-vide' : '';
-      return '<div class="carte ' + couleurClasseV2(w.Couleur) + vide + '"' + onclick + '><div class="carte-centre"><span class="carte-titre">' + nom + '</span></div><div class="carte-droite">' + caseDroiteV2(w, g.count) + '</div></div>';
-    }).join('') : '<div class="texte-secondaire">Aucun vin de ce cépage en cave</div>';
+    var cartesVins = cartesVinsChartierV2(cep);
     var listeAliments = aliments.map(function(a) {
       return '<div class="ligne-info">' + a.aliment + (a.nuance ? ' <span class="libelle">(' + a.nuance + ')</span>' : '') + '</div>';
     }).join('');
@@ -327,18 +318,7 @@ function calculerResultatsChartierV2() {
 
   div.innerHTML = liste.map(function(s, i) {
     var entete = s.cepage + (s.nuance ? ' <span class="libelle">(' + s.nuance + ')</span>' : '');
-    var vins = grouperVinsV2((ALL_DATA || []).filter(function(it) {
-      return cepageRepondChartierV2(cepageDominant(it), s.cepage);
-    }));
-    // « En cave » : plus une seule carte de vin que je n'ai plus.
-    if (filtresChartierV2.dispo) vins = vins.filter(function(g) { return g.count > 0; });
-    var cartesVins = vins.length ? vins.map(function(g) {
-      var w = g.wine;
-      var nom = decodeHTML(w.Nom || '—');
-      var onclick = g.cb ? ' onclick="ouvrirApresTap(function(){fermerChartierV2();ouvrirFicheV2(\'' + g.cb + '\', \'accords\')})"' : '';
-      var vide = g.count === 0 ? ' carte-vide' : '';
-      return '<div class="carte ' + couleurClasseV2(w.Couleur) + vide + '"' + onclick + '><div class="carte-centre"><span class="carte-titre">' + nom + '</span></div><div class="carte-droite">' + caseDroiteV2(w, g.count) + '</div></div>';
-    }).join('') : '<div class="texte-secondaire">Aucun vin de ce cépage</div>';
+    var cartesVins = cartesVinsChartierV2(s.cepage);
 
     // Le lien cherché : ce que Chartier met d'autre sur ce cépage — de quoi bâtir le plat.
     var autres = autresAlimentsChartierV2(s.cepage, alim);
@@ -518,8 +498,7 @@ function carteRecetteSaqV2(r) {
   var ing = (r.ingredients || []).map(function(x) { return decodeHTML(x); }).join(', ');
   var sous = [cls, ing].filter(Boolean).join('<br>');
   var sku = (r.sku || '').toString();
-  var oc = sku ? ' onclick="window.open(\'https://www.saq.com/fr/' + sku + '\', \'_blank\')"' : '';
-  return '<div class="carte histo-mets"' + oc + '><div class="carte-centre"><span class="carte-titre">' + nomR + '</span><span class="carte-sous">' + sous + '</span></div></div>';
+  return carteV2({ classes: 'histo-mets', onclick: sku ? 'window.open(\'https://www.saq.com/fr/' + sku + '\', \'_blank\')' : '', titre: nomR, sous: sous });
 }
 
 function calculerSelonSaqV2() {
@@ -579,17 +558,7 @@ function calculerSelonSaqV2() {
   compte.innerHTML = vins.length + ' vin' + (vins.length > 1 ? 's' : '') + '<br>' + recettes.length + ' recette' + (recettes.length > 1 ? 's' : '');
   if (!vins.length) { div.innerHTML = '<div class="texte-secondaire">Aucun vin de la cave pour ce choix</div>'; return; }
 
-  div.innerHTML = vins.map(function(g) {
-    var w = g.wine;
-    var nom = decodeHTML(w.Nom || '—');
-    var sous = sousVinV2(w);
-    var photo = w['Photo URL'] ? '<div class="carte-photo"><img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
-    var onclick = g.cb ? ' onclick="ouvrirApresTap(function(){fermerSelonSaqV2();ouvrirFicheV2(\'' + g.cb + '\', \'selonsaq\')})"' : '';
-    var vide = g.count === 0 ? ' carte-vide' : '';
-    return '<div class="carte ' + couleurClasseV2(w.Couleur) + vide + '"' + onclick + '>' + photo +
-           '<div class="carte-centre"><span class="carte-titre">' + nom + '</span><span class="carte-sous">' + sous + '</span></div>' +
-           '<div class="carte-droite">' + caseDroiteV2(w, g.count) + '</div></div>';
-  }).join('');
+  div.innerHTML = vins.map(function(g) { return carteGroupeVinV2(g, tapFicheV2(g.cb, 'selonsaq', 'fermerSelonSaqV2();')); }).join('');
 }
 
 // Ouvre le volet « les recettes » d'une valeur (depuis la ligne sous une valeur sélectionnée)
@@ -766,13 +735,8 @@ function groupeCurieuxBeginV2(g, provenance) {
     var w = g.wine;
     var cb = (w['Code-barres'] || '').toString().trim();
     classeCoul = couleurClasseV2(w.Couleur);
-    var nom = decodeHTML(w.Nom || '—');
-    var sous = sousVinV2(w);
-    var photo = w['Photo URL'] ? '<div class="carte-photo"><img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
-    var ouvrir = provenance === 'recherche' ? 'ouvrirFicheV2(\'' + cb + '\', \'recherche\')' : 'fermerCurieuxBeginV2();ouvrirFicheV2(\'' + cb + '\', \'curieuxbegin\')';
-    var onclick = cb ? ' onclick="ouvrirApresTap(function(){' + ouvrir + '})"' : '';
-    carteVin = '<div class="carte histo-vin ' + classeCoul + '"' + onclick + '>' + photo +
-      '<div class="carte-centre"><span class="carte-titre">' + nom + '</span><span class="carte-sous">' + sous + '</span></div></div>';
+    carteVin = carteV2({ classes: 'histo-vin ' + classeCoul, photo: w['Photo URL'], titre: decodeHTML(w.Nom || '—'), sous: sousVinV2(w),
+      onclick: provenance === 'recherche' ? tapFicheV2(cb, 'recherche') : tapFicheV2(cb, 'curieuxbegin', 'fermerCurieuxBeginV2();') });
   } else {
     var a0 = g.ref;
     classeCoul = couleurClasseV2(a0.type);
@@ -781,18 +745,10 @@ function groupeCurieuxBeginV2(g, provenance) {
     var prix = isFinite(prixNum) ? (prixNum.toFixed(2).replace('.', ',') + ' $') : '';
     var ligne1 = [decodeHTML(a0.cepage || ''), prix].filter(Boolean).join(' • ');
     var sousV = [ligne1, 'Vin à découvrir à la SAQ'].filter(Boolean).join('<br>');
-    var photoV = a0.photo ? '<div class="carte-photo"><img src="' + a0.photo + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
-    carteVin = '<div class="carte histo-vin ' + classeCoul + '" onclick="window.open(\'https://www.saq.com/fr/' + g.codeSAQ + '\', \'_blank\')">' + photoV +
-      '<div class="carte-centre"><span class="carte-titre">' + nomV + '</span><span class="carte-sous">' + sousV + '</span></div></div>';
+    carteVin = carteV2({ classes: 'histo-vin ' + classeCoul, onclick: 'window.open(\'https://www.saq.com/fr/' + g.codeSAQ + '\', \'_blank\')', photo: a0.photo, titre: nomV, sous: sousV });
   }
 
-  var cartesPlats = g.items.map(function(a) {
-    var url = 'https://cuisinez.telequebec.tv/recettes/' + a.recetteId + '/' + a.slug;
-    var saison = a.saison ? 'Saison ' + a.saison + (a.episode ? '-' + a.episode : '') : '';
-    return '<div class="carte histo-mets" onclick="window.open(\'' + url + '\', \'_blank\')">' +
-      '<div class="carte-centre"><span class="carte-titre">' + decodeHTML(a.plat || '') + '</span></div>' +
-      '<div class="carte-droite">' + saison + '</div></div>';
-  }).join('');
+  var cartesPlats = g.items.map(function(a) { return cartePlatCurieuxBeginV2(a); }).join('');
 
   return '<div class="histo-groupe ' + classeCoul + '">' + carteVin + cartesPlats + '</div>';
 }

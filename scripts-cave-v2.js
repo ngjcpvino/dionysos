@@ -27,22 +27,18 @@ function fermerARangerV2() {
   document.getElementById('aRangerV2Container').style.display = 'none';
 }
 
+// Une page-liste de vins (Cave, À ranger, Sans cépage) : le compte (« N vins », puis la ligne suite), les cartes, ou siVide.
+// tap(g) : le JS du tap d'une carte.
+function afficherCartesVinsV2(prefixe, groups, siVide, tap, suite) {
+  document.getElementById(prefixe + '-compte').innerHTML = groups.length + ' vin' + (groups.length > 1 ? 's' : '') + (suite ? '<br>' + suite : '');
+  document.getElementById(prefixe + '-cartes').innerHTML = groups.length ?
+    groups.map(function(g) { return carteGroupeVinV2(g, tap(g)); }).join('') : '<div class="texte-secondaire">' + siVide + '</div>';
+}
+
 function afficherCartesARangerV2() {
-  var aRanger = bouteillesEnCaveV2('aranger');
-  var div = document.getElementById('aRangerV2-cartes');
-  var groups = grouperVinsV2(aRanger);
-  document.getElementById('aRangerV2-compte').textContent = groups.length + ' vin' + (groups.length > 1 ? 's' : '');
-  if (groups.length === 0) { div.innerHTML = '<div class="texte-secondaire">Tout est bien rangé</div>'; return; }
-  div.innerHTML = groups.map(function(g) {
-    var w = g.wine;
-    var nom = decodeHTML(w.Nom || '—');
-    var sous = sousVinV2(w);
-    var photo = w['Photo URL'] ? '<div class="carte-photo"><img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
-    var onclick = g.cb ? ' onclick="deplacerDepuisListeV2(\'' + g.cb + '\', \'aranger\')"' : '';
-    return '<div class="carte ' + couleurClasseV2(w.Couleur) + '"' + onclick + '>' + photo +
-           '<div class="carte-centre"><span class="carte-titre">' + nom + '</span><span class="carte-sous">' + sous + '</span></div>' +
-           '<div class="carte-droite">' + caseDroiteV2(w, g.count) + '</div></div>';
-  }).join('');
+  afficherCartesVinsV2('aRangerV2', grouperVinsV2(bouteillesEnCaveV2('aranger')), 'Tout est bien rangé', function(g) {
+    return g.cb ? 'deplacerDepuisListeV2(\'' + g.cb + '\', \'aranger\')' : '';
+  });
 }
 
 // ==================== SANS CÉPAGE V2 ====================
@@ -63,52 +59,14 @@ function vinsSansCepageV2() {
 }
 
 function afficherCartesSansCepageV2() {
-  var sansCepage = vinsSansCepageV2();
-
-  var div = document.getElementById('sansCepageV2-cartes');
-  var groups = grouperVinsV2(sansCepage);
-  document.getElementById('sansCepageV2-compte').textContent = groups.length + ' vin' + (groups.length > 1 ? 's' : '');
-  if (groups.length === 0) { div.innerHTML = '<div class="texte-secondaire">Aucun vin sans cépage</div>'; return; }
-  div.innerHTML = groups.map(function(g) {
-    var w = g.wine;
-    var nom = decodeHTML(w.Nom || '—');
-    var pays = w.Pays || '';
-    var region = w.Region || '';
-    var sous = (pays && region) ? (pays + ' • ' + region) : (pays || region);
-    var photo = w['Photo URL'] ? '<div class="carte-photo"><img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
-    var onclick = g.cb ? ' onclick="ouvrirApresTap(function(){ouvrirFicheV2(\'' + g.cb + '\', \'sanscepage\')})"' : '';
-    var vide = g.count === 0 ? ' carte-vide' : '';
-    return '<div class="carte ' + couleurClasseV2(w.Couleur) + vide + '"' + onclick + '>' + photo +
-           '<div class="carte-centre"><span class="carte-titre">' + nom + '</span><span class="carte-sous">' + sous + '</span></div>' +
-           '<div class="carte-droite">' + caseDroiteV2(w, g.count) + '</div></div>';
-  }).join('');
+  afficherCartesVinsV2('sansCepageV2', grouperVinsV2(vinsSansCepageV2()), 'Aucun vin sans cépage', function(g) { return tapFicheV2(g.cb, 'sanscepage'); });
 }
 
 function afficherCartesCaveV2(data) {
-  var div = document.getElementById('caveV2-cartes');
   var groups = grouperVinsV2(data);
   if (filtresCaveV2.dispo) groups = groups.filter(function(g){ return g.count > 0; });
   var totalBtl = groups.reduce(function(t, g){ return t + (g.count || 0); }, 0);
-  document.getElementById('caveV2-compte').innerHTML = groups.length + ' vin' + (groups.length > 1 ? 's' : '') + '<br>' + totalBtl + ' bouteille' + (totalBtl > 1 ? 's' : '') + ' en stock';
-  if (groups.length === 0) { div.innerHTML = '<div class="texte-secondaire">Aucun vin</div>'; return; }
-  div.innerHTML = groups.map(function(g) {
-    var w = g.wine;
-    var nom = decodeHTML(w.Nom || '—');
-    var pays = w.Pays || '';
-    var region = w.Region || '';
-    var paysRegion = (pays && region) ? (pays + ' • ' + region) : (pays || region);
-    var cepage = annoterCepagesV2(w.Cepage);
-    var cepageHtml = cepage ? (cepage + (w.Favori === 'Oui' ? ' <span class="etoile-favori actif">★</span>' : '')) : '';
-    var sous = [paysRegion, cepageHtml, w.Appellation || ''].filter(Boolean).join('<br>');
-    var photo = w['Photo URL'] ? '<div class="carte-photo"><img src="' + w['Photo URL'] + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
-    var onclick = g.cb ? ' onclick="ouvrirApresTap(function(){ouvrirFicheV2(\'' + g.cb + '\', \'cave\')})"' : '';
-    var vide = g.count === 0 ? ' carte-vide' : '';
-    return '<div class="carte ' + couleurClasseV2(w.Couleur) + vide + '"' + onclick + '>' + photo +
-           '<div class="carte-centre"><span class="carte-titre">' + nom + '</span><span class="carte-sous">' + sous + '</span></div>' +
-           '<div class="carte-droite">' + caseDroiteV2(w, g.count) +
-           (g.emplacements && g.emplacements.length ? '<br>' + g.emplacements.join('<br>') : '') +
-           '</div></div>';
-  }).join('');
+  afficherCartesVinsV2('caveV2', groups, 'Aucun vin', function(g) { return tapFicheV2(g.cb, 'cave'); }, totalBtl + ' bouteille' + (totalBtl > 1 ? 's' : '') + ' en stock');
 }
 
 var filtresCaveV2 = filtresVidesV2('caveV2');
