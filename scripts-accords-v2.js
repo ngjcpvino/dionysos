@@ -472,7 +472,7 @@ function calculerResultatsChartierV2() {
     var listeAliments = aliments.map(function(a) {
       return '<div class="ligne-info">' + a.aliment + (a.nuance ? ' <span class="libelle">(' + a.nuance + ')</span>' : '') + '</div>';
     }).join('');
-    div.innerHTML = '<div class="emp-meuble">' + cep + '</div>' + listeAliments + '<div class="panneau-separateur"></div>' + cartesVins;
+    div.innerHTML = '<div class="titre-2">' + cep + '</div>' + listeAliments + '<div class="panneau-separateur"></div>' + cartesVins;
     return;
   }
 
@@ -520,7 +520,7 @@ function calculerResultatsChartierV2() {
                return '<div class="item-liste accordeon-2" onclick="choisirAlimentChartierV2(this.getAttribute(\'data-aliment\'))" data-aliment="' + a.replace(/"/g, '&quot;') + '">' + a + '</div>';
              }).join('') + '</div>';
     }
-    return '<div class="emp-meuble">' + entete + '</div>' + cartesVins + bloc;
+    return '<div class="titre-2">' + entete + '</div>' + cartesVins + bloc;
   }).join('');
 }
 
@@ -1027,7 +1027,7 @@ function chargerCurieuxBeginV2() {
     groupes.sort(function(a, b) {
       return (numeroCbV2(b.items[0].episode) - numeroCbV2(a.items[0].episode)) || nomGroupe(a).localeCompare(nomGroupe(b));
     });
-    return '<div class="emp-meuble">' + (s ? 'Saison ' + s : 'Saison inconnue') + '</div>' +
+    return '<div class="titre-2">' + (s ? 'Saison ' + s : 'Saison inconnue') + '</div>' +
       groupes.map(function(g) { return groupeCurieuxBeginV2(g); }).join('');
   }).join('');
 }

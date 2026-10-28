@@ -25,6 +25,7 @@
 - **Aller vite : regrouper** les changements sans dépendance et les appliquer d'un coup. Ne découper (et attendre un OK au milieu) que si une étape doit être validée AVANT que la suivante ait du sens.
 - Après une série, dire clairement à l'utilisateur ce qu'il doit **publier / redéployer**, et tout **geste manuel** requis (ex. renommer un onglet du Sheet).
 - L'utilisateur ne teste qu'à la fin : **vérifier la syntaxe** des fichiers modifiés avant de livrer (`node --check`), et tracer chaque parcours en silence.
+- **Le style, c'est l'IA qui décide (28 oct. 2026, l'utilisateur : « Décide des styles comme tu le faisais avant, mais respecte-le partout »)** : pas de planche à choisir pour chaque détail (« c'est difficile de voir ça dans un ensemble ») — l'IA choisit, en restant dans les modèles déjà en place, et l'applique PARTOUT, sans exception ni variante. Une image seulement si l'utilisateur la demande ou si le changement touche l'allure de toute l'app.
 - Toujours modifier dans le bon fichier : plusieurs classes existent en double entre `styles.css` (V1, figé) et `styles-v2.css` (V2). Toucher uniquement le V2.
 
 ## Format des échanges

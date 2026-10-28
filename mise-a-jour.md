@@ -79,9 +79,16 @@
 - Verre du spinner : trait `.spinner-trace` à 1,5 px (`--largeur-bordure-1-5`) — plein écran et verre en ligne (`verreSpinnerHtmlV2`).
 
 ## 🎨 Design
-« Un chat est un chat. » Tout le V2 est pleine page, même fond que la fiche vin ; chaque écran = `.modal-v2-fullscreen` + `.modal-v2-content`. Titres BLANCS, jamais en or (exception du Tri : rubriques `.titre-rubrique` en or — à trancher avec les titres, liste 2.0 chantier 3).
+« Un chat est un chat. » Tout le V2 est pleine page, même fond que la fiche vin ; chaque écran = `.modal-v2-fullscreen` + `.modal-v2-content`.
 
-**Gabarit des pages VIN** (menu d'action compris) : ✕ en haut à droite ; NOM en capitales (`.titre-1`) ; origine Pays • Région • Appellation dessous (`.texte-secondaire`) ; action en titre blanc plein (`.titre-action`). Boire/Donner/Arrivée/Déplacer passent par `rendreEnteteActionV2(prefixe)`.
+**Trois titres, partout (28 oct. 2026, chantier 3 — choix de l'utilisateur sur image : sections « D », petits titres « P3 »)** — un titre s'écrit pareil partout, jamais un style de titre de plus :
+- **`.titre-1` — la page** : blanc, 20, majuscules, centré.
+- **`.titre-2` — une section** : **or**, 18, minuscules (fiche : Information, Dégustation… ; listes : Cellier, Saison 17, Vins, Espagne… ; arrêts du Tri ; Comparables). Dans un `.emp-bloc`, un trait dessous. Une section repliable ajoute `.emp-meuble-pliable` (chevron).
+- **`.titre-3` — un petit titre** : **or**, 14, petites majuscules espacées (l'action d'une page de vin « BOIRE » ; l'étiquette d'un champ ou d'un menu « SOMMELIER », « FILTRER », « AFFICHER » ; une rubrique sous une section, « SORS » du Tri).
+- **`.carte-titre` — le nom sur une carte** : blanc, 14. Une phrase posée au-dessus d'un groupe (« Pinot grigio : tu en as 3… ») est du **texte** (`.texte`), pas un titre.
+- Retirés : `.titre-action`, `.emp-meuble`, `.titre-rubrique`, `.titre-groupe` (et `--gold-70`). L'ancienne règle « titres blancs, jamais en or » ne vaut plus que pour `.titre-1`.
+
+**Gabarit des pages VIN** (menu d'action compris) : ✕ en haut à droite ; NOM en capitales (`.titre-1`) ; origine Pays • Région • Appellation dessous (`.texte-secondaire`) ; action en petit titre (`.titre-3`). Boire/Donner/Arrivée/Déplacer passent par `rendreEnteteActionV2(prefixe)`.
 
 **Carte universelle `.carte`** : 3 zones flex + bande couleur en bas. `.carte-photo` 60px, `.carte-centre`, `.carte-droite`. Bandes `.note-1..5` (plats) et `.vin-*` (vin). `.carte-vide` = voile 0 bouteille. Cartes mets : date EN HAUT à droite. **Sous-titre des cartes vin** : une seule fonction `sousVinV2(w)` → **Pays • Région / Cépage / Appellation** (lignes vides masquées), partout. Exceptions : la cave garde l'étoile sur le cépage, la Liste d'achat ajoute les sommeliers.
 - **Cartes réutilisées, jamais réécrites** : `groupeNoteV2`, `groupeSuggestionV2`, `groupeCurieuxBeginV2`, `carteRecetteSaqV2`, `carteGroupeVinV2`, `sectionDegustationV2`, `citationCurieuxBeginV2` servent à plusieurs endroits. Corriger la carte = la corriger partout.
@@ -92,7 +99,7 @@
 
 **CSS**
 - Une valeur = un seul endroit (`:root`), nommée par sa valeur (`--ls-9`), jamais par son usage. **Jamais de style en dur dans le JS** (sauf `display:none` d'état initial). Jamais nominatif : pas de CSS collé à un `#id` de page.
-- Réutiliser avant de créer : `.roundel`, `.champ-saisie`, `.menu-liste`/`.item-liste`, `.controle`, `.colonnes-controle` (une colonne par rond, `flex: 1`), `.titre-1`, `.titre-action`, `.icone-loupe`, `.ligne-ajout`, `.bloc-favori`, `.toast-img`, `.coche-panier`, `.carte-droite-empilee`, `.color-primary`/`.color-white`, `.fs-11`/`.fs-12`, `.ligne-ronds.grande`, `.cercle-choix`, `.modal-v2-avant`, `.citations`/`.citation`/`.citation-texte`, `.item-liste.multiligne`, `.pastille-rappel` (+ `.visible`), `.spinner-en-ligne`, `.item-icone`.
+- Réutiliser avant de créer : `.roundel`, `.champ-saisie`, `.menu-liste`/`.item-liste`, `.controle`, `.colonnes-controle` (une colonne par rond, `flex: 1`), `.titre-1` / `.titre-2` / `.titre-3` (les trois titres), `.icone-loupe`, `.ligne-ajout`, `.bloc-favori`, `.toast-img`, `.coche-panier`, `.carte-droite-empilee`, `.color-primary`/`.color-white`, `.fs-11`/`.fs-12`, `.ligne-ronds.grande`, `.cercle-choix`, `.modal-v2-avant`, `.citations`/`.citation`/`.citation-texte`, `.item-liste.multiligne`, `.pastille-rappel` (+ `.visible`), `.spinner-en-ligne`, `.item-icone`.
 - **Accordéons** : `.accordeon-1` / `.accordeon-2` + jeton `--espace-accordeon: 7px`, un seul style partout (menu burger, recettes SAQ, Chartier, Curieux Bégin, Recherche).
 - Jamais `100vh` : toujours `height:100%` (iOS recadre le fond). Fond de page toujours OPAQUE.
 - Loupe et ✕ d'une page-liste : `position:fixed` (`.gauche` reste `absolute`).
@@ -243,7 +250,7 @@ Une phrase entendue (« asperge et crabe m'amènent un chablis »). 4e mécaniqu
 - **Pastilles réutilisables** (`PASTILLES_V2[prefixe]`, `rendrePastillesV2` / `retirerPastilleV2` / `basculerAjoutPastilleV2` / `ajouterPastilleV2` / `ajouterNouvellePastilleV2`, fiche) : servent au correcteur de recettes SAQ et aux notes.
 
 ## 🔎 Recherche de l'accueil
-- Elle fouille **six** sources, en **sections** (`.emp-meuble`, sans compte) : **Vins · Nos notes · Propositions · Chartier · Recettes SAQ · Curieux Bégin**. Les filtres du panneau ne portent **que sur les Vins**. Les autres sections apparaissent à partir de **2 lettres**.
+- Elle fouille **six** sources, en **sections** (`.titre-2`, sans compte) : **Vins · Nos notes · Propositions · Chartier · Recettes SAQ · Curieux Bégin**. Les filtres du panneau ne portent **que sur les Vins**. Les autres sections apparaissent à partir de **2 lettres**.
 - La section **Vins** s'affiche entière ; les cinq autres sont **repliées**, une seule ouverte à la fois (`basculerSectionRechercheV2`, retenue pendant la frappe dans `RECHERCHE_V2_SECTION_OUVERTE`, remise à zéro à l'ouverture) ; aucun vin → la première s'ouvre. **50 cartes au plus par section** (`MAX_SECTION_RECHERCHE_V2`).
 - Chartier : une carte par ligne trouvée → Chartier filtré sur ce cépage (`ouvrirChartierCepageV2`). Propositions : prix SAQ comme la Liste d'achat.
 - `chargerSourcesRechercheV2()` va chercher les sources qui manquent, une à la fois, puis relance l'affichage. Une note ou une proposition corrigée depuis la recherche remet la liste à jour (`rafraichirRechercheSiOuverteV2`).

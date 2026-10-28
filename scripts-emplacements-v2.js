@@ -246,7 +246,7 @@ function afficherEmpV2() {
   var html = '';
   meubles.forEach(function(meuble){
     var rangeesDef = (CONFIG.meubles && CONFIG.meubles[meuble]) ? CONFIG.meubles[meuble] : {};
-    html += '<div class="emp-bloc"><div class="emp-meuble">' + meuble + '</div>';
+    html += '<div class="emp-bloc"><div class="titre-2">' + meuble + '</div>';
     Object.keys(rangeesDef).sort(function(a,b){ return parseInt(a) - parseInt(b); }).forEach(function(rangee){
       if (f.rangee && String(rangee) !== String(f.rangee)) return;
       var espacesDef = rangeesDef[rangee] || [];
@@ -291,7 +291,7 @@ function afficherEmpV2() {
       var estompe = (filtreVin && !vinPasseFiltresEmpV2(w)) ? ' estompe' : '';
       return '<div class="cercle' + estompe + '" data-photo="' + photo + '" data-cb="' + cb + '" data-row="' + w.row + '" data-couleur="' + coul + '"></div>';
     }).join('');
-    html += '<div class="emp-bloc"><div class="emp-meuble">À ranger</div>' +
+    html += '<div class="emp-bloc"><div class="titre-2">À ranger</div>' +
             '<div class="emp-rangee a-ranger">' +
               '<div class="emp-ronds"><div class="ligne-ronds">' + rondsAR + '</div></div>' +
               '<span class="emp-compte">' + aRanger.length + '</span>' +
@@ -780,31 +780,31 @@ function afficherMenageEmpV2(recalculer) {
   var tournee = lignesMenageV2(plan);
   var html = '';
   if (tournee.max) {
-    html += '<div class="titre-groupe">' + (tournee.max <= 12 ? 'Une boîte suffit' : 'Prends ' + Math.ceil(tournee.max / 12) + ' boîtes') +
+    html += '<div class="texte">' + (tournee.max <= 12 ? 'Une boîte suffit' : 'Prends ' + Math.ceil(tournee.max / 12) + ' boîtes') +
       ' : au plus ' + tournee.max + ' bouteille' + (tournee.max > 1 ? 's' : '') + ' à la fois</div>';
   }
   [1, 2, 3, 4, 5, 6, 7].forEach(function(a) {
-    html += '<div class="emp-bloc"><div class="emp-meuble">' + TITRES_ARRETS_MENAGE_V2[a] + '</div>';
+    html += '<div class="emp-bloc"><div class="titre-2">' + TITRES_ARRETS_MENAGE_V2[a] + '</div>';
     var vide = true;
     RUBRIQUES_ARRETS_MENAGE_V2[a].forEach(function(rubrique) {
       if (rubrique === 'Choisir') {
         if (!plan.groupes.length) return;
         vide = false;
-        html += '<div class="titre-rubrique">Choisir</div>';
+        html += '<div class="titre-3">Choisir</div>';
         plan.groupes.forEach(function(g) { html += choixMenageV2Html(g); });
         return;
       }
       var lignes = tournee.arrets[a][rubrique];
       if (!lignes || !lignes.length) return;
       vide = false;
-      html += '<div class="titre-rubrique">' + rubrique + '</div>';
+      html += '<div class="titre-3">' + rubrique + '</div>';
       lignes.forEach(function(l) { html += ligneMenageV2Html(l); });
     });
     if (vide) html += '<div class="texte-secondaire texte-gauche">Rien à faire ici</div>';
     html += '</div>';
   });
   if (plan.aVerifier.length) {
-    html += '<div class="emp-bloc"><div class="emp-meuble">À vérifier</div><div class="texte-secondaire texte-gauche">L\'assistant ne les touche pas : corrige leur fiche (✎)</div>';
+    html += '<div class="emp-bloc"><div class="titre-2">À vérifier</div><div class="texte-secondaire texte-gauche">L\'assistant ne les touche pas : corrige leur fiche (✎)</div>';
     plan.aVerifier.forEach(function(b) {
       html += carteMenageV2(b, nomMenageV2(b), b.doute + ' · ' + libellePlaceMenageV2(b.place), '', false);
     });
@@ -822,7 +822,7 @@ function afficherMenageEmpV2(recalculer) {
 function choixMenageV2Html(g) {
   var M = MENAGE_V2;
   var nCedes = g.bouteilles.filter(function(b) { return M.cedes[b.cle]; }).length;
-  var html = '<div class="titre-groupe">' + g.titre + ' : tu en as ' + g.bouteilles.length + ' au cellier, cèdes-en ' + g.aCeder +
+  var html = '<div class="texte">' + g.titre + ' : tu en as ' + g.bouteilles.length + ' au cellier, cèdes-en ' + g.aCeder +
     (nCedes ? ' (' + nCedes + ' choisi' + (nCedes > 1 ? 's' : '') + ')' : '') + '</div>' +
     '<div class="histo-groupe ' + g.coul + '">';
   g.bouteilles.forEach(function(b) {
@@ -1011,7 +1011,7 @@ function afficherListeEmpV2(type) {
         var vins = parCepL[k].sort(function(a, b){
           return normaliserRechercheV2(decodeHTML(a.wine.Nom || '')).localeCompare(normaliserRechercheV2(decodeHTML(b.wine.Nom || '')));
         });
-        return '<div class="emp-meuble">' + nomCepL[k] + '</div>' + vins.map(function(g){
+        return '<div class="titre-2">' + nomCepL[k] + '</div>' + vins.map(function(g){
           return empCarteVinV2(g.wine, g.count + ' btl<br>' + g.emplacements.join(', '), true);
         }).join('');
       }).join('');
@@ -1035,7 +1035,7 @@ function afficherListeEmpV2(type) {
     if (cles.length === 0) { html = '<div class="texte-secondaire">Aucun cépage en double</div>'; }
     else {
       html = cles.map(function(cep){
-        return '<div class="emp-meuble">' + nomCepage[cep] + '</div>' + parCepage[cep].map(function(g){
+        return '<div class="titre-2">' + nomCepage[cep] + '</div>' + parCepage[cep].map(function(g){
           return empCarteVinV2(g.wine, g.count + ' btl<br>' + g.emplacements.join(', '), true);
         }).join('');
       }).join('');
@@ -1061,7 +1061,7 @@ function afficherListeEmpV2(type) {
     if (clesG.length === 0) { html = '<div class="texte-secondaire">Aucun cépage manquant</div>'; }
     else {
       html = clesG.map(function(cep){
-        return '<div class="emp-meuble">' + nomCepGlobal[cep] + '</div>' + parCepGlobal[cep].map(function(g){
+        return '<div class="titre-2">' + nomCepGlobal[cep] + '</div>' + parCepGlobal[cep].map(function(g){
           return empCarteVinV2(g.wine, '0 btl', true);
         }).join('');
       }).join('');
@@ -1090,7 +1090,7 @@ function afficherListeEmpV2(type) {
     if (cles2.length === 0) { html = '<div class="texte-secondaire">Aucun cépage manquant</div>'; }
     else {
       html = cles2.map(function(cep){
-        return '<div class="emp-meuble">' + nomCepageHors[cep] + '</div>' + parCepageHors[cep].map(function(g){
+        return '<div class="titre-2">' + nomCepageHors[cep] + '</div>' + parCepageHors[cep].map(function(g){
           return empCarteVinV2(g.wine, g.count + ' btl<br>' + g.emplacements.join(', '), true);
         }).join('');
       }).join('');
@@ -1113,7 +1113,7 @@ function afficherListeEmpV2(type) {
     if (clesFamG.length === 0) { html = '<div class="texte-secondaire">Aucune famille manquante</div>'; }
     else {
       html = clesFamG.map(function(fam){
-        return '<div class="emp-meuble">' + fam + '</div>' + parFamGlobal[fam].map(function(g){
+        return '<div class="titre-2">' + fam + '</div>' + parFamGlobal[fam].map(function(g){
           return empCarteVinV2(g.wine, '0 btl', true);
         }).join('');
       }).join('');
@@ -1140,7 +1140,7 @@ function afficherListeEmpV2(type) {
     if (clesFam2.length === 0) { html = '<div class="texte-secondaire">Aucune famille manquante</div>'; }
     else {
       html = clesFam2.map(function(fam){
-        return '<div class="emp-meuble">' + fam + '</div>' + parFamHors[fam].map(function(g){
+        return '<div class="titre-2">' + fam + '</div>' + parFamHors[fam].map(function(g){
           return empCarteVinV2(g.wine, g.count + ' btl<br>' + g.emplacements.join(', '), true);
         }).join('');
       }).join('');
@@ -1166,7 +1166,7 @@ function afficherListeEmpV2(type) {
     if (clesAG.length === 0) { html = '<div class="texte-secondaire">Aucune appellation manquante</div>'; }
     else {
       html = clesAG.map(function(app){
-        return '<div class="emp-meuble">' + nomAppGlobal[app] + '</div>' + parAppGlobal[app].map(function(g){
+        return '<div class="titre-2">' + nomAppGlobal[app] + '</div>' + parAppGlobal[app].map(function(g){
           return empCarteVinV2(g.wine, '0 btl', true);
         }).join('');
       }).join('');
@@ -1195,7 +1195,7 @@ function afficherListeEmpV2(type) {
     if (clesA2.length === 0) { html = '<div class="texte-secondaire">Aucune appellation manquante</div>'; }
     else {
       html = clesA2.map(function(app){
-        return '<div class="emp-meuble">' + nomAppHors[app] + '</div>' + parAppHors[app].map(function(g){
+        return '<div class="titre-2">' + nomAppHors[app] + '</div>' + parAppHors[app].map(function(g){
           return empCarteVinV2(g.wine, g.count + ' btl<br>' + g.emplacements.join(', '), true);
         }).join('');
       }).join('');

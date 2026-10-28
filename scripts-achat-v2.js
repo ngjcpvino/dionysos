@@ -708,7 +708,7 @@ function afficherCartesAchatV2(liste) {
     if (sectionCle !== derniereSection) {
       derniereSection = sectionCle;
       var marque = (parCepage && cep && !cavePrincipaux[sectionCle]) ? ' <span class="cepage-nouveau">🍇</span>' : '';
-      entete = '<div class="emp-meuble">' + sectionTexte + marque + '</div>';
+      entete = '<div class="titre-2">' + sectionTexte + marque + '</div>';
     }
     var cle = cleCartePanierV2(w);
     var coche = !!panierSessionAchatV2[cle];
@@ -791,7 +791,7 @@ function majEntetesAchatV2() {
   var entete = null;
   var aVisible = false;
   Array.prototype.forEach.call(div.children, function(el){
-    if (el.classList.contains('emp-meuble')) {
+    if (el.classList.contains('titre-2')) {
       if (entete) entete.style.display = aVisible ? '' : 'none';
       entete = el;
       aVisible = false;

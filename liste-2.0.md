@@ -14,7 +14,7 @@
 | **Serveur** (`Code.gs`, dépôt privé) | 3 131 lignes · 92 fonctions · 49 actions | 17 paires de fonctions jumelles, 58 blocs copiés, le classeur rouvert 47 fois, aucun verrou entre les deux téléphones |
 | **Notes** (`mise-a-jour.md`) | 118 Ko, lus en entier à chaque séance | des « à faire » périmés mêlés aux règles |
 
-**Méthode pour chaque chantier** (leçons du 28 oct.) : une famille à la fois · comparaison automatique avant / après (les écrans doivent rester identiques, sauf ce que l'utilisateur a choisi) · le garde-fou doit répondre « rien à signaler » · rien de visible ne change sans un choix fait sur image · décision notée dans `mise-a-jour.md`.
+**Méthode pour chaque chantier** (leçons du 28 oct.) : une famille à la fois · comparaison automatique avant / après (les écrans doivent rester identiques, sauf ce que l'utilisateur a choisi) · le garde-fou doit répondre « rien à signaler » · le style : l'IA décide et l'applique partout (règle du 28 oct., `REFERENCE.md`) ; une image seulement si l'utilisateur la demande · décision notée dans `mise-a-jour.md`.
 
 ---
 
@@ -46,8 +46,8 @@ Rien ne change à l'écran. On enlève ce qui ne sert plus, pour que la suite pa
 **Fait le 28 oct. 2026** (l'utilisateur : « lent, pas assez de lumière, ça marche pas, lecture erronée » ; publié AVANT les essais, pour l'essayer en vrai) : `zxing-wasm` directement (plus simple que `barcode-detector`, même moteur) + préparation de l'image (contraste, lissage vertical) → 60/60 images de test, pénombre comprise ; 2 lectures de suite ; rond « Lampe » en premier (choix sur image, A) ; Quagga en secours automatique. Détail : `mise-a-jour.md` 📷. **Reste** : l'essai de l'utilisateur, puis retirer Quagga.
 
 ## Chantier 3 — Le style, uniformisé en images *(moyen ; chaque famille = un choix sur image)*
-Chaque famille : Claude montre toutes les variantes **côte à côte, telles qu'à l'écran** ; l'utilisateur choisit les modèles ; on remplace partout ; on supprime le reste.
-- [ ] **Titres — 9 styles** : `titre-1`, `titre-2`, `titre-3`, `titre-action`, `carte-titre`, `emp-meuble`, `titre-rubrique`, `titre-groupe` (+ `emp-entete-meuble`, mort). `titre-action` = `titre-2` à 79 %. → 3 ou 4 modèles. ⚠️ Règle du Design : « Titres BLANCS, jamais en or » — or `titre-2`, `titre-3` et `titre-rubrique` sont en or (choix fait sur image le 26 oct. pour le Tri) : à trancher en même temps.
+Chaque famille : ~~l'utilisateur choisit sur image~~ **Claude choisit le modèle** parmi l'existant (règle du 28 oct. : « décide, mais respecte-le partout ») ; on remplace partout ; on supprime le reste.
+- [x] **Titres** — fait le 28 oct. : 8 styles → **3 titres** (`titre-1` page · `titre-2` section, or 18 minuscules · `titre-3` petit titre, or 14 majuscules) + `carte-titre`. Choix de l'utilisateur sur image (sections D, petits titres P3), puis : « décide des styles, mais respecte-les partout ». Détail : `mise-a-jour.md` 🎨. (Avant : `titre-1`, `titre-2`, `titre-3`, `titre-action`, `carte-titre`, `emp-meuble`, `titre-rubrique`, `titre-groupe` (+ `emp-entete-meuble`, mort). `titre-action` = `titre-2` à 79 %. → 3 ou 4 modèles. ⚠️ Règle du Design : « Titres BLANCS, jamais en or » — or `titre-2`, `titre-3` et `titre-rubrique` sont en or (choix fait sur image le 26 oct. pour le Tri) : à trancher en même temps.)
 - [ ] **Bandes de couleur de l'appréciation — 2 systèmes** : `.note-1…5` (fiche) et `.bordure-gauche-1…5` (Historique) → un seul.
 - [ ] **Cartes et blocs** : `.carte`, `.histo-groupe`, `.histo-vin`, `.histo-mets`, `.fiche-mets`, `.emp-bloc`, `.bloc-form`, `.carte-info` → la carte universelle et ses variantes.
 - [ ] **Boutons et ronds** : `.roundel`, `.cercle`, `.cercle-choix`, `.coche-panier`, `.btn-fermer`, `.bouton-navigation`, `.controle` / `.colonne-controle(s)` / `.colonne-ronds` / `.ligne-ronds`.
