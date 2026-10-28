@@ -974,15 +974,14 @@ function verifierEtPoserPlacementV2(prefixe) {
   appelBackend('checkLocationAvailable', { meuble: c.meuble, rangee: c.rangee, espace: c.espace }, { spinner: 'Vérification' }).then(function(result) {
     if (result.available) { PLACEMENTS_V2[prefixe].poser(c); return; }
     afficherMessage('Occupé par : ' + result.message);
-    return appelBackend('getInventoryData', {}).then(function(data) {
-      if (data) ALL_DATA = data;
+    return rechargerInventaireV2().then(function() {
       c.espace = '';
       majBarrePlacementV2(prefixe, 'espace', '', 'Espace');
       menuPlacementV2(prefixe, 'espace', espacesLibresV2(c.meuble, c.rangee));
       document.getElementById(prefixe + '-espace-menu').classList.add('ouvert');
     });
   }).catch(function(err) {
-    afficherMessage('Vérification de l\'espace impossible : ' + (err && err.message ? err.message : err));
+    afficherMessage('Vérification de l\'espace impossible : ' + causeV2(err));
   });
 }
 
@@ -1095,15 +1094,9 @@ function choisirBouteilleDeplacer(row, bottle) {
 function deplacerBouteilleV2(c) {
   appelBackend('actionBouteille', { row: c.row, action: 'deplacer', bottle: c.bottle, meuble: c.meuble, rangee: c.rangee, espace: c.espace }, { spinner: 'Déplacement' }).then(function() {
     afficherMessage('Bouteille déplacée');
-    return appelBackend('getInventoryData', {}, { spinner: 'Déplacement' }).then(function(data) {
-      if (data) ALL_DATA = data;
-      return appelBackend('checkWineExists', { codebarre: menuActionV2Context.code }, { spinner: 'Déplacement' }).then(function(result) {
-        if (result) menuActionV2Context.wineResult = result;
-        fermerDeplacerV2();
-      });
-    });
-  }).catch(function(err) {
-    retourAccueilV2('Déplacement : ' + (err && err.message ? err.message : err));
+    return rechargerVinEnCoursV2('Déplacement');
+  }).then(fermerDeplacerV2).catch(function(err) {
+    retourAccueilV2('Déplacement : ' + causeV2(err));
   });
 }
 
@@ -1112,15 +1105,9 @@ function deplacerARangerV2() {
   if (c.meuble) return;
   appelBackend('mettreBotteilleARanger', { row: c.row, bottle: c.bottle }, { spinner: 'Mise à ranger' }).then(function() {
     afficherMessage('Bouteille mise à ranger');
-    return appelBackend('getInventoryData', {}, { spinner: 'Mise à ranger' }).then(function(data) {
-      if (data) ALL_DATA = data;
-      return appelBackend('checkWineExists', { codebarre: menuActionV2Context.code }, { spinner: 'Mise à ranger' }).then(function(result) {
-        if (result) menuActionV2Context.wineResult = result;
-        fermerDeplacerV2();
-      });
-    });
-  }).catch(function() {
-    retourAccueilV2();
+    return rechargerVinEnCoursV2('Mise à ranger');
+  }).then(fermerDeplacerV2).catch(function(err) {
+    retourAccueilV2('Mise à ranger : ' + causeV2(err));
   });
 }
 
@@ -1174,46 +1161,57 @@ function ouvrirBoireV2() {
   construireBoireV2();
 }
 
-function construireBoireV2() {
+// Boire et Donner commencent pareil : l'en-tête, puis la bouteille — une seule : choisie d'office, et le
+// formulaire tout de suite (renvoie vrai) ; plusieurs : d'abord la liste des bouteilles.
+function choixBouteilleActionV2(action) {
   actionV2Choix = { row: menuActionV2Context.wineResult.row, bottle: 0, note: 0 };
-  rendreEnteteActionV2('boire');
+  rendreEnteteActionV2(action);
+  var actives = bottlesActivesV2();
+  if (actives.length === 1) actionV2Choix.bottle = actives[0].bottle;
+  else document.getElementById(action + 'V2-bouteille-menu').innerHTML = actives.map(function(b) {
+    return '<div class="item-liste" onclick="choisirBouteilleActionV2(\'' + action + '\', ' + b.bottle + ')">' + empBouteilleV2(b) + '</div>';
+  }).join('');
+  etapeActionV2(action, actives.length === 1);
+  return actives.length === 1;
+}
+// L'étape montrée : le formulaire (vrai) ou le choix de la bouteille
+function etapeActionV2(action, formulaire) {
+  document.getElementById(action + 'V2-choix-bouteille').style.display = formulaire ? 'none' : 'block';
+  document.getElementById(action + 'V2-form').style.display = formulaire ? 'block' : 'none';
+}
+function choisirBouteilleActionV2(action, bottle) {
+  actionV2Choix.bottle = bottle;
+  etapeActionV2(action, true);
+  if (action === 'boire') construireFormBoireV2();
+}
+// ✕ : du formulaire, retour au choix de la bouteille (s'il y en a plusieurs) ; sinon, au menu d'action
+function fermerActionBouteilleV2(action) {
+  var page = document.getElementById(action + 'V2Container');
+  page.style.display = 'none';
+  if (bottlesActivesV2().length > 1 && document.getElementById(action + 'V2-form').style.display === 'block') {
+    etapeActionV2(action, false);
+    page.style.display = 'flex';
+    return;
+  }
+  if (menuActionV2Context) ouvrirMenuActionV2(menuActionV2Context.code, menuActionV2Context.wineResult);
+}
+
+function construireBoireV2() {
+  var tout = choixBouteilleActionV2('boire');
   document.getElementById('boireV2-plat').value = '';
   var codeBoire = (menuActionV2Context.code || '').toString().trim();
 var itemBoire = (ALL_DATA || []).filter(function(i) { return memeCodeV2(i['Code-barres'], codeBoire); })[0];
   BOIRE_V2_NOTE_INITIALE = itemBoire ? decodeHTML((itemBoire['Notes temporaires'] || '').toString()) : '';
   document.getElementById('boireV2-notes').value = BOIRE_V2_NOTE_INITIALE;
   document.getElementById('boireV2-accords-menu').classList.remove('ouvert');
-
-  var actives = bottlesActivesV2();
-  if (actives.length === 1) {
-    actionV2Choix.bottle = actives[0].bottle;
-    document.getElementById('boireV2-choix-bouteille').style.display = 'none';
-    document.getElementById('boireV2-form').style.display = 'block';
-    construireFormBoireV2();
-  } else {
-    document.getElementById('boireV2-bouteille-menu').innerHTML = actives.map(function(b) {
-      return '<div class="item-liste" onclick="choisirBouteilleBoireV2(' + b.bottle + ')">' + empBouteilleV2(b) + '</div>';
-    }).join('');
-    document.getElementById('boireV2-choix-bouteille').style.display = 'block';
-    document.getElementById('boireV2-form').style.display = 'none';
-  }
+  if (tout) construireFormBoireV2();
   document.getElementById('boireV2Container').style.display = 'flex';
-}
-
-function choisirBouteilleBoireV2(bottle) {
-  actionV2Choix.bottle = bottle;
-  document.getElementById('boireV2-choix-bouteille').style.display = 'none';
-  document.getElementById('boireV2-form').style.display = 'block';
-  construireFormBoireV2();
 }
 
 function construireFormBoireV2() {
   var v = document.getElementById('boireV2-verres');
   v.classList.add('desactive');
-  v.innerHTML = '';
-  for (var i = 1; i <= 5; i++) {
-    v.innerHTML += '<span class="boire-verre" data-note="' + i + '" onclick="choisirNoteBoireV2(' + i + ')">🍷</span>';
-  }
+  dessinerVerresV2('boireV2-verres', 0, 'choisirNoteBoireV2');
   var accordsActuels = (menuActionV2Context.wineResult.wine.accords || '').split(',').map(function(a) { return a.trim(); }).filter(Boolean);
   document.getElementById('boireV2-accords-menu').innerHTML = (CONFIG && CONFIG.accords ? CONFIG.accords : []).map(function(acc) {
     var sel = accordsActuels.indexOf(acc) !== -1;
@@ -1246,9 +1244,7 @@ function boireV2PlatChange() {
 function choisirNoteBoireV2(note) {
   if (document.getElementById('boireV2-plat').value.trim() === '') return;
   actionV2Choix.note = note;
-  Array.prototype.forEach.call(document.querySelectorAll('#boireV2-verres .boire-verre'), function(el) {
-    el.classList.toggle('allume', parseInt(el.getAttribute('data-note')) <= note);
-  });
+  allumerVerresV2('boireV2-verres', note);
 }
 
 function basculerMenuAccordsBoireV2() {
@@ -1271,29 +1267,13 @@ function confirmerBoireV2() {
       return appelBackend('updateWineField', { codebarre: menuActionV2Context.code, field: 'Notes temporaires', value: noteBoire });
     }
   }).then(function() {
-    return appelBackend('getInventoryData', {}, { spinner: 'Santé' });
-  }).then(function(data) {
-    if (data) ALL_DATA = data;
-    return appelBackend('checkWineExists', { codebarre: menuActionV2Context.code }, { spinner: 'Santé' });
-  }).then(function(result) {
-    if (result) menuActionV2Context.wineResult = result;
+    return rechargerVinEnCoursV2('Santé');
+  }).then(function() {
     ALL_HISTORIQUE = [];
     cacherToutesPagesV2();
     menuActionV2Context = null;
     afficherMessage('Santé');
-  }).catch(function() { retourAccueilV2(); }).then(function() { BOIRE_V2_EN_COURS = false; });
-}
-
-function fermerBoireV2() {
-  document.getElementById('boireV2Container').style.display = 'none';
-  var actives = bottlesActivesV2();
-  if (actives.length > 1 && document.getElementById('boireV2-form').style.display === 'block') {
-    document.getElementById('boireV2-form').style.display = 'none';
-    document.getElementById('boireV2-choix-bouteille').style.display = 'block';
-    document.getElementById('boireV2Container').style.display = 'flex';
-    return;
-  }
-  if (menuActionV2Context) ouvrirMenuActionV2(menuActionV2Context.code, menuActionV2Context.wineResult);
+  }).catch(function(err) { retourAccueilV2('Boire : ' + causeV2(err)); }).then(function() { BOIRE_V2_EN_COURS = false; });
 }
 
 // ---------- DONNER ----------
@@ -1303,54 +1283,18 @@ function ouvrirDonnerV2() {
 }
 
 function construireDonnerV2() {
-  actionV2Choix = { row: menuActionV2Context.wineResult.row, bottle: 0, note: 0 };
-  rendreEnteteActionV2('donner');
-
-  var actives = bottlesActivesV2();
-  if (actives.length === 1) {
-    actionV2Choix.bottle = actives[0].bottle;
-    document.getElementById('donnerV2-choix-bouteille').style.display = 'none';
-    document.getElementById('donnerV2-form').style.display = 'block';
-  } else {
-    document.getElementById('donnerV2-bouteille-menu').innerHTML = actives.map(function(b) {
-      return '<div class="item-liste" onclick="choisirBouteilleDonnerV2(' + b.bottle + ')">' + empBouteilleV2(b) + '</div>';
-    }).join('');
-    document.getElementById('donnerV2-choix-bouteille').style.display = 'block';
-    document.getElementById('donnerV2-form').style.display = 'none';
-  }
+  choixBouteilleActionV2('donner');
   document.getElementById('donnerV2Container').style.display = 'flex';
-}
-
-function choisirBouteilleDonnerV2(bottle) {
-  actionV2Choix.bottle = bottle;
-  document.getElementById('donnerV2-choix-bouteille').style.display = 'none';
-  document.getElementById('donnerV2-form').style.display = 'block';
 }
 
 function confirmerDonnerV2() {
   appelBackend('actionBouteille', { row: actionV2Choix.row, action: 'donner', bottle: actionV2Choix.bottle }, { spinner: 'Don' }).then(function() {
-    return appelBackend('getInventoryData', {}, { spinner: 'Don' });
-  }).then(function(data) {
-    if (data) ALL_DATA = data;
-    return appelBackend('checkWineExists', { codebarre: menuActionV2Context.code }, { spinner: 'Don' });
-  }).then(function(result) {
-    if (result) menuActionV2Context.wineResult = result;
+    return rechargerVinEnCoursV2('Don');
+  }).then(function() {
     cacherToutesPagesV2();
     menuActionV2Context = null;
     afficherMessage('Bouteille donnée');
-  }).catch(function() { retourAccueilV2(); });
-}
-
-function fermerDonnerV2() {
-  document.getElementById('donnerV2Container').style.display = 'none';
-  var actives = bottlesActivesV2();
-  if (actives.length > 1 && document.getElementById('donnerV2-form').style.display === 'block') {
-    document.getElementById('donnerV2-form').style.display = 'none';
-    document.getElementById('donnerV2-choix-bouteille').style.display = 'block';
-    document.getElementById('donnerV2Container').style.display = 'flex';
-    return;
-  }
-  if (menuActionV2Context) ouvrirMenuActionV2(menuActionV2Context.code, menuActionV2Context.wineResult);
+  }).catch(function(err) { retourAccueilV2('Donner : ' + causeV2(err)); });
 }
 
 function ajouterBouteilleArrivee(meuble, rangee, espace) {
@@ -1367,14 +1311,12 @@ function ajouterBouteilleArrivee(meuble, rangee, espace) {
       afficherMessage(res.message || 'Ajout refusé');
       return null;
     }
-    return appelBackend('getInventoryData', {}, { spinner: 'Mise en cave' });
-  }).then(function(data) {
-    if (data === null) return;
-    if (data) ALL_DATA = data;
-    cacherToutesPagesV2();
-    menuActionV2Context = null;
-    afficherMessage('Bouteille ajoutée');
-  }).catch(function() {
-    retourAccueilV2();
+    return rechargerInventaireV2('Mise en cave').then(function() {
+      cacherToutesPagesV2();
+      menuActionV2Context = null;
+      afficherMessage('Bouteille ajoutée');
+    });
+  }).catch(function(err) {
+    retourAccueilV2('Mise en cave : ' + causeV2(err));
   });
 }

@@ -48,6 +48,20 @@ function ouvrirSAQV2(codeSAQ) {
   }
 }
 
+// ==================== APRÈS UNE ÉCRITURE : LES DONNÉES FRAÎCHES (28 oct. 2026, liste 2.0 chantier 4) ====================
+// Règle : toute écriture au Sheet resynchronise la mémoire AVANT de rendre la main. L'inventaire frais dans ALL_DATA…
+function rechargerInventaireV2(spinner) {
+  return appelBackend('getInventoryData', {}, { spinner: spinner }).then(function(data) { if (data) ALL_DATA = data; return data; });
+}
+// …et, pour le vin du menu d'action, ses bouteilles fraîches
+function rechargerVinEnCoursV2(spinner) {
+  return rechargerInventaireV2(spinner).then(function() {
+    return appelBackend('checkWineExists', { codebarre: menuActionV2Context.code }, { spinner: spinner });
+  }).then(function(result) { if (result) menuActionV2Context.wineResult = result; return result; });
+}
+// La cause d'un échec, en clair
+function causeV2(err) { return err && err.message ? err.message : String(err); }
+
 // Une page s'ouvre pareil partout : affichée, remontée en haut…
 function montrerPageV2(id) {
   document.getElementById(id).style.display = 'flex';

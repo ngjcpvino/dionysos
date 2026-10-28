@@ -286,6 +286,19 @@ function majAccordsSaqBoucleV2(faitsCumul) {
   }).catch(function(e) { afficherMessage('Accords SAQ : ' + (e && e.message ? e.message : 'erreur inconnue')); });
 }
 
+// ==================== L'APPRÉCIATION EN VERRES (Boire, Corriger, Ajouter à l'historique) ====================
+// Les 5 verres, allumés jusqu'à la note ; un verre touché appelle appel(note)
+function dessinerVerresV2(id, note, appel) {
+  document.getElementById(id).innerHTML = [1, 2, 3, 4, 5].map(function(i) {
+    return '<span class="boire-verre' + (i <= (note || 0) ? ' allume' : '') + '" data-note="' + i + '" onclick="' + appel + '(' + i + ')">🍷</span>';
+  }).join('');
+}
+function allumerVerresV2(id, note) {
+  Array.prototype.forEach.call(document.querySelectorAll('#' + id + ' .boire-verre'), function(el) {
+    el.classList.toggle('allume', parseInt(el.getAttribute('data-note')) <= note);
+  });
+}
+
 // ==================== FILTRES : « SEULEMENT » OU « SAUF » (27 oct. 2026) ====================
 // Dans un menu de filtre, taper une valeur = « seulement elle » ; la retaper = « sauf elle » ; une 3e fois = « Tous ».
 // « Sauf X » se garde dans la même variable que « X », précédé de SAUF_FILTRE_V2 : toute comparaison passe par

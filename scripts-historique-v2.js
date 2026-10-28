@@ -197,19 +197,13 @@ function ouvrirHistoEditV2(row, plat, note, nom, provenance, codeSAQ, codebarre)
   var origineEl = document.getElementById('histoEditV2-origine');
   if (origineEl) origineEl.textContent = w ? [w.Pays, w.Region, w.Appellation].filter(Boolean).map(decodeHTML).join(' • ') : '';
   document.getElementById('histoEditV2-plat').value = plat || '';
-  var v = document.getElementById('histoEditV2-verres');
-  v.innerHTML = '';
-  for (var i = 1; i <= 5; i++) {
-    v.innerHTML += '<span class="boire-verre' + (i <= (note || 0) ? ' allume' : '') + '" data-note="' + i + '" onclick="choisirNoteHistoEditV2(' + i + ')">🍷</span>';
-  }
+  dessinerVerresV2('histoEditV2-verres', note, 'choisirNoteHistoEditV2');
   document.getElementById('histoEditV2Overlay').style.display = 'flex';
 }
 
 function choisirNoteHistoEditV2(note) {
   histoEditV2.note = note;
-  Array.prototype.forEach.call(document.querySelectorAll('#histoEditV2-verres .boire-verre'), function(el){
-    el.classList.toggle('allume', parseInt(el.getAttribute('data-note')) <= note);
-  });
+  allumerVerresV2('histoEditV2-verres', note);
 }
 
 function sauverHistoEditV2() {
@@ -324,11 +318,7 @@ function choisirVinHistoAjoutV2(cb, saq, nom) {
   champDate.value = dateIsoV2();
   champDate.max = dateIsoV2();
 
-  var v = document.getElementById('histoAjoutV2-verres');
-  v.innerHTML = '';
-  for (var i = 1; i <= 5; i++) {
-    v.innerHTML += '<span class="boire-verre" data-note="' + i + '" onclick="choisirNoteHistoAjoutV2(' + i + ')">🍷</span>';
-  }
+  dessinerVerresV2('histoAjoutV2-verres', 0, 'choisirNoteHistoAjoutV2');
   var accordsActuels = [];
   var vin = (ALL_DATA || []).filter(function(d){ return (d['Code-barres'] || '').toString().trim().replace(/\s+/g, '') === cb; })[0];
   if (vin && vin.Accords) accordsActuels = vin.Accords.split(',').map(function(a){ return a.trim(); }).filter(Boolean);
@@ -342,9 +332,7 @@ function choisirVinHistoAjoutV2(cb, saq, nom) {
 
 function choisirNoteHistoAjoutV2(note) {
   histoAjoutV2.note = note;
-  Array.prototype.forEach.call(document.querySelectorAll('#histoAjoutV2-verres .boire-verre'), function(el){
-    el.classList.toggle('allume', parseInt(el.getAttribute('data-note')) <= note);
-  });
+  allumerVerresV2('histoAjoutV2-verres', note);
 }
 
 function basculerMenuAccordsHistoAjoutV2() {
