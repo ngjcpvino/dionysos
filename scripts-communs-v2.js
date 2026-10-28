@@ -95,10 +95,7 @@ function wineResultDepuisMemoireV2(code) {
   });
   if (!items.length) return null;
   var w = items[0];
-  var actives = items.filter(function(i) {
-    var statut = i.Statut || 'En stock';
-    return i.bottle && i.bottle > 0 && statut !== 'Bu' && statut !== 'Sorti' && statut !== 'Suggestion';
-  });
+  var actives = items.filter(bouteilleEnCaveV2);
   return {
     exists: true,
     row: w.row,
@@ -147,14 +144,27 @@ function sousVinV2(w) {
   return [paysRegion, annoterCepagesV2(w.Cepage), w.Appellation || ''].filter(Boolean).join('<br>');
 }
 
+// Une bouteille encore en cave : ni bue, ni sortie. (Le serveur rend un vin sans bouteille active en « Bu »,
+// bouteille 0 ; le Statut « Suggestion » n'existe pas dans les données.)
+function bouteilleEnCaveV2(i) { var s = i.Statut || 'En stock'; return s !== 'Bu' && s !== 'Sorti'; }
+// Les bouteilles en cave ; ou = 'rangees' (meuble, rangée et espace) ou 'aranger' (le reste) ; sans ou : toutes
+function bouteillesEnCaveV2(ou) {
+  return (ALL_DATA || []).filter(function(i) {
+    return bouteilleEnCaveV2(i) && (!ou || (ou === 'rangees') === !!(i.Meuble && i.Rangee && i.Espace));
+  });
+}
+// Vrai si le vin a au moins une bouteille en cave — par son code-barres, ou par champ ('Code SAQ')
+function vinEnCaveV2(code, champ) {
+  return bouteillesEnCaveV2().some(function(i) { return memeCodeV2(i[champ || 'Code-barres'], code); });
+}
+
 function grouperVinsV2(data) {
   var grouped = {};
   data.forEach(function(item) {
     var cb = (item['Code-barres'] || '').toString().trim().replace(/\s+/g, '');
     var key = cleVinV2(item);
     if (!grouped[key]) grouped[key] = { wine: item, cb: cb, count: 0, emplacements: [] };
-    var statut = item.Statut || 'En stock';
-    if (statut !== 'Bu' && statut !== 'Sorti' && statut !== 'Suggestion') {
+    if (bouteilleEnCaveV2(item)) {
       grouped[key].count++;
       if (item.Meuble && item.Rangee && item.Espace) {
         grouped[key].emplacements.push(item.Meuble.toString().substring(0, 1).toUpperCase() + '-' + item.Rangee + '-' + item.Espace);
@@ -264,7 +274,7 @@ function majCurieuxBeginBoucleV2(ajoutsCumul) {
     if (!res.termine) { majCurieuxBeginBoucleV2(ajouts); return; }
     ALL_CURIEUXBEGIN = null;
     afficherMessage('✓ Curieux Bégin à jour (' + ajouts + ' ajout' + (ajouts > 1 ? 's' : '') + ')');
-  }).catch(function(e) { afficherMessage('Curieux Bégin : ' + (e && e.message ? e.message : 'erreur inconnue')); });
+  }).catch(function(e) { afficherMessage('Curieux Bégin : ' + causeV2(e)); });
 }
 
 // Mise à jour Accords SAQ — remplit les familles des vins (relance auto s'il en reste) puis les recettes,
@@ -283,7 +293,7 @@ function majAccordsSaqBoucleV2(faitsCumul) {
       ALL_HISTORIQUE = [];
       afficherMessage('✓ Accords SAQ à jour (' + (res.ajoutees || 0) + ' recette' + ((res.ajoutees > 1) ? 's' : '') + ')');
     }).catch(function() { afficherMessage('✓ Accords SAQ à jour'); });
-  }).catch(function(e) { afficherMessage('Accords SAQ : ' + (e && e.message ? e.message : 'erreur inconnue')); });
+  }).catch(function(e) { afficherMessage('Accords SAQ : ' + causeV2(e)); });
 }
 
 // ==================== L'APPRÉCIATION EN VERRES (Boire, Corriger, Ajouter à l'historique) ====================
@@ -600,6 +610,19 @@ function construirePanneauxV2() {
   });
 }
 document.addEventListener('DOMContentLoaded', construirePanneauxV2);
+
+// Les valeurs d'un champ multiple des recettes SAQ (typesPlats, ingredients…), chacune avec son compte ;
+// triées par nom, ou (parCompte) les plus fréquentes d'abord
+function comptesRecettesV2(recettes, champ, parCompte) {
+  var comptes = {};
+  recettes.forEach(function(r) {
+    (r[champ] || []).forEach(function(v) { comptes[v] = (comptes[v] || 0) + 1; });
+  });
+  return Object.keys(comptes).sort(function(a, b) {
+    if (parCompte && comptes[b] !== comptes[a]) return comptes[b] - comptes[a];
+    return a.localeCompare(b);
+  }).map(function(v) { return { valeur: v, compte: comptes[v] }; });
+}
 
 // Un accordéon à volets (Comparables, « Accords selon… ») : ids base+clé (le volet) et base+clé+'-titre' (son titre).
 // Taper un titre ouvre son volet et referme les autres ; le retaper le referme.

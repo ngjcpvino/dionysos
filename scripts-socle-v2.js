@@ -60,7 +60,9 @@ function rechargerVinEnCoursV2(spinner) {
   }).then(function(result) { if (result) menuActionV2Context.wineResult = result; return result; });
 }
 // La cause d'un échec, en clair
-function causeV2(err) { return err && err.message ? err.message : String(err); }
+function causeV2(err) { return err && err.message ? err.message : (err ? String(err) : 'erreur inconnue'); }
+// Une écriture qui échoue : le toast le dit, avec la cause. Usage : .catch(signalerErreurV2)
+function signalerErreurV2(err) { afficherMessage('Erreur : ' + causeV2(err)); }
 // Un appel de fond qui échoue ne dérange pas l'écran (la page reste utilisable), mais laisse sa trace dans le journal
 // des erreurs (onglet « Erreurs ») : jamais une panne avalée en silence. Usage : .catch(journaliserV2('Promotions'))
 function journaliserV2(quoi) { return function(err) { logErreurV2(quoi + ' : ' + causeV2(err), 'fond'); }; }
@@ -108,7 +110,7 @@ function demarrerAppV2(essai) {
       ALL_SUGGESTIONS = sugg || [];
       restaurerInventaireSuccV2(false);
     }).catch(function(err) {
-      var msg = (err && err.message) ? err.message : String(err);
+      var msg = causeV2(err);
       // Mot de passe : appelBackend a déjà rouvert l'écran du mot de passe → ne pas réessayer.
       if (msg === 'Mot de passe incorrect') return;
       // Pas de réseau : démarrer sur la copie gardée dans le téléphone

@@ -26,7 +26,7 @@ function ouvrirFicheV2(codebarre, provenance) {
     afficherFicheV2(result);
   }).catch(function(err) {
     fermerFicheV2();
-    afficherMessage('Erreur: ' + err);
+    signalerErreurV2(err);
   });
 }
 
@@ -192,7 +192,7 @@ function afficherFicheV2(result) {
             '<div class="colonne-controle">' +
               '<span class="libelle">Sur-inventaire ?</span>' +
               '<div class="colonne-ronds">' +
-                '<div id="ficheV2-panier" class="cercle' + (wine.Panier === 'Oui' ? ' actif' : '') + '" onclick="togglePanierV2()">' + (wine.Panier === 'Oui' ? '✓' : '') + '</div>' +
+                '<div id="ficheV2-panier" class="cercle' + (wine.Panier === 'Oui' ? ' actif' : '') + '" onclick="basculerRondFicheV2(\'ficheV2-panier\', \'Panier\')">' + (wine.Panier === 'Oui' ? '✓' : '') + '</div>' +
               '</div>' +
             '</div>' +
             '<div class="colonne-controle">' +
@@ -295,18 +295,6 @@ function recettesDeLaFamilleV2(famille) {
   });
 }
 
-// Comptes décroissants d'un champ multiple sur une liste de recettes
-function comptesRecettesV2(recettes, champ) {
-  var comptes = {};
-  recettes.forEach(function(r) {
-    (r[champ] || []).forEach(function(v) { comptes[v] = (comptes[v] || 0) + 1; });
-  });
-  return Object.keys(comptes).sort(function(a, b) {
-    if (comptes[b] !== comptes[a]) return comptes[b] - comptes[a];
-    return a.localeCompare(b);
-  }).map(function(v) { return { valeur: v, compte: comptes[v] }; });
-}
-
 var RECETTES_FICHE_V2 = [];
 
 // Accordéon des types de plats — un seul ouvert, titres cliquables vers saq.com
@@ -346,7 +334,7 @@ function chargerRecettesFicheV2(famille) {
   function rendre() {
     RECETTES_FICHE_V2 = recettesDeLaFamilleV2(fam);
     if (!RECETTES_FICHE_V2.length) { conteneur.innerHTML = '<div class="texte-secondaire">Aucune recette</div>'; return; }
-    conteneur.innerHTML = comptesRecettesV2(RECETTES_FICHE_V2, 'typesPlats').map(function(x, i) {
+    conteneur.innerHTML = comptesRecettesV2(RECETTES_FICHE_V2, 'typesPlats', true).map(function(x, i) {
       var esc = x.valeur.replace(/'/g, "\\'");
       return '<div class="item-liste accordeon-1" id="ficheV2-typ-' + i + '" onclick="basculerPlatFicheV2(' + i + ', \'' + esc + '\')">' + decodeHTML(x.valeur) + ' (' + x.compte + ')</div>' +
              '<div id="ficheV2-rec-' + i + '" style="display:none;"></div>';
@@ -468,7 +456,7 @@ function sauverCorrigerRecetteV2() {
     fermerCorrigerRecetteV2();
     if (CURRENT_WINE_DATA) chargerRecettesFicheV2(CURRENT_WINE_DATA.Famille);
     afficherMessage('Recette corrigée');
-  }).catch(function() { afficherMessage('Erreur d\'enregistrement'); });
+  }).catch(signalerErreurV2);
 }
 
 // ==================== Selon Chartier — bloc de la fiche (9a) ====================
@@ -659,10 +647,28 @@ function toggleAccordV2(element) {
   var selectionnes = Array.prototype.map.call(menu.querySelectorAll('.item-liste.actif'), function(el) { return el.getAttribute('data-accord'); });
   var display = document.getElementById('ficheV2-accords-display');
   if (display) display.textContent = selectionnes.length ? selectionnes.join(', ') : 'Aucun';
-  appelBackend('updateWineField', { codebarre: CURRENT_WINE_CODEBARRE, field: 'Accords', value: selectionnes.join(', ') }, { spinner: 'Sauvegarde' }).then(function() {
-    majMemoireVinV2(CURRENT_WINE_CODEBARRE, { 'Accords': selectionnes.join(', ') });
-    if (CURRENT_WINE_DATA) CURRENT_WINE_DATA.Accords = selectionnes.join(', ');
-  }).catch(function(err) { afficherMessage('Erreur: ' + err); });
+  enregistrerChampFicheV2('Accords', selectionnes.join(', ')).catch(signalerErreurV2);
+}
+
+// Un champ du vin de la fiche : au serveur, puis dans la mémoire et la fiche en cours (rend la promesse)
+function enregistrerChampFicheV2(champ, valeur, spinner) {
+  var maj = {};
+  maj[champ] = valeur;
+  return appelBackend('updateWineField', { codebarre: CURRENT_WINE_CODEBARRE, field: champ, value: valeur }, { spinner: spinner === undefined ? 'Sauvegarde' : spinner }).then(function() {
+    majMemoireVinV2(CURRENT_WINE_CODEBARRE, maj);
+    if (CURRENT_WINE_DATA) CURRENT_WINE_DATA[champ] = valeur;
+  });
+}
+
+// Un rond ✓ de la fiche (Panier, Favori) : il bascule et s'enregistre ; rend sa nouvelle valeur ('Oui' ou ''), null s'il manque
+function basculerRondFicheV2(id, champ) {
+  var btn = document.getElementById(id);
+  if (!btn) return null;
+  var valeur = btn.classList.contains('actif') ? '' : 'Oui';
+  btn.classList.toggle('actif', valeur === 'Oui');
+  btn.textContent = valeur === 'Oui' ? '✓' : '';
+  enregistrerChampFicheV2(champ, valeur).catch(signalerErreurV2);
+  return valeur;
 }
 
 function majMemoireVinV2(codebarre, champs) {
@@ -679,21 +685,14 @@ function setAimeV2(value) {
   var non = document.getElementById('ficheV2-aime-non');
   if (oui) oui.classList.toggle('actif', value === 'Oui');
   if (non) non.classList.toggle('actif', value === 'Non');
-  appelBackend('updateWineField', { codebarre: CURRENT_WINE_CODEBARRE, field: 'Racheter', value: value }, { spinner: 'Sauvegarde' }).then(function() {
-    majMemoireVinV2(CURRENT_WINE_CODEBARRE, { 'Racheter': value });
-    if (CURRENT_WINE_DATA) CURRENT_WINE_DATA.Racheter = value;
-  }).catch(function(err) { afficherMessage('Erreur: ' + err); });
+  enregistrerChampFicheV2('Racheter', value).catch(signalerErreurV2);
 }
 
 // Le rond « Favori » de la fiche : même champ que « Vin pour cépage favori »
 // du crayon ; l'étoile ★ des cépages suit sans recharger la fiche.
 function toggleFavoriV2() {
-  var btn = document.getElementById('ficheV2-favori');
-  if (!btn) return;
-  var actif = btn.classList.contains('actif');
-  var newValue = actif ? '' : 'Oui';
-  btn.classList.toggle('actif', !actif);
-  btn.textContent = newValue === 'Oui' ? '✓' : '';
+  var newValue = basculerRondFicheV2('ficheV2-favori', 'Favori');
+  if (newValue === null) return;
   var cep = document.getElementById('ficheV2-cepages');
   var etoile = document.getElementById('ficheV2-etoile-favori');
   if (newValue === 'Oui') {
@@ -701,23 +700,6 @@ function toggleFavoriV2() {
   } else if (etoile) {
     etoile.remove();
   }
-  appelBackend('updateWineField', { codebarre: CURRENT_WINE_CODEBARRE, field: 'Favori', value: newValue }, { spinner: 'Sauvegarde' }).then(function() {
-    majMemoireVinV2(CURRENT_WINE_CODEBARRE, { 'Favori': newValue });
-    if (CURRENT_WINE_DATA) CURRENT_WINE_DATA.Favori = newValue;
-  }).catch(function(err) { afficherMessage('Erreur: ' + err); });
-}
-
-function togglePanierV2() {
-  var btn = document.getElementById('ficheV2-panier');
-  if (!btn) return;
-  var actif = btn.classList.contains('actif');
-  var newValue = actif ? '' : 'Oui';
-  btn.classList.toggle('actif', !actif);
-  btn.textContent = newValue === 'Oui' ? '✓' : '';
-  appelBackend('updateWineField', { codebarre: CURRENT_WINE_CODEBARRE, field: 'Panier', value: newValue }, { spinner: 'Sauvegarde' }).then(function() {
-    majMemoireVinV2(CURRENT_WINE_CODEBARRE, { 'Panier': newValue });
-    if (CURRENT_WINE_DATA) CURRENT_WINE_DATA.Panier = newValue;
-  }).catch(function(err) { afficherMessage('Erreur: ' + err); });
 }
 
 // Garde TOUS les cépages affichés et ajoute le % de la SAQ là où il est disponible
@@ -1041,6 +1023,7 @@ function remettreNotesDisplayV2() {
   var champ = document.getElementById('ficheV2-notes-champ');
   if (!champ) return;
   var valeur = (CURRENT_WINE_DATA && CURRENT_WINE_DATA['Notes temporaires']) ? decodeHTML(CURRENT_WINE_DATA['Notes temporaires'].toString()) : '';
+  champ.onblur = null;   // retirer le champ le ferait « quitter » : pas de 2e sauvegarde
   champ.outerHTML = '<div id="ficheV2-notes-display" class="champ-cliquable" onclick="editerNotesSommelierV2()">' + (valeur || 'Aucune') + '</div>';
 }
 
@@ -1050,14 +1033,10 @@ function sauverNotesSommelierV2() {
   var valeur = champ.value.trim();
   var avant = ((CURRENT_WINE_DATA && CURRENT_WINE_DATA['Notes temporaires']) ? decodeHTML(CURRENT_WINE_DATA['Notes temporaires'].toString()) : '').trim();
   if (valeur === avant) { remettreNotesDisplayV2(); return; }
-  appelBackend('updateWineField', { codebarre: CURRENT_WINE_CODEBARRE, field: 'Notes temporaires', value: valeur }, { spinner: '' }).then(function() {
-    majMemoireVinV2(CURRENT_WINE_CODEBARRE, { 'Notes temporaires': valeur });
-    if (CURRENT_WINE_DATA) CURRENT_WINE_DATA['Notes temporaires'] = valeur;
+  enregistrerChampFicheV2('Notes temporaires', valeur, '').then(function() {
     remettreNotesDisplayV2();
     afficherMessage('Note sauvegardée');
-  }).catch(function() {
-    afficherMessage('Erreur de sauvegarde');
-  });
+  }).catch(signalerErreurV2);
 }
 
 // ==================== ÉDITION FICHE V2 ====================
@@ -1137,7 +1116,7 @@ function photoSAQDepuisEditV2() {
       remettreAncien();
       afficherMessage((res && res.message) || 'Photo introuvable');
     }
-  }).catch(function(err) { remettreAncien(); afficherMessage('Erreur: ' + err); });
+  }).catch(function(err) { remettreAncien(); signalerErreurV2(err); });
 }
 
 function sauverEditFicheV2() {
@@ -1159,5 +1138,5 @@ function sauverEditFicheV2() {
     document.getElementById('editFicheV2Overlay').style.display = 'none';
     afficherMessage('Modifications enregistrées');
     ouvrirFicheV2(CURRENT_WINE_CODEBARRE, FICHE_V2_PROVENANCE);
-  }).catch(function(err) { afficherMessage('Erreur: ' + err); });
+  }).catch(signalerErreurV2);
 }

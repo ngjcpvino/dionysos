@@ -79,7 +79,7 @@ function demarrerLecteurV2(session) {
     }).catch(function(e) {
       // zxing ne démarre pas : l'ancien lecteur prend la relève (il ouvre sa propre caméra)
       if (session !== SESSION_SCAN_V2 || !isScanningV2) return;
-      logErreurV2('Lecteur zxing indisponible, secours Quagga : ' + (e && e.message ? e.message : e), 'scan');
+      logErreurV2('Lecteur zxing indisponible, secours Quagga : ' + causeV2(e), 'scan');
       couperFluxV2(FLUX_SCAN_V2);
       FLUX_SCAN_V2 = null;
       demarrerQuaggaV2();
@@ -291,7 +291,7 @@ function validerSaisieManuelleV2() {
         }
         ouvrirMenuActionV2(cup, result);
       } else if (suggestionsV2Attente) {
-        creerVinSAQV2(cup, codeSAQ);
+        creerVinV2(cup, codeSAQ);
       } else {
         afficherVinInconnuV2(cup, codeSAQ);
       }
@@ -455,7 +455,7 @@ function ouvrirVinInconnuV2(code, fond) {
     if (mien && ouvrirMonVinAutreCodeV2(code, mien)) return;
     if (codeSAQ && suggestionsV2Attente) {
       document.getElementById('vinInconnuV2Container').style.display = 'none';
-      creerVinSAQV2(code, codeSAQ);
+      creerVinV2(code, codeSAQ);
       return;
     }
     afficherVinInconnuV2(code, codeSAQ || '');
@@ -620,24 +620,22 @@ function estPropositionV2(w) {
   return !((w && w.Racheter) || '').toString().trim();
 }
 
-function creerVinSAQV2(code, codeSAQ, mode) {
-  appelBackend('ajouterVinAvecBouteilles', { codebarre: code, codeSAQ: codeSAQ, note: '', bouteilles: '[]', nom: '' }, { spinner: 'Un instant svp' }).then(function(res) {
+// Un vin inscrit sans bouteille, par son code SAQ ou, à défaut, par son nom ; puis la suite selon mode
+function creerVinV2(code, codeSAQ, nom, mode) {
+  appelBackend('ajouterVinAvecBouteilles', { codebarre: code, codeSAQ: codeSAQ || '', note: '', bouteilles: '[]', nom: nom || '' }, { spinner: 'Un instant svp' }).then(function(res) {
     if (res && res.success) {
       enchainerMenuApresCreationV2(code, mode);
     } else {
       retourAccueilV2((res && res.message) ? res.message : 'Création refusée par le serveur');
     }
   }).catch(function(e) {
-    retourAccueilV2('Création impossible : ' + (e && e.message ? e.message : 'erreur inconnue'));
+    retourAccueilV2('Création impossible : ' + causeV2(e));
   });
 }
 
 function enchainerMenuApresCreationV2(code, mode) {
   appelBackend('checkWineExists', { codebarre: code }, { spinner: 'Un instant svp' }).then(function(result) {
-    return appelBackend('getInventoryData', {}, { spinner: 'Un instant svp' }).then(function(data) {
-      if (data) ALL_DATA = data;
-      return result;
-    }).catch(function() { return result; });
+    return rechargerInventaireV2('Un instant svp').then(function() { return result; }).catch(function() { return result; });
   }).then(function(result) {
     document.getElementById('vinInconnuV2Container').style.display = 'none';
     if (!result || !result.exists) {
@@ -658,7 +656,7 @@ function enchainerMenuApresCreationV2(code, mode) {
       terminerAjoutSuggestionV2(code, result);
     });
   }).catch(function(e) {
-    retourAccueilV2('Vérification impossible : ' + (e && e.message ? e.message : 'erreur inconnue'));
+    retourAccueilV2('Vérification impossible : ' + causeV2(e));
   });
 }
 
@@ -712,7 +710,7 @@ function creerVinManuelV2(mode) {
   function suite(saq) {
     if (mode === 'achat') { arriveeVinNeufV2(code, saq, saq ? '' : nom); return; }
     document.getElementById('vinInconnuV2Container').style.display = 'none';
-    if (saq) creerVinSAQV2(code, saq, mode); else creerVinNomV2(code, nom, mode);
+    creerVinV2(code, saq, saq ? '' : nom, mode);
   }
 
   if (codeSAQ) { suite(codeSAQ); return; }
@@ -739,20 +737,15 @@ function arriveeVinNeufV2(code, codeSAQ, nom) {
   naviguerV2(ouvrirArriveeV2);
 }
 
-function creerVinNomV2(code, nom, mode) {
-  document.getElementById('vinInconnuV2Container').style.display = 'none';
-  appelBackend('ajouterVinAvecBouteilles', { codebarre: code, codeSAQ: '', note: '', bouteilles: '[]', nom: nom }, { spinner: 'Un instant svp' }).then(function(res) {
-    if (res && res.success) {
-      enchainerMenuApresCreationV2(code, mode);
-    } else {
-      retourAccueilV2((res && res.message) ? res.message : 'Création refusée par le serveur');
-    }
-  }).catch(function(e) {
-    retourAccueilV2('Création impossible : ' + (e && e.message ? e.message : 'erreur inconnue'));
-  });
-}
-
 let menuActionV2Context = null;
+
+// Une carte d'une liste (À ranger, Emplacements) → le Déplacer de ce vin ; son ✕ ramène à la liste (retour)
+function deplacerDepuisListeV2(code, retour) {
+  var result = wineResultDepuisMemoireV2(code);
+  if (!result) { afficherMessage('Vin introuvable'); return; }
+  menuActionV2Context = { code: code, wineResult: result, retour: retour };
+  naviguerV2(ouvrirDeplacerV2);
+}
 
 function barcodeDepuisSAQV2(codeSAQ) {
   var saq = (codeSAQ || '').toString().trim();
@@ -866,8 +859,7 @@ var arriveeV2Choix = { meuble: '', rangee: '', espace: '' };
 function espacesOccupesV2(meuble, rangee) {
   var occupes = [];
   (ALL_DATA || []).forEach(function(item) {
-    var statut = item.Statut || 'En stock';
-    if (statut === 'Bu' || statut === 'Sorti' || statut === 'Suggestion') return;
+    if (!bouteilleEnCaveV2(item)) return;
     if (String(item.Meuble) === String(meuble) && String(item.Rangee) === String(rangee) && item.Espace) {
       occupes.push(String(item.Espace));
     }
