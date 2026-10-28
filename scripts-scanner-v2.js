@@ -2733,9 +2733,9 @@ function lancerRechercheV2() {
     var infos = saqInfosV2();
     var tousVins = grouperVinsV2(ALL_DATA || []);
 
-    // --- Mes notes : aliments, ce que ça appelle, qui l'a dit
+    // --- Nos notes : aliments, ce que ça appelle, qui l'a dit
     var notes = (ALL_NOTES || []).filter(function(n) { return contient([n.aliments, n.appelle, n.source, n.cepages, n.appellations]); });
-    ajouterSectionRechercheV2(sections, 'Mes notes', notes, function(n) { return groupeNoteV2(n, tousVins, 'recherche'); });
+    ajouterSectionRechercheV2(sections, 'Nos notes', notes, function(n) { return groupeNoteV2(n, tousVins, 'recherche'); });
 
     // --- Propositions : sommelier, note, nom du vin
     var props = (ALL_SUGGESTIONS || []).filter(function(sg) {
@@ -2825,7 +2825,7 @@ function basculerSectionRechercheV2(i) {
   RECHERCHE_V2_SECTION_OUVERTE = cible.getAttribute('data-titre') || '';
 }
 
-// ==================== MES NOTES D'ACCORD V2 ====================
+// ==================== NOS NOTES D'ACCORD V2 ====================
 // Une phrase entendue (« asperge et crabe m'amènent un chablis »), notée telle
 // quelle : des aliments, ce que ça appelle, qui l'a dit. Aucun lien avec un vin
 // précis — c'est ce qui la distingue des Propositions.
@@ -2960,7 +2960,7 @@ function afficherNotesV2() {
   div.innerHTML = liste.map(function(n) { return groupeNoteV2(n, groupes); }).join('');
 }
 
-// Une note + les vins qu'elle appelle : même bloc sur la page Mes notes et dans la recherche (provenance 'recherche').
+// Une note + les vins qu'elle appelle : même bloc sur la page Nos notes et dans la recherche (provenance 'recherche').
 // La fiche est sous cette page dans le HTML : depuis la page, on la ferme avant d'ouvrir la fiche (le ✕ la rouvre).
 function groupeNoteV2(n, groupes, provenance) {
   var sous = [n.aliments, n.source].filter(Boolean).join(' · ');
