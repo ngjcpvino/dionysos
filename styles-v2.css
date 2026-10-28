@@ -60,7 +60,6 @@ html, body {
   --white-15: rgba(255,255,255,0.15);
   --white-10: rgba(255,255,255,0.1);
   --white-05: rgba(255,255,255,0.05);
-  --white-03: rgba(255,255,255,0.03);
   --red: #c0392b;
   --error: #f44336;
   --success: #4caf50;
@@ -437,9 +436,18 @@ body::after {
 .ligne-ronds.grande .cercle { width: var(--taille-90); height: var(--taille-90); font-size: var(--fs-32); }
 
 /* ===== Emplacements : meuble graphique ===== */
-.emp-bloc {
+/* L'ENCADRÉ — le même cadre partout (28 oct. 2026) : champs, menus, lignes de liste, blocs des Emplacements,
+   cases de la Dégustation. Un nouveau cadre réutilise ces classes, jamais un autre fond ni une autre bordure. */
+.champ-cliquable, .champ-saisie, .item-liste, .emp-bloc, .carte-info {
+  background: var(--white-05);
   border: var(--largeur-bordure-1) solid var(--white-10);
-  background: var(--white-03);
+}
+.champ-cliquable, .champ-saisie, .item-liste {
+  padding: var(--space-10) var(--space-15);
+  color: var(--white);
+  font-size: var(--fs-14);
+}
+.emp-bloc {
   padding: var(--space-10) var(--space-15) var(--space-15);
   margin-bottom: var(--space-25);
 }
@@ -661,8 +669,6 @@ body::after {
   flex: 1 1 auto;
   min-width: var(--taille-90);
   padding: var(--space-10);
-  background: var(--noir-50);
-  border: var(--largeur-bordure-1) solid var(--white-10);
   text-align: center;
 }
 .carte-info .libelle {
@@ -844,11 +850,6 @@ body::after {
 
 .champ-cliquable {
   flex: 1;
-  padding: var(--space-10) var(--space-15);
-  background: var(--white-05);
-  border: var(--largeur-bordure-1) solid var(--white-10);
-  color: var(--white);
-  font-size: var(--fs-14);
   cursor: pointer;
 }
 .panneau-gauche .champ-cliquable { flex: none; }
@@ -864,11 +865,6 @@ body::after {
 .champ-saisie {
   width: 100%;
   max-width: var(--taille-400);
-  padding: var(--space-10) var(--space-15);
-  background: var(--white-05);
-  border: var(--largeur-bordure-1) solid var(--white-10);
-  color: var(--white);
-  font-size: var(--fs-14);
   text-align: left;
   letter-spacing: var(--ls-1);
   outline: none;
@@ -892,13 +888,9 @@ input[type="date"].champ-saisie::-webkit-date-and-time-value { text-align: left;
 .menu-liste::-webkit-scrollbar { display: none; }
 .menu-liste.ouvert { display: block; }
 .item-liste {
-  padding: var(--space-10) var(--space-15);
   margin-bottom: var(--space-10);
   cursor: pointer;
-  font-size: var(--fs-14);
   white-space: nowrap;
-  background: var(--white-05);
-  border: var(--largeur-bordure-1) solid var(--white-10);
 }
 .item-liste:last-child { margin-bottom: 0; }
 .item-liste.actif { background: var(--gold-30); }
@@ -1066,16 +1058,11 @@ input[type="date"].champ-saisie::-webkit-date-and-time-value { text-align: left;
   border: var(--largeur-bordure-1) solid var(--white-10);
 }
 
+/* Groupe d'un vin (sa carte puis ses cartes en retrait) : le trait de gauche est celui de .vin-* */
 .histo-groupe {
   margin-bottom: var(--space-25);
-  border-left: var(--largeur-bordure-1) solid transparent;
   padding-left: var(--space-10);
 }
-.histo-groupe.vin-rouge  { border-left-color: var(--vin-rouge); }
-.histo-groupe.vin-blanc  { border-left-color: var(--vin-blanc); }
-.histo-groupe.vin-rose   { border-left-color: var(--vin-rose); }
-.histo-groupe.vin-bulles { border-left-color: var(--vin-bulles); }
-.histo-groupe.vin-spiritueux { border-left-color: var(--vin-spiritueux); }
 .histo-vin {
   padding-top: var(--space-10);
 }
