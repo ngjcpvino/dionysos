@@ -1,0 +1,3 @@
+# Cas acceptés par le garde-fou (outils/garde-fou.py) : un sosie VRAIMENT différent, expliqué à l'utilisatrice ou l'utilisateur.
+# Une ligne par cas : « clé | raison » — la clé est celle que le garde-fou affiche entre crochets.
+# Exemple : classe .exemple | aucun style existant ne fait ça : … (expliqué le jj mois aaaa)

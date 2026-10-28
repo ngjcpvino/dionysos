@@ -52,6 +52,7 @@
 - Un titre s'écrit pareil partout, une liste se comporte pareil partout, un bouton se ferme pareil partout. Toute exception doit être DEMANDÉE, jamais improvisée.
 
 ## Vérification avant livraison — OBLIGATOIRE, en silence
+- **Garde-fou (28 oct. 2026)** : avant chaque publication, `python3 outils/garde-fou.py` doit répondre « rien à signaler ». Il se lance aussi tout seul avant chaque `git push` (`.claude/settings.json`) et BLOQUE s'il trouve un sosie : nouvelle classe CSS, valeur en dur hors `:root`, style en dur dans le HTML ou le JS, fonction qui ressemble à une autre, bloc de code copié. La réponse est de réutiliser l'existant. Seule exception : un cas vraiment différent, EXPLIQUÉ à l'utilisateur, puis inscrit avec sa raison dans `outils/garde-fou-acceptes.txt`. Jamais de contournement : pas de publication qui évite l'outil, pas d'ajout aux acceptés sans l'avoir dit.
 - Chaque parcours utilisateur est tracé JUSQU'AU BOUT avant de livrer : succès, erreur, annulation, retour. Une fonction qui ouvre une page a TOUJOURS sa sortie définie.
 - Chaque livraison est vérifiée contre : (1) les décisions du `.md` d'état, (2) le style des pages existantes, (3) la règle des données fraîches (toute écriture au Sheet resynchronise les mémoires), (4) l'impact sur les autres pages (IDs, classes, variables, z-index, navigation).
 - Un travail demandé « complet » couvre TOUS les volets : navigation, style, gels/blocages, aboutissement de chaque fonction, données. Si un volet ne peut pas être couvert, le dire AVANT, pas après.
