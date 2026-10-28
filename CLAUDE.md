@@ -8,6 +8,8 @@
 
 **4. Garde-fou avant chaque publication.** `python3 outils/garde-fou.py` doit répondre « rien à signaler » (il se lance aussi tout seul avant `git push`). Il bloque toute copie de l'existant : réutiliser, jamais copier — voir `REFERENCE.md`.
 
+**5. La liste 2.0** (plan de consolidation, 28 oct. 2026) : `liste-2.0.md`. Quand l'utilisateur demande « ta liste 2.0 », c'est ce fichier — la présenter, puis la reprendre un chantier à la fois.
+
 ## Repères techniques (pour ne pas les redemander)
 - **Frontend** : dépôt public `ngjcpvino/dionysos`, servi par GitHub Pages (`index-v2.html` · `styles-v2.css` · `scripts-*-v2.js` : socle, communs, scan, cave, achat, recherche, accords, emplacements, historique, fiche — rôle de chacun dans `mise-a-jour.md` « Fichiers » · `sw.js` — copie hors ligne). Anti-cache : jusqu'à ~1 h avant qu'une publication soit visible.
 - **Backend** : Google Apps Script `Code.gs` — hors de ce dépôt public : il vit dans le dépôt **PRIVÉ `ngjcpvino/dionysos-serveur`** (historique de chaque version ; copie de travail gitignorée ici). Une modif du backend = la pousser là, puis l'utilisateur recopie tout `Code.gs` dans Apps Script **et redéploie** (Gérer les déploiements → Nouvelle version), à la main.
