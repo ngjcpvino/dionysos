@@ -8,7 +8,7 @@
 ## 📁 Architecture
 - **Frontend** : GitHub Pages, dépôt public `ngjcpvino/dionysos`. Adresse : `.../index-v2.html` (l'adresse de base donne « page introuvable » — assumé, ce n'est PAS une protection).
 - **Backend** : Google Apps Script, projet « Vino 3.0 », `Code.gs`. **La version de référence vit dans le dépôt PRIVÉ `ngjcpvino/dionysos-serveur`** (`Code.gs`, `appsscript.json` — celui du dépôt public est périmé —, `README.md` : coller, vérifier la dernière ligne, redéployer, revenir en arrière). Copie de travail gitignorée ici. Tout changement du backend y est poussé (branche `main`) et envoyé en pièce jointe ; l'utilisateur colle tout le fichier puis redéploie.
-  - Vérif simple d'un collage : le numéro de la dernière ligne de `Code.gs` dans Apps Script (**3 011 lignes** depuis le ménage du 28 oct. ; 3 131 avant).
+  - Vérif simple d'un collage : le numéro de la dernière ligne de `Code.gs` dans Apps Script (**2 405 lignes** depuis la consolidation du 28 oct., liste 2.0 chantier 5 ; 3 011 après le ménage, 3 131 avant).
   - ⚠️ La copie `Dionysos/Code.gs` du Google Drive est **la copie de l'utilisateur** (faite en collant, 25 oct.) : l'IA ne la met pas à jour. La coller = « aucun changement ».
   - Lire le projet sans copier-coller : export par le connecteur Drive (`application/vnd.google-apps.script+json`, fichier `Code`). Projet « Vino 3.0 » = identifiant `1HYkvpL3PhuZrzgVwYDP2KRcBEOikrxTA-QbVQX-tC5ey7nDP9YX-h8Pd`.
   - **Mise en ligne sans copier-coller : `outils/deployer.py` du dépôt `dionysos-serveur`** (`etat` · `essai` · `publier "…"` · `revenir N`) — **prêt (28 oct.), en attente de la clé** de l'utilisateur (variable d'environnement `CLASPRC_JSON`, mode d'emploi dans le `README.md` de ce dépôt). Tant qu'elle manque, le collage à la main reste la règle. Le réseau de l'environnement bloque `script.google.com` (l'adresse de l'app) : la vérification finale se fait dans l'app, sauf si l'utilisateur l'ajoute aux domaines permis ; `script.googleapis.com` (l'API) passe.
@@ -149,6 +149,16 @@
 
 ## 🔑 Backend — pièges
 - **Le Statut `'Suggestion'` N'EXISTE PAS dans les données** : aucune ligne de `Code.gs` ne l'écrit ; un vin sans bouteille active revient avec `Statut: "Bu"`. Une proposition = `Racheter` vide (`estPropositionV2`). **Une bouteille en cave = `bouteilleEnCaveV2(i)`** (ni « Bu » ni « Sorti » ; le vin sans bouteille revient en « Bu », bouteille 0) — `bouteillesEnCaveV2('rangees' | 'aranger')`, `vinEnCaveV2(code, champ)` ; jamais de test de Statut écrit à la main (14 copies en 4 variantes retirées le 28 oct.). Un vin proposé puis acheté redevient normal : `addBottle` pose `AIME = "Oui"` s'il était vide.
+- **Une seule façon de faire, côté serveur (28 oct. 2026, liste 2.0 chantier 5)** — à réutiliser, jamais à recopier :
+  - le classeur s'ouvre une fois par appel : `classeur_()`, `onglet_(nom)` (jamais `SpreadsheetApp.openById` ailleurs) ;
+  - un vin par son code-barres : `ligneDuVin_(values, code)` (n'importe lequel de ses codes, zéros de tête ignorés : `cleCode_`, `memeCodeBarre`), ses codes `codesDeLaLigne_`, ses bouteilles `bouteilleDe_` / `bouteillesDe_` (`active` = ni « Bu » ni « Sorti ») ; une entrée de l'inventaire : `entreeInventaire_` ;
+  - écrire : `ecrireLigne_(sheet, ligne, { colonne : valeur })` — les colonnes qui se suivent partent en un seul `setValues`, aucune autre cellule réécrite (⚠️ jamais réécrire une ligne entière lue : un code « 0061… » redeviendrait un nombre) ; une bouteille : `cellulesBouteille_`, `bouteilleQuiArrive_` ;
+  - lire un onglet pour l'app : `lireOnglet_(nom, garder, enObjet)` ; un onglet à en-têtes : `ongletAvecEntetes_` ; supprimer une ligne : `supprimerLigne_` ; une valeur dans config : `ajouterAConfig_` ;
+  - la SAQ : `appelAPISAQ` (le seul appel au catalogue : clé et en-têtes écrits une fois), `produitsSAQ_`, `prixSAQ_`, `attributsVinSAQ_`, `pointsBonisSAQ_`, `idInterneSAQ_`, `pageSuccursalesSAQ_`, `extraireSAQ_` (pages produit) ;
+  - les routes : `executerAction_` (la table), `doPost` (mot de passe, verrou, réponse `reponseJSON_`).
+- **Verrou des écritures** : les 22 actions de `ACTIONS_QUI_ECRIVENT_` passent une à la fois (`LockService`, 30 s) ; occupé → « Le serveur est occupé par une autre écriture, réessayez » (le toast d'erreur de l'app le dit). **Toute nouvelle action qui écrit s'ajoute à cette liste.** Pas de verrou pour les lectures, le journal des erreurs et les grandes mises à jour (Curieux Bégin, Accords SAQ).
+- **Banc d'essai du serveur** (dépôt privé, `outils/banc/`) : `node outils/banc/verifier.js` joue les 46 routes et les outils de l'éditeur sur un faux classeur et une fausse SAQ, et compare à `origin/main` (réponses, cellules, appels au réseau). **À lancer avant chaque publication du serveur.**
+- **Boire** inscrit dans l'Historique le code-barres **principal** du vin (le premier), plus toute la liste ; `getHistorique` trouve la couleur par n'importe quel code (anciennes lignes à liste comprises).
 - `checkWineExists` renvoie des bouteilles SANS `row` (d'où le repli sur `wineResult.row`).
 - **« Boire » idempotent** : `actionBouteille('boire')` sur une bouteille déjà sortie retourne `dejaFait:true` sans réécrire l'historique (évite le plat écrit en double).
 - **`supprimerHistorique(row)`** efface **seulement l'entrée** (rond Supprimer de `histoEditV2Overlay`), **ne remet PAS la bouteille en stock**.
@@ -291,6 +301,7 @@ Une phrase entendue (« asperge et crabe m'amènent un chablis »). 4e mécaniqu
 
 ## 📋 En attente
 - **Liste 2.0** (`liste-2.0.md`) : tout le plan de consolidation, un chantier à la fois.
+- **À recoller par l'utilisateur, à l'ordinateur** : `Code.gs` du dépôt privé (**2 405 lignes** : ménage du chantier 0 + consolidation du chantier 5), puis Déployer → Gérer les déploiements → ✏️ → **Nouvelle version**. Aucun changement de l'app n'en dépend : l'ancien et le nouveau serveur répondent pareil. (Ou installer la clé du chantier 1 : Claude le met en ligne lui-même.)
 - **Supprimer `scripts-scanner-v2.js` à partir du 4 nov. 2026** (et la ligne qui le décrit dans 📂 Fichiers).
 - **Essais de la 1.0 en fin de semaine** : tournée du Tri, hors ligne en succursale, **et le nouveau lecteur** (au cellier, en succursale ; la lampe sur l'iPhone ?).
 - **Après ces essais, si le lecteur zxing est concluant** : retirer Quagga (balise de `index-v2.html`, `EXTERNES` de `sw.js`, `demarrerQuaggaV2` et son appel).
