@@ -875,7 +875,7 @@ function menuV2Click(action) {
 var arriveeV2Choix = { meuble: '', rangee: '', espace: '' };
 
 // Espaces occupés d'une rangée donnée (inventaire en mémoire, statut actif)
-function espacesOccupesArrivee(meuble, rangee) {
+function espacesOccupesV2(meuble, rangee) {
   var occupes = [];
   (ALL_DATA || []).forEach(function(item) {
     var statut = item.Statut || 'En stock';
@@ -890,7 +890,7 @@ function espacesOccupesArrivee(meuble, rangee) {
 // Une rangée a-t-elle au moins une place libre ?
 function rangeeALibre(meuble, rangee) {
   var tous = (CONFIG.meubles[meuble] && CONFIG.meubles[meuble][rangee]) ? CONFIG.meubles[meuble][rangee] : [];
-  var occ = espacesOccupesArrivee(meuble, rangee);
+  var occ = espacesOccupesV2(meuble, rangee);
   return tous.some(function(e) { return occ.indexOf(String(e)) === -1; });
 }
 
@@ -918,6 +918,74 @@ function majBarrePlacementV2(prefixe, champ, valeur, defaut) {
   if (coche) coche.classList.toggle('actif', !!valeur);
 }
 
+// ==================== LE CHOIX D'UN EMPLACEMENT (28 oct. 2026, liste 2.0 chantier 4) ====================
+// Un seul sélecteur Meuble → Rangée → Espace pour l'Arrivée et le Déplacer (prefixe 'arriveeV2' / 'deplacerV2') :
+// seules les places libres sont proposées ; l'espace choisi est revérifié au serveur (l'autre téléphone a pu le
+// prendre) — pris : l'inventaire frais et la liste des espaces rouverte ; libre : l'écran pose la bouteille.
+var PLACEMENTS_V2 = {
+  arriveeV2: { choix: function() { return arriveeV2Choix; }, poser: function(c) { ajouterBouteilleArrivee(c.meuble, c.rangee, c.espace); } },
+  deplacerV2: { choix: function() { return deplacerV2Choix; }, poser: function(c) { deplacerBouteilleV2(c); } }
+};
+var LIBELLES_PLACEMENT_V2 = { meuble: 'Meuble', rangee: 'Rangée', espace: 'Espace' };
+
+function meublesLibresV2() {
+  return ((CONFIG && CONFIG.meubles) ? Object.keys(CONFIG.meubles) : []).filter(meubleALibre).sort(function(a, b) { return a.localeCompare(b); });
+}
+function rangeesLibresV2(meuble) {
+  return (CONFIG.meubles[meuble] ? Object.keys(CONFIG.meubles[meuble]) : []).filter(function(r) { return rangeeALibre(meuble, r); })
+    .sort(function(a, b) { return parseInt(a) - parseInt(b); });
+}
+function espacesLibresV2(meuble, rangee) {
+  var occ = espacesOccupesV2(meuble, rangee);
+  return ((CONFIG.meubles[meuble] && CONFIG.meubles[meuble][rangee]) ? CONFIG.meubles[meuble][rangee] : [])
+    .filter(function(e) { return occ.indexOf(String(e)) === -1; }).sort(function(a, b) { return parseInt(a) - parseInt(b); });
+}
+// Une liste de choix (meubles, rangées ou espaces), la valeur prise cochée
+function menuPlacementV2(prefixe, champ, valeurs) {
+  var pris = PLACEMENTS_V2[prefixe].choix()[champ];
+  document.getElementById(prefixe + '-' + champ + '-menu').innerHTML = valeurs.map(function(v) {
+    return ligneChoixPlacementV2(v, 'choisirPlacementV2(&quot;' + prefixe + '&quot;, &quot;' + champ + '&quot;, &quot;' + v + '&quot;)', String(pris) === String(v));
+  }).join('');
+}
+// Le rond d'une liste l'ouvre (et referme les deux autres) ; le retaper la referme
+function basculerListePlacementV2(prefixe, champ) {
+  Object.keys(LIBELLES_PLACEMENT_V2).forEach(function(t) {
+    document.getElementById(prefixe + '-' + t + '-menu').classList.toggle('ouvert', t === champ && !document.getElementById(prefixe + '-' + t + '-menu').classList.contains('ouvert'));
+  });
+}
+function choisirPlacementV2(prefixe, champ, valeur) {
+  var c = PLACEMENTS_V2[prefixe].choix();
+  c[champ] = valeur;
+  majBarrePlacementV2(prefixe, champ, valeur, LIBELLES_PLACEMENT_V2[champ]);
+  document.getElementById(prefixe + '-' + champ + '-menu').classList.remove('ouvert');
+  if (champ === 'espace') { verifierEtPoserPlacementV2(prefixe); return; }
+  c.espace = '';
+  majBarrePlacementV2(prefixe, 'espace', '', 'Espace');
+  if (champ === 'rangee') { menuPlacementV2(prefixe, 'espace', espacesLibresV2(c.meuble, valeur)); return; }
+  c.rangee = '';
+  majBarrePlacementV2(prefixe, 'rangee', '', 'Rangée');
+  var aRanger = document.getElementById(prefixe + '-aranger');   // Déplacer : « À ranger » tant qu'aucun meuble n'est choisi
+  if (aRanger) aRanger.style.display = 'none';
+  menuPlacementV2(prefixe, 'rangee', rangeesLibresV2(valeur));
+  document.getElementById(prefixe + '-espace-menu').innerHTML = '';
+}
+function verifierEtPoserPlacementV2(prefixe) {
+  var c = PLACEMENTS_V2[prefixe].choix();
+  appelBackend('checkLocationAvailable', { meuble: c.meuble, rangee: c.rangee, espace: c.espace }, { spinner: 'Vérification' }).then(function(result) {
+    if (result.available) { PLACEMENTS_V2[prefixe].poser(c); return; }
+    afficherMessage('Occupé par : ' + result.message);
+    return appelBackend('getInventoryData', {}).then(function(data) {
+      if (data) ALL_DATA = data;
+      c.espace = '';
+      majBarrePlacementV2(prefixe, 'espace', '', 'Espace');
+      menuPlacementV2(prefixe, 'espace', espacesLibresV2(c.meuble, c.rangee));
+      document.getElementById(prefixe + '-espace-menu').classList.add('ouvert');
+    });
+  }).catch(function(err) {
+    afficherMessage('Vérification de l\'espace impossible : ' + (err && err.message ? err.message : err));
+  });
+}
+
 function ouvrirArriveeV2() {
   if (!menuActionV2Context) return;
   construireArriveeV2();
@@ -941,14 +1009,8 @@ function construireArriveeV2() {
   majBarrePlacementV2('arriveeV2', 'rangee', '', 'Rangée');
   majBarrePlacementV2('arriveeV2', 'espace', '', 'Espace');
 
-  var menuMeuble = document.getElementById('arriveeV2-meuble-menu');
-  var meubles = (CONFIG && CONFIG.meubles) ? Object.keys(CONFIG.meubles) : [];
-  meubles = meubles.filter(function(m) { return meubleALibre(m); });
-  meubles.sort(function(a, b) { return a.localeCompare(b); });
-  menuMeuble.innerHTML = meubles.map(function(m) {
-    return ligneChoixPlacementV2(m, 'choisirMeubleArrivee(&quot;' + m + '&quot;)', arriveeV2Choix.meuble === m);
-  }).join('');
-  menuMeuble.classList.remove('ouvert');
+  menuPlacementV2('arriveeV2', 'meuble', meublesLibresV2());
+  document.getElementById('arriveeV2-meuble-menu').classList.remove('ouvert');
   document.getElementById('arriveeV2-rangee-menu').innerHTML = '';
   document.getElementById('arriveeV2-rangee-menu').classList.remove('ouvert');
   document.getElementById('arriveeV2-espace-menu').innerHTML = '';
@@ -969,82 +1031,6 @@ function fermerArriveeV2() {
   if (menuActionV2Context) {
     ouvrirMenuActionV2(menuActionV2Context.code, menuActionV2Context.wineResult);
   }
-}
-
-function basculerListeArrivee(type) {
-  ['meuble', 'rangee', 'espace'].forEach(function(t) {
-    var menu = document.getElementById('arriveeV2-' + t + '-menu');
-    if (t === type) {
-      menu.classList.toggle('ouvert');
-    } else {
-      menu.classList.remove('ouvert');
-    }
-  });
-}
-
-function choisirMeubleArrivee(meuble) {
-  arriveeV2Choix.meuble = meuble;
-  arriveeV2Choix.rangee = '';
-  arriveeV2Choix.espace = '';
-  majBarrePlacementV2('arriveeV2', 'meuble', meuble, 'Meuble');
-  document.getElementById('arriveeV2-meuble-menu').classList.remove('ouvert');
-  majBarrePlacementV2('arriveeV2', 'rangee', '', 'Rangée');
-  majBarrePlacementV2('arriveeV2', 'espace', '', 'Espace');
-
-  var rangees = (CONFIG.meubles[meuble]) ? Object.keys(CONFIG.meubles[meuble]) : [];
-  rangees = rangees.filter(function(r) { return rangeeALibre(meuble, r); });
-  rangees.sort(function(a, b) { return parseInt(a) - parseInt(b); });
-  document.getElementById('arriveeV2-rangee-menu').innerHTML = rangees.map(function(r) {
-    return ligneChoixPlacementV2(r, 'choisirRangeeArrivee(&quot;' + r + '&quot;)', String(arriveeV2Choix.rangee) === String(r));
-  }).join('');
-  document.getElementById('arriveeV2-espace-menu').innerHTML = '';
-}
-
-function choisirRangeeArrivee(rangee) {
-  arriveeV2Choix.rangee = rangee;
-  arriveeV2Choix.espace = '';
-  majBarrePlacementV2('arriveeV2', 'rangee', rangee, 'Rangée');
-  document.getElementById('arriveeV2-rangee-menu').classList.remove('ouvert');
-  majBarrePlacementV2('arriveeV2', 'espace', '', 'Espace');
-
-  var meuble = arriveeV2Choix.meuble;
-  var espaces = (CONFIG.meubles[meuble] && CONFIG.meubles[meuble][rangee]) ? CONFIG.meubles[meuble][rangee] : [];
-  var occ = espacesOccupesArrivee(meuble, rangee);
-  espaces = espaces.filter(function(e) { return occ.indexOf(String(e)) === -1; });
-  espaces.sort(function(a, b) { return parseInt(a) - parseInt(b); });
-  document.getElementById('arriveeV2-espace-menu').innerHTML = espaces.map(function(e) {
-    return ligneChoixPlacementV2(e, 'choisirEspaceArrivee(&quot;' + e + '&quot;)', String(arriveeV2Choix.espace) === String(e));
-  }).join('');
-}
-
-function choisirEspaceArrivee(espace) {
-  arriveeV2Choix.espace = espace;
-  majBarrePlacementV2('arriveeV2', 'espace', espace, 'Espace');
-  document.getElementById('arriveeV2-espace-menu').classList.remove('ouvert');
-
-  var c = arriveeV2Choix;
-  appelBackend('checkLocationAvailable', { meuble: c.meuble, rangee: c.rangee, espace: c.espace }, { spinner: 'Vérification' }).then(function(result) {
-    if (!result.available) {
-      afficherMessage('Occupé par : ' + result.message);
-      return appelBackend('getInventoryData', {}).then(function(data) {
-        if (data) ALL_DATA = data;
-        arriveeV2Choix.espace = '';
-        majBarrePlacementV2('arriveeV2', 'espace', '', 'Espace');
-        var occ = espacesOccupesArrivee(c.meuble, c.rangee);
-        var espaces = (CONFIG.meubles[c.meuble] && CONFIG.meubles[c.meuble][c.rangee]) ? CONFIG.meubles[c.meuble][c.rangee] : [];
-        espaces = espaces.filter(function(e) { return occ.indexOf(String(e)) === -1; });
-        espaces.sort(function(a, b) { return parseInt(a) - parseInt(b); });
-        var menu = document.getElementById('arriveeV2-espace-menu');
-        menu.innerHTML = espaces.map(function(e) {
-          return ligneChoixPlacementV2(e, 'choisirEspaceArrivee(&quot;' + e + '&quot;)', false);
-        }).join('');
-        menu.classList.add('ouvert');
-      });
-    }
-    ajouterBouteilleArrivee(c.meuble, c.rangee, c.espace);
-  }).catch(function(err) {
-    afficherMessage('Erreur : ' + err);
-  });
 }
 
 function arriveeARangerV2() {
@@ -1083,7 +1069,7 @@ function construireDeplacerV2() {
     deplacerV2Choix.bottle = bottles[0].bottle;
     document.getElementById('deplacerV2-choix-bouteille').style.display = 'none';
     document.getElementById('deplacerV2-destination').style.display = 'block';
-    construireMeublesDeplacer();
+    menuPlacementV2('deplacerV2', 'meuble', meublesLibresV2());
   } else {
     var menu = document.getElementById('deplacerV2-bouteille-menu');
     menu.innerHTML = bottles.map(function(b) {
@@ -1102,100 +1088,22 @@ function choisirBouteilleDeplacer(row, bottle) {
   deplacerV2Choix.bottle = bottle;
   document.getElementById('deplacerV2-choix-bouteille').style.display = 'none';
   document.getElementById('deplacerV2-destination').style.display = 'block';
-  construireMeublesDeplacer();
+  menuPlacementV2('deplacerV2', 'meuble', meublesLibresV2());
 }
 
-function construireMeublesDeplacer() {
-  var meubles = (CONFIG && CONFIG.meubles) ? Object.keys(CONFIG.meubles) : [];
-  meubles = meubles.filter(function(m) { return meubleALibre(m); });
-  meubles.sort(function(a, b) { return a.localeCompare(b); });
-  document.getElementById('deplacerV2-meuble-menu').innerHTML = meubles.map(function(m) {
-    return ligneChoixPlacementV2(m, 'choisirMeubleDeplacer(&quot;' + m + '&quot;)', deplacerV2Choix.meuble === m);
-  }).join('');
-}
-
-function basculerListeDeplacer(type) {
-  ['meuble', 'rangee', 'espace'].forEach(function(t) {
-    var menu = document.getElementById('deplacerV2-' + t + '-menu');
-    if (t === type) { menu.classList.toggle('ouvert'); }
-    else { menu.classList.remove('ouvert'); }
-  });
-}
-
-function choisirMeubleDeplacer(meuble) {
-  deplacerV2Choix.meuble = meuble;
-  deplacerV2Choix.rangee = '';
-  deplacerV2Choix.espace = '';
-  document.getElementById('deplacerV2-aranger').style.display = 'none';
-  majBarrePlacementV2('deplacerV2', 'meuble', meuble, 'Meuble');
-  document.getElementById('deplacerV2-meuble-menu').classList.remove('ouvert');
-  majBarrePlacementV2('deplacerV2', 'rangee', '', 'Rangée');
-  majBarrePlacementV2('deplacerV2', 'espace', '', 'Espace');
-  document.getElementById('deplacerV2-espace-menu').innerHTML = '';
-
-  var rangees = (CONFIG.meubles[meuble]) ? Object.keys(CONFIG.meubles[meuble]) : [];
-  rangees = rangees.filter(function(r) { return rangeeALibre(meuble, r); });
-  rangees.sort(function(a, b) { return parseInt(a) - parseInt(b); });
-  document.getElementById('deplacerV2-rangee-menu').innerHTML = rangees.map(function(r) {
-    return ligneChoixPlacementV2(r, 'choisirRangeeDeplacer(&quot;' + r + '&quot;)', String(deplacerV2Choix.rangee) === String(r));
-  }).join('');
-}
-
-function choisirRangeeDeplacer(rangee) {
-  deplacerV2Choix.rangee = rangee;
-  deplacerV2Choix.espace = '';
-  majBarrePlacementV2('deplacerV2', 'rangee', rangee, 'Rangée');
-  document.getElementById('deplacerV2-rangee-menu').classList.remove('ouvert');
-  majBarrePlacementV2('deplacerV2', 'espace', '', 'Espace');
-
-  var meuble = deplacerV2Choix.meuble;
-  var espaces = (CONFIG.meubles[meuble] && CONFIG.meubles[meuble][rangee]) ? CONFIG.meubles[meuble][rangee] : [];
-  var occ = espacesOccupesArrivee(meuble, rangee);
-  espaces = espaces.filter(function(e) { return occ.indexOf(String(e)) === -1; });
-  espaces.sort(function(a, b) { return parseInt(a) - parseInt(b); });
-  document.getElementById('deplacerV2-espace-menu').innerHTML = espaces.map(function(e) {
-    return ligneChoixPlacementV2(e, 'choisirEspaceDeplacer(&quot;' + e + '&quot;)', String(deplacerV2Choix.espace) === String(e));
-  }).join('');
-}
-
-function choisirEspaceDeplacer(espace) {
-  deplacerV2Choix.espace = espace;
-  majBarrePlacementV2('deplacerV2', 'espace', espace, 'Espace');
-  document.getElementById('deplacerV2-espace-menu').classList.remove('ouvert');
-
-  var c = deplacerV2Choix;
-  appelBackend('checkLocationAvailable', { meuble: c.meuble, rangee: c.rangee, espace: c.espace }, { spinner: 'Vérification' }).then(function(result) {
-    if (!result.available) {
-      afficherMessage('Occupé par : ' + result.message);
-      return appelBackend('getInventoryData', {}).then(function(data) {
-        if (data) ALL_DATA = data;
-        c.espace = '';
-        majBarrePlacementV2('deplacerV2', 'espace', '', 'Espace');
-        var espaces = (CONFIG.meubles[c.meuble] && CONFIG.meubles[c.meuble][c.rangee]) ? CONFIG.meubles[c.meuble][c.rangee] : [];
-        var occ = espacesOccupesArrivee(c.meuble, c.rangee);
-        espaces = espaces.filter(function(e) { return occ.indexOf(String(e)) === -1; });
-        espaces.sort(function(a, b) { return parseInt(a) - parseInt(b); });
-        var menu = document.getElementById('deplacerV2-espace-menu');
-        menu.innerHTML = espaces.map(function(e) {
-          return ligneChoixPlacementV2(e, 'choisirEspaceDeplacer(&quot;' + e + '&quot;)', false);
-        }).join('');
-        menu.classList.add('ouvert');
-      });
-    }
+// Déplacer : la pose (après la vérification de l'espace), puis l'inventaire et la bouteille frais
+function deplacerBouteilleV2(c) {
   appelBackend('actionBouteille', { row: c.row, action: 'deplacer', bottle: c.bottle, meuble: c.meuble, rangee: c.rangee, espace: c.espace }, { spinner: 'Déplacement' }).then(function() {
-      afficherMessage('Bouteille déplacée');
-      return appelBackend('getInventoryData', {}, { spinner: 'Déplacement' }).then(function(data) {
-        if (data) ALL_DATA = data;
-        return appelBackend('checkWineExists', { codebarre: menuActionV2Context.code }, { spinner: 'Déplacement' }).then(function(result) {
-          if (result) menuActionV2Context.wineResult = result;
-          fermerDeplacerV2();
-        });
+    afficherMessage('Bouteille déplacée');
+    return appelBackend('getInventoryData', {}, { spinner: 'Déplacement' }).then(function(data) {
+      if (data) ALL_DATA = data;
+      return appelBackend('checkWineExists', { codebarre: menuActionV2Context.code }, { spinner: 'Déplacement' }).then(function(result) {
+        if (result) menuActionV2Context.wineResult = result;
+        fermerDeplacerV2();
       });
-    }).catch(function() {
-      retourAccueilV2();
     });
-  }).catch(function() {
-    retourAccueilV2();
+  }).catch(function(err) {
+    retourAccueilV2('Déplacement : ' + (err && err.message ? err.message : err));
   });
 }
 
