@@ -144,6 +144,8 @@ html, body {
   --gold-60: rgba(201,129,60,0.6);
   --gold-50: rgba(201,129,60,0.5);
   --gold-40: rgba(201,129,60,0.4);
+  --fs-9: 9px;
+  --fs-10: 10px;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -735,7 +737,7 @@ body::after {
 
 /* ===== Un graphique dans un bloc de contenu (Profil, 28 oct. 2026) : l'or, du plus soutenu (la 1re part, la plus grande)
    au plus pâle ; à côté de chaque part, son nom et son % (dessous, atténué), relié par un trait fin ===== */
-.contenu > svg { display: block; width: 100%; max-width: var(--taille-400); height: auto; margin: var(--space-20) auto; }
+.contenu > svg { display: block; width: 100%; max-width: var(--taille-600); height: auto; margin: var(--space-20) auto; }
 .contenu > svg path:nth-of-type(1), .contenu > svg circle { fill: var(--gold); }
 .contenu > svg path:nth-of-type(2) { fill: var(--gold-90); }
 .contenu > svg path:nth-of-type(3) { fill: var(--gold-80); }
@@ -753,6 +755,11 @@ body::after {
 .contenu > svg line { stroke: var(--white-60); stroke-width: var(--largeur-bordure-1); }
 .contenu > svg text { fill: var(--white); font-size: var(--fs-14); }
 .contenu > svg tspan { fill: var(--white-60); font-size: var(--fs-12); }
+/* iPad : la tarte grandit avec l'écran, ses écritures non (les mêmes proportions que sur l'iPhone — l'utilisateur, 29 oct.) */
+@media (min-width: 600px) {
+  .contenu > svg text { font-size: var(--fs-10); }
+  .contenu > svg tspan { font-size: var(--fs-9); }
+}
 
 /* ===== Photo V2 — mode rond (Emplacements) ===== */
 #photoV2Overlay.photo-ronde .photo-grande {
