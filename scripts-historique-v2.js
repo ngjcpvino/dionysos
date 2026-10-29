@@ -341,9 +341,9 @@ function confirmerHistoAjoutV2() {
 
 // ===================== PROFIL =====================
 // Ce que dit l'Historique (28 oct. 2026 : d'abord les pays bus ; le reste viendra).
-// Les couleurs des parts, dans l'ordre : celles de l'appréciation, alternées pour que deux parts voisines se distinguent.
-// Au-delà, les plus petits pays vont dans « Autres » (gris).
-var COULEURS_TARTE_V2 = ['note-5', 'note-3', 'note-1', 'note-4', 'note-2'];
+// Les couleurs des parts, dans l'ordre : celles de l'appréciation (alternées pour que deux parts voisines se distinguent),
+// le blanc et l'or. Au-delà, les plus petits pays vont dans « Autres » (gris).
+var COULEURS_TARTE_V2 = ['note-5', 'note-3', 'note-1', 'note-4', 'note-2', 'color-white', 'color-primary'];
 
 function ouvrirProfilV2() {
   montrerPageV2('profilV2Container');
