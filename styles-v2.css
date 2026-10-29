@@ -744,6 +744,12 @@ body::after {
 .contenu > svg path:nth-of-type(6) { fill: var(--gold-50); }
 .contenu > svg path:nth-of-type(7) { fill: var(--gold-40); }
 .contenu > svg path:nth-of-type(8) { fill: var(--gold-30); }
+/* une part qui porte la couleur d'un vin (Profil → Couleurs) la prend, à la place de sa nuance d'or */
+.contenu > svg path.vin-rouge, .contenu > svg circle.vin-rouge { fill: var(--vin-rouge); }
+.contenu > svg path.vin-blanc, .contenu > svg circle.vin-blanc { fill: var(--vin-blanc); }
+.contenu > svg path.vin-rose, .contenu > svg circle.vin-rose { fill: var(--vin-rose); }
+.contenu > svg path.vin-bulles, .contenu > svg circle.vin-bulles { fill: var(--vin-bulles); }
+.contenu > svg path.vin-spiritueux, .contenu > svg circle.vin-spiritueux { fill: var(--vin-spiritueux); }
 .contenu > svg line { stroke: var(--white-60); stroke-width: var(--largeur-bordure-1); }
 .contenu > svg text { fill: var(--white); font-size: var(--fs-14); }
 .contenu > svg tspan { fill: var(--white-60); font-size: var(--fs-12); }

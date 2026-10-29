@@ -358,19 +358,27 @@ function historiqueV2(spinner) {
   return appelBackend('getHistorique', {}, { spinner: spinner }).then(function(data) { return (ALL_HISTORIQUE = data || []); });
 }
 
-// Les bus par pays, du plus bu au moins bu ; PAYS_TARTE_V2 pays, puis « Autres »
-function busParPaysV2() {
+// Les bus regroupés par une valeur de leur vin (valeur(vin, entrée de l'Historique)), du plus bu au moins bu ;
+// PAYS_TARTE_V2 parts, puis « Autres (N quoi) »
+function busParV2(valeur, inconnu, quoi) {
   var vinDe = indexVinsHistoV2();
   var compte = {};
   (ALL_HISTORIQUE || []).forEach(function(h) {
-    var pays = decodeHTML(vinDe(h).Pays || '').trim() || 'Pays inconnu';
-    compte[pays] = (compte[pays] || 0) + 1;
+    var v = decodeHTML(valeur(vinDe(h), h) || '').trim() || inconnu;
+    compte[v] = (compte[v] || 0) + 1;
   });
-  var parts = Object.keys(compte).map(function(p) { return { nom: p, n: compte[p] }; })
+  var parts = Object.keys(compte).map(function(v) { return { nom: v, n: compte[v] }; })
     .sort(function(a, b) { return b.n - a.n || a.nom.localeCompare(b.nom); });
   var reste = parts.splice(PAYS_TARTE_V2);
-  if (reste.length) parts.push({ nom: reste.length === 1 ? reste[0].nom : 'Autres (' + reste.length + ' pays)',
+  if (reste.length) parts.push({ nom: reste.length === 1 ? reste[0].nom : 'Autres (' + reste.length + ' ' + quoi + ')',
     n: reste.reduce(function(s, p) { return s + p.n; }, 0) });
+  return parts;
+}
+
+// Les couleurs bues : chaque part prend la couleur de son vin (.vin-*, comme la bande des cartes)
+function busParCouleurV2() {
+  var parts = busParV2(function(w, h) { return w.Couleur || h.couleur; }, 'Couleur inconnue', 'couleurs');
+  parts.forEach(function(p) { if (p.nom !== 'Couleur inconnue') p.classe = couleurClasseV2(p.nom); });
   return parts;
 }
 
@@ -402,8 +410,9 @@ function tarteV2(parts) {
   parts.forEach(function(p, i) {
     var part = p.n / total, debut = place[i][0], fin = place[i][1], m = (debut + fin) / 2, pct = Math.round(part * 100);
     var a = pt(debut, r), b = pt(fin, r);
-    formes += part >= 1 ? '<circle cx="' + cx + '" cy="0" r="' + r + '"/>'
-      : '<path d="M' + cx + ' 0 L' + f(a[0]) + ' ' + f(a[1]) + ' A' + r + ' ' + r + ' 0 ' + (part > 0.5 ? 1 : 0) + ' 1 ' + f(b[0]) + ' ' + f(b[1]) + 'Z"/>';
+    var classe = p.classe ? ' class="' + p.classe + '"' : '';
+    formes += part >= 1 ? '<circle' + classe + ' cx="' + cx + '" cy="0" r="' + r + '"/>'
+      : '<path' + classe + ' d="M' + cx + ' 0 L' + f(a[0]) + ' ' + f(a[1]) + ' A' + r + ' ' + r + ' 0 ' + (part > 0.5 ? 1 : 0) + ' 1 ' + f(b[0]) + ' ' + f(b[1]) + 'Z"/>';
     if (i < 2) {   // le nom, puis le % dessous : juste au-dessus de la tarte (la 1re), juste au-dessous (la 2e)
       var x = f(pt(m, r)[0]), enBas = i === 1;
       ecritures += '<text x="' + x + '" y="' + (enBas ? r + 22 : -r - 28) + '" text-anchor="middle">' + p.nom +
@@ -430,5 +439,6 @@ function rendreProfilV2() {
   var total = (ALL_HISTORIQUE || []).length;
   document.getElementById('profilV2-compte').textContent = total
     ? 'Sur ' + total + ' bouteille' + (total > 1 ? 's bues' : ' bue') + ' (Historique)' : 'Aucune bouteille dans l\'Historique';
-  document.getElementById('profilV2-pays').innerHTML = total ? tarteV2(busParPaysV2()) : '';
+  document.getElementById('profilV2-pays').innerHTML = total ? tarteV2(busParV2(function(w) { return w.Pays; }, 'Pays inconnu', 'pays')) : '';
+  document.getElementById('profilV2-couleurs').innerHTML = total ? tarteV2(busParCouleurV2()) : '';
 }
