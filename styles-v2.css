@@ -138,6 +138,12 @@ html, body {
   --vh-100: 100vh;
   --vw-80: 80vw;
   --vw-100: 100vw;
+  --gold-90: rgba(201,129,60,0.9);
+  --gold-80: rgba(201,129,60,0.8);
+  --gold-70: rgba(201,129,60,0.7);
+  --gold-60: rgba(201,129,60,0.6);
+  --gold-50: rgba(201,129,60,0.5);
+  --gold-40: rgba(201,129,60,0.4);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -727,19 +733,20 @@ body::after {
 .carte.vin-bulles { border-bottom-color: var(--vin-bulles); border-left: none; }
 .carte.vin-spiritueux { border-bottom-color: var(--vin-spiritueux); border-left: none; }
 
-/* ===== Un graphique dans un bloc de contenu (Profil, 28 oct. 2026) : les couleurs de l'appréciation (.note-1…5), le blanc
-   et l'or, les mêmes que la bande de la carte ; sans couleur = gris (« Autres ») ; le % garde un liseré sombre (lisible sur le blanc) ===== */
-.contenu > svg { display: block; width: var(--taille-200); height: var(--taille-200); margin: var(--space-20) auto; }
-.contenu > svg path, .contenu > svg circle { fill: var(--white-60); }
-.contenu > svg .note-1 { fill: var(--note-1); }
-.contenu > svg .note-2 { fill: var(--note-2); }
-.contenu > svg .note-3 { fill: var(--note-3); }
-.contenu > svg .note-4 { fill: var(--note-4); }
-.contenu > svg .note-5 { fill: var(--note-5); }
-.contenu > svg .color-white, .contenu > svg .color-primary { fill: currentColor; }   /* + le blanc et l'or */
-.carte.color-white, .carte.color-primary { border-bottom-color: currentColor; }
-.contenu > svg text { fill: var(--white); stroke: var(--noir-70); stroke-width: var(--largeur-bordure-4); paint-order: stroke;
-  font-size: var(--fs-14); font-weight: var(--fw-600); text-anchor: middle; dominant-baseline: central; }
+/* ===== Un graphique dans un bloc de contenu (Profil, 28 oct. 2026) : l'or, du plus soutenu (la 1re part, la plus grande)
+   au plus pâle ; à côté de chaque part, son nom et son % (dessous, atténué), relié par un trait fin ===== */
+.contenu > svg { display: block; width: 100%; max-width: var(--taille-600); height: auto; margin: var(--space-20) auto; }
+.contenu > svg path:nth-of-type(1), .contenu > svg circle { fill: var(--gold); }
+.contenu > svg path:nth-of-type(2) { fill: var(--gold-90); }
+.contenu > svg path:nth-of-type(3) { fill: var(--gold-80); }
+.contenu > svg path:nth-of-type(4) { fill: var(--gold-70); }
+.contenu > svg path:nth-of-type(5) { fill: var(--gold-60); }
+.contenu > svg path:nth-of-type(6) { fill: var(--gold-50); }
+.contenu > svg path:nth-of-type(7) { fill: var(--gold-40); }
+.contenu > svg path:nth-of-type(8) { fill: var(--gold-30); }
+.contenu > svg line { stroke: var(--white-60); stroke-width: var(--largeur-bordure-1); }
+.contenu > svg text { fill: var(--white); font-size: var(--fs-14); }
+.contenu > svg tspan { fill: var(--white-60); font-size: var(--fs-12); }
 
 /* ===== Photo V2 — mode rond (Emplacements) ===== */
 #photoV2Overlay.photo-ronde .photo-grande {

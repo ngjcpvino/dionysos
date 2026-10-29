@@ -340,10 +340,8 @@ function confirmerHistoAjoutV2() {
 }
 
 // ===================== PROFIL =====================
-// Ce que dit l'Historique (28 oct. 2026 : d'abord les pays bus ; le reste viendra).
-// Les couleurs des parts, dans l'ordre : celles de l'appréciation (alternées pour que deux parts voisines se distinguent),
-// le blanc et l'or. Au-delà, les plus petits pays vont dans « Autres » (gris).
-var COULEURS_TARTE_V2 = ['note-5', 'note-3', 'note-1', 'note-4', 'note-2', 'color-white', 'color-primary'];
+// Ce que dit l'Historique (28 oct. 2026 : d'abord les pays bus ; le reste viendra). Se lit d'un coup : pas de phrase, pas de liste.
+var PAYS_TARTE_V2 = 7;   // au-delà, les plus petits pays vont dans « Autres »
 
 function ouvrirProfilV2() {
   montrerPageV2('profilV2Container');
@@ -360,7 +358,7 @@ function historiqueV2(spinner) {
   return appelBackend('getHistorique', {}, { spinner: spinner }).then(function(data) { return (ALL_HISTORIQUE = data || []); });
 }
 
-// Les bus par pays, du plus bu au moins bu ; une couleur par pays, puis « Autres »
+// Les bus par pays, du plus bu au moins bu ; PAYS_TARTE_V2 pays, puis « Autres »
 function busParPaysV2() {
   var vinDe = indexVinsHistoV2();
   var compte = {};
@@ -368,37 +366,46 @@ function busParPaysV2() {
     var pays = decodeHTML(vinDe(h).Pays || '').trim() || 'Pays inconnu';
     compte[pays] = (compte[pays] || 0) + 1;
   });
-  var parts = Object.keys(compte).map(function(p) { return { nom: p, n: compte[p], classe: '' }; })
+  var parts = Object.keys(compte).map(function(p) { return { nom: p, n: compte[p] }; })
     .sort(function(a, b) { return b.n - a.n || a.nom.localeCompare(b.nom); });
-  var reste = parts.splice(COULEURS_TARTE_V2.length);
-  parts.forEach(function(p, i) { p.classe = COULEURS_TARTE_V2[i]; });
+  var reste = parts.splice(PAYS_TARTE_V2);
   if (reste.length) parts.push({ nom: reste.length === 1 ? reste[0].nom : 'Autres (' + reste.length + ' pays)',
-    n: reste.reduce(function(s, p) { return s + p.n; }, 0), classe: '' });
+    n: reste.reduce(function(s, p) { return s + p.n; }, 0) });
   return parts;
 }
 
-// La tarte (SVG 200 × 200) : les parts dans l'ordre, en partant du haut ; le % écrit sur les parts assez grandes
+// La tarte (SVG) : les parts dans l'ordre, en partant du haut (leur nuance d'or suit ce rang : CSS) ; à côté de chaque part,
+// son nom et son %, reliés à elle par un trait fin. D'un même côté, les écritures s'écartent pour ne pas se chevaucher.
 function tarteV2(parts) {
   var total = parts.reduce(function(s, p) { return s + p.n; }, 0);
-  var xy = function(a, r) { return [100 + r * Math.cos(a), 100 + r * Math.sin(a)].map(function(v) { return v.toFixed(1); }); };
-  var angle = -Math.PI / 2, formes = '', textes = '';
+  var cx = 230, r = 90, ecart = 34, f = function(v) { return v.toFixed(1); };
+  var pt = function(a, rayon) { return [cx + rayon * Math.cos(a), rayon * Math.sin(a)]; };
+  var angle = -Math.PI / 2, formes = '', ecritures = '', cotes = { droite: [], gauche: [] };
   parts.forEach(function(p) {
-    var part = p.n / total, debut = angle, fin = angle + part * 2 * Math.PI, pct = Math.round(part * 100);
+    var part = p.n / total, debut = angle, fin = angle + part * 2 * Math.PI, m = (debut + fin) / 2;
     angle = fin;
-    var a = xy(debut, 99), b = xy(fin, 99), m = xy((debut + fin) / 2, 62);
-    formes += part >= 1 ? '<circle class="' + p.classe + '" cx="100" cy="100" r="99"/>'
-      : '<path class="' + p.classe + '" d="M100 100 L' + a.join(' ') + ' A99 99 0 ' + (part > 0.5 ? 1 : 0) + ' 1 ' + b.join(' ') + 'Z"/>';
-    if (pct >= 6) textes += '<text x="' + m[0] + '" y="' + m[1] + '">' + pct + ' %</text>';
+    var a = pt(debut, r), b = pt(fin, r);
+    formes += part >= 1 ? '<circle cx="' + cx + '" cy="0" r="' + r + '"/>'
+      : '<path d="M' + cx + ' 0 L' + f(a[0]) + ' ' + f(a[1]) + ' A' + r + ' ' + r + ' 0 ' + (part > 0.5 ? 1 : 0) + ' 1 ' + f(b[0]) + ' ' + f(b[1]) + 'Z"/>';
+    cotes[Math.cos(m) >= 0 ? 'droite' : 'gauche'].push({ nom: p.nom, pct: Math.round(part * 100), bord: pt(m, r), y: pt(m, r + 20)[1] });
   });
-  return formes + textes;
+  var haut = -r - 10, bas = r + 10;
+  Object.keys(cotes).forEach(function(cote) {
+    var x = cote === 'droite' ? cx + r + 30 : cx - r - 30;
+    cotes[cote].sort(function(e1, e2) { return e1.y - e2.y; }).forEach(function(e, i, l) {
+      if (i && e.y < l[i - 1].y + ecart) e.y = l[i - 1].y + ecart;
+      ecritures += '<line x1="' + f(e.bord[0]) + '" y1="' + f(e.bord[1]) + '" x2="' + (cote === 'droite' ? x - 6 : x + 6) + '" y2="' + f(e.y) + '"/>' +
+        '<text x="' + x + '" y="' + f(e.y - 3) + '"' + (cote === 'droite' ? '' : ' text-anchor="end"') + '>' + e.nom +
+        '<tspan x="' + x + '" dy="16">' + e.pct + ' %</tspan></text>';
+      haut = Math.min(haut, e.y - 20); bas = Math.max(bas, e.y + 20);
+    });
+  });
+  return '<svg viewBox="0 ' + f(haut) + ' ' + (2 * cx) + ' ' + f(bas - haut) + '">' + formes + ecritures + '</svg>';
 }
 
 function rendreProfilV2() {
   var total = (ALL_HISTORIQUE || []).length;
-  var parts = busParPaysV2();
   document.getElementById('profilV2-compte').textContent = total
     ? 'Sur ' + total + ' bouteille' + (total > 1 ? 's bues' : ' bue') + ' (Historique)' : 'Aucune bouteille dans l\'Historique';
-  document.getElementById('profilV2-pays').innerHTML = (total ? '<svg viewBox="0 0 200 200">' + tarteV2(parts) + '</svg>' : '') + parts.map(function(p) {
-    return carteV2({ classes: p.classe, titre: p.nom, sous: null, droite: Math.round(p.n * 100 / total) + ' % · ' + p.n + ' btl' });
-  }).join('');
+  document.getElementById('profilV2-pays').innerHTML = total ? tarteV2(busParPaysV2()) : '';
 }
