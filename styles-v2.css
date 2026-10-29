@@ -735,7 +735,7 @@ body::after {
 
 /* ===== Un graphique dans un bloc de contenu (Profil, 28 oct. 2026) : l'or, du plus soutenu (la 1re part, la plus grande)
    au plus pâle ; à côté de chaque part, son nom et son % (dessous, atténué), relié par un trait fin ===== */
-.contenu > svg { display: block; width: 100%; max-width: var(--taille-600); height: auto; margin: var(--space-20) auto; }
+.contenu > svg { display: block; width: 100%; max-width: var(--taille-400); height: auto; margin: var(--space-20) auto; }
 .contenu > svg path:nth-of-type(1), .contenu > svg circle { fill: var(--gold); }
 .contenu > svg path:nth-of-type(2) { fill: var(--gold-90); }
 .contenu > svg path:nth-of-type(3) { fill: var(--gold-80); }

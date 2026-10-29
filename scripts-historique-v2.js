@@ -437,8 +437,7 @@ function tarteV2(parts) {
 
 function rendreProfilV2() {
   var total = (ALL_HISTORIQUE || []).length;
-  document.getElementById('profilV2-compte').textContent = total
-    ? 'Sur ' + total + ' bouteille' + (total > 1 ? 's bues' : ' bue') + ' (Historique)' : 'Aucune bouteille dans l\'Historique';
-  document.getElementById('profilV2-pays').innerHTML = total ? tarteV2(busParV2(function(w) { return w.Pays; }, 'Pays inconnu', 'pays')) : '';
+  document.getElementById('profilV2-pays').innerHTML = total ? tarteV2(busParV2(function(w) { return w.Pays; }, 'Pays inconnu', 'pays'))
+    : '<div class="texte-secondaire">Aucune bouteille dans l\'Historique</div>';
   document.getElementById('profilV2-couleurs').innerHTML = total ? tarteV2(busParCouleurV2()) : '';
 }
