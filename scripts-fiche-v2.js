@@ -751,17 +751,24 @@ function chargerPlatsV2(codebarre) {
   if (!conteneur) return;
 
   function rendrePlats(historique) {
-    var cb = (codebarre || '').toString().trim();
+    var codes = codesBarresDuVinV2(CURRENT_WINE_DATA || {}).concat([codebarre]);
+    // n'importe lequel des codes du vin (une vieille ligne garde toute la liste)
     var mets = (historique || []).filter(function(h) {
-      return (h.codebarre || '').toString().trim() === cb;
+      return (h.codebarre || '').toString().split(',').some(function(c) {
+        return codes.some(function(k) { return memeCodeV2(c, k); });
+      });
     });
     if (mets.length === 0) { conteneur.innerHTML = ''; return; }
+    var derniere = mets.slice().sort(function(a, b) {
+      return dateHistoIsoV2(b.date) < dateHistoIsoV2(a.date) ? -1 : 1;
+    })[0].date;
+    var compte = '<div class="texte-secondaire">Bu ' + mets.length + ' fois' + (derniere ? ' · la dernière fois le ' + derniere : '') + '</div>';
     mets.sort(function(a, b) {
       return (parseInt(b.bonAccord) || 0) - (parseInt(a.bonAccord) || 0);
     });
     var nom = decodeHTML((CURRENT_WINE_DATA && CURRENT_WINE_DATA.Nom) || '');
     var cartes = mets.map(function(m) { return carteMetHistoV2(m, nom, 'fiche'); }).join('');
-    conteneur.innerHTML = cartes;
+    conteneur.innerHTML = compte + cartes;
   }
 
   if (ALL_HISTORIQUE && ALL_HISTORIQUE.length) {
