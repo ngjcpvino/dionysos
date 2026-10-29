@@ -71,8 +71,13 @@ function afficherCartesCaveV2(data) {
 
 var filtresCaveV2 = filtresVidesV2('caveV2');
 
+// Les vins de la Cave : tout le classeur, sauf les propositions sans bouteille (elles sont dans Propositions et la Liste d'achat)
+function vinsCaveV2() {
+  return (ALL_DATA || []).filter(function(i) { return !(estPropositionV2(i) && !bouteilleEnCaveV2(i)); });
+}
+
 function remplirFiltresCaveV2() {
-  var listes = valeursEnCascadeV2(ALL_DATA || [], filtresCaveV2, [
+  var listes = valeursEnCascadeV2(vinsCaveV2(), filtresCaveV2, [
     critereChampV2('couleur', 'Couleur'),
     ['cepage', function(i) { var c = cepageDominant(i); return c ? [cepageCommunV2(decodeHTML(c))] : []; },
                function(i, choix) { return passeFiltreV2(choix, cepageDominant(i), memeCepageV2); }],
@@ -94,7 +99,7 @@ function appliquerFiltresCaveV2() {
   var nom = normaliserRechercheV2(document.getElementById('caveV2-f-nom').value.trim());
   var champsExclusCave = { row: 1, bottle: 1, Statut: 1, Meuble: 1, Rangee: 1, Espace: 1, 'Date d\'ajout': 1, 'Date sortie': 1, Source: 1, 'Photo URL': 1 };
 
-  var filtered = (ALL_DATA || []).filter(function(i) {
+  var filtered = vinsCaveV2().filter(function(i) {
     return passeFiltreV2(c, i.Couleur) &&
       passeFiltreV2(cep, cepageDominant(i), memeCepageV2) &&
       passeFiltreV2(p, i.Pays) &&
