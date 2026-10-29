@@ -338,3 +338,67 @@ function confirmerHistoAjoutV2() {
     return rechargerHistoriqueV2('histoAjoutV2Overlay', histoAjoutV2.provenance, 'Enregistrement', dateIgnoree ? 'Ajouté à la date du jour : Code.gs à recoller' : 'Ajouté au carnet');
   }).catch(function(err) { retourAccueilV2('Ajout à l\'historique : ' + causeV2(err)); });
 }
+
+// ===================== PROFIL =====================
+// Ce que dit l'Historique (28 oct. 2026 : d'abord les pays bus ; le reste viendra).
+// Les couleurs des parts, dans l'ordre : celles de l'appréciation, alternées pour que deux parts voisines se distinguent.
+// Au-delà, les plus petits pays vont dans « Autres » (gris).
+var COULEURS_TARTE_V2 = ['note-5', 'note-3', 'note-1', 'note-4', 'note-2'];
+
+function ouvrirProfilV2() {
+  montrerPageV2('profilV2Container');
+  historiqueV2(' ').then(rendreProfilV2).catch(function(err) { retourAccueilV2('Profil : ' + causeV2(err)); });
+}
+
+function fermerProfilV2() {
+  cacherPageV2('profilV2Container');
+}
+
+// L'Historique en mémoire, chargé au besoin
+function historiqueV2(spinner) {
+  if (ALL_HISTORIQUE && ALL_HISTORIQUE.length) return Promise.resolve(ALL_HISTORIQUE);
+  return appelBackend('getHistorique', {}, { spinner: spinner }).then(function(data) { return (ALL_HISTORIQUE = data || []); });
+}
+
+// Les bus par pays, du plus bu au moins bu ; une couleur par pays, puis « Autres »
+function busParPaysV2() {
+  var vinDe = indexVinsHistoV2();
+  var compte = {};
+  (ALL_HISTORIQUE || []).forEach(function(h) {
+    var pays = decodeHTML(vinDe(h).Pays || '').trim() || 'Pays inconnu';
+    compte[pays] = (compte[pays] || 0) + 1;
+  });
+  var parts = Object.keys(compte).map(function(p) { return { nom: p, n: compte[p], classe: '' }; })
+    .sort(function(a, b) { return b.n - a.n || a.nom.localeCompare(b.nom); });
+  var reste = parts.splice(COULEURS_TARTE_V2.length);
+  parts.forEach(function(p, i) { p.classe = COULEURS_TARTE_V2[i]; });
+  if (reste.length) parts.push({ nom: reste.length === 1 ? reste[0].nom : 'Autres (' + reste.length + ' pays)',
+    n: reste.reduce(function(s, p) { return s + p.n; }, 0), classe: '' });
+  return parts;
+}
+
+// La tarte (SVG 200 × 200) : les parts dans l'ordre, en partant du haut ; le % écrit sur les parts assez grandes
+function tarteV2(parts) {
+  var total = parts.reduce(function(s, p) { return s + p.n; }, 0);
+  var xy = function(a, r) { return [100 + r * Math.cos(a), 100 + r * Math.sin(a)].map(function(v) { return v.toFixed(1); }); };
+  var angle = -Math.PI / 2, formes = '', textes = '';
+  parts.forEach(function(p) {
+    var part = p.n / total, debut = angle, fin = angle + part * 2 * Math.PI, pct = Math.round(part * 100);
+    angle = fin;
+    var a = xy(debut, 99), b = xy(fin, 99), m = xy((debut + fin) / 2, 62);
+    formes += part >= 1 ? '<circle class="' + p.classe + '" cx="100" cy="100" r="99"/>'
+      : '<path class="' + p.classe + '" d="M100 100 L' + a.join(' ') + ' A99 99 0 ' + (part > 0.5 ? 1 : 0) + ' 1 ' + b.join(' ') + 'Z"/>';
+    if (pct >= 6) textes += '<text x="' + m[0] + '" y="' + m[1] + '">' + pct + ' %</text>';
+  });
+  return formes + textes;
+}
+
+function rendreProfilV2() {
+  var total = (ALL_HISTORIQUE || []).length;
+  var parts = busParPaysV2();
+  document.getElementById('profilV2-compte').textContent = total
+    ? 'Sur ' + total + ' bouteille' + (total > 1 ? 's bues' : ' bue') + ' (Historique)' : 'Aucune bouteille dans l\'Historique';
+  document.getElementById('profilV2-pays').innerHTML = (total ? '<svg viewBox="0 0 200 200">' + tarteV2(parts) + '</svg>' : '') + parts.map(function(p) {
+    return carteV2({ classes: p.classe, titre: p.nom, sous: null, droite: Math.round(p.n * 100 / total) + ' % · ' + p.n + ' btl' });
+  }).join('');
+}

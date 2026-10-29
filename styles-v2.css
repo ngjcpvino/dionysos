@@ -727,6 +727,17 @@ body::after {
 .carte.vin-bulles { border-bottom-color: var(--vin-bulles); border-left: none; }
 .carte.vin-spiritueux { border-bottom-color: var(--vin-spiritueux); border-left: none; }
 
+/* ===== Un graphique dans un bloc de contenu (Profil, 28 oct. 2026) : les couleurs de l'appréciation (.note-1…5),
+   les mêmes que la bande de la carte ; sans couleur = gris (« Autres ») ===== */
+.contenu > svg { display: block; width: var(--taille-200); height: var(--taille-200); margin: var(--space-20) auto; }
+.contenu > svg path, .contenu > svg circle { fill: var(--white-60); }
+.contenu > svg .note-1 { fill: var(--note-1); }
+.contenu > svg .note-2 { fill: var(--note-2); }
+.contenu > svg .note-3 { fill: var(--note-3); }
+.contenu > svg .note-4 { fill: var(--note-4); }
+.contenu > svg .note-5 { fill: var(--note-5); }
+.contenu > svg text { fill: var(--white); font-size: var(--fs-14); font-weight: var(--fw-600); text-anchor: middle; dominant-baseline: central; }
+
 /* ===== Photo V2 — mode rond (Emplacements) ===== */
 #photoV2Overlay.photo-ronde .photo-grande {
   height: min(var(--vw-80), var(--vh-60));

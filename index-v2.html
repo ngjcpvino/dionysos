@@ -53,6 +53,7 @@
   <div class="item-liste" onclick="burgerV2Click('cave')">CAVE À VIN</div>
   <div class="item-liste" onclick="burgerV2Click('emplacements')">EMPLACEMENTS</div>
   <div class="item-liste" onclick="burgerV2Click('historique')">HISTORIQUE</div>
+  <div class="item-liste" onclick="burgerV2Click('profil')">PROFIL</div>
   <div class="item-liste" onclick="burgerV2Click('racheter')">LISTE D'ACHAT</div>
   <div class="item-liste" onclick="basculerSousMenuV2('burgerV2-accord')">ACCORD SELON…</div>
   <div id="burgerV2-accord" style="display:none;">
@@ -299,6 +300,17 @@
     <h2 class="titre-1">Sans cépage</h2>
     <div id="sansCepageV2-compte" class="texte-secondaire"></div>
     <div id="sansCepageV2-cartes" class="contenu"></div>
+  </div>
+</div>
+
+<!-- ====================== PROFIL V2 ====================== -->
+<div id="profilV2Container" class="modal-v2-fullscreen" style="display:none;">
+  <div class="modal-v2-content modale-haut">
+    <div class="btn-fermer" onclick="fermerProfilV2()">✕</div>
+    <h2 class="titre-1">Profil</h2>
+    <h3 class="titre-2">Pays</h3>
+    <div id="profilV2-compte" class="texte-secondaire"></div>
+    <div id="profilV2-pays" class="contenu"></div>
   </div>
 </div>
 
