@@ -26,7 +26,7 @@
   - **`scripts-recherche-v2.js`** : Recherche de l'accueil.
   - **`scripts-accords-v2.js`** : Nos notes, Chartier, Selon SAQ, Curieux Bégin.
   - **`scripts-emplacements-v2.js`** : Emplacements, Tri Dionysos.
-  - **`scripts-historique-v2.js`** : Historique, ajout d'un bu antérieur.
+  - **`scripts-historique-v2.js`** : Historique, ajout d'un bu antérieur, Profil.
   - **`scripts-fiche-v2.js`** : fiche, édition, photo, plats, suggestions de la fiche, pastilles, utilitaires mémoire.
 - Scripts classiques (pas de modules) : tous partagent les mêmes globales. ⚠️ **Piège** : le levage (hoisting) ne traverse pas les fichiers — du code exécuté **au chargement** (hors fonction : `var x = f()`, `addEventListener(…, f)`) n'appelle que ce qui est dans son fichier ou dans un fichier chargé AVANT. **Nouveau fichier = l'ajouter dans `index-v2.html` ET dans `FICHIERS` de `sw.js`.**
 - **`scripts-scanner-v2.js`** : l'ancien fourre-tout d'avant le découpage (28 oct.), plus chargé, gardé en ligne pour un appareil qui aurait encore l'ancienne page. **À supprimer à partir du 4 nov. 2026.**
@@ -261,6 +261,10 @@ Les règles sont écrites en tête du module dans `scripts-emplacements-v2.js` (
 ## 📅 Historique
 - **« Ajouter à l'historique »** (page Historique et « + » de la fiche) : champ **date** (aujourd'hui par défaut, jamais dans le futur) ; plat et appréciation **facultatifs** (un vieux « bu » n'a souvent que sa date). **« Corriger »** : la date de l'entrée, envoyée seulement si elle change. Utilitaires `dateIsoV2`, `dateHistoIsoV2`.
 - **Filtres** : Vin · Appréciation · Couleur · Cépage · Pays · Appellation · Accord · Pastille de goût · Acidité + « Rechercher un mets », **en cascade comme la Cave**, valeurs puisées dans les vins de l'historique (fiche retrouvée par code-barres puis code SAQ, `indexVinsHistoV2`). Appréciation : « 5 verres » … « 1 verre », « Sans appréciation » (sans note, ou « Oui » écrit par Boire). Une seule table `libellesFiltreHistoV2` ; les filtres à zéro = `PANNEAUX_V2.histo.vide`.
+
+## 📊 Profil (menu, sous HISTORIQUE — 28 oct. 2026)
+- Les statistiques de l'Historique, « très visuelles ». Pour l'instant : **Pays** = une tarte des bus par pays, en % du total, et une carte par pays dessous (% · btl). 5 pays, puis « Autres » en gris. Le reste est à développer avec l'utilisateur (cépages, pastilles, etc.).
+- **Un graphique = un `<svg>` posé directement dans un `.contenu`** (règle `.contenu > svg`). **Couleurs : celles de l'appréciation `.note-1…5`** (ordre `COULEURS_TARTE_V2`, alterné), les mêmes que la bande de la carte ; gris `--white-60` = Autres ; pas de contour. **Jamais de nouvelle couleur** : on a les 5 couleurs, l'or, le blanc, le gris (l'utilisateur, 28 oct.).
 
 ## 📝 Nos notes d'accord
 Une phrase entendue (« asperge et crabe m'amènent un chablis »). 4e mécanique d'accord, la seule qui ne s'accroche à aucun vin.

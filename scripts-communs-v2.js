@@ -279,6 +279,7 @@ function burgerV2Click(cible) {
   if (cible === 'racheter') { cacherToutesPagesV2(); ouvrirAchatV2(); return; }
   if (cible === 'emplacements') { cacherToutesPagesV2(); ouvrirEmpV2(); return; }
   if (cible === 'historique') { cacherToutesPagesV2(); ouvrirHistoV2(); return; }
+  if (cible === 'profil') { cacherToutesPagesV2(); ouvrirProfilV2(); return; }
     if (cible === 'facture') { cacherToutesPagesV2(); ouvrirRecuV2(); return; }
   if (cible === 'accords') { cacherToutesPagesV2(); ouvrirChartierV2(); return; }
   if (cible === 'selonsaq') { cacherToutesPagesV2(); ouvrirSelonSaqV2(); return; }
