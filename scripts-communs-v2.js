@@ -171,7 +171,7 @@ function carteGroupeVinV2(g, onclick, classes) {
   var w = g.wine;
   var emp = (g.emplacements && g.emplacements.length) ? '<br>' + g.emplacements.join('<br>') : '';
   return carteV2({ classes: (classes ? classes + ' ' : '') + couleurClasseV2(w.Couleur) + (g.count === 0 ? ' carte-vide' : ''), onclick: onclick,
-    photo: w['Photo URL'], titre: decodeHTML(w.Nom || '—'), sous: sousVinV2(w), droite: caseDroiteV2(w, g.count) + emp });
+    photo: w['Photo URL'], placePhoto: true, titre: decodeHTML(w.Nom || '—'), sous: sousVinV2(w), droite: caseDroiteV2(w, g.count) + emp });
 }
 
 // Une carte de groupe (un vin en tête, ses plats / propositions dessous) : un plat de l'historique → le corriger
@@ -233,8 +233,9 @@ function grouperVinsV2(data) {
   });
 }
 
+// Un vin qui a une bouteille n'est jamais une proposition (même si sa case Racheter est restée vide)
 function caseDroiteV2(w, count) {
-  return (w && !(w.Racheter || '').toString().trim()) ? 'Proposition' : (count + ' btl');
+  return (!count && w && estPropositionV2(w)) ? 'Proposition' : (count + ' btl');
 }
 
 // ==================== MENU BURGER V2 ====================
