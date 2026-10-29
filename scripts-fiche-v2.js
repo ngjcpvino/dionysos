@@ -921,52 +921,41 @@ function fermerFicheV2() {
   document.getElementById('ficheV2Overlay').style.display = 'none';
   var panneauV2 = document.querySelector('#ficheV2Overlay .modal-v2-content');
   if (panneauV2) panneauV2.classList.remove('vin-rouge', 'vin-blanc', 'vin-rose', 'vin-bulles', 'vin-spiritueux');
+  // Fiche ouverte depuis une page, puis son menu d'action : on revient à cette page
   if (FICHE_V2_PROVENANCE === 'menuScan' && FICHE_V2_ORIGINE) {
-    var origine = FICHE_V2_ORIGINE;
+    FICHE_V2_PROVENANCE = FICHE_V2_ORIGINE;
     FICHE_V2_ORIGINE = null;
-    FICHE_V2_PROVENANCE = null;
-    if (origine === 'cave') { document.getElementById('caveV2Container').style.display = 'flex'; remonterScrollV2('caveV2Container'); appliquerFiltresCaveV2(); return; }
-    if (origine === 'achat') { ouvrirAchatV2(); return; }
-    if (origine === 'histo') { ouvrirHistoV2(); return; }
-    return;
   }
+  // La page d'où vient la fiche revient là où on était rendu dans sa liste (revenirPageV2), filtres gardés
   if (FICHE_V2_PROVENANCE === 'menuScan' && menuActionV2Context) {
     ouvrirMenuActionV2(menuActionV2Context.code, menuActionV2Context.wineResult);
   } else if (FICHE_V2_PROVENANCE === 'comparable') {
     // fiche d'un vin de Comparables : retour au menu d'action du vin scanné
     if (menuActionV2Context) ouvrirMenuActionV2(menuActionV2Context.code, menuActionV2Context.wineResult);
   } else if (FICHE_V2_PROVENANCE === 'cave') {
-    montrerPageV2('caveV2Container');
+    revenirPageV2('caveV2Container', appliquerFiltresCaveV2);
   } else if (FICHE_V2_PROVENANCE === 'achat') {
-    montrerPageV2('achatV2Container');
-    appliquerFiltresAchatV2();
+    revenirPageV2('achatV2Container', appliquerFiltresAchatV2);
   } else if (FICHE_V2_PROVENANCE === 'histo') {
-    ouvrirHistoV2();
+    // historique vidé entre-temps (bouton Données) : il se recharge, depuis le haut
+    if (ALL_HISTORIQUE && ALL_HISTORIQUE.length) revenirPageV2('histoV2Container', PANNEAUX_V2.histo.rafraichir);
+    else ouvrirHistoV2();
   } else if (FICHE_V2_PROVENANCE === 'recherche') {
-    montrerPageV2('rechercheV2Container');
-  } else if (FICHE_V2_PROVENANCE === 'empliste') {
-    montrerPageV2('empV2Container');
-    rendreEmpV2();
-    // le Tri Dionysos : on revient au même endroit du parcours
-    if (empV2Mode === 'menage') document.querySelector('#empV2Container .modal-v2-content').scrollTop = SCROLL_EMP_V2;
-  } else if (FICHE_V2_PROVENANCE === 'emplacements') {
-    ouvrirEmpV2();
+    revenirPageV2('rechercheV2Container');
+  } else if (FICHE_V2_PROVENANCE === 'empliste' || FICHE_V2_PROVENANCE === 'emplacements') {
+    revenirPageV2('empV2Container', rendreEmpV2);
   } else if (FICHE_V2_PROVENANCE === 'sanscepage') {
-    montrerPageV2('sansCepageV2Container');
-    } else if (FICHE_V2_PROVENANCE === 'suggestions') {
-    montrerPageV2('suggestionsV2Container');
-    afficherSuggestionsV2();
+    revenirPageV2('sansCepageV2Container');
+  } else if (FICHE_V2_PROVENANCE === 'suggestions') {
+    revenirPageV2('suggestionsV2Container', afficherSuggestionsV2);
   } else if (FICHE_V2_PROVENANCE === 'accords') {
-    montrerPageV2('chartierV2Container');
+    revenirPageV2('chartierV2Container');
   } else if (FICHE_V2_PROVENANCE === 'selonsaq') {
-    montrerPageV2('selonSaqV2Container');
-    calculerSelonSaqV2();
+    revenirPageV2('selonSaqV2Container', calculerSelonSaqV2);
   } else if (FICHE_V2_PROVENANCE === 'curieuxbegin') {
-    montrerPageV2('curieuxBeginV2Container');
-    chargerCurieuxBeginV2();
+    revenirPageV2('curieuxBeginV2Container', chargerCurieuxBeginV2);
   } else if (FICHE_V2_PROVENANCE === 'notes') {
-    montrerPageV2('notesV2Container');
-    afficherNotesV2();
+    revenirPageV2('notesV2Container', afficherNotesV2);
   }
 
   FICHE_V2_PROVENANCE = null;
