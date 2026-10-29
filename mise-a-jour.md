@@ -265,6 +265,7 @@ Les règles sont écrites en tête du module dans `scripts-emplacements-v2.js` (
 
 ## 📊 Profil (menu, sous HISTORIQUE — 28 oct. 2026)
 - Les statistiques de l'Historique, « très visuelles ». Pour l'instant : **Pays** = une tarte des bus par pays, en % du total, et une carte par pays dessous (% · btl). 7 pays (l'utilisateur, 28 oct.), puis « Autres » en gris. Le reste est à développer avec l'utilisateur (cépages, pastilles, etc.).
+- **But (l'utilisateur, 28 oct.)** : « une page visuelle, d'un coup on voit » — sans lire ni faire d'allers-retours entre le graphique et une liste. **Pas de phrase en tête** : le visuel doit dire seul « je bois espagnol ». La tarte actuelle (couleurs de l'appréciation, légende à part) ne lui plaît pas (« pas chic ») ; il y réfléchit. Pistes laissées : le nom du pays sur sa part, ou des barres nommées.
 - **Un graphique = un `<svg>` posé directement dans un `.contenu`** (règle `.contenu > svg`). **Couleurs : celles de l'appréciation `.note-1…5`, puis le blanc `.color-white` et l'or `.color-primary`** (ordre `COULEURS_TARTE_V2`), les mêmes que la bande de la carte ; gris `--white-60` = Autres ; pas de contour des parts ; le % garde un liseré sombre (lisible sur le blanc et le jaune). **Jamais de nouvelle couleur** : on a les 5 couleurs, l'or, le blanc, le gris (l'utilisateur, 28 oct.).
 
 ## 📝 Nos notes d'accord
