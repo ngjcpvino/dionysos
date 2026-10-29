@@ -821,9 +821,7 @@ function fermerMenuActionV2() {
 // Toutes les pages (.modal-v2-fullscreen), lues dans la page — sauf l'écran du mot de passe (voulu). Une page
 // nouvelle est donc cachée d'office : plus de liste à tenir à la main.
 function cacherToutesPagesV2() {
-  Array.prototype.forEach.call(document.querySelectorAll('.modal-v2-fullscreen:not(#secretV2Container)'), function(el) {
-    el.style.display = 'none';
-  });
+  Array.prototype.forEach.call(document.querySelectorAll('.modal-v2-fullscreen:not(#secretV2Container)'), rangerPageV2);
   fermerMenuBurgerV2();
 }
 

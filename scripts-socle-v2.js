@@ -75,7 +75,23 @@ function montrerPageV2(id) {
 // …et se ferme pareil : son panneau de filtres (si elle en a un), puis la page
 function cacherPageV2(id) {
   fermerFiltresV2(id.replace(/(Container|Overlay)$/, ''));
-  document.getElementById(id).style.display = 'none';
+  rangerPageV2(document.getElementById(id));
+}
+// Une page qui se cache retient sa place (où on était rendu dans la liste)…
+var PLACE_PAGES_V2 = {};
+function rangerPageV2(page) {
+  var c = page.querySelector('.modal-v2-content');
+  if (c && page.style.display !== 'none') PLACE_PAGES_V2[page.id] = c.scrollTop;
+  page.style.display = 'none';
+}
+// …et on y revient à cette place, pas en haut, en fermant la fiche (redessiner : la remettre à jour au passage)
+function revenirPageV2(id, redessiner) {
+  var page = document.getElementById(id);
+  var c = page.querySelector('.modal-v2-content');
+  var place = page.style.display !== 'none' ? c.scrollTop : (PLACE_PAGES_V2[id] || 0);
+  page.style.display = 'flex';
+  if (redessiner) redessiner();
+  c.scrollTop = place;
 }
 
 function remonterScrollV2(containerId) {

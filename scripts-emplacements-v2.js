@@ -1133,12 +1133,9 @@ function afficherListeEmpV2(type) {
   div.innerHTML = html;
 }
 
-// Position dans la liste au moment d'ouvrir une fiche : le Tri Dionysos y revient en fermant la fiche
-var SCROLL_EMP_V2 = 0;
+// Une carte d'une liste (Tri Dionysos compris) → la fiche ; la fermer revient au même endroit (revenirPageV2)
 function ouvrirFicheDepuisListeEmpV2(code) {
-  var c = document.querySelector('#empV2Container .modal-v2-content');
-  SCROLL_EMP_V2 = c ? c.scrollTop : 0;
-  document.getElementById('empV2Container').style.display = 'none';
+  cacherPageV2('empV2Container');
   ouvrirApresTap(function(){ ouvrirFicheV2(code, 'empliste'); });
 }
 
