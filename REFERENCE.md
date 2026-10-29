@@ -19,6 +19,7 @@
 
 ## Changements de code — LE PLUS IMPORTANT
 - **Jamais de code sans OK explicite. On DIALOGUE avant de coder** : dire en clair ce qui va changer, attendre le OK, PUIS appliquer. Ne pas partir en silence puis livrer du code non demandé.
+- **Une correction ou une précision de l'utilisateur n'est PAS un oui (28 oct. 2026)** : redire le plan corrigé en une ligne, attendre « oui », puis appliquer et publier. Publier sans redemander ne vaut que pour un changement déjà approuvé.
 - **Jaser avant de coder (23 oct. 2026)** : sur un besoin nouveau, ouvrir la discussion — demander comment l'utilisateur vit la situation, offrir des pistes OUVERTES, laisser de la latitude. Jamais un plan bouclé « c'est ça et pas autre chose ». Le vin, c'est le goût et le feeling de l'utilisateur : c'est lui qui les apporte.
 - **L'IA modifie les fichiers du dépôt directement** (`index-v2.html`, `scripts-*-v2.js`, `styles-v2.css`) — plus de « Trouve / Remplace » à copier à la main. L'utilisateur relit et publie quand il veut (souvent une seule fois, à la fin d'une série).
 - **`Code.gs` est hors du dépôt public** (Apps Script). Sa bonne version vit dans le dépôt **privé `ngjcpvino/dionysos-serveur`** (28 oct. 2026) : l'IA modifie sa copie (`Code.gs`, gitignorée ici), la pousse dans ce dépôt privé à chaque changement, et l'envoie aussi en pièce jointe ; l'utilisateur fait **un seul copier-coller** de tout le fichier dans Apps Script, puis **redéploie** (Gérer les déploiements → nouvelle version). Ne jamais donner de Trouve/Remplace pour le backend.

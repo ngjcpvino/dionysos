@@ -374,22 +374,45 @@ function busParPaysV2() {
   return parts;
 }
 
-// La tarte (SVG) : les parts dans l'ordre, en partant du haut (leur nuance d'or suit ce rang : CSS) ; à côté de chaque part,
-// son nom et son %, reliés à elle par un trait fin. D'un même côté, les écritures s'écartent pour ne pas se chevaucher.
+// L'ordre des parts sur le cercle, dans le sens des aiguilles : la 1re (la plus grande) centrée en haut, les parts du côté
+// droit (les plus grandes près du haut), la 2e (qui tombe ainsi en bas), puis celles du côté gauche. Chaque part va du côté
+// le moins chargé : les deux côtés pèsent à peu près pareil (l'utilisateur, 28 oct. 2026).
+function ordreTarteV2(parts) {
+  var droite = [], gauche = [], sd = 0, sg = 0;
+  parts.slice(2).forEach(function(p) {
+    if (sd <= sg) { droite.push(p); sd += p.n; } else { gauche.push(p); sg += p.n; }
+  });
+  return parts.slice(0, 1).concat(droite, parts.slice(1, 2), gauche.reverse());
+}
+
+// La tarte (SVG) : les parts placées par ordreTarteV2, mais écrites dans l'ordre du rang (leur nuance d'or suit ce rang : CSS).
+// La 1re et la 2e ont leur nom et leur % au-dessus et au-dessous de la tarte ; les autres, à côté de leur part, reliés à elle
+// par un trait fin. D'un même côté, les écritures s'écartent pour ne pas se chevaucher.
 function tarteV2(parts) {
   var total = parts.reduce(function(s, p) { return s + p.n; }, 0);
   var cx = 230, r = 90, ecart = 34, f = function(v) { return v.toFixed(1); };
   var pt = function(a, rayon) { return [cx + rayon * Math.cos(a), rayon * Math.sin(a)]; };
-  var angle = -Math.PI / 2, formes = '', ecritures = '', cotes = { droite: [], gauche: [] };
-  parts.forEach(function(p) {
-    var part = p.n / total, debut = angle, fin = angle + part * 2 * Math.PI, m = (debut + fin) / 2;
+  var angle = -Math.PI / 2 - Math.PI * parts[0].n / total, place = [];
+  ordreTarteV2(parts).forEach(function(p) {
+    var fin = angle + 2 * Math.PI * p.n / total;
+    place[parts.indexOf(p)] = [angle, fin];
     angle = fin;
+  });
+  var formes = '', ecritures = '', cotes = { droite: [], gauche: [] }, haut = -r - 10, bas = r + 10;
+  parts.forEach(function(p, i) {
+    var part = p.n / total, debut = place[i][0], fin = place[i][1], m = (debut + fin) / 2, pct = Math.round(part * 100);
     var a = pt(debut, r), b = pt(fin, r);
     formes += part >= 1 ? '<circle cx="' + cx + '" cy="0" r="' + r + '"/>'
       : '<path d="M' + cx + ' 0 L' + f(a[0]) + ' ' + f(a[1]) + ' A' + r + ' ' + r + ' 0 ' + (part > 0.5 ? 1 : 0) + ' 1 ' + f(b[0]) + ' ' + f(b[1]) + 'Z"/>';
-    cotes[Math.cos(m) >= 0 ? 'droite' : 'gauche'].push({ nom: p.nom, pct: Math.round(part * 100), bord: pt(m, r), y: pt(m, r + 20)[1] });
+    if (i < 2) {   // le nom, puis le % dessous : juste au-dessus de la tarte (la 1re), juste au-dessous (la 2e)
+      var x = f(pt(m, r)[0]), enBas = i === 1;
+      ecritures += '<text x="' + x + '" y="' + (enBas ? r + 22 : -r - 28) + '" text-anchor="middle">' + p.nom +
+        '<tspan x="' + x + '" dy="16">' + pct + ' %</tspan></text>';
+      if (enBas) bas = Math.max(bas, r + 44); else haut = Math.min(haut, -r - 46);
+      return;
+    }
+    cotes[Math.cos(m) >= 0 ? 'droite' : 'gauche'].push({ nom: p.nom, pct: pct, bord: pt(m, r), y: pt(m, r + 20)[1] });
   });
-  var haut = -r - 10, bas = r + 10;
   Object.keys(cotes).forEach(function(cote) {
     var x = cote === 'droite' ? cx + r + 30 : cx - r - 30;
     cotes[cote].sort(function(e1, e2) { return e1.y - e2.y; }).forEach(function(e, i, l) {

@@ -265,7 +265,7 @@ Les règles sont écrites en tête du module dans `scripts-emplacements-v2.js` (
 
 ## 📊 Profil (menu, sous HISTORIQUE — 28 oct. 2026)
 - **But (l'utilisateur)** : « une page visuelle, d'un coup on voit » — sans lire ni faire d'allers-retours. **Pas de phrase en tête, pas de liste sous le graphique.** Le reste (cépages, pastilles…) est à développer avec lui.
-- **Pays** : une tarte des bus de l'Historique (% du total) ; 7 pays, puis « Autres » (`PAYS_TARTE_V2`). **À côté de chaque part, son nom et son % dessous**, reliés par un trait fin ; d'un même côté, les écritures s'écartent pour ne pas se chevaucher. Aucun chiffre dans la tarte, aucun contour.
+- **Pays** : une tarte des bus de l'Historique (% du total) ; 7 pays, puis « Autres » (`PAYS_TARTE_V2`). **Disposition (l'utilisateur)** : pas en ordre décroissant depuis midi — le pays le plus bu **centré en haut**, le 2e **en bas**, les autres répartis à droite et à gauche pour que les deux côtés pèsent pareil (`ordreTarteV2`). Le nom et le % du 1er au-dessus de la tarte, du 2e au-dessous ; les autres **à côté de leur part**, reliés par un trait fin ; d'un même côté, les écritures s'écartent pour ne pas se chevaucher. Aucun chiffre dans la tarte, aucun contour.
 - **Couleurs : l'or seul, en nuances** (choix de l'utilisateur) : la 1re part (la plus grande) en `--gold`, puis `--gold-90`, `-80`… jusqu'à `--gold-30` pour « Autres » — la nuance suit le rang (`.contenu > svg path:nth-of-type(N)`), aucune classe. Refusés : les couleurs de l'appréciation (« pas chic »), le gris pour « Autres », de nouvelles couleurs.
 - **Un graphique = un `<svg>` posé directement dans un `.contenu`** (règles `.contenu > svg …`).
 
