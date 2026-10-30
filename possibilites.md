@@ -29,7 +29,7 @@
 - **Boire** (🍷) : le plat, l'appréciation en verres, les accords et la note de dégustation.
 - **Donner** (🎁).
 - **Historique** : tout ce qui a été bu, avec plats et appréciations. On peut corriger une entrée, ou ajouter un vin bu avant l'app.
-- **Profil** : les pays, les couleurs et les pastilles de goût de vos achats, en tartes.
+- **Profil** : les pays, les couleurs et les pastilles de goût de vos achats, en tartes. Toucher une part ouvre la Cave sur ses vins ; « Autres » s'ouvre en sa propre tarte.
 
 ## Qu'est-ce que je sers avec…
 - **Chartier** : un aliment, puis les cépages qui vont avec, puis tes vins de ces cépages.
