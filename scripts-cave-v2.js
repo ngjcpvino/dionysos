@@ -5,7 +5,11 @@
 ============================================================ */
 
 // ==================== CAVE À VIN V2 ====================
+// La Cave ouverte par une part du Profil : son ✕ y ramène (toucherPartProfilV2)
+var CAVE_DEPUIS_PROFIL_V2 = false;
+
 function ouvrirCaveV2() {
+  CAVE_DEPUIS_PROFIL_V2 = false;
   montrerPageV2('caveV2Container');
   majToggleHautV2('caveV2-dispo', filtresCaveV2.dispo);
   remplirFiltresCaveV2();
@@ -15,6 +19,7 @@ function ouvrirCaveV2() {
 function fermerCaveV2() {
   cacherPageV2('caveV2Container');
   reinitialiserFiltresV2('caveV2');
+  if (CAVE_DEPUIS_PROFIL_V2) { CAVE_DEPUIS_PROFIL_V2 = false; revenirPageV2('profilV2Container'); }
 }
 
 // ==================== À RANGER V2 ====================
