@@ -17,6 +17,7 @@ let ALL_DATA = [];
 let ALL_HISTORIQUE = [];
 let ALL_SUGGESTIONS = [];
 let ALL_NOTES = [];
+let ALL_ACHATS = null;   // l'onglet Achats (« Acheté N fois » de la fiche) ; null = à relire
 let CURRENT_WINE_CODEBARRE = null;
 let CURRENT_WINE_DATA = null;
 let CURRENT_WINE_BOTTLES = [];

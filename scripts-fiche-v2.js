@@ -209,6 +209,7 @@ function afficherFicheV2(result) {
   // === NOTES : HISTORIQUE ===
   html += '<div class="section" id="ficheV2-plats-section">';
   html += '<div class="ligne-ajout"><h3 class="titre-2">Historique</h3><div class="cercle" onclick="ouvrirHistoAjoutDepuisFicheV2()">+</div></div>';
+  html += '<div id="ficheV2-achats"></div>';
   html += '<div id="ficheV2-plats"></div>';
   html += '</div>';
 
@@ -270,6 +271,7 @@ function afficherFicheV2(result) {
 
 
   document.getElementById('ficheV2-corps').innerHTML = html;
+  chargerAchatsFicheV2();
   chargerPlatsV2(CURRENT_WINE_CODEBARRE);
   chargerSuggestionsFicheV2(wine['Code SAQ']);
   chargerRecettesFicheV2(wine.Famille);
@@ -759,10 +761,7 @@ function chargerPlatsV2(codebarre) {
       });
     });
     if (mets.length === 0) { conteneur.innerHTML = ''; return; }
-    var derniere = mets.slice().sort(function(a, b) {
-      return dateHistoIsoV2(b.date) < dateHistoIsoV2(a.date) ? -1 : 1;
-    })[0].date;
-    var compte = '<div class="texte-secondaire">Bu ' + mets.length + ' fois' + (derniere ? ' · la dernière fois le ' + derniere : '') + '</div>';
+    var compte = ligneCompteFicheV2('Bu', mets.map(function(m) { return m.date; }));
     mets.sort(function(a, b) {
       return (parseInt(b.bonAccord) || 0) - (parseInt(a.bonAccord) || 0);
     });
@@ -779,6 +778,37 @@ function chargerPlatsV2(codebarre) {
     ALL_HISTORIQUE = data || [];
     rendrePlats(ALL_HISTORIQUE);
   }).catch(journaliserV2('Plats de la fiche'));
+}
+
+// « Bu 3 fois · la dernière fois le 12-10-2026 » — dates « jj-mm-aaaa » ; rien si aucune
+function ligneCompteFicheV2(verbe, dates) {
+  if (!dates.length) return '';
+  var derniere = dates.slice().sort(function(a, b) { return dateHistoIsoV2(b) < dateHistoIsoV2(a) ? -1 : 1; })[0];
+  return '<div class="texte-secondaire">' + verbe + ' ' + dates.length + ' fois' + (derniere ? ' · la dernière fois le ' + derniere : '') + '</div>';
+}
+
+// « Acheté N fois » en tête de l'Historique de la fiche (30 oct. 2026) : les achats du vin (onglet Achats), par son code SAQ
+// ou l'un de ses codes-barres. Un serveur sans la route (Code.gs à recoller) : rien d'affiché, la trace au journal.
+function chargerAchatsFicheV2() {
+  var div = document.getElementById('ficheV2-achats');
+  if (!div) return;
+  var w = CURRENT_WINE_DATA || {};
+  function rendre() {
+    var saq = (w['Code SAQ'] || '').toString().trim();
+    var codes = codesBarresDuVinV2(w).concat([CURRENT_WINE_CODEBARRE]);
+    div.innerHTML = ligneCompteFicheV2('Acheté', ALL_ACHATS.filter(function(a) {
+      return (saq && memeCodeV2(a.codeSAQ, saq)) || codes.some(function(k) { return memeCodeV2(a.codebarre, k); });
+    }).map(function(a) { return a.date; }));
+  }
+  if (ALL_ACHATS) { rendre(); return; }
+  appelBackend('getAchats', {}, { spinner: '' }).then(function(data) {
+    if (!Array.isArray(data)) throw new Error((data && data.error) || 'Achats illisibles');
+    ALL_ACHATS = data;
+    rendre();
+  }).catch(function(err) {
+    ALL_ACHATS = [];
+    journaliserV2('Achats de la fiche')(err);
+  });
 }
 
 var PHOTO_V2_MODE = 'fiche';

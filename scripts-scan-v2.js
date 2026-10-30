@@ -1289,6 +1289,7 @@ function ajouterBouteilleArrivee(meuble, rangee, espace) {
       afficherMessage(res.message || 'Ajout refusé');
       return null;
     }
+    ALL_ACHATS = null;   // le serveur a compté l'achat
     return rechargerInventaireV2('Mise en cave').then(function() {
       cacherToutesPagesV2();
       menuActionV2Context = null;

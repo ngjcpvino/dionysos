@@ -282,6 +282,7 @@ function burgerV2Click(cible) {
   if (cible === 'historique') { cacherToutesPagesV2(); ouvrirHistoV2(); return; }
   if (cible === 'profil') { cacherToutesPagesV2(); ouvrirProfilV2(); return; }
     if (cible === 'facture') { cacherToutesPagesV2(); ouvrirRecuV2(); return; }
+  if (cible === 'importachats') { cacherToutesPagesV2(); ouvrirImportAchatsV2(); return; }
   if (cible === 'accords') { cacherToutesPagesV2(); ouvrirChartierV2(); return; }
   if (cible === 'selonsaq') { cacherToutesPagesV2(); ouvrirSelonSaqV2(); return; }
   if (cible === 'curieuxbegin') { cacherToutesPagesV2(); ouvrirCurieuxBeginV2(); return; }
@@ -301,6 +302,7 @@ function burgerV2Click(cible) {
       ALL_SUGGESTIONS = sugg || [];
       ALL_HISTORIQUE = [];
       ALL_NOTES = [];
+      ALL_ACHATS = null;
       ALL_ACCORDS = null;
       ALL_RECETTES = null;
       ALL_CURIEUXBEGIN = null;
