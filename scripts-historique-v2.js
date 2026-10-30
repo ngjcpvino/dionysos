@@ -340,30 +340,26 @@ function confirmerHistoAjoutV2() {
 }
 
 // ===================== PROFIL =====================
-// Ce que dit l'Historique (28 oct. 2026 : d'abord les pays bus ; le reste viendra). Se lit d'un coup : pas de phrase, pas de liste.
+// Ce que disent les achats (30 oct. 2026, l'utilisateur : « selon les achats » — tout ce qui est acheté se boit dans les
+// 6 mois, et l'historique d'achat SAQ remonte avant l'app ; un vin acheté un jour = une part). Se lit d'un coup : pas de
+// phrase, pas de liste.
 var PAYS_TARTE_V2 = 7;   // au-delà, les plus petits pays vont dans « Autres »
 
 function ouvrirProfilV2() {
   montrerPageV2('profilV2Container');
-  historiqueV2(' ').then(rendreProfilV2).catch(function(err) { retourAccueilV2('Profil : ' + causeV2(err)); });
+  achatsV2(' ').then(rendreProfilV2).catch(function(err) { retourAccueilV2('Profil : ' + causeAchatV2(err)); });
 }
 
 function fermerProfilV2() {
   cacherPageV2('profilV2Container');
 }
 
-// L'Historique en mémoire, chargé au besoin
-function historiqueV2(spinner) {
-  if (ALL_HISTORIQUE && ALL_HISTORIQUE.length) return Promise.resolve(ALL_HISTORIQUE);
-  return appelBackend('getHistorique', {}, { spinner: spinner }).then(function(data) { return (ALL_HISTORIQUE = data || []); });
-}
-
-// Les bus regroupés par une valeur de leur vin (valeur(vin, entrée de l'Historique)), du plus bu au moins bu ;
-// PAYS_TARTE_V2 parts, puis « Autres (N quoi) »
-function busParV2(valeur, inconnu, quoi) {
+// Les entrées (achats, ou bus : { codebarre, codeSAQ }) regroupées par une valeur de leur vin (valeur(vin, entrée)),
+// de la plus grande part à la plus petite ; PAYS_TARTE_V2 parts, puis « Autres (N quoi) »
+function partsParV2(liste, valeur, inconnu, quoi) {
   var vinDe = indexVinsHistoV2();
   var compte = {};
-  (ALL_HISTORIQUE || []).forEach(function(h) {
+  (liste || []).forEach(function(h) {
     var v = decodeHTML(valeur(vinDe(h), h) || '').trim() || inconnu;
     compte[v] = (compte[v] || 0) + 1;
   });
@@ -375,9 +371,9 @@ function busParV2(valeur, inconnu, quoi) {
   return parts;
 }
 
-// Les couleurs bues : chaque part prend la couleur de son vin (.vin-*, comme la bande des cartes)
-function busParCouleurV2() {
-  var parts = busParV2(function(w, h) { return w.Couleur || h.couleur; }, 'Couleur inconnue', 'couleurs');
+// Les couleurs : chaque part prend la couleur de son vin (.vin-*, comme la bande des cartes)
+function partsParCouleurV2(liste) {
+  var parts = partsParV2(liste, function(w, h) { return w.Couleur || h.couleur; }, 'Couleur inconnue', 'couleurs');
   parts.forEach(function(p) { if (p.nom !== 'Couleur inconnue') p.classe = couleurClasseV2(p.nom); });
   return parts;
 }
@@ -436,8 +432,8 @@ function tarteV2(parts) {
 }
 
 function rendreProfilV2() {
-  var total = (ALL_HISTORIQUE || []).length;
-  document.getElementById('profilV2-pays').innerHTML = total ? tarteV2(busParV2(function(w) { return w.Pays; }, 'Pays inconnu', 'pays'))
-    : '<div class="texte-secondaire">Aucune bouteille dans l\'Historique</div>';
-  document.getElementById('profilV2-couleurs').innerHTML = total ? tarteV2(busParCouleurV2()) : '';
+  var achats = ALL_ACHATS || [];
+  document.getElementById('profilV2-pays').innerHTML = achats.length ? tarteV2(partsParV2(achats, function(w) { return w.Pays; }, 'Pays inconnu', 'pays'))
+    : '<div class="texte-secondaire">Aucun achat : Outils → Importer des achats</div>';
+  document.getElementById('profilV2-couleurs').innerHTML = achats.length ? tarteV2(partsParCouleurV2(achats)) : '';
 }
