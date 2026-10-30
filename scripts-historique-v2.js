@@ -347,7 +347,7 @@ var PAYS_TARTE_V2 = 7;   // au-delà, les plus petits pays vont dans « Autres �
 
 function ouvrirProfilV2() {
   montrerPageV2('profilV2Container');
-  achatsV2(' ').then(rendreProfilV2).catch(function(err) { retourAccueilV2('Profil : ' + causeAchatV2(err)); });
+  achatsV2(' ').then(rendreProfilV2).catch(function(err) { retourAccueilV2('Profil : ' + causeServeurV2(err)); });
 }
 
 function fermerProfilV2() {

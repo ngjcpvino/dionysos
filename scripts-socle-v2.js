@@ -62,6 +62,15 @@ function rechargerVinEnCoursV2(spinner) {
 }
 // La cause d'un échec, en clair
 function causeV2(err) { return err && err.message ? err.message : (err ? String(err) : 'erreur inconnue'); }
+// La cause d'une panne d'une route nouvelle : une route inconnue = un serveur pas encore redéployé
+function causeServeurV2(err) {
+  var c = causeV2(err);
+  return /Action inconnue/.test(c) ? c + ' — Code.gs à recoller' : c;
+}
+// Un serveur qui ne connaît pas la route répond { error } : c'est une panne, pas un refus
+function verifierReponseV2(res) {
+  if (res && res.error) throw new Error(res.error);
+}
 // Une écriture qui échoue : le toast le dit, avec la cause. Usage : .catch(signalerErreurV2)
 function signalerErreurV2(err) { afficherMessage('Erreur : ' + causeV2(err)); }
 // Un appel de fond qui échoue ne dérange pas l'écran (la page reste utilisable), mais laisse sa trace dans le journal
