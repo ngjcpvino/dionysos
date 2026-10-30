@@ -50,7 +50,7 @@
   - corriger la fiche (crayon), aller chercher la photo SAQ, faire une action sur une bouteille, trouver le vin en succursale.
 
 ## L'entretien (Outils)
-- **Sans cépage** : les vins à compléter (point doré). Sur la fiche d'un vin sans cépage, **Cépage Vivino** va chercher ses cépages sur Vivino ; « Garder » les inscrit.
+- **Sans cépage** : les vins à compléter (point doré).
 - **Importer des achats** : tu colles ton historique d'achat de saq.com ; les vins qui manquent entrent dans Dionysos (0 bouteille, voilés dans la Cave) et chaque achat est compté. Les bouteilles ne sont jamais touchées.
 - **Mises à jour** : Accords SAQ et Curieux Bégin, puis **Données** pour tout recharger.
 - **Sans réseau** : l'app s'ouvre et se consulte avec la dernière copie, mais rien ne peut s'enregistrer.
