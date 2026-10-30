@@ -146,16 +146,16 @@ html, body {
   --gold-40: rgba(201,129,60,0.4);
   --fs-9: 9px;
   --fs-10: 10px;
-  /* les couleurs des pastilles de goût de la SAQ (relevées sur son tableau, 30 oct. 2026) */
-  --pastille-delicat-leger: #E0E5AD;
-  --pastille-fruite-vif: #F9E652;
-  --pastille-aromatique-rond: #A2A3C7;
-  --pastille-fruite-doux: #9FCBC5;
-  --pastille-fruite-extra-doux: #B9D9F1;
-  --pastille-fruite-leger: #DAB4C8;
-  --pastille-fruite-genereux: #D88632;
-  --pastille-aromatique-souple: #C4052C;
-  --pastille-aromatique-charnu: #5F2036;
+  /* les couleurs des pastilles de goût de la SAQ (officielles : les images de la SAQ de fév. 2014, version RGB — 30 oct. 2026) */
+  --pastille-delicat-leger: #EBEEBF;
+  --pastille-fruite-vif: #FFE40F;
+  --pastille-aromatique-rond: #B8C1DE;
+  --pastille-fruite-doux: #9ED3CB;
+  --pastille-fruite-extra-doux: #B5DEF2;
+  --pastille-fruite-leger: #F3C6DB;
+  --pastille-fruite-genereux: #F39704;
+  --pastille-aromatique-souple: #E52D39;
+  --pastille-aromatique-charnu: #770D35;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
