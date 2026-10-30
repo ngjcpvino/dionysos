@@ -16,6 +16,7 @@
 ## De retour à la maison
 - **Arrivée** (+) : ajouter des bouteilles et choisir leur place (meuble, rangée, espace).
 - **Facture SAQ** : tu prends la facture en photo, l'app lit les vins, tu valides chacun et ils entrent « À ranger ». Elle crie « Bingo » si Curieux Bégin a proposé le vin.
+- **Chaque Arrivée et chaque Facture compte un achat** : la fiche dit « Acheté N fois · la dernière fois le … ».
 - **À ranger** : les bouteilles qui attendent une place.
 
 ## Dans la cave
@@ -41,7 +42,7 @@
 ## La fiche d'un vin
 - Ce qu'elle montre :
   - information, dégustation, production ;
-  - où sont ses bouteilles, combien de fois il a été bu, avec quels plats ;
+  - où sont ses bouteilles, combien de fois il a été acheté et bu, avec quels plats ;
   - les accords selon les sommeliers, Curieux Bégin, Chartier et la SAQ.
 - Ce qu'on y fait :
   - écrire la note de dégustation (section Appréciation, « Notes du sommelier »), choisir les accords ;
@@ -50,5 +51,6 @@
 
 ## L'entretien (Outils)
 - **Sans cépage** : les vins à compléter (point doré).
+- **Importer des achats** : tu colles ton historique d'achat de saq.com ; les vins qui manquent entrent dans Dionysos (0 bouteille, voilés dans la Cave) et chaque achat est compté. Les bouteilles ne sont jamais touchées.
 - **Mises à jour** : Accords SAQ et Curieux Bégin, puis **Données** pour tout recharger.
 - **Sans réseau** : l'app s'ouvre et se consulte avec la dernière copie, mais rien ne peut s'enregistrer.

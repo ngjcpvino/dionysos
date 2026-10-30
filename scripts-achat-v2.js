@@ -891,11 +891,12 @@ function confirmerRecuVinV2() {
       statutEl.textContent = 'Vin introuvable, corrigez le code';
       return;
     }
-    return appelBackend('ajouterVinAvecBouteilles', { codebarre: codeCUP, codeSAQ: codeSAQ, note: '', bouteilles: JSON.stringify(bouteilles), nom: '' }, { spinner: 'Ajout' }).then(function(res) {
+    return appelBackend('ajouterVinAvecBouteilles', { codebarre: codeCUP, codeSAQ: codeSAQ, note: '', bouteilles: JSON.stringify(bouteilles), nom: '', source: 'Facture' }, { spinner: 'Ajout' }).then(function(res) {
       if (!res || !res.success) {
         statutEl.textContent = (res && res.message) || 'Erreur d\'ajout';
         return;
       }
+      ALL_ACHATS = null;   // le serveur a compté l'achat
       return rechargerInventaireV2('Ajout').then(function() {
         if (platsCurieuxBeginV2(codeSAQ).length) RECU_V2_BINGOS++;
         RECU_V2_INDEX++;
@@ -905,4 +906,242 @@ function confirmerRecuVinV2() {
   }).catch(function() {
     statutEl.textContent = 'Erreur, réessayez';
   });
+}
+
+// ==================== IMPORTER DES ACHATS (30 oct. 2026) ====================
+// L'historique d'achat de saq.com, copié tel quel : chaque visite (date, succursale) et ses produits. La liste à cocher :
+// les vins absents de Dionysos, tous cochés sauf les spiritueux et les formats autres que 750 ml. Importer : chaque vin coché
+// est retrouvé à la SAQ par son nom (même nom, même couleur, même format) et entre avec sa fiche, sans bouteille (« Racheter »
+// à Oui) — un doute le laisse « À vérifier ». Puis les achats des vins de la cave s'inscrivent (onglet Achats, sans doublon :
+// l'import se recommence sans risque). Les bouteilles ne sont jamais touchées.
+var IMPORT_ACHATS_V2 = null;
+var MOIS_ACHATS_V2 = { janvier: 1, fevrier: 2, mars: 3, avril: 4, mai: 5, juin: 6, juillet: 7, aout: 8, septembre: 9, octobre: 10, novembre: 11, decembre: 12 };
+
+function ouvrirImportAchatsV2() {
+  IMPORT_ACHATS_V2 = null;
+  document.getElementById('importAchatsV2-texte').value = '';
+  montrerPageV2('importAchatsV2Container');
+  afficherImportAchatsV2();
+}
+
+// Un import en cours s'arrête après le vin en cours : ce qui est fait est gardé (ses achats s'inscrivent)
+function fermerImportAchatsV2() {
+  if (IMPORT_ACHATS_V2) IMPORT_ACHATS_V2.arret = true;
+  cacherPageV2('importAchatsV2Container');
+}
+
+// Un nom comparable : sans majuscules, accents ni ponctuation (« Montepulciano-d'Abruzzo » = « Montepulciano d'Abruzzo »)
+function cleNomAchatV2(t) {
+  return normaliserRechercheV2(decodeHTML(t || '')).replace(/[^a-z0-9]+/g, ' ').trim();
+}
+// « Vin rouge », « Vin mousseux rosé », « Vodka »… → la couleur de Dionysos ; ce qui n'est pas du vin = Spiritueux
+function couleurAchatV2(type) {
+  var t = normaliserRechercheV2(type);
+  if (/mousseux|champagne|cremant|cava|prosecco/.test(t)) return 'Bulles';
+  if (t.indexOf('vin rouge') === 0) return 'Rouge';
+  if (t.indexOf('vin blanc') === 0) return 'Blanc';
+  if (t.indexOf('vin rose') === 0) return 'Rosé';
+  return t.indexOf('vin') === 0 ? '' : 'Spiritueux';
+}
+// Deux couleurs qui peuvent être le même vin : comparées seulement si ce sont deux couleurs de vin (rouge, blanc, rosé)
+function memeCouleurAchatV2(a, b) {
+  var x = normaliserRechercheV2(a).trim(), y = normaliserRechercheV2(b).trim(), vin = /^(rouge|blanc|rose)$/;
+  return !vin.test(x) || !vin.test(y) || x === y;
+}
+// Les millilitres d'un format (« 750 ml » → 750, « 1,5 L » → 1500) ; 0 s'il n'y en a pas
+function mlFormatV2(f) {
+  var m = normaliserRechercheV2(f).replace(',', '.').match(/(\d+(?:\.\d+)?)\s*(ml|l)?\b/);
+  return m ? Math.round(parseFloat(m[1]) * (m[2] === 'l' ? 1000 : 1)) : 0;
+}
+
+// Le texte collé → { visites, vins: [{ nom, couleur, format, pays, achats: [{ date, succursale }] }] }, un vin par nom et couleur.
+// Une visite = une ligne « 1 novembre 2024 » suivie de la succursale ; un produit = sa ligne « Vin rouge | 750 ml | France »,
+// précédée de son nom (millésime retiré). Une caissette n'a pas cette ligne : ignorée.
+function lireAchatsSaqV2(texte) {
+  var lignes = (texte || '').split(/\r?\n/).map(function(l) { return l.trim(); });
+  var vins = {}, ordre = [], visite = null, visites = 0;
+  lignes.forEach(function(l, i) {
+    var d = normaliserRechercheV2(l).match(/^(\d{1,2})(?:er)? ([a-z]+) (\d{4})$/);
+    if (d && MOIS_ACHATS_V2[d[2]]) {
+      visite = { date: d[3] + '-' + ('0' + MOIS_ACHATS_V2[d[2]]).slice(-2) + '-' + ('0' + d[1]).slice(-2), succursale: lignes[i + 1] || '' };
+      visites++;
+      return;
+    }
+    var t = l.split('|').map(function(x) { return x.trim(); });
+    if (!visite || t.length !== 3 || !t[1] || !lignes[i - 1]) return;
+    var nom = lignes[i - 1].replace(/\s+(19|20)\d{2}$/, '');
+    var couleur = couleurAchatV2(t[0]);
+    var cle = cleNomAchatV2(nom) + '|' + couleur;
+    if (!vins[cle]) { vins[cle] = { nom: nom, couleur: couleur, format: t[1], pays: t[2], achats: [] }; ordre.push(cle); }
+    vins[cle].achats.push({ date: visite.date, succursale: visite.succursale });
+  });
+  return { visites: visites, vins: ordre.map(function(k) { return vins[k]; }) };
+}
+
+// Lire : l'inventaire frais, puis chaque vin retrouvé dans la cave (même nom, même couleur) ou coché pour l'ajouter
+function lireImportAchatsV2() {
+  var lu = lireAchatsSaqV2(document.getElementById('importAchatsV2-texte').value);
+  if (!lu.vins.length) { afficherMessage('Aucun achat reconnu : colle l\'historique d\'achat de saq.com'); return; }
+  rechargerInventaireV2('Lecture').then(function() {
+    var cave = {};
+    (ALL_DATA || []).forEach(function(i) { var k = cleNomAchatV2(i.Nom); (cave[k] = cave[k] || []).push(i); });
+    lu.vins.forEach(function(v) {
+      v.cave = (cave[cleNomAchatV2(v.nom)] || []).filter(function(i) { return memeCouleurAchatV2(i.Couleur, v.couleur); })[0] || null;
+      v.coche = !v.cave && v.couleur !== 'Spiritueux' && mlFormatV2(v.format) === 750;
+    });
+    IMPORT_ACHATS_V2 = { visites: lu.visites, vins: lu.vins, aVerifier: [], ajoutes: 0, achats: 0 };
+    afficherImportAchatsV2();
+  }).catch(function(err) { afficherMessage('Importer des achats : ' + causeAchatV2(err)); });
+}
+
+function basculerAchatV2(i) {
+  var v = IMPORT_ACHATS_V2 && IMPORT_ACHATS_V2.vins[i];
+  if (!v || IMPORT_ACHATS_V2.enCours) return;
+  v.coche = !v.coche;
+  afficherImportAchatsV2();
+}
+
+// La cause d'une panne ; une route inconnue = un serveur pas encore redéployé
+function causeAchatV2(err) {
+  var c = causeV2(err);
+  return /Action inconnue/.test(c) ? c + ' — Code.gs à recoller' : c;
+}
+// Un serveur qui ne connaît pas la route répond { error } : c'est une panne, pas un refus
+function verifierReponseAchatV2(res) {
+  if (res && res.error) throw new Error(res.error);
+}
+
+function importerAchatsV2() {
+  var e = IMPORT_ACHATS_V2;
+  if (!e || e.enCours) return;
+  var aFaire = e.vins.filter(function(v) { return v.coche && !v.cave && e.aVerifier.indexOf(v) === -1; });
+  e.enCours = true; e.lance = true; e.arret = false; e.erreur = ''; e.position = 0; e.total = aFaire.length;
+  afficherImportAchatsV2();
+  var suite = rechargerInventaireV2('');
+  aFaire.forEach(function(v) {
+    suite = suite.then(function() {
+      if (e.arret) return;
+      e.position++;
+      var pos = document.getElementById('importAchatsV2-position');
+      if (pos) pos.textContent = e.position;
+      return importerUnVinAchatV2(e, v);
+    });
+  });
+  suite.catch(function(err) { e.erreur = causeAchatV2(err); })
+    .then(function() { return inscrireAchatsV2(e, ''); })
+    .catch(function(err) { e.erreur = e.erreur || causeAchatV2(err); })
+    .then(function() { return rechargerInventaireV2(''); })
+    .catch(journaliserV2('Importer des achats'))
+    .then(function() { e.enCours = false; afficherImportAchatsV2(); });
+}
+
+// Un vin coché, cherché à la SAQ par son nom : un seul produit sûr (même nom, même couleur, même format) → il entre ;
+// sinon il attend « À vérifier » avec les produits trouvés. Une SAQ muette arrête l'import (à relancer).
+function importerUnVinAchatV2(e, v) {
+  return appelBackend('chercherVinsSAQParNom', { nom: v.nom }, { spinner: '' }).then(function(res) {
+    verifierReponseAchatV2(res);
+    if (!res || !res.success) throw new Error((res && res.message) || 'Recherche SAQ refusée');
+    var cle = cleNomAchatV2(v.nom), ml = mlFormatV2(v.format);
+    v.candidats = (res.produits || []).filter(function(p) { return memeCouleurAchatV2(p.couleur, v.couleur); });
+    var surs = v.candidats.filter(function(p) {
+      return cleNomAchatV2(p.nom) === cle && (!ml || !mlFormatV2(p.format) || mlFormatV2(p.format) === ml);
+    });
+    if (surs.length === 1) return creerVinAchatV2(e, v, surs[0], '');
+    v.raison = v.candidats.length ? 'Lequel ?' : 'Introuvable à la SAQ';
+    e.aVerifier.push(v);
+  });
+}
+
+// Le vin trouvé entre dans la cave (importerVinSAQ : sans bouteille, rien d'écrit s'il y est déjà sous un autre nom)
+function creerVinAchatV2(e, v, p, spinner) {
+  function fin(cave) {
+    v.cave = cave;
+    e.aVerifier = e.aVerifier.filter(function(x) { return x !== v; });
+  }
+  var connu = vinParCodeSAQV2(p.codeSAQ);
+  if (connu) { fin(connu); return Promise.resolve(); }
+  return appelBackend('importerVinSAQ', { codeSAQ: p.codeSAQ, cups: JSON.stringify(p.cups || []) }, { spinner: spinner }).then(function(res) {
+    verifierReponseAchatV2(res);
+    if (!res || !res.success) {
+      v.raison = (res && res.message) || 'Ajout refusé';
+      if (e.aVerifier.indexOf(v) === -1) e.aVerifier.push(v);
+      return;
+    }
+    if (!res.dejaLa) e.ajoutes++;
+    fin({ 'Code SAQ': p.codeSAQ, 'Code-barres': res.codebarre, Racheter: 'Oui' });
+  });
+}
+
+// Les achats des vins de la cave pas encore inscrits (le serveur saute ceux qu'il a déjà) ; une proposition achetée
+// redevient un vin (« Racheter » à Oui, comme à l'Arrivée)
+function inscrireAchatsV2(e, spinner) {
+  var vins = e.vins.filter(function(v) { return v.cave && !v.inscrit; });
+  var achats = [];
+  vins.forEach(function(v) {
+    var saq = (v.cave['Code SAQ'] || '').toString().trim(), cb = (v.cave['Code-barres'] || '').toString().trim();
+    v.achats.forEach(function(a) { achats.push({ date: a.date, succursale: a.succursale, nom: v.nom, codeSAQ: saq, codebarre: cb }); });
+  });
+  if (!achats.length) return Promise.resolve();
+  return appelBackend('ajouterAchats', { achats: JSON.stringify(achats) }, { spinner: spinner }).then(function(res) {
+    verifierReponseAchatV2(res);
+    if (!res || !res.success) throw new Error((res && res.message) || 'Achats refusés');
+    vins.forEach(function(v) { v.inscrit = true; });
+    e.achats += res.ajoutes || 0;
+    ALL_ACHATS = null;
+    return vins.filter(function(v) { return estPropositionV2(v.cave) && v.cave['Code-barres']; }).reduce(function(suite, v) {
+      return suite.then(function() {
+        return appelBackend('updateWineField', { codebarre: v.cave['Code-barres'], field: 'Racheter', value: 'Oui' }, { spinner: spinner });
+      });
+    }, Promise.resolve());
+  });
+}
+
+// « À vérifier » : le bon produit touché entre dans la cave, avec ses achats
+function choisirAchatAVerifierV2(i, j) {
+  var e = IMPORT_ACHATS_V2;
+  var v = e && e.aVerifier[i];
+  if (!v || e.enCours || !v.candidats[j]) return;
+  creerVinAchatV2(e, v, v.candidats[j], 'Ajout').then(function() {
+    return inscrireAchatsV2(e, 'Ajout');
+  }).then(function() {
+    return rechargerInventaireV2('Ajout');
+  }).then(afficherImportAchatsV2).catch(function(err) {
+    afficherMessage('Importer des achats : ' + causeAchatV2(err));
+  });
+}
+
+function afficherImportAchatsV2() {
+  var e = IMPORT_ACHATS_V2;
+  var compte = document.getElementById('importAchatsV2-compte');
+  var liste = document.getElementById('importAchatsV2-liste');
+  document.getElementById('importAchatsV2-saisie').style.display = e ? 'none' : '';
+  document.getElementById('importAchatsV2-importer').style.display = (e && !e.enCours) ? '' : 'none';
+  if (!e) { compte.textContent = ''; liste.innerHTML = ''; return; }
+  if (e.enCours) {
+    compte.textContent = '';
+    liste.innerHTML = '<div class="spinner-en-ligne">' + verreSpinnerHtmlV2() +
+      '<div class="spinner-texte">Import · <span id="importAchatsV2-position">' + e.position + '</span> / ' + e.total + '</div>' +
+      '<div class="texte-secondaire sans-majuscules">Chaque vin est cherché à la SAQ : quelques secondes par vin.</div></div>';
+    return;
+  }
+  var pluriel = function(n, mot) { return n + ' ' + mot + (n > 1 ? 's' : ''); };
+  var lignes = [pluriel(e.visites, 'visite') + ' · ' + pluriel(e.vins.length, 'vin') + ' · ' + e.vins.filter(function(v) { return v.cave; }).length + ' dans Dionysos'];
+  if (e.lance) lignes.push(pluriel(e.ajoutes, 'vin') + ' ajouté' + (e.ajoutes > 1 ? 's' : '') + ' · ' + pluriel(e.achats, 'achat') + ' inscrit' + (e.achats > 1 ? 's' : ''));
+  if (e.erreur) lignes.push('Import arrêté : ' + e.erreur + ' — touche Importer pour continuer');
+  compte.innerHTML = lignes.join('<br>');
+
+  var html = '';
+  if (e.aVerifier.length) html += '<div class="titre-2">À vérifier</div>' + e.aVerifier.map(function(v, i) {
+    return carteV2({ classes: couleurClasseV2(v.couleur), titre: v.nom, sous: v.raison }) + (v.candidats || []).map(function(p, j) {
+      return carteV2({ classes: 'histo-mets ' + couleurClasseV2(p.couleur), onclick: 'choisirAchatAVerifierV2(' + i + ',' + j + ')',
+        titre: p.nom, sous: [p.pays, p.format, p.codeSAQ].filter(Boolean).join(' · ') });
+    }).join('');
+  }).join('');
+  var aAjouter = e.vins.filter(function(v) { return !v.cave && e.aVerifier.indexOf(v) === -1; });
+  if (aAjouter.length) html += '<div class="titre-2">À ajouter</div>' + aAjouter.map(function(v) {
+    var i = e.vins.indexOf(v);
+    return carteV2({ classes: couleurClasseV2(v.couleur), onclick: 'basculerAchatV2(' + i + ')', titre: v.nom,
+      sous: [v.pays, v.format, pluriel(v.achats.length, 'achat')].join(' · '), droite: cocheMenageV2('basculerAchatV2(' + i + ')', v.coche) });
+  }).join('');
+  liste.innerHTML = html || '<div class="texte-secondaire">Tous ces vins sont dans Dionysos</div>';
 }

@@ -68,6 +68,7 @@
     <div class="item-liste accordeon-1" onclick="burgerV2Click('aranger')">À ranger</div>
     <div class="item-liste accordeon-1" onclick="burgerV2Click('sanscepage')">Sans cépage<span id="burgerV2-pastille-sanscepage" class="pastille-rappel"></span></div>
     <div class="item-liste accordeon-1" onclick="burgerV2Click('facture')">Facture SAQ</div>
+    <div class="item-liste accordeon-1" onclick="burgerV2Click('importachats')">Importer des achats</div>
     <div class="item-liste accordeon-1" onclick="burgerV2Click('majaccordssaq')">
       <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="item-icone">
         <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
@@ -603,6 +604,27 @@
     <div class="roundel" onclick="passerRecuVinV2()">
       <span class="roundel-anneau"></span>
       <span class="roundel-barre">Passer</span>
+    </div>
+  </div>
+</div>
+
+<!-- ====================== IMPORTER DES ACHATS V2 ====================== -->
+<div id="importAchatsV2Container" class="modal-v2-fullscreen" style="display:none;">
+  <div class="modal-v2-content modale-haut">
+    <button class="btn-fermer" onclick="fermerImportAchatsV2()">✕</button>
+    <h2 class="titre-1">Importer des achats</h2>
+    <div id="importAchatsV2-compte" class="texte-secondaire"></div>
+    <div id="importAchatsV2-saisie" class="bloc-form">
+      <textarea id="importAchatsV2-texte" class="champ-saisie" rows="6" placeholder="Colle ici l'historique d'achat copié sur saq.com"></textarea>
+      <div class="roundel" onclick="lireImportAchatsV2()">
+        <span class="roundel-anneau"></span>
+        <span class="roundel-barre">Lire</span>
+      </div>
+    </div>
+    <div id="importAchatsV2-liste" class="contenu"></div>
+    <div id="importAchatsV2-importer" class="roundel" style="display:none;" onclick="importerAchatsV2()">
+      <span class="roundel-anneau"></span>
+      <span class="roundel-barre">Importer</span>
     </div>
   </div>
 </div>
