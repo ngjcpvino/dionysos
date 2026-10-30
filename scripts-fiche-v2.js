@@ -134,6 +134,8 @@ function afficherFicheV2(result) {
   // le texte de la fiche est gardé dans data-cepages (les % de la SAQ s'y ajoutent) ; on montre chaque synonyme
   // suivi de son nom commun — « Cannonau (Grenache) 85 % »
   html += wine['Cépage'] ? '<div class="ligne-info"><span class="libelle">Cépages : </span><span id="ficheV2-cepages" data-cepages="' + decodeHTML(wine['Cépage'].toString()).replace(/"/g, '&quot;') + '">' + annoterCepagesV2(wine['Cépage']) + '</span>' + (favoriEtoile ? ' ' + favoriEtoile : '') + '</div>' : '';
+  // sans cépage (hors spiritueux) : Vivino, où l'utilisateur les cherchait à la main
+  if (!wine['Cépage'] && wine.Couleur !== 'Spiritueux') html += '<div id="ficheV2-vivino"><div class="roundel" onclick="cepagesVivinoV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Cépage Vivino</span></div></div>';
   html += ligne('Appellation', wine.Appellation);
   html += ligne('Pastille', wine['Pastille gout']);
   html += ligne('Classification', wine.Classification);
@@ -778,6 +780,36 @@ function chargerPlatsV2(codebarre) {
     ALL_HISTORIQUE = data || [];
     rendrePlats(ALL_HISTORIQUE);
   }).catch(journaliserV2('Plats de la fiche'));
+}
+
+// ==================== CÉPAGES VIVINO (30 oct. 2026) ====================
+// Le serveur cherche le vin sur Vivino par son nom et lit ses cépages ; on montre le vin trouvé et ses cépages,
+// « Garder » les inscrit (un autre vin trouvé : on ne garde pas). Vivino peut refuser : la cause s'affiche à la place.
+var CEPAGES_VIVINO_V2 = '';
+function cepagesVivinoV2() {
+  var div = document.getElementById('ficheV2-vivino');
+  if (!div) return;
+  appelBackend('cepagesVivino', { nom: decodeHTML((CURRENT_WINE_DATA && CURRENT_WINE_DATA.Nom) || '') }, { spinner: 'Vivino' }).then(function(res) {
+    verifierReponseV2(res);
+    if (!res || !res.success) {
+      logErreurV2('Vivino : ' + ((res && res.message) || 'pas de réponse') + (res && res.url ? ' ' + res.url : ''), 'fiche');
+      div.innerHTML = '<div class="texte-secondaire">' + ((res && res.message) || 'Vivino ne répond pas') + '</div>';
+      return;
+    }
+    CEPAGES_VIVINO_V2 = res.cepages;
+    div.innerHTML = '<div class="texte-secondaire">Vivino : ' + res.nom + '</div>' +
+      '<div class="ligne-info"><span class="libelle">Cépages : </span>' + annoterCepagesV2(res.cepages) + '</div>' +
+      '<div class="roundel" onclick="garderCepagesVivinoV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Garder</span></div>';
+  }).catch(function(err) {
+    div.innerHTML = '<div class="texte-secondaire">Vivino : ' + causeServeurV2(err) + '</div>';
+  });
+}
+function garderCepagesVivinoV2() {
+  if (!CEPAGES_VIVINO_V2) return;
+  enregistrerChampFicheV2('Cepage', CEPAGES_VIVINO_V2).then(function() {
+    afficherMessage('Cépage inscrit');
+    ouvrirFicheV2(CURRENT_WINE_CODEBARRE, FICHE_V2_PROVENANCE);
+  }).catch(signalerErreurV2);
 }
 
 // « Bu 3 fois · la dernière fois le 12-10-2026 » — dates « jj-mm-aaaa » ; rien si aucune

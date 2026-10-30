@@ -991,7 +991,7 @@ function lireImportAchatsV2() {
     });
     IMPORT_ACHATS_V2 = { visites: lu.visites, vins: lu.vins, aVerifier: [], ajoutes: 0, achats: 0 };
     afficherImportAchatsV2();
-  }).catch(function(err) { afficherMessage('Importer des achats : ' + causeAchatV2(err)); });
+  }).catch(function(err) { afficherMessage('Importer des achats : ' + causeServeurV2(err)); });
 }
 
 function basculerAchatV2(i) {
@@ -999,16 +999,6 @@ function basculerAchatV2(i) {
   if (!v || IMPORT_ACHATS_V2.enCours) return;
   v.coche = !v.coche;
   afficherImportAchatsV2();
-}
-
-// La cause d'une panne ; une route inconnue = un serveur pas encore redéployé
-function causeAchatV2(err) {
-  var c = causeV2(err);
-  return /Action inconnue/.test(c) ? c + ' — Code.gs à recoller' : c;
-}
-// Un serveur qui ne connaît pas la route répond { error } : c'est une panne, pas un refus
-function verifierReponseAchatV2(res) {
-  if (res && res.error) throw new Error(res.error);
 }
 
 function importerAchatsV2() {
@@ -1027,9 +1017,9 @@ function importerAchatsV2() {
       return importerUnVinAchatV2(e, v);
     });
   });
-  suite.catch(function(err) { e.erreur = causeAchatV2(err); })
+  suite.catch(function(err) { e.erreur = causeServeurV2(err); })
     .then(function() { return inscrireAchatsV2(e, ''); })
-    .catch(function(err) { e.erreur = e.erreur || causeAchatV2(err); })
+    .catch(function(err) { e.erreur = e.erreur || causeServeurV2(err); })
     .then(function() { return rechargerInventaireV2(''); })
     .catch(journaliserV2('Importer des achats'))
     .then(function() { e.enCours = false; afficherImportAchatsV2(); });
@@ -1039,7 +1029,7 @@ function importerAchatsV2() {
 // sinon il attend « À vérifier » avec les produits trouvés. Une SAQ muette arrête l'import (à relancer).
 function importerUnVinAchatV2(e, v) {
   return appelBackend('chercherVinsSAQParNom', { nom: v.nom }, { spinner: '' }).then(function(res) {
-    verifierReponseAchatV2(res);
+    verifierReponseV2(res);
     if (!res || !res.success) throw new Error((res && res.message) || 'Recherche SAQ refusée');
     var cle = cleNomAchatV2(v.nom), ml = mlFormatV2(v.format);
     v.candidats = (res.produits || []).filter(function(p) { return memeCouleurAchatV2(p.couleur, v.couleur); });
@@ -1061,7 +1051,7 @@ function creerVinAchatV2(e, v, p, spinner) {
   var connu = vinParCodeSAQV2(p.codeSAQ);
   if (connu) { fin(connu); return Promise.resolve(); }
   return appelBackend('importerVinSAQ', { codeSAQ: p.codeSAQ, cups: JSON.stringify(p.cups || []) }, { spinner: spinner }).then(function(res) {
-    verifierReponseAchatV2(res);
+    verifierReponseV2(res);
     if (!res || !res.success) {
       v.raison = (res && res.message) || 'Ajout refusé';
       if (e.aVerifier.indexOf(v) === -1) e.aVerifier.push(v);
@@ -1083,7 +1073,7 @@ function inscrireAchatsV2(e, spinner) {
   });
   if (!achats.length) return Promise.resolve();
   return appelBackend('ajouterAchats', { achats: JSON.stringify(achats) }, { spinner: spinner }).then(function(res) {
-    verifierReponseAchatV2(res);
+    verifierReponseV2(res);
     if (!res || !res.success) throw new Error((res && res.message) || 'Achats refusés');
     vins.forEach(function(v) { v.inscrit = true; });
     e.achats += res.ajoutes || 0;
@@ -1106,7 +1096,7 @@ function choisirAchatAVerifierV2(i, j) {
   }).then(function() {
     return rechargerInventaireV2('Ajout');
   }).then(afficherImportAchatsV2).catch(function(err) {
-    afficherMessage('Importer des achats : ' + causeAchatV2(err));
+    afficherMessage('Importer des achats : ' + causeServeurV2(err));
   });
 }
 
