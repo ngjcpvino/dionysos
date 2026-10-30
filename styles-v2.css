@@ -146,6 +146,16 @@ html, body {
   --gold-40: rgba(201,129,60,0.4);
   --fs-9: 9px;
   --fs-10: 10px;
+  /* les couleurs des pastilles de goût de la SAQ (relevées sur son tableau, 30 oct. 2026) */
+  --pastille-delicat-leger: #E0E5AD;
+  --pastille-fruite-vif: #F9E652;
+  --pastille-aromatique-rond: #A2A3C7;
+  --pastille-fruite-doux: #9FCBC5;
+  --pastille-fruite-extra-doux: #B9D9F1;
+  --pastille-fruite-leger: #DAB4C8;
+  --pastille-fruite-genereux: #D88632;
+  --pastille-aromatique-souple: #C4052C;
+  --pastille-aromatique-charnu: #5F2036;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -752,6 +762,16 @@ body::after {
 .contenu > svg path.vin-rose, .contenu > svg circle.vin-rose { fill: var(--vin-rose); }
 .contenu > svg path.vin-bulles, .contenu > svg circle.vin-bulles { fill: var(--vin-bulles); }
 .contenu > svg path.vin-spiritueux, .contenu > svg circle.vin-spiritueux { fill: var(--vin-spiritueux); }
+/* une part qui porte une pastille de goût de la SAQ (Profil → Pastilles) prend sa couleur */
+.contenu > svg path.pastille-delicat-leger, .contenu > svg circle.pastille-delicat-leger { fill: var(--pastille-delicat-leger); }
+.contenu > svg path.pastille-fruite-vif, .contenu > svg circle.pastille-fruite-vif { fill: var(--pastille-fruite-vif); }
+.contenu > svg path.pastille-aromatique-rond, .contenu > svg circle.pastille-aromatique-rond { fill: var(--pastille-aromatique-rond); }
+.contenu > svg path.pastille-fruite-doux, .contenu > svg circle.pastille-fruite-doux { fill: var(--pastille-fruite-doux); }
+.contenu > svg path.pastille-fruite-extra-doux, .contenu > svg circle.pastille-fruite-extra-doux { fill: var(--pastille-fruite-extra-doux); }
+.contenu > svg path.pastille-fruite-leger, .contenu > svg circle.pastille-fruite-leger { fill: var(--pastille-fruite-leger); }
+.contenu > svg path.pastille-fruite-genereux, .contenu > svg circle.pastille-fruite-genereux { fill: var(--pastille-fruite-genereux); }
+.contenu > svg path.pastille-aromatique-souple, .contenu > svg circle.pastille-aromatique-souple { fill: var(--pastille-aromatique-souple); }
+.contenu > svg path.pastille-aromatique-charnu, .contenu > svg circle.pastille-aromatique-charnu { fill: var(--pastille-aromatique-charnu); }
 .contenu > svg line { stroke: var(--white-60); stroke-width: var(--largeur-bordure-1); }
 .contenu > svg text { fill: var(--white); font-size: var(--fs-14); }
 .contenu > svg tspan { fill: var(--white-60); font-size: var(--fs-12); }
