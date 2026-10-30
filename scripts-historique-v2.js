@@ -356,8 +356,9 @@ function fermerProfilV2() {
 
 // Les entrées (achats, ou bus : { codebarre, codeSAQ }) regroupées par une valeur de leur vin (valeur(vin, entrée)),
 // de la plus grande part à la plus petite ; PAYS_TARTE_V2 parts, puis « Autres (N quoi) ». Sans valeur : la part
-// « inconnu », ou rien si inconnu est vide (les pastilles : la tarte ne parle que de goût)
-function partsParV2(liste, valeur, inconnu, quoi) {
+// « inconnu », ou rien si inconnu est vide (les pastilles : la tarte ne parle que de goût). classe(nom), facultative :
+// la couleur d'une part (sa classe CSS) ; '' = sa nuance d'or
+function partsParV2(liste, valeur, inconnu, quoi, classe) {
   var vinDe = indexVinsHistoV2();
   var compte = {};
   (liste || []).forEach(function(h) {
@@ -370,14 +371,19 @@ function partsParV2(liste, valeur, inconnu, quoi) {
   var reste = parts.splice(PAYS_TARTE_V2);
   if (reste.length) parts.push({ nom: reste.length === 1 ? reste[0].nom : 'Autres (' + reste.length + ' ' + quoi + ')',
     n: reste.reduce(function(s, p) { return s + p.n; }, 0) });
+  if (classe) parts.forEach(function(p) { p.classe = classe(p.nom); });
   return parts;
 }
 
 // Les couleurs : chaque part prend la couleur de son vin (.vin-*, comme la bande des cartes)
-function partsParCouleurV2(liste) {
-  var parts = partsParV2(liste, function(w, h) { return w.Couleur || h.couleur; }, 'Couleur inconnue', 'couleurs');
-  parts.forEach(function(p) { if (p.nom !== 'Couleur inconnue') p.classe = couleurClasseV2(p.nom); });
-  return parts;
+function classeCouleurTarteV2(nom) { return nom === 'Couleur inconnue' || nom.indexOf('Autres') === 0 ? '' : couleurClasseV2(nom); }
+
+// Les pastilles : chaque part prend la couleur de sa pastille à la SAQ (30 oct. 2026, l'utilisateur) ; une pastille que
+// la SAQ ne colore pas (« Corsé et fumé ») et « Autres » gardent leur nuance d'or
+var PASTILLES_SAQ_V2 = ['delicat-leger', 'fruite-vif', 'aromatique-rond', 'fruite-doux', 'fruite-extra-doux', 'fruite-leger', 'fruite-genereux', 'aromatique-souple', 'aromatique-charnu'];
+function classePastilleV2(nom) {
+  var k = normaliserRechercheV2(nom).trim().replace(/\s+et\s+/, '-').replace(/\s+/g, '-');
+  return PASTILLES_SAQ_V2.indexOf(k) !== -1 ? 'pastille-' + k : '';
 }
 
 // L'ordre des parts sur le cercle, dans le sens des aiguilles : la 1re (la plus grande) centrée en haut, les parts du côté
@@ -437,9 +443,9 @@ function rendreProfilV2() {
   var achats = ALL_ACHATS || [];
   document.getElementById('profilV2-pays').innerHTML = achats.length ? tarteV2(partsParV2(achats, function(w) { return w.Pays; }, 'Pays inconnu', 'pays'))
     : '<div class="texte-secondaire">Aucun achat : Outils → Importer des achats</div>';
-  var pastilles = partsParV2(achats, function(w) { return w['Pastille gout']; }, '', 'pastilles');
+  var pastilles = partsParV2(achats, function(w) { return w['Pastille gout']; }, '', 'pastilles', classePastilleV2);
   // une tarte vide n'est pas montrée (ni la ligne qui la sépare)
-  [['profilV2-couleurs', achats.length ? tarteV2(partsParCouleurV2(achats)) : ''],
+  [['profilV2-couleurs', achats.length ? tarteV2(partsParV2(achats, function(w, h) { return w.Couleur || h.couleur; }, 'Couleur inconnue', 'couleurs', classeCouleurTarteV2)) : ''],
    ['profilV2-pastilles', pastilles.length ? tarteV2(pastilles) : '']].forEach(function(t) {
     var el = document.getElementById(t[0]);
     el.innerHTML = t[1];
