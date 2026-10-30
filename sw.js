@@ -2,7 +2,8 @@
    © 2026 Dionysos — Tous droits réservés
    SW.JS — copie de l'app dans le téléphone (ouverture sans réseau)
    Réseau d'abord : avec du réseau, rien ne change (et la copie se refait au passage) ;
-   sans réseau, ou s'il traîne entre les murs de béton, la copie gardée répond.
+   sans réseau, s'il traîne entre les murs de béton, ou s'il répond mal (fichier introuvable, erreur du site :
+   un fichier qui manquerait à l'app), la copie gardée répond.
    Ne touche jamais au backend (POST vers Apps Script) ni aux photos des bouteilles (SAQ).
 ============================================================ */
 
@@ -27,6 +28,9 @@ var EXTERNES = [
 // L'anti-cache ?v= change chaque heure : une seule copie par fichier, sans le ?v=
 function cleCache(url) { return url.split('?')[0]; }
 
+// Une réponse qui vaut d'être gardée et servie (une image d'un autre site arrive « opaque » : on ne peut pas la lire)
+function reponseBonne(rep) { return rep && (rep.ok || rep.type === 'opaque'); }
+
 function aGarder(url) {
   var u = new URL(url);
   if (u.origin === self.location.origin) return u.pathname.slice(-6) !== '/sw.js';
@@ -39,7 +43,7 @@ self.addEventListener('install', function(e) {
     return Promise.all(FICHIERS.concat(EXTERNES).map(function(url) {
       var req = new Request(url, EXTERNES.indexOf(url) !== -1 ? { mode: 'no-cors' } : {});
       return fetch(req).then(function(rep) {
-        if (rep && (rep.ok || rep.type === 'opaque')) return cache.put(cleCache(req.url), rep);
+        if (reponseBonne(rep)) return cache.put(cleCache(req.url), rep);
       }).catch(function() {});
     }));
   }));
@@ -61,7 +65,7 @@ self.addEventListener('fetch', function(e) {
 function reseauPuisCopie(req) {
   var cle = cleCache(req.url);
   var reseau = fetch(req).then(function(rep) {
-    if (rep && (rep.ok || rep.type === 'opaque')) {
+    if (reponseBonne(rep)) {
       var copie = rep.clone();
       caches.open(CACHE_APP).then(function(cache) { cache.put(cle, copie); });
     }
@@ -69,8 +73,8 @@ function reseauPuisCopie(req) {
   });
   var delai = new Promise(function(ok) { setTimeout(ok, DELAI_RESEAU); });
   return Promise.race([reseau.catch(function() { return null; }), delai.then(function() { return null; })]).then(function(rep) {
-    if (rep) return rep;
-    // Pas de réponse à temps : la copie ; sans copie, on attend quand même le réseau
+    if (reponseBonne(rep)) return rep;
+    // Pas de bonne réponse à temps : la copie ; sans copie, on attend quand même le réseau (sa réponse, même mauvaise)
     return caches.match(cle).then(function(copie) { return copie || reseau; });
   });
 }
