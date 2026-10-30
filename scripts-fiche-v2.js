@@ -800,14 +800,18 @@ function chargerAchatsFicheV2() {
       return (saq && memeCodeV2(a.codeSAQ, saq)) || codes.some(function(k) { return memeCodeV2(a.codebarre, k); });
     }).map(function(a) { return a.date; }));
   }
-  if (ALL_ACHATS) { rendre(); return; }
-  appelBackend('getAchats', {}, { spinner: '' }).then(function(data) {
-    if (!Array.isArray(data)) throw new Error((data && data.error) || 'Achats illisibles');
-    ALL_ACHATS = data;
-    rendre();
-  }).catch(function(err) {
+  achatsV2('').then(rendre).catch(function(err) {
     ALL_ACHATS = [];
     journaliserV2('Achats de la fiche')(err);
+  });
+}
+
+// Les achats en mémoire (onglet Achats), lus au besoin — la fiche, le Profil. Un serveur sans la route répond { error } : une panne.
+function achatsV2(spinner) {
+  if (ALL_ACHATS) return Promise.resolve(ALL_ACHATS);
+  return appelBackend('getAchats', {}, { spinner: spinner }).then(function(data) {
+    if (!Array.isArray(data)) throw new Error((data && data.error) || 'Achats illisibles');
+    return (ALL_ACHATS = data);
   });
 }
 
