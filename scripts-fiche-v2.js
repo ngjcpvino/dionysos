@@ -975,15 +975,15 @@ function fermerFicheV2() {
     if (ALL_HISTORIQUE && ALL_HISTORIQUE.length) revenirPageV2('histoV2Container', PANNEAUX_V2.histo.rafraichir);
     else ouvrirHistoV2();
   } else if (FICHE_V2_PROVENANCE === 'recherche') {
-    revenirPageV2('rechercheV2Container');
+    revenirPageV2('rechercheV2Container', lancerRechercheV2);
   } else if (FICHE_V2_PROVENANCE === 'empliste' || FICHE_V2_PROVENANCE === 'emplacements') {
     revenirPageV2('empV2Container', rendreEmpV2);
   } else if (FICHE_V2_PROVENANCE === 'sanscepage') {
-    revenirPageV2('sansCepageV2Container');
+    revenirPageV2('sansCepageV2Container', afficherCartesSansCepageV2);
   } else if (FICHE_V2_PROVENANCE === 'suggestions') {
     revenirPageV2('suggestionsV2Container', afficherSuggestionsV2);
   } else if (FICHE_V2_PROVENANCE === 'accords') {
-    revenirPageV2('chartierV2Container');
+    revenirPageV2('chartierV2Container', PANNEAUX_V2.chartier.rafraichir);
   } else if (FICHE_V2_PROVENANCE === 'selonsaq') {
     revenirPageV2('selonSaqV2Container', calculerSelonSaqV2);
   } else if (FICHE_V2_PROVENANCE === 'curieuxbegin') {
