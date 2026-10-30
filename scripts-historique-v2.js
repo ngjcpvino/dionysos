@@ -357,17 +357,22 @@ function fermerProfilV2() {
 // Les entrées (achats, ou bus : { codebarre, codeSAQ }) regroupées par une valeur de leur vin (valeur(vin, entrée)),
 // de la plus grande part à la plus petite ; PAYS_TARTE_V2 parts, puis « Autres (N quoi) ». Sans valeur : la part
 // « inconnu », ou rien si inconnu est vide (les pastilles : la tarte ne parle que de goût). classe(nom), facultative :
-// la couleur d'une part (sa classe CSS) ; '' = sa nuance d'or
-function partsParV2(liste, valeur, inconnu, quoi, classe) {
+// la couleur d'une part (sa classe CSS) ; '' = sa nuance d'or. precision(vin, entrée), facultative : une 2e valeur écrite
+// sous le nom de la part (sous), les plus fréquentes d'abord (« Rouge · Rosé ») ; pas pour « Autres »
+function partsParV2(liste, valeur, inconnu, quoi, classe, precision) {
   var vinDe = indexVinsHistoV2();
-  var compte = {};
+  var compte = {}, precisions = {};
   (liste || []).forEach(function(h) {
-    var v = decodeHTML(valeur(vinDe(h), h) || '').trim() || inconnu;
+    var w = vinDe(h), v = decodeHTML(valeur(w, h) || '').trim() || inconnu;
     if (!v) return;
     compte[v] = (compte[v] || 0) + 1;
+    var d = precision ? (precision(w, h) || '').toString().trim() : '';
+    if (d) { precisions[v] = precisions[v] || {}; precisions[v][d] = (precisions[v][d] || 0) + 1; }
   });
-  var parts = Object.keys(compte).map(function(v) { return { nom: v, n: compte[v] }; })
-    .sort(function(a, b) { return b.n - a.n || a.nom.localeCompare(b.nom); });
+  var parts = Object.keys(compte).map(function(v) {
+    var d = precisions[v] || {};
+    return { nom: v, n: compte[v], sous: Object.keys(d).sort(function(a, b) { return d[b] - d[a]; }).join(' · ') };
+  }).sort(function(a, b) { return b.n - a.n || a.nom.localeCompare(b.nom); });
   var reste = parts.splice(PAYS_TARTE_V2);
   if (reste.length) parts.push({ nom: reste.length === 1 ? reste[0].nom : 'Autres (' + reste.length + ' ' + quoi + ')',
     n: reste.reduce(function(s, p) { return s + p.n; }, 0) });
@@ -417,23 +422,24 @@ function tarteV2(parts) {
     var classe = p.classe ? ' class="' + p.classe + '"' : '';
     formes += part >= 1 ? '<circle' + classe + ' cx="' + cx + '" cy="0" r="' + r + '"/>'
       : '<path' + classe + ' d="M' + cx + ' 0 L' + f(a[0]) + ' ' + f(a[1]) + ' A' + r + ' ' + r + ' 0 ' + (part > 0.5 ? 1 : 0) + ' 1 ' + f(b[0]) + ' ' + f(b[1]) + 'Z"/>';
-    if (i < 2) {   // le nom, puis le % dessous : juste au-dessus de la tarte (la 1re), juste au-dessous (la 2e)
+    // sous le nom : sa précision s'il en a une (« Rouge »), puis le % ; une ligne de plus = 16 de plus
+    var sous = (p.sous && p.nom.indexOf('Autres') !== 0) ? p.sous : '', plus = sous ? 16 : 0;
+    var lignes = function(x) { return (sous ? '<tspan x="' + x + '" dy="16">' + sous + '</tspan>' : '') + '<tspan x="' + x + '" dy="16">' + pct + ' %</tspan>'; };
+    if (i < 2) {   // le nom, puis le reste dessous : juste au-dessus de la tarte (la 1re), juste au-dessous (la 2e)
       var x = f(pt(m, r)[0]), enBas = i === 1;
-      ecritures += '<text x="' + x + '" y="' + (enBas ? r + 22 : -r - 28) + '" text-anchor="middle">' + p.nom +
-        '<tspan x="' + x + '" dy="16">' + pct + ' %</tspan></text>';
-      if (enBas) bas = Math.max(bas, r + 44); else haut = Math.min(haut, -r - 46);
+      ecritures += '<text x="' + x + '" y="' + (enBas ? r + 22 : -r - 28 - plus) + '" text-anchor="middle">' + p.nom + lignes(x) + '</text>';
+      if (enBas) bas = Math.max(bas, r + 44 + plus); else haut = Math.min(haut, -r - 46 - plus);
       return;
     }
-    cotes[Math.cos(m) >= 0 ? 'droite' : 'gauche'].push({ nom: p.nom, pct: pct, bord: pt(m, r), y: pt(m, r + 20)[1] });
+    cotes[Math.cos(m) >= 0 ? 'droite' : 'gauche'].push({ nom: p.nom, lignes: lignes, plus: plus, bord: pt(m, r), y: pt(m, r + 20)[1] });
   });
   Object.keys(cotes).forEach(function(cote) {
     var x = cote === 'droite' ? cx + r + 30 : cx - r - 30;
     cotes[cote].sort(function(e1, e2) { return e1.y - e2.y; }).forEach(function(e, i, l) {
-      if (i && e.y < l[i - 1].y + ecart) e.y = l[i - 1].y + ecart;
+      if (i && e.y < l[i - 1].y + ecart + l[i - 1].plus) e.y = l[i - 1].y + ecart + l[i - 1].plus;
       ecritures += '<line x1="' + f(e.bord[0]) + '" y1="' + f(e.bord[1]) + '" x2="' + (cote === 'droite' ? x - 6 : x + 6) + '" y2="' + f(e.y) + '"/>' +
-        '<text x="' + x + '" y="' + f(e.y - 3) + '"' + (cote === 'droite' ? '' : ' text-anchor="end"') + '>' + e.nom +
-        '<tspan x="' + x + '" dy="16">' + e.pct + ' %</tspan></text>';
-      haut = Math.min(haut, e.y - 20); bas = Math.max(bas, e.y + 20);
+        '<text x="' + x + '" y="' + f(e.y - 3) + '"' + (cote === 'droite' ? '' : ' text-anchor="end"') + '>' + e.nom + e.lignes(x) + '</text>';
+      haut = Math.min(haut, e.y - 20); bas = Math.max(bas, e.y + 20 + e.plus);
     });
   });
   return '<svg viewBox="0 ' + f(haut) + ' ' + (2 * cx) + ' ' + f(bas - haut) + '">' + formes + ecritures + '</svg>';
@@ -443,7 +449,8 @@ function rendreProfilV2() {
   var achats = ALL_ACHATS || [];
   document.getElementById('profilV2-pays').innerHTML = achats.length ? tarteV2(partsParV2(achats, function(w) { return w.Pays; }, 'Pays inconnu', 'pays'))
     : '<div class="texte-secondaire">Aucun achat : Outils → Importer des achats</div>';
-  var pastilles = partsParV2(achats, function(w) { return w['Pastille gout']; }, '', 'pastilles', classePastilleV2);
+  // sous chaque pastille, la couleur de ses vins : blanc ou rouge (30 oct. 2026, l'utilisateur), rosé s'il y en a
+  var pastilles = partsParV2(achats, function(w) { return w['Pastille gout']; }, '', 'pastilles', classePastilleV2, function(w) { return w.Couleur; });
   // une tarte vide n'est pas montrée (ni la ligne qui la sépare)
   [['profilV2-couleurs', achats.length ? tarteV2(partsParV2(achats, function(w, h) { return w.Couleur || h.couleur; }, 'Couleur inconnue', 'couleurs', classeCouleurTarteV2)) : ''],
    ['profilV2-pastilles', pastilles.length ? tarteV2(pastilles) : '']].forEach(function(t) {
