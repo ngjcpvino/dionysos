@@ -355,12 +355,14 @@ function fermerProfilV2() {
 }
 
 // Les entrées (achats, ou bus : { codebarre, codeSAQ }) regroupées par une valeur de leur vin (valeur(vin, entrée)),
-// de la plus grande part à la plus petite ; PAYS_TARTE_V2 parts, puis « Autres (N quoi) »
+// de la plus grande part à la plus petite ; PAYS_TARTE_V2 parts, puis « Autres (N quoi) ». Sans valeur : la part
+// « inconnu », ou rien si inconnu est vide (les pastilles : la tarte ne parle que de goût)
 function partsParV2(liste, valeur, inconnu, quoi) {
   var vinDe = indexVinsHistoV2();
   var compte = {};
   (liste || []).forEach(function(h) {
     var v = decodeHTML(valeur(vinDe(h), h) || '').trim() || inconnu;
+    if (!v) return;
     compte[v] = (compte[v] || 0) + 1;
   });
   var parts = Object.keys(compte).map(function(v) { return { nom: v, n: compte[v] }; })
@@ -435,5 +437,20 @@ function rendreProfilV2() {
   var achats = ALL_ACHATS || [];
   document.getElementById('profilV2-pays').innerHTML = achats.length ? tarteV2(partsParV2(achats, function(w) { return w.Pays; }, 'Pays inconnu', 'pays'))
     : '<div class="texte-secondaire">Aucun achat : Outils → Importer des achats</div>';
-  document.getElementById('profilV2-couleurs').innerHTML = achats.length ? tarteV2(partsParCouleurV2(achats)) : '';
+  var pastilles = partsParV2(achats, function(w) { return w['Pastille gout']; }, '', 'pastilles');
+  // une tarte vide n'est pas montrée (ni la ligne qui la sépare)
+  [['profilV2-couleurs', achats.length ? tarteV2(partsParCouleurV2(achats)) : ''],
+   ['profilV2-pastilles', pastilles.length ? tarteV2(pastilles) : '']].forEach(function(t) {
+    var el = document.getElementById(t[0]);
+    el.innerHTML = t[1];
+    el.style.display = t[1] ? '' : 'none';
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('#profilV2Container svg'), cadrerTarteV2);
+}
+
+// Une écriture de côté qui dépasse (un long nom : « Aromatique et charnu ») : la tarte s'élargit des deux côtés, toujours centrée
+function cadrerTarteV2(svg) {
+  var b = svg.getBBox(), v = svg.viewBox.baseVal;
+  var d = Math.max(0, v.x - b.x, (b.x + b.width) - (v.x + v.width));
+  if (d) svg.setAttribute('viewBox', (v.x - d - 4) + ' ' + v.y + ' ' + (v.width + 2 * d + 8) + ' ' + v.height);
 }
