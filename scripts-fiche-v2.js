@@ -761,9 +761,7 @@ function chargerPlatsV2(codebarre) {
     });
     rendreComptesFicheV2(mets.map(function(m) { return m.date; }));
     if (mets.length === 0) { conteneur.innerHTML = ''; return; }
-    mets.sort(function(a, b) {
-      return (parseInt(b.bonAccord) || 0) - (parseInt(a.bonAccord) || 0);
-    });
+    mets.sort(platPlusRecentV2);
     var nom = decodeHTML((CURRENT_WINE_DATA && CURRENT_WINE_DATA.Nom) || '');
     var cartes = mets.map(function(m) { return carteMetHistoV2(m, nom, 'fiche'); }).join('');
     conteneur.innerHTML = cartes;
