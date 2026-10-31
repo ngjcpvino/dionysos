@@ -114,7 +114,7 @@ function afficherHistoV2() {
     if (!grouped[key]) grouped[key] = { cb: cb, nom: h.nom, couleur: h.couleur, photo: cbPhoto[cb] || '', mets: [] };
     grouped[key].mets.push(h);
   });
-  // le vin bu le plus récemment en haut (31 oct. 2026, l'utilisateur) ; ses plats, eux, du meilleur accord au moins bon
+  // le vin bu le plus récemment en haut, ses plats du plus récent au plus ancien (31 oct. 2026, l'utilisateur)
   var groupes = Object.values(grouped);
   groupes.forEach(function(g) { g.dernier = dateHistoIsoV2(derniereDateHistoV2(g.mets.map(function(m) { return m.date; }))); });
   groupes.sort(function(a, b) { return b.dernier < a.dernier ? -1 : b.dernier > a.dernier ? 1 : 0; });
@@ -132,7 +132,7 @@ function afficherHistoV2() {
   div.innerHTML = groupes.map(function(g){
     var nom = decodeHTML(g.nom || '—');
     var carteVin = carteV2({ classes: 'histo-vin ' + couleurClasseV2(g.couleur), onclick: tapFicheV2(g.cb, 'histo'), photo: g.photo, titre: nom, sous: sousVinV2(cbInfos[g.cb] || {}) });
-    var mets = g.mets.slice().sort(function(a, b){ return (parseInt(b.bonAccord) || 0) - (parseInt(a.bonAccord) || 0); });
+    var mets = g.mets.slice().sort(platPlusRecentV2);
     var cartesMets = mets.map(function(m){ return carteMetHistoV2(m, nom, 'histo'); }).join('');
 
     return '<div class="histo-groupe ' + couleurClasseV2(g.couleur) + '">' + carteVin + cartesMets + '</div>';
@@ -148,6 +148,11 @@ function dateIsoV2(d) {
 function dateHistoIsoV2(jma) {
   var m = (jma || '').match(/^(\d{2})-(\d{2})-(\d{4})$/);
   return m ? m[3] + '-' + m[2] + '-' + m[1] : '';
+}
+// Deux entrées de l'Historique, la plus récente d'abord (même jour : l'ordre reçu, la dernière inscrite en tête)
+function platPlusRecentV2(a, b) {
+  var da = dateHistoIsoV2(a.date), db = dateHistoIsoV2(b.date);
+  return db < da ? -1 : db > da ? 1 : 0;
 }
 // La plus récente de dates « jj-mm-aaaa » ('' si aucune)
 function derniereDateHistoV2(dates) {
