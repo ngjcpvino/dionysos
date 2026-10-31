@@ -21,7 +21,7 @@
 ## Chantier 0 — Le grand ménage sans risque *(petit, une séance)*
 Rien ne change à l'écran. On enlève ce qui ne sert plus, pour que la suite parte d'un terrain propre.
 
-- [ ] **Supprimer `scripts-scanner-v2.js`** (le filet du découpage) — à partir du **4 nov.**
+- [ ] **Supprimer `scripts-scanner-v2.js`** (le filet du découpage) — à partir du **4 nov.** ; le même jour, retirer `ANCIENS_NOMS_` du serveur.
 - [x] **Fichiers égarés à la racine** — fait le 28 oct. : `emi.json` et `rec.json` **supprimés** (dans `archives/`, ils restaient publiés ; l'historique du dépôt les garde) ; `a-coder.md` → `archives/a-coder-souhaits-5-sept-2026.md`.
 - [x] **Code mort de l'app** — fait le 28 oct. : `codeSAQDepuisBarcodeV2` (scan) et `grouperParCbEmpV2` (emplacements) supprimées.
 - [x] **Style mort** — fait le 28 oct. (+ `--white-70`, qui ne servait plus qu'à `--couleur-bordure-pale`) : classes jamais utilisées `centre`, `color-error`, `color-muted`, `emp-entete-meuble`, `lien-titre`, `ligne-dispo`, `mb-20`, `mt-10`, `mt-40`, `text-uppercase` ; 26 réglages `:root` jamais utilisés (`--gold-hover`, `--gold-40/50/60`, 7 `--largeur-bordure-*`, `--couleur-bordure-claire/subtile/pale`, `--bg-overlay`, `--bg-panel(-light)`, `--green`, `--orange`, `--info`, `--warning`, `--shadow-sm/md/lg`, `--fw-light`, `--fw-normal`).
@@ -78,7 +78,7 @@ Chaque famille : ~~l'utilisateur choisit sur image~~ **Claude choisit le modèle
 - [x] **Écritures groupées** — fait le 28 oct. : `ecrireLigne_` (colonnes voisines en un seul appel, rien d'autre réécrit) : appels au classeur, mesurés au banc : Boire 7 → 2 (dont la ligne d'historique), ranger / déplacer 4 → 1, ajouter une bouteille 7 → 3, une facture de 4 bouteilles 21 → 5, corriger une fiche complète 29 → 6 ; au total 184 → 109.
 - [x] **Un verrou** — fait le 28 oct. : les 22 actions qui écrivent passent une à la fois ; occupé plus de 30 s → « réessayez ».
 - [x] **Sosies du serveur** — fait le 28 oct. : `ajouterAConfig_` (Accords, Sommelier), `majColonneDepuisSAQ_` (Bois, Cellier), `extraireSAQ_` (détail, dégustation), `ongletAvecEntetes_` (Recettes, Curieux Bégin, Notes), `lireOnglet_` (7 lectures d'onglet), `supprimerLigne_`, `executerAction_` / `reponseJSON_`. Retiré : `creerOngletChartier` (l'onglet existe).
-- [ ] **Noms trompeurs** : `testScrapingSAQ`, `mettreBotteilleARanger`, `…_GRAPHQL_V1` — à renommer des deux côtés en même temps, **avec le chantier 1**.
+- [x] **Noms trompeurs** — fait le 31 oct. : `ficheSAQ` (ex-`testScrapingSAQ`), `mettreBouteilleARanger`, `chercherProduitSAQ`, `verifierDispoSAQ` — serveur (version 1145, publiée par l'IA) puis app ; les anciens noms restent acceptés par le serveur jusqu'à la suppression de `scripts-scanner-v2.js` (4 nov.).
 - [x] **`Logger.log` triés** — fait le 28 oct. : 73 → 51 (restent les erreurs et les bilans des outils de l'éditeur).
 - Corrections trouvées en route (voulues) : corriger une fiche reconnaît le vin par **n'importe lequel** de ses codes-barres (avant : seulement le code exact) ; l'Historique montre la **couleur** des vins à plusieurs codes-barres ; **Boire** inscrit le code principal dans l'Historique (avant : toute la liste de codes).
 

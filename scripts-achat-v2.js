@@ -647,7 +647,7 @@ function chargerDispoAchatV2(liste) {
 // Quantité d'un vin dans la succursale (« X btl ») ; absent → la carte est masquée
 function quantiteDispoAchatV2(codeSAQ, succ) {
   function el(){ return document.getElementById('achatV2-dispo-' + codeSAQ); }
-  appelBackend('verifierDispoSAQ_GRAPHQL_V1', { codeSAQ: codeSAQ, succursale: succ }, { spinner: '' }).then(function(res){
+  appelBackend('verifierDispoSAQ', { codeSAQ: codeSAQ, succursale: succ }, { spinner: '' }).then(function(res){
     var e = el(); if (!e) return;
     if (res && res.disponible) {
       e.innerHTML = '<span class="dispo-oui">' + (res.quantite ? res.quantite + ' btl' : '✓') + '</span>';
@@ -862,7 +862,7 @@ function afficherProchainRecuVinV2() {
     return;
   }
 
-  appelBackend('testScrapingSAQ', { codeSAQ: codeSAQ }, { spinner: '' }).then(function(res) {
+  appelBackend('ficheSAQ', { codeSAQ: codeSAQ }, { spinner: '' }).then(function(res) {
     var nom = (res && res.success && res.data) ? (res.data.nom || '') : '';
     document.getElementById('recuValidationV2-nom').value = nom ? decodeHTML(nom) : 'Vin introuvable, vérifiez le code';
   }).catch(function() {
