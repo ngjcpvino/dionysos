@@ -242,7 +242,7 @@ function afficherFicheV2(result) {
       var range = !!(b.meuble && b.rangee && b.espace);
       return {
         range: range,
-        texte: range ? b.meuble + '-' + b.rangee + '-' + b.espace : 'À ranger',
+        texte: emplacementV2(b.meuble, b.rangee, b.espace),
         meuble: b.meuble || '',
         rangee: parseInt(b.rangee) || 0,
         espace: parseInt(b.espace) || 0
@@ -892,11 +892,8 @@ function ouvrirPhotoEmpV2(cb, liste, row) {
   var emp = document.getElementById('photoV2-emplacement');
   if (emp) {
     var bc = (PHOTO_V2_LISTE && PHOTO_V2_INDEX >= 0) ? PHOTO_V2_LISTE[PHOTO_V2_INDEX] : null;
-    if (bc && bc.Meuble && bc.Rangee && bc.Espace) {
-      emp.textContent = bc.Meuble + '-' + bc.Rangee + '-' + bc.Espace;
-      emp.style.display = '';
-    } else if (bc) {
-      emp.textContent = 'À ranger';
+    if (bc) {
+      emp.textContent = emplacementV2(bc.Meuble, bc.Rangee, bc.Espace);
       emp.style.display = '';
     } else {
       emp.style.display = 'none';

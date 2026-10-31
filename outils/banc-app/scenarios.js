@@ -39,6 +39,10 @@ module.exports = [
   ['scan, arrivée', ["traiterResultatScanV2('" + UN + "')", "menuV2Click('arrivee')", "basculerListePlacementV2('arriveeV2', 'meuble')",
     "choisirPlacementV2('arriveeV2', 'meuble', 'Réserve')", "fermerArriveeV2()"]],
   ['scan d\'un vin inconnu', ["traiterResultatScanV2('0036000291452')", "fermerVinInconnuV2()"]],
+  ['Tri : doublons puis tournée', ["burgerV2Click('emplacements')", "choisirModeEmpV2('menage')", "document.querySelector('#empV2-cartes .coche-panier').click()",
+    "document.querySelector('#empV2-cartes .roundel').click()"].concat(new Array(8).fill("document.querySelector('#empV2-cartes .roundel') && document.querySelector('#empV2-cartes .roundel').click()"))],
+  ['hors tri : arrivée et déplacer', ["traiterResultatScanV2('" + UN + "')", "menuV2Click('arrivee')", "arriveeARangerV2(true)", "burgerV2Click('aranger')", "fermerARangerV2()",
+    "traiterResultatScanV2('" + CINQ + "')", "menuV2Click('deplacer')", "document.querySelector('#deplacerV2-bouteille-menu .item-liste').click()", "deplacerARangerV2(true)"]],
   ['importer des achats', ["burgerV2Click('importachats')", { saisir: ['#importAchatsV2-texte', HISTORIQUE_SAQ] }, "lireImportAchatsV2()", "importerAchatsV2()",
     "fermerImportAchatsV2()", "ouvrirFicheV2('" + UN + "', 'cave')"]],
   ['facture SAQ', ["burgerV2Click('facture')", { fichier: ['#recuV2-fichier', 'recu.png'] }, "confirmerRecuVinV2()", "passerRecuVinV2()"]]
