@@ -165,12 +165,13 @@ function tapFicheV2(cb, provenance, avant) {
   return (provenance === 'comparable' ? 'naviguerV2' : 'ouvrirApresTap') + '(function(){' + (avant || '') + 'ouvrirFicheV2(\'' + cb + '\', \'' + provenance + '\')})';
 }
 
-// La carte d'un vin groupé (grouperVinsV2) — la même partout : couleur, voilée à 0 bouteille, photo, nom, origine (sousVinV2),
-// « X btl » et ses emplacements. onclick : le JS du tap ; classes : en plus, devant la couleur (histo-mets dans un groupe).
+// La carte d'un vin groupé (grouperVinsV2) — la même partout : couleur, voilée à 0 bouteille, photo (un cercle rouge barré dessus
+// si « Racheter » est à Non), nom, origine (sousVinV2), « X btl » et ses emplacements. onclick : le JS du tap ; classes : en plus, devant la couleur (histo-mets dans un groupe).
 function carteGroupeVinV2(g, onclick, classes) {
   var w = g.wine;
   var emp = (g.emplacements && g.emplacements.length) ? '<br>' + g.emplacements.join('<br>') : '';
-  return carteV2({ classes: (classes ? classes + ' ' : '') + couleurClasseV2(w.Couleur) + (g.count === 0 ? ' carte-vide' : ''), onclick: onclick,
+  return carteV2({ classes: (classes ? classes + ' ' : '') + couleurClasseV2(w.Couleur) + (g.count === 0 ? ' carte-vide' : '') +
+    (w.Racheter === 'Non' ? ' ne-pas-racheter' : ''), onclick: onclick,
     photo: w['Photo URL'], placePhoto: true, titre: decodeHTML(w.Nom || '—'), sous: sousVinV2(w), droite: caseDroiteV2(w, g.count) + emp });
 }
 

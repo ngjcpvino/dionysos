@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Un vin à ne pas racheter : le cercle rouge barré posé sur la bouteille de sa carte (le rouge de ne-pas-racheter.svg) -->
+  <g fill="none" stroke="#e02020" stroke-width="16">
+    <circle cx="256" cy="256" r="240"/>
+    <line x1="86" y1="86" x2="426" y2="426" stroke-linecap="round"/>
+  </g>
+</svg>

@@ -156,6 +156,7 @@ html, body {
   --pastille-fruite-genereux: #F39704;
   --pastille-aromatique-souple: #E52D39;
   --pastille-aromatique-charnu: #770D35;
+  --image-interdit: url("images/interdit.svg");
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -696,6 +697,7 @@ body::after {
   -webkit-tap-highlight-color: transparent;
 }
 .carte-photo {
+  position: relative;
   flex: 0 0 auto;
   width: var(--taille-60);
   display: flex;
@@ -840,6 +842,11 @@ body::after {
 }
 
 .carte.carte-vide { opacity: 0.45; }
+/* Un vin à ne pas racheter (31 oct. 2026, l'utilisateur) : un cercle rouge barré posé sur sa bouteille, partout où est sa carte */
+.carte.ne-pas-racheter .carte-photo::after {
+  content: ''; position: absolute; inset: 0; margin: auto; width: var(--taille-48); height: var(--taille-48);
+  background: var(--image-interdit) center / contain no-repeat;
+}
 .coche-panier {
   display: inline-flex;
   align-items: center;

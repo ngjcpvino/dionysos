@@ -16,7 +16,7 @@ var FICHIERS = [
   'scripts-cave-v2.js', 'scripts-achat-v2.js', 'scripts-recherche-v2.js', 'scripts-accords-v2.js',
   'scripts-emplacements-v2.js', 'scripts-historique-v2.js', 'scripts-fiche-v2.js',
   'images/scan.png', 'images/saq1.PNG', 'images/partager-spinner-3.svg', 'images/ne-pas-racheter.svg',
-  'images/icone-ipad.png', 'images/vin.ico',
+  'images/interdit.svg', 'images/icone-ipad.png', 'images/vin.ico',
   'lecteur/zxing-wasm-3.1.6.js', 'lecteur/zxing_reader-3.1.6.wasm'
 ];
 // Hors du site, mais nécessaires sans réseau : l'ancien lecteur de codes-barres (secours) et l'image de fond
