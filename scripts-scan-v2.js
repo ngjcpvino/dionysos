@@ -781,9 +781,7 @@ function ouvrirMenuActionV2(code, wineResult) {
   var activesMenu = bottlesMenu.filter(function(b) { return b.statut !== 'Bu' && b.statut !== 'Sorti'; });
   var empEl = document.getElementById('menuActionV2-emplacements');
   if (empEl) {
-    empEl.textContent = activesMenu.map(function(b) {
-      return (b.meuble && b.rangee && b.espace) ? (b.meuble + '-' + b.rangee + '-' + b.espace) : 'À ranger';
-    }).sort(comparerEmplacementsV2).join(' · ');
+    empEl.textContent = activesMenu.map(empBouteilleV2).sort(comparerEmplacementsV2).join(' · ');
   }
 
   var nbActives = (wineResult && typeof wineResult.count === 'number') ? wineResult.count : 0;
@@ -1010,8 +1008,9 @@ function fermerArriveeV2() {
   }
 }
 
-function arriveeARangerV2() {
-  ajouterBouteilleArrivee('', '', '');
+// « À ranger », ou « Hors tri » (horsTri : une bouteille d'occasion spéciale, que le Tri ne touche jamais)
+function arriveeARangerV2(horsTri) {
+  ajouterBouteilleArrivee(horsTri ? HORS_TRI_V2 : '', '', '');
 }
 
 
@@ -1050,8 +1049,7 @@ function construireDeplacerV2() {
   } else {
     var menu = document.getElementById('deplacerV2-bouteille-menu');
     menu.innerHTML = bottles.map(function(b) {
-      var emp = (b.meuble && b.rangee && b.espace) ? (b.meuble + '-' + b.rangee + '-' + b.espace) : 'À ranger';
-      return '<div class="item-liste" onclick="choisirBouteilleDeplacer(' + (b.row || rowVin) + ',' + b.bottle + ')">' + emp + '</div>';
+      return '<div class="item-liste" onclick="choisirBouteilleDeplacer(' + (b.row || rowVin) + ',' + b.bottle + ')">' + empBouteilleV2(b) + '</div>';
     }).join('');
     document.getElementById('deplacerV2-choix-bouteille').style.display = 'block';
     document.getElementById('deplacerV2-destination').style.display = 'none';
@@ -1078,11 +1076,12 @@ function deplacerBouteilleV2(c) {
   });
 }
 
-function deplacerARangerV2() {
+function deplacerARangerV2(horsTri) {
   var c = deplacerV2Choix;
   if (c.meuble) return;
-  appelBackend('mettreBouteilleARanger', { row: c.row, bottle: c.bottle }, { spinner: 'Mise à ranger' }).then(function() {
-    afficherMessage('Bouteille mise à ranger');
+  (horsTri ? appelBackend('actionBouteille', { row: c.row, action: 'deplacer', bottle: c.bottle, meuble: HORS_TRI_V2, rangee: '', espace: '' }, { spinner: 'Mise à ranger' })
+    : appelBackend('mettreBouteilleARanger', { row: c.row, bottle: c.bottle }, { spinner: 'Mise à ranger' })).then(function() {
+    afficherMessage(horsTri ? 'Bouteille mise à ranger, hors tri' : 'Bouteille mise à ranger');
     return rechargerVinEnCoursV2('Mise à ranger');
   }).then(fermerDeplacerV2).catch(function(err) {
     retourAccueilV2('Mise à ranger : ' + causeV2(err));
@@ -1116,7 +1115,7 @@ function bottlesActivesV2() {
 }
 
 function empBouteilleV2(b) {
-  return (b.meuble && b.rangee && b.espace) ? (b.meuble + '-' + b.rangee + '-' + b.espace) : 'À ranger';
+  return emplacementV2(b.meuble, b.rangee, b.espace);
 }
 
 function rendreEnteteActionV2(prefixe) {

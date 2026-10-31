@@ -221,6 +221,10 @@
       <span class="roundel-anneau"></span>
       <span class="roundel-barre">À ranger</span>
     </div>
+    <div class="roundel" onclick="arriveeARangerV2(true)">
+      <span class="roundel-anneau"></span>
+      <span class="roundel-barre">Hors tri</span>
+    </div>
 
   </div>
 </div>
@@ -257,9 +261,15 @@
       </div>
       <div id="deplacerV2-espace-menu" class="menu-liste"></div>
 
-      <div class="roundel" id="deplacerV2-aranger" onclick="deplacerARangerV2()">
-        <span class="roundel-anneau"></span>
-        <span class="roundel-barre">À ranger</span>
+      <div id="deplacerV2-aranger">
+        <div class="roundel" onclick="deplacerARangerV2()">
+          <span class="roundel-anneau"></span>
+          <span class="roundel-barre">À ranger</span>
+        </div>
+        <div class="roundel" onclick="deplacerARangerV2(true)">
+          <span class="roundel-anneau"></span>
+          <span class="roundel-barre">Hors tri</span>
+        </div>
       </div>
     </div>
   </div>

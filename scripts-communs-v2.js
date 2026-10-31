@@ -209,6 +209,15 @@ function vinEnCaveV2(code, champ) {
   return bouteillesEnCaveV2().some(function(i) { return memeCodeV2(i[champ || 'Code-barres'], code); });
 }
 
+// « À ranger – hors tri » (31 oct. 2026, l'utilisateur) : les bouteilles d'occasions spéciales, physiquement dans « À ranger » ;
+// le Tri ne les touche jamais. Dans le classeur : le meuble « Hors tri », sans rangée ni espace (statut « A ranger »).
+var HORS_TRI_V2 = 'Hors tri';
+// L'emplacement d'une bouteille, partout pareil : « Cellier-4-2 » (court : « C-4-2 »), sinon « À ranger » ou « À ranger – hors tri »
+function emplacementV2(meuble, rangee, espace, court) {
+  if (meuble && rangee && espace) return (court ? meuble.toString().substring(0, 1).toUpperCase() : meuble) + '-' + rangee + '-' + espace;
+  return memeTexteV2(meuble || '', HORS_TRI_V2) ? 'À ranger – hors tri' : 'À ranger';
+}
+
 function grouperVinsV2(data) {
   var grouped = {};
   data.forEach(function(item) {
@@ -217,11 +226,7 @@ function grouperVinsV2(data) {
     if (!grouped[key]) grouped[key] = { wine: item, cb: cb, count: 0, emplacements: [] };
     if (bouteilleEnCaveV2(item)) {
       grouped[key].count++;
-      if (item.Meuble && item.Rangee && item.Espace) {
-        grouped[key].emplacements.push(item.Meuble.toString().substring(0, 1).toUpperCase() + '-' + item.Rangee + '-' + item.Espace);
-      } else {
-        grouped[key].emplacements.push('À ranger');
-      }
+      grouped[key].emplacements.push(emplacementV2(item.Meuble, item.Rangee, item.Espace, true));
     }
   });
   var arr = Object.values(grouped);
