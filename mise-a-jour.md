@@ -145,6 +145,11 @@
 - Exceptions : `outils/garde-fou-acceptes.txt`, une ligne « clé | raison », chaque cas expliqué à l'utilisateur.
 - `--tout` = l'inventaire de l'existant ; c'est la base de la liste 2.0, il doit baisser à chaque chantier.
 
+## 🧪 Banc d'essai de l'app (31 oct. 2026)
+- **`node outils/banc-app/verifier.js`** (ou `… HEAD~1`) : rejoue les mêmes gestes (`outils/banc-app/scenarios.js` : 17 scénarios, 139 étapes — Cave et filtres, fiche, Recherche, Historique, Profil, Propositions, Liste d'achat, Emplacements et Tri, Chartier, Selon SAQ, Curieux Bégin, Nos notes, scan → Boire, Donner, Déplacer, Arrivée, vin inconnu, Importer des achats, Facture) sur `origin/main` et sur les fichiers tels qu'ils sont, puis compare à chaque étape **l'écran** (chaque élément visible : texte, boîte, couleurs), **les appels au serveur** et **les erreurs**. « IDENTIQUE » ou la liste des différences — **à relire : seules les voulues doivent rester**. ~1 min.
+- Le faux serveur est **le vrai** : les `.gs` de `dionysos-serveur` dans le faux Apps Script de son banc (faux classeur de `monde.js` + quelques achats, fausse SAQ) — le dépôt du serveur doit être à côté (`../dionysos-serveur`, ou la variable `DIONYSOS_SERVEUR`). Heure et hasard figés, animations coupées : deux versions identiques donnent la même trace (vérifié).
+- Un geste nouveau (une page, un bouton) s'ajoute à `scenarios.js` en même temps que lui. Pas lancé par le crochet du `git push` (trop long, et il faut Playwright) : c'est l'IA qui le lance.
+
 ## 🛡️ Anti-gel
 - `appelBackend` : timeout 30 s par défaut, ajustable (`options.timeout` — Promotions 120 s et 300 s, Curieux Bégin 330 s) via `AbortController` → « Le serveur ne répond pas », spinner toujours retiré (`finally`).
 - Le socle écoute `window error` et `unhandledrejection` : toute erreur JS devient un toast.
