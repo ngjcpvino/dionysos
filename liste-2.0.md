@@ -83,7 +83,7 @@ Chaque famille : ~~l'utilisateur choisit sur image~~ **Claude choisit le modèle
 - Corrections trouvées en route (voulues) : corriger une fiche reconnaît le vin par **n'importe lequel** de ses codes-barres (avant : seulement le code exact) ; l'Historique montre la **couleur** des vins à plusieurs codes-barres ; **Boire** inscrit le code principal dans l'Historique (avant : toute la liste de codes).
 
 ## Chantier 6 — Le garde-fou couvre tout *(petit)*
-- [ ] L'étendre au **serveur** (`dionysos-serveur`) : aujourd'hui il ne vérifie que l'app.
+- [x] L'étendre au **serveur** (`dionysos-serveur`) — fait le 31 oct. : `--serveur` (sosies, blocs copiés, portes uniques `classeur_` / `appelAPISAQ`, verrou des actions qui écrivent) ; un `git push` du serveur le lance tout seul. Inventaire : 8 → 3 à régler (5 voulus, acceptés avec leur raison).
 - [ ] Après chaque chantier, l'inventaire (`--tout`) doit **baisser** ; ce qui reste volontairement est inscrit dans `outils/garde-fou-acceptes.txt` avec sa raison.
 
 ---
