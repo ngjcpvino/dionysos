@@ -209,7 +209,7 @@ function afficherFicheV2(result) {
   // === NOTES : HISTORIQUE ===
   html += '<div class="section" id="ficheV2-plats-section">';
   html += '<div class="ligne-ajout"><h3 class="titre-2">Historique</h3><div class="cercle" onclick="ouvrirHistoAjoutDepuisFicheV2()">+</div></div>';
-  html += '<div id="ficheV2-achats"></div>';
+  html += '<div id="ficheV2-comptes"></div>';
   html += '<div id="ficheV2-plats"></div>';
   html += '</div>';
 
@@ -271,7 +271,6 @@ function afficherFicheV2(result) {
 
 
   document.getElementById('ficheV2-corps').innerHTML = html;
-  chargerAchatsFicheV2();
   chargerPlatsV2(CURRENT_WINE_CODEBARRE);
   chargerSuggestionsFicheV2(wine['Code SAQ']);
   chargerRecettesFicheV2(wine.Famille);
@@ -760,14 +759,14 @@ function chargerPlatsV2(codebarre) {
         return codes.some(function(k) { return memeCodeV2(c, k); });
       });
     });
+    rendreComptesFicheV2(mets.map(function(m) { return m.date; }));
     if (mets.length === 0) { conteneur.innerHTML = ''; return; }
-    var compte = ligneCompteFicheV2('Bu', mets.map(function(m) { return m.date; }));
     mets.sort(function(a, b) {
       return (parseInt(b.bonAccord) || 0) - (parseInt(a.bonAccord) || 0);
     });
     var nom = decodeHTML((CURRENT_WINE_DATA && CURRENT_WINE_DATA.Nom) || '');
     var cartes = mets.map(function(m) { return carteMetHistoV2(m, nom, 'fiche'); }).join('');
-    conteneur.innerHTML = compte + cartes;
+    conteneur.innerHTML = cartes;
   }
 
   if (ALL_HISTORIQUE && ALL_HISTORIQUE.length) {
@@ -777,31 +776,43 @@ function chargerPlatsV2(codebarre) {
   appelBackend('getHistorique', {}, { spinner: '' }).then(function(data) {
     ALL_HISTORIQUE = data || [];
     rendrePlats(ALL_HISTORIQUE);
-  }).catch(journaliserV2('Plats de la fiche'));
+  }).catch(function(err) {
+    rendreComptesFicheV2([]);
+    journaliserV2('Plats de la fiche')(err);
+  });
 }
 
-// « Bu 3 fois · la dernière fois le 12-10-2026 » — dates « jj-mm-aaaa » ; rien si aucune
-function ligneCompteFicheV2(verbe, dates) {
-  if (!dates.length) return '';
+// « Bu 3 fois · la dernière fois le 12-10-2026 » — dates « jj-mm-aaaa » ; n : un nombre plus grand que celui des dates
+// (les bus d'avant l'app) ; rien si aucun
+function ligneCompteFicheV2(verbe, dates, n) {
+  n = Math.max(n || 0, dates.length);
+  if (!n) return '';
   var derniere = dates.slice().sort(function(a, b) { return dateHistoIsoV2(b) < dateHistoIsoV2(a) ? -1 : 1; })[0];
-  return '<div class="texte-secondaire">' + verbe + ' ' + dates.length + ' fois' + (derniere ? ' · la dernière fois le ' + derniere : '') + '</div>';
+  return '<div class="texte-secondaire">' + verbe + ' ' + n + ' fois' + (derniere ? ' · la dernière fois le ' + derniere : '') + '</div>';
 }
 
-// « Acheté N fois » en tête de l'Historique de la fiche (30 oct. 2026) : les achats du vin (onglet Achats), par son code SAQ
-// ou l'un de ses codes-barres. Un serveur sans la route (Code.gs à recoller) : rien d'affiché, la trace au journal.
-function chargerAchatsFicheV2() {
-  var div = document.getElementById('ficheV2-achats');
+// En tête de l'Historique de la fiche : « Acheté N fois » (30 oct. 2026 : les jours d'achat de l'onglet Achats, par le code SAQ
+// ou l'un des codes-barres du vin), puis « Bu N fois » — bus : les dates de l'Historique. Bu = l'Historique, ou, si c'est plus,
+// les bouteilles achetées moins celles en cave (31 oct. 2026, l'utilisateur : les achats d'avant l'app n'ont pas de ligne
+// à l'Historique) ; une bouteille par jour d'achat quand la quantité n'est pas connue (saq.com ne la donne pas).
+// Un serveur sans la route (Code.gs à recoller) : seulement l'Historique, la trace au journal.
+function rendreComptesFicheV2(bus) {
+  var div = document.getElementById('ficheV2-comptes');
   if (!div) return;
   var w = CURRENT_WINE_DATA || {};
-  function rendre() {
-    var saq = (w['Code SAQ'] || '').toString().trim();
-    var codes = codesBarresDuVinV2(w).concat([CURRENT_WINE_CODEBARRE]);
-    div.innerHTML = ligneCompteFicheV2('Acheté', ALL_ACHATS.filter(function(a) {
+  var saq = (w['Code SAQ'] || '').toString().trim();
+  var codes = codesBarresDuVinV2(w).concat([CURRENT_WINE_CODEBARRE]);
+  function rendre(achats) {
+    var siens = achats.filter(function(a) {
       return (saq && memeCodeV2(a.codeSAQ, saq)) || codes.some(function(k) { return memeCodeV2(a.codebarre, k); });
-    }).map(function(a) { return a.date; }));
+    });
+    var achetees = siens.reduce(function(s, a) { return s + (parseInt(a.quantite, 10) || 1); }, 0);
+    var enCave = bouteillesEnCaveV2().filter(function(i) { return codes.some(function(k) { return memeCodeV2(i['Code-barres'], k); }); }).length;
+    div.innerHTML = ligneCompteFicheV2('Acheté', siens.map(function(a) { return a.date; })) + ligneCompteFicheV2('Bu', bus, achetees - enCave);
   }
   achatsV2('').then(rendre).catch(function(err) {
     ALL_ACHATS = [];
+    rendre([]);
     journaliserV2('Achats de la fiche')(err);
   });
 }
