@@ -299,7 +299,9 @@ function parcoursMeubleEmpV2(meuble) {
 //      tri » (occasions spéciales), les autres meubles, les spiritueux ; rosés et bulles au cellier et au Pigeonnier.
 // 3. LA TOURNÉE, calculée une seule fois, ÉCRAN PAR ÉCRAN — meuble par meuble, rangée par rangée, chaque écran se confirme
 //    (ETAPES_MENAGE_V2). En haut, tout ce qui reste en haut s'échange sur place ; en bas, la Réserve puis « À ranger » ;
-//    on remonte, le Pigeonnier puis le cellier. Une bouteille posée s'écrit au classeur à la confirmation : pas
+//    on remonte, le Pigeonnier puis le cellier. Tout s'écrit au classeur à la confirmation de l'écran : une bouteille
+//    sortie devient « À ranger » (elle voyage), une bouteille posée prend sa place — seulement si cette place est libre
+//    (31 oct. : deux bouteilles s'étaient retrouvées en C-7-1). L'app dit donc vrai même si on arrête en chemin. Pas
 //    d'« Enregistrer » à la fin, et la tournée ne se recalcule jamais en chemin (plus de 2e passage).
 // 4. LES BOÎTES (4 cases par rangée, 3 rangées par boîte) : à la sortie, l'app dit la case ; les cases suivent l'ordre
 //    de la POSE — à la pose, on reprend case 1-1, 1-2… en remplissant le meuble rangée par rangée.
@@ -518,7 +520,7 @@ function simulerMenageV2(toutes, groupes) {
 
   // 0. La tablette : C-7-1 est la place d'un rouge ; ce qui l'occupe d'autre glisse sur la tablette
   var c71 = toutes.filter(function(b) { return b.place && memeTexteV2(b.place.meuble, 'Cellier') && b.place.rangee === '7' && b.place.espace === '1'; })[0];
-  if (c71 && c71.coul !== 'vin-rouge' && !fige(c71) && !cede[c71.cle]) {
+  if (c71 && c71.coul !== 'vin-rouge' && !garde[c71.cle] && !cede[c71.cle]) {
     var o71 = occ();
     var t = placesMenageV2('Cellier', ['7']).filter(function(p) { return p.espace !== '1' && !o71[placeMenageV2(p)]; })[0];
     if (t) { poser(c71, t); entre[c71.cle] = 'C-7-1 se libère pour un rouge'; }
@@ -820,36 +822,46 @@ function afficherEtapeMenageV2() {
   document.getElementById('empV2-cartes').innerHTML = html;
 }
 
-// Confirmer un écran : une sortie n'écrit rien (la bouteille voyage) ; une pose s'écrit au classeur, bouteille par
-// bouteille (une bouteille déjà écrite ne l'est pas deux fois ; une bouteille bue ou sortie entre-temps est sautée).
+// Confirmer un écran, bouteille par bouteille (une bouteille déjà écrite ne l'est pas deux fois ; une bouteille bue ou
+// sortie entre-temps est sautée) : une sortie devient « À ranger » (elle voyage) ; une pose prend sa place, seulement si
+// la place est libre dans l'app — sinon la bouteille reste « À ranger » et l'écran dit qui occupe la place.
 function confirmerEtapeMenageV2() {
   var T = MENAGE_V2.tournee;
   var e = tourneeMenageV2(T.moves).ecrans[T.etape];
   if (!e) return;
-  var aEcrire = e.sorte === 'sors' ? [] : e.lignes.filter(function(m) { return !T.ecrits[m.cle]; });
-  var suivant = function() {
+  var faits = e.sorte === 'sors' ? (T.sortis = T.sortis || {}) : T.ecrits;
+  var aEcrire = e.lignes.filter(function(m) { return !faits[m.cle]; });
+  var occupees = [];
+  var memePlace = function(i, p) { return memeTexteV2(i.Meuble || '', p.meuble) && String(i.Rangee) === String(p.rangee) && String(i.Espace) === String(p.espace); };
+  aEcrire.reduce(function(suite, m) {
+    return suite.then(function() {
+      var data = ALL_DATA || [];
+      var la = data.some(function(i) { return i.row === m.row && String(i.bottle) === String(m.bottle) && bouteilleEnCaveV2(i); });
+      var vers = e.sorte === 'sors' ? null : m.vers;
+      var occupant = vers && data.filter(function(i) { return bouteilleEnCaveV2(i) && memePlace(i, vers) && !(i.row === m.row && String(i.bottle) === String(m.bottle)); })[0];
+      if (!la) { faits[m.cle] = true; return null; }
+      if (occupant) {
+        occupees.push(emplacementV2(vers.meuble, vers.rangee, vers.espace, true) + ' est occupée par ' + decodeHTML(occupant.Nom || '—'));
+        vers = null;   // elle reste « À ranger »
+      }
+      var appel = vers
+        ? appelBackend('actionBouteille', { row: m.row, action: 'deplacer', bottle: m.bottle, meuble: vers.meuble, rangee: vers.rangee, espace: vers.espace }, { spinner: 'Tri' })
+        : appelBackend('mettreBouteilleARanger', { row: m.row, bottle: m.bottle }, { spinner: 'Tri' });
+      return appel.then(function(res) {
+        if (res && res.success === false) throw new Error(res.message || res.error || 'écriture refusée');
+        faits[m.cle] = true;
+        garderMenageV2();
+      });
+    });
+  }, Promise.resolve()).then(function() {
+    return aEcrire.length ? rechargerInventaireV2('Tri') : null;
+  }).then(function() {
+    if (occupees.length) afficherMessage(occupees.join(' · ') + ' : la bouteille reste « À ranger »');
     T.etape++;
     garderMenageV2();
     remonterScrollV2('empV2Container');
     afficherMenageEmpV2();
-  };
-  if (!aEcrire.length) { suivant(); return; }
-  rechargerInventaireV2('Tri').then(function() {
-    return aEcrire.reduce(function(p, m) {
-      return p.then(function() {
-        var la = (ALL_DATA || []).some(function(i) { return i.row === m.row && String(i.bottle) === String(m.bottle) && bouteilleEnCaveV2(i); });
-        if (!la) { T.ecrits[m.cle] = true; return null; }
-        var appel = m.vers
-          ? appelBackend('actionBouteille', { row: m.row, action: 'deplacer', bottle: m.bottle, meuble: m.vers.meuble, rangee: m.vers.rangee, espace: m.vers.espace }, { spinner: 'Tri' })
-          : appelBackend('mettreBouteilleARanger', { row: m.row, bottle: m.bottle }, { spinner: 'Tri' });
-        return appel.then(function(res) {
-          if (res && res.success === false) throw new Error(res.message || 'écriture refusée');
-          T.ecrits[m.cle] = true;
-          garderMenageV2();
-        });
-      });
-    }, Promise.resolve());
-  }).then(function() { return rechargerInventaireV2('Tri'); }).then(suivant).catch(function(err) {
+  }).catch(function(err) {
     garderMenageV2();   // ce qui est écrit le reste ; « Confirmer » reprend le reste
     signalerErreurV2(err);
   });
@@ -860,7 +872,7 @@ function recommencerMenageV2Html() {
 }
 function recommencerMenageV2() {
   var T = MENAGE_V2.tournee;
-  if (T && T.etape > 0 && T.etape < tourneeMenageV2(T.moves).ecrans.length) afficherMessage('Remets à leur place les bouteilles restées dans les boîtes');
+  if (T && T.etape > 0 && T.etape < tourneeMenageV2(T.moves).ecrans.length) afficherMessage('Ce qui est resté dans les boîtes est « À ranger » dans l\'app : pose-le là');
   MENAGE_V2 = etatMenageVideV2();
   oublierMenageV2();
   remonterScrollV2('empV2Container');
