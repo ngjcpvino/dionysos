@@ -247,7 +247,7 @@ function entreeManuelleV2() {
 
 // Code SAQ tapé : ré-essai automatique si le 1er appel échoue (démarrage à froid / latence SAQ)
 function testSAQAvecRetryV2(codeSAQ) {
-  function essai() { return appelBackend('testScrapingSAQ', { codeSAQ: codeSAQ }, { spinner: 'Un instant svp' }); }
+  function essai() { return appelBackend('ficheSAQ', { codeSAQ: codeSAQ }, { spinner: 'Un instant svp' }); }
   function valide(res) { return res && res.success && res.data && (res.data.codeCUP || '').replace(/\D/g, '').trim(); }
   return essai().then(function(res) {
     return valide(res) ? res : essai();
@@ -411,7 +411,7 @@ function remplirEnteteVinInconnuV2(codeSAQ, produit) {
     });
     return;
   }
-  appelBackend('testScrapingSAQ', { codeSAQ: codeSAQ }, { spinner: '' }).then(function(res) {
+  appelBackend('ficheSAQ', { codeSAQ: codeSAQ }, { spinner: '' }).then(function(res) {
     // Réponse d'un scan précédent arrivée en retard : on ne la mélange pas au vin affiché
     if ((document.getElementById('vinInconnuV2-codesaq').value || '').replace(/\D/g, '').trim() !== codeSAQ.toString().trim()) return;
     if (res && res.success && res.data) appliquerFicheSaqVinInconnuV2(codeSAQ, res.data);
@@ -447,7 +447,7 @@ function afficherVinInconnuV2(code, codeSAQ, produit) {
 // Rejette sur une panne de réseau (voir chercherVinScanneV2).
 function ouvrirVinInconnuV2(code, fond) {
   vinInconnuV2Code = code;
-  return appelBackend('chercherProduitSAQ_GRAPHQL_V1', { codebarre: code }, { spinner: fond ? '' : 'Un instant svp', timeout: 15000 }).then(function(codeSAQ) {
+  return appelBackend('chercherProduitSAQ', { codebarre: code }, { spinner: fond ? '' : 'Un instant svp', timeout: 15000 }).then(function(codeSAQ) {
     if (fond && !vinInconnuAttendV2(code)) return;
     clearTimeout(VIN_INCONNU_V2_ESSAI);
     // la SAQ dit que c'est un de mes vins (même code SAQ) sous un autre code-barres : mon vin, jamais un 2e vin créé
@@ -715,7 +715,7 @@ function creerVinManuelV2(mode) {
 
   if (codeSAQ) { suite(codeSAQ); return; }
 
-  appelBackend('chercherProduitSAQ_GRAPHQL_V1', { codebarre: code }, { spinner: 'Un instant svp' }).then(function(codeTrouve) {
+  appelBackend('chercherProduitSAQ', { codebarre: code }, { spinner: 'Un instant svp' }).then(function(codeTrouve) {
     if (codeTrouve) { suite(codeTrouve); return; }
     if (nom) { suite(''); return; }
     afficherMessage('Toujours introuvable — entrez un code SAQ ou un nom');
@@ -1081,7 +1081,7 @@ function deplacerBouteilleV2(c) {
 function deplacerARangerV2() {
   var c = deplacerV2Choix;
   if (c.meuble) return;
-  appelBackend('mettreBotteilleARanger', { row: c.row, bottle: c.bottle }, { spinner: 'Mise à ranger' }).then(function() {
+  appelBackend('mettreBouteilleARanger', { row: c.row, bottle: c.bottle }, { spinner: 'Mise à ranger' }).then(function() {
     afficherMessage('Bouteille mise à ranger');
     return rechargerVinEnCoursV2('Mise à ranger');
   }).then(fermerDeplacerV2).catch(function(err) {

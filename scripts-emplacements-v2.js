@@ -829,7 +829,7 @@ function enregistrerMenageV2() {
     return p.then(function() {
       var appel = d.vers
         ? appelBackend('actionBouteille', { row: d.b.w.row, action: 'deplacer', bottle: d.b.w.bottle, meuble: d.vers.meuble, rangee: d.vers.rangee, espace: d.vers.espace }, { spinner: 'Tri' })
-        : appelBackend('mettreBotteilleARanger', { row: d.b.w.row, bottle: d.b.w.bottle }, { spinner: 'Tri' });
+        : appelBackend('mettreBouteilleARanger', { row: d.b.w.row, bottle: d.b.w.bottle }, { spinner: 'Tri' });
       return appel.then(function() { faits++; });
     });
   }, Promise.resolve());
