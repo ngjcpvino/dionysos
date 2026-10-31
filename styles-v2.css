@@ -734,11 +734,18 @@ body::after {
   text-align: right;
   white-space: nowrap;
 }
-.carte.note-1 { border-bottom-color: var(--note-1); }
-.carte.note-2 { border-bottom-color: var(--note-2); }
-.carte.note-3 { border-bottom-color: var(--note-3); }
-.carte.note-4 { border-bottom-color: var(--note-4); }
-.carte.note-5 { border-bottom-color: var(--note-5); }
+/* L'appréciation d'un plat (31 oct. 2026, l'utilisateur) : une pastille de sa couleur devant le plat, sans bande ; les plats resserrés */
+.carte:is(.note-1, .note-2, .note-3, .note-4, .note-5) { margin-bottom: 0; }
+.carte:is(.note-1, .note-2, .note-3, .note-4, .note-5) :is(.carte-centre, .carte-droite) { padding-top: var(--space-5); padding-bottom: var(--space-5); }
+.carte:is(.note-1, .note-2, .note-3, .note-4, .note-5) .carte-titre { display: flex; align-items: flex-start; }
+.carte:is(.note-1, .note-2, .note-3, .note-4, .note-5) .carte-titre::before {
+  content: ''; flex: 0 0 auto; width: var(--taille-9); height: var(--taille-9); border-radius: 50%; margin: var(--space-5) var(--space-10) 0 0;
+}
+.carte.note-1 .carte-titre::before { background: var(--note-1); }
+.carte.note-2 .carte-titre::before { background: var(--note-2); }
+.carte.note-3 .carte-titre::before { background: var(--note-3); }
+.carte.note-4 .carte-titre::before { background: var(--note-4); }
+.carte.note-5 .carte-titre::before { background: var(--note-5); }
 .carte.vin-rouge  { border-bottom-color: var(--vin-rouge); border-left: none; }
 .carte.vin-blanc  { border-bottom-color: var(--vin-blanc); border-left: none; }
 .carte.vin-rose   { border-bottom-color: var(--vin-rose); border-left: none; }
@@ -1108,8 +1115,8 @@ input[type="date"].champ-saisie::-webkit-date-and-time-value { text-align: left;
 .histo-vin {
   padding-top: var(--space-10);
 }
-/* Carte en retrait sous un vin (plat noté, recette, note de sommelier…) : la carte universelle, bande en bas
-   (appréciation .note-1…5 ou couleur du vin). Une seule classe partout : fiche, Historique, Propositions, notes, Curieux Bégin. */
+/* Carte en retrait sous un vin (plat noté, recette, note de sommelier…) : la carte universelle (un plat noté : la pastille
+   .note-1…5 devant ; un vin : la bande de sa couleur). Une seule classe partout : fiche, Historique, Propositions, notes, Curieux Bégin. */
 .histo-mets { margin-left: var(--taille-60); width: calc(100% - var(--taille-60)); }
 .histo-mets .carte-droite { align-items: flex-start; }
 
