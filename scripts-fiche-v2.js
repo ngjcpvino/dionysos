@@ -787,7 +787,7 @@ function chargerPlatsV2(codebarre) {
 function ligneCompteFicheV2(verbe, dates, n) {
   n = Math.max(n || 0, dates.length);
   if (!n) return '';
-  var derniere = dates.slice().sort(function(a, b) { return dateHistoIsoV2(b) < dateHistoIsoV2(a) ? -1 : 1; })[0];
+  var derniere = derniereDateHistoV2(dates);
   return '<div class="texte-secondaire">' + verbe + ' ' + n + ' fois' + (derniere ? ' · la dernière fois le ' + derniere : '') + '</div>';
 }
 

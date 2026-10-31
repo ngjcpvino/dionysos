@@ -114,7 +114,10 @@ function afficherHistoV2() {
     if (!grouped[key]) grouped[key] = { cb: cb, nom: h.nom, couleur: h.couleur, photo: cbPhoto[cb] || '', mets: [] };
     grouped[key].mets.push(h);
   });
+  // le vin bu le plus récemment en haut (31 oct. 2026, l'utilisateur) ; ses plats, eux, du meilleur accord au moins bon
   var groupes = Object.values(grouped);
+  groupes.forEach(function(g) { g.dernier = dateHistoIsoV2(derniereDateHistoV2(g.mets.map(function(m) { return m.date; }))); });
+  groupes.sort(function(a, b) { return b.dernier < a.dernier ? -1 : b.dernier > a.dernier ? 1 : 0; });
 
   var div = document.getElementById('histoV2-cartes');
   document.getElementById('histoV2-compte').textContent = groupes.length + ' vin' + (groupes.length > 1 ? 's' : '');
@@ -145,6 +148,10 @@ function dateIsoV2(d) {
 function dateHistoIsoV2(jma) {
   var m = (jma || '').match(/^(\d{2})-(\d{2})-(\d{4})$/);
   return m ? m[3] + '-' + m[2] + '-' + m[1] : '';
+}
+// La plus récente de dates « jj-mm-aaaa » ('' si aucune)
+function derniereDateHistoV2(dates) {
+  return dates.slice().sort(function(a, b) { return dateHistoIsoV2(b) < dateHistoIsoV2(a) ? -1 : 1; })[0] || '';
 }
 
 function ouvrirHistoEditV2(row, plat, note, nom, provenance, codeSAQ, codebarre) {
