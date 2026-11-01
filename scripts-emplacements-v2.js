@@ -299,8 +299,8 @@ function parcoursMeubleEmpV2(meuble) {
 //    - un rouge chez les blancs (ou l'inverse) rejoint sa couleur dans son meuble, sinon il suit la cascade ;
 //    - jamais déplacées : couleur douteuse, cépage non nommé ou manquant (« À vérifier »), la tablette, « À ranger – hors
 //      tri » (occasions spéciales), les autres meubles, les spiritueux ; rosés et bulles au cellier et au Pigeonnier.
-// 3. LA TOURNÉE, calculée une seule fois, ÉCRAN PAR ÉCRAN — meuble par meuble, rangée par rangée, chaque écran se confirme
-//    (ETAPES_MENAGE_V2). En haut, tout ce qui reste en haut s'échange sur place ; en bas, la Réserve puis « À ranger » ;
+// 3. LA TOURNÉE, calculée une seule fois, ÉCRAN PAR ÉCRAN — une étape par écran, ses bouteilles dans l'ordre des places
+//    (P-1-1, P-1-2… P-9-4 ; 1er nov., l'utilisateur), et chaque écran se confirme (ETAPES_MENAGE_V2). En haut, tout ce qui reste en haut s'échange sur place ; en bas, la Réserve puis « À ranger » ;
 //    on remonte, le Pigeonnier puis le cellier. Tout s'écrit au classeur à la confirmation de l'écran : une bouteille
 //    sortie devient « À ranger » (elle voyage), une bouteille posée prend sa place — seulement si cette place est libre
 //    (31 oct. : deux bouteilles s'étaient retrouvées en C-7-1). L'app dit donc vrai même si on arrête en chemin. Pas
@@ -754,8 +754,8 @@ function confirmerDoublonsMenageV2(meuble) {
   afficherMenageEmpV2();
 }
 
-// Les étapes de la tournée (31 oct. 2026, l'utilisateur), dans l'ordre où il les fait. Chacune se fait rangée par
-// rangée (un écran par rangée), et chaque écran se confirme. sorte : 'sors' (dans une boîte), 'pose' (d'une boîte),
+// Les étapes de la tournée (31 oct. 2026, l'utilisateur), dans l'ordre où il les fait. Une étape = un écran, ses
+// bouteilles dans l'ordre des places (rangée, puis espace : « rangée par rangée »), et chaque écran se confirme. sorte : 'sors' (dans une boîte), 'pose' (d'une boîte),
 // 'direct' (sans boîte : « À ranger » est à côté de la Réserve). Chaque déplacement est sorti une fois et posé une fois.
 // En haut, ce qui reste en haut s'échange sur place (le cellier, puis le Pigeonnier : ce qui descend d'abord, puis ce
 // qui monte au cellier ; on place au Pigeonnier ce qui vient du cellier, puis au cellier ce qui vient du Pigeonnier) ;
@@ -777,8 +777,8 @@ var ETAPES_MENAGE_V2 = [
   { titre: '7 · Au cellier', action: 'Place', sorte: 'pose', de: ['reserve', 'aranger'], vers: ['cellier'] }
 ];
 
-// Les écrans de la tournée : chaque étape, rangée par rangée (la place quittée pour sortir, la place prise pour poser),
-// puis la case de chaque bouteille. Les cases d'une même pose se suivent, dans l'ordre de la pose ; elles se libèrent
+// Les écrans de la tournée : une étape par écran, ses bouteilles dans l'ordre des places (la place quittée pour sortir,
+// la place prise pour poser), puis la case de chaque bouteille. Les cases d'une même pose se suivent, dans l'ordre de la pose ; elles se libèrent
 // une fois posées et resservent plus tard (le moins de boîtes possible).
 function tourneeMenageV2(moves) {
   var ecrans = [], sortieDe = {}, poseDe = {};
@@ -787,14 +787,11 @@ function tourneeMenageV2(moves) {
   ETAPES_MENAGE_V2.forEach(function(e, n) {
     var cote = e.sorte === 'pose' ? 'vers' : 'de';
     var lignes = moves.filter(function(m) { return e.de.indexOf(lieuMenageV2(m.de)) !== -1 && e.vers.indexOf(lieuMenageV2(m.vers)) !== -1; })
-      .sort(function(a, b) { return (rangeeDe(a[cote]) - rangeeDe(b[cote])) || (espaceDe(a[cote]) - espaceDe(b[cote])); });
-    var parRangee = {};
-    lignes.forEach(function(m) {
-      var r = m[cote] ? String(m[cote].rangee) : '';
-      if (!parRangee[r]) { parRangee[r] = { etape: n, titre: e.titre, action: e.action, sorte: e.sorte, rangee: r, lignes: [] }; ecrans.push(parRangee[r]); }
-      parRangee[r].lignes.push(m);
-      (e.sorte === 'pose' ? poseDe : sortieDe)[m.cle] = ecrans.length - 1;
-    });
+      .sort(function(a, b) { return (rangeeDe(a[cote]) - rangeeDe(b[cote])) || (espaceDe(a[cote]) - espaceDe(b[cote])) ||
+        decodeHTML(a.w.Nom || '').localeCompare(decodeHTML(b.w.Nom || '')); });
+    if (!lignes.length) return;
+    ecrans.push({ etape: n, titre: e.titre, action: e.action, sorte: e.sorte, lignes: lignes });
+    lignes.forEach(function(m) { (e.sorte === 'pose' ? poseDe : sortieDe)[m.cle] = ecrans.length - 1; });
   });
   // Les poses depuis une boîte, étape par étape : de la première sortie à la dernière pose, un bloc de cases qui se suivent
   var blocs = [], caseDe = {}, max = 0;
@@ -844,7 +841,7 @@ function afficherEtapeMenageV2() {
   if (T.etape === 0 && t.boites) html += '<div class="texte">Prends ' + t.boites + ' boîte' + (t.boites > 1 ? 's' : '') + '</div>';
   var court = function(p) { return emplacementV2(p && p.meuble, p && p.rangee, p && p.espace, true); };
   var dest = { cellier: 'cellier', pigeonnier: 'Pigeonnier', reserve: 'Réserve', aranger: 'À ranger' };
-  html += '<div class="emp-bloc"><div class="titre-2">' + e.titre + '</div><div class="titre-3">' + e.action + (e.rangee ? ' · rangée ' + e.rangee : '') + '</div>';
+  html += '<div class="emp-bloc"><div class="titre-2">' + e.titre + '</div><div class="titre-3">' + e.action + '</div>';
   e.lignes.forEach(function(m) {
     var boite = caseMenageV2(t.caseDe[m.cle], t.boites);
     if (e.sorte === 'sors') html += carteMenageV2(m, court(m.de) + ' · ' + decodeHTML(m.w.Nom || '—'), m.raison,
