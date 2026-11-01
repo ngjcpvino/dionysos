@@ -785,7 +785,8 @@ function tourneeMenageV2(moves) {
   var rangeeDe = function(p) { return p ? parseInt(p.rangee, 10) || 0 : 0; };
   var espaceDe = function(p) { return p ? parseInt(p.espace, 10) || 0 : 0; };
   ETAPES_MENAGE_V2.forEach(function(e, n) {
-    var cote = e.sorte === 'pose' ? 'vers' : 'de';
+    // l'ordre des places du meuble où l'on pose (une pose, ou « À ranger » → Réserve) ; sinon de celui d'où l'on sort
+    var cote = e.sorte === 'pose' || (e.sorte === 'direct' && e.vers.indexOf('aranger') === -1) ? 'vers' : 'de';
     var lignes = moves.filter(function(m) { return e.de.indexOf(lieuMenageV2(m.de)) !== -1 && e.vers.indexOf(lieuMenageV2(m.vers)) !== -1; })
       .sort(function(a, b) { return (rangeeDe(a[cote]) - rangeeDe(b[cote])) || (espaceDe(a[cote]) - espaceDe(b[cote])) ||
         decodeHTML(a.w.Nom || '').localeCompare(decodeHTML(b.w.Nom || '')); });
