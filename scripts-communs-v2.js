@@ -5,6 +5,26 @@
    synonymes de cépages, codes-barres d'un vin, regroupement et cartes de vins
 ============================================================ */
 
+// Familles d'appellations (1er nov. 2026, l'utilisateur : « je doute de ma capacité à distinguer un Rioja d'un Rioja Alta ») :
+// une sous-zone ou une mention (Villages, Supérieur, Classico…) compte comme l'appellation mère. Liste tenue ici, à
+// compléter quand l'utilisateur signale un cas. [famille, motif sur le nom sans accents ni majuscules]
+var FAMILLES_APPELLATIONS_V2 = [
+  ['Rioja', /^rioja\b/],
+  ['Côtes du Rhône', /^cotes du rhone\b/],
+  ['Côtes de Bordeaux', /cotes de bordeaux$/],
+  ['Bordeaux', /^bordeaux\b/],
+  ['Saint-Émilion', /saint.emilion/],
+  ['Beaujolais', /^beaujolais\b/],
+  ['Chianti', /^chianti\b/],
+  ['Bourgogne', /^bourgogne\b|^coteaux bourguignons$/]
+];
+// L'appellation d'un vin, ramenée à sa famille (« Rioja Alta » → « Rioja ») ; une autre reste telle quelle
+function familleAppellationV2(nom) {
+  var n = normaliserRechercheV2(nom).trim();
+  var f = FAMILLES_APPELLATIONS_V2.filter(function(x) { return x[1].test(n); })[0];
+  return f ? f[0] : (nom || '').toString().trim();
+}
+
 // Synonymes de cépages (25 oct. 2026 ; PARTOUT dans l'app depuis le 28 oct.) — liste tenue ici, à compléter quand
 // l'utilisateur en signale un. Nom commun (celui le plus présent en cave) : ses autres noms.
 // Restent à part : Garnacha tintorera (= Alicante Bouschet), Grenache blanc, Grenache gris.
