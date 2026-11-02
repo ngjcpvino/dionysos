@@ -324,6 +324,15 @@ var NOMS_COULEURS_MENAGE_V2 = { 'vin-blanc': 'blancs', 'vin-rouge': 'rouges', 'v
 // La tablette : rangée 7 du cellier, sauf C-7-1
 function tabletteMenageV2(p) { return !!p && memeTexteV2(p.meuble, 'Cellier') && String(p.rangee) === '7' && String(p.espace) !== '1'; }
 
+// Arrivée et Déplacer (2 nov. 2026, l'utilisateur) : une place d'une zone n'est proposée qu'à la couleur de la zone ;
+// la tablette, la Réserve et les autres meubles prennent toutes les couleurs ; une couleur inconnue prend tout
+function placePermiseV2(couleur, meuble, rangee, espace) {
+  var p = { meuble: String(meuble), rangee: String(rangee), espace: String(espace) };
+  if (!couleurConnueV2(couleur) || tabletteMenageV2(p)) return true;
+  var z = zoneMenageV2(p);
+  return !z || z.couleur === couleurClasseV2(couleur);
+}
+
 // L'état du Tri, gardé dans le téléphone 7 jours : cedes[bouteille] = doublon sorti ; doublonsFaits = les meubles dont
 // les doublons sont confirmés ; tournee = { moves (calculés une fois), etape (l'écran en cours), ecrits[bouteille] }.
 var MEUBLES_DOUBLONS_MENAGE_V2 = ['Cellier'];   // 1er nov. : au Pigeonnier et à la Réserve, la règle reclasse d'elle-même
@@ -409,7 +418,7 @@ function bouteillesMenageV2() {
     };
     // Douteux : jamais déplacé, listé « À vérifier »
     var texte = normaliserRechercheV2([i.Nom, i.Appellation, i.Cepage].join(' '));
-    if (!/rouge|blanc|ros|bulle|mousseux|spiritueux/i.test(i.Couleur || '')) b.doute = 'Couleur manquante';
+    if (!couleurConnueV2(i.Couleur)) b.doute = 'Couleur manquante';
     else if (b.coul === 'vin-blanc' && /glera|prosecco|champagne|cremant|cava|mousseux|petillant|franciacorta/.test(texte)) b.doute = 'Des bulles notées « Blanc » ?';
     else if (/^autre/.test(b.cep)) b.doute = 'Cépage non nommé : inscris le vrai dans la fiche';
     else if (!b.cep && b.coul !== 'vin-spiritueux') b.doute = 'Cépage manquant : inscris-le dans la fiche';

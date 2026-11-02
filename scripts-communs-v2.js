@@ -156,6 +156,8 @@ function couleurClasseV2(couleur) {
   if (couleur.indexOf('spiritueux') !== -1) return 'vin-spiritueux';
   return 'vin-rouge';
 }
+// Une couleur que l'app sait lire (sans elle, couleurClasseV2 répond « rouge » par défaut)
+function couleurConnueV2(couleur) { return /rouge|blanc|ros|bulle|mousseux|spiritueux/i.test(couleur || ''); }
 
 // Sous-titre standard d'une carte vin : Pays • Région, Cépage, Appellation (lignes vides masquées).
 function sousVinV2(w) {

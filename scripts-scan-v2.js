@@ -405,7 +405,7 @@ function remplirEnteteVinInconnuV2(codeSAQ, produit) {
   if (nomInput) nomInput.style.display = 'none';
   if (produit) {
     appliquerFicheSaqVinInconnuV2(codeSAQ, {
-      nom: produit.nom, pays: produit.pays, region: produit.region, appellation: produit.appellation, cepages: produit.cepage,
+      nom: produit.nom, couleur: produit.couleur, pays: produit.pays, region: produit.region, appellation: produit.appellation, cepages: produit.cepage,
       aromes: produit.aromes, acidite: produit.acidite, sucrosite: produit.sucrosite, corps: produit.corps, bouche: produit.bouche,
       sucre: produit.sucre, alcool: produit.alcool, temperature: produit.temperature, bois: produit.bois
     });
@@ -420,7 +420,7 @@ function remplirEnteteVinInconnuV2(codeSAQ, produit) {
 
 // d = fiche SAQ (noms de lireFicheSAQ — l'inventaire de la succursale porte les mêmes) : en-tête, bloc du scan, Dégustation
 function appliquerFicheSaqVinInconnuV2(codeSAQ, d) {
-  vinInconnuV2Saq = { codeSAQ: codeSAQ.toString().trim(), nom: d.nom || '', pays: d.pays || '', region: d.region || '', appellation: d.appellation || '' };
+  vinInconnuV2Saq = { codeSAQ: codeSAQ.toString().trim(), nom: d.nom || '', couleur: d.couleur || '', pays: d.pays || '', region: d.region || '', appellation: d.appellation || '' };
   document.getElementById('vinInconnuV2-titre').textContent = decodeHTML((d.nom || 'Vin inconnu').toString());
   var org = [d.pays, d.region, d.appellation, d.cepages].filter(Boolean).map(function(x) { return decodeHTML(x.toString()); }).join(' · ');
   document.getElementById('vinInconnuV2-soustitre').textContent = org || "Ce vin n'est pas dans ta cave";
@@ -731,7 +731,7 @@ function arriveeVinNeufV2(code, codeSAQ, nom) {
   var d = (vinInconnuV2Saq && codeSAQ && vinInconnuV2Saq.codeSAQ === codeSAQ.toString().trim()) ? vinInconnuV2Saq : {};
   menuActionV2Context = {
     code: code,
-    wineResult: { exists: false, count: 0, bottles: [], wine: { nom: d.nom || nom || 'Nouveau vin', pays: d.pays || '', region: d.region || '', appellation: d.appellation || '' } },
+    wineResult: { exists: false, count: 0, bottles: [], wine: { nom: d.nom || nom || 'Nouveau vin', couleur: d.couleur || '', pays: d.pays || '', region: d.region || '', appellation: d.appellation || '' } },
     nouveau: { codeSAQ: codeSAQ || '', nom: nom || '' }
   };
   naviguerV2(ouvrirArriveeV2);
@@ -863,19 +863,6 @@ function espacesOccupesV2(meuble, rangee) {
   return occupes;
 }
 
-// Une rangée a-t-elle au moins une place libre ?
-function rangeeALibre(meuble, rangee) {
-  var tous = (CONFIG.meubles[meuble] && CONFIG.meubles[meuble][rangee]) ? CONFIG.meubles[meuble][rangee] : [];
-  var occ = espacesOccupesV2(meuble, rangee);
-  return tous.some(function(e) { return occ.indexOf(String(e)) === -1; });
-}
-
-// Un meuble a-t-il au moins une place libre ?
-function meubleALibre(meuble) {
-  var rangees = CONFIG.meubles[meuble] ? Object.keys(CONFIG.meubles[meuble]) : [];
-  return rangees.some(function(r) { return rangeeALibre(meuble, r); });
-}
-
 // Le libellé d'un roundel de placement et son rond de coche vont toujours ensemble :
 // le texte montre la valeur choisie (ou le nom du champ), le rond n'est coché que si
 // une valeur est prise. Vaut pour Ajouter et pour Déplacer.
@@ -896,7 +883,8 @@ function majBarrePlacementV2(prefixe, champ, valeur, defaut) {
 
 // ==================== LE CHOIX D'UN EMPLACEMENT (28 oct. 2026, liste 2.0 chantier 4) ====================
 // Un seul sélecteur Meuble → Rangée → Espace pour l'Arrivée et le Déplacer (prefixe 'arriveeV2' / 'deplacerV2') :
-// seules les places libres sont proposées ; l'espace choisi est revérifié au serveur (l'autre téléphone a pu le
+// seules les places libres sont proposées, et seulement celles permises à la couleur du vin (placePermiseV2 : les zones
+// du Tri ; 2 nov. 2026, l'utilisateur) ; l'espace choisi est revérifié au serveur (l'autre téléphone a pu le
 // prendre) — pris : l'inventaire frais et la liste des espaces rouverte ; libre : l'écran pose la bouteille.
 var PLACEMENTS_V2 = {
   arriveeV2: { choix: function() { return arriveeV2Choix; }, poser: function(c) { ajouterBouteilleArrivee(c.meuble, c.rangee, c.espace); } },
@@ -904,17 +892,26 @@ var PLACEMENTS_V2 = {
 };
 var LIBELLES_PLACEMENT_V2 = { meuble: 'Meuble', rangee: 'Rangée', espace: 'Espace' };
 
+// La couleur du vin qu'on place (Arrivée, Déplacer) : sa fiche en mémoire, sinon la SAQ (vin neuf) ; '' = inconnue
+function couleurPlacementV2() {
+  var c = menuActionV2Context;
+  if (!c) return '';
+  var memoire = wineResultDepuisMemoireV2(c.code);
+  return ((memoire && memoire.wine.couleur) || (c.wineResult && c.wineResult.wine && c.wineResult.wine.couleur) || '').toString();
+}
 function meublesLibresV2() {
-  return ((CONFIG && CONFIG.meubles) ? Object.keys(CONFIG.meubles) : []).filter(meubleALibre).sort(function(a, b) { return a.localeCompare(b); });
+  return ((CONFIG && CONFIG.meubles) ? Object.keys(CONFIG.meubles) : []).filter(function(m) { return rangeesLibresV2(m).length; })
+    .sort(function(a, b) { return a.localeCompare(b); });
 }
 function rangeesLibresV2(meuble) {
-  return (CONFIG.meubles[meuble] ? Object.keys(CONFIG.meubles[meuble]) : []).filter(function(r) { return rangeeALibre(meuble, r); })
+  return (CONFIG.meubles[meuble] ? Object.keys(CONFIG.meubles[meuble]) : []).filter(function(r) { return espacesLibresV2(meuble, r).length; })
     .sort(function(a, b) { return parseInt(a) - parseInt(b); });
 }
 function espacesLibresV2(meuble, rangee) {
-  var occ = espacesOccupesV2(meuble, rangee);
+  var occ = espacesOccupesV2(meuble, rangee), couleur = couleurPlacementV2();
   return ((CONFIG.meubles[meuble] && CONFIG.meubles[meuble][rangee]) ? CONFIG.meubles[meuble][rangee] : [])
-    .filter(function(e) { return occ.indexOf(String(e)) === -1; }).sort(function(a, b) { return parseInt(a) - parseInt(b); });
+    .filter(function(e) { return occ.indexOf(String(e)) === -1 && placePermiseV2(couleur, meuble, rangee, e); })
+    .sort(function(a, b) { return parseInt(a) - parseInt(b); });
 }
 // Une liste de choix (meubles, rangées ou espaces), la valeur prise cochée
 function menuPlacementV2(prefixe, champ, valeurs) {
