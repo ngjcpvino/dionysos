@@ -832,7 +832,7 @@ function afficherEtapeMenageV2() {
   if (T.etape >= t.ecrans.length) {
     document.getElementById('empV2-compte').innerHTML = 'Tri Dionysos';
     html = '<div class="texte">' + (T.moves.length ? '✓ Tournée terminée : ' + T.moves.length + ' bouteille' + (T.moves.length > 1 ? 's' : '') + ' à leur place'
-      : 'Rien à déplacer : la cave suit la règle') + '</div>' +
+      : 'Rien à déplacer : les emplacements sont maximisés') + '</div>' +
       '<div class="item-liste" onclick="recommencerMenageV2()">Nouveau Tri</div>';
     document.getElementById('empV2-cartes').innerHTML = html;
     return;
