@@ -310,13 +310,13 @@ function parcoursMeubleEmpV2(meuble) {
 // Zones : meubles et rangées de l'onglet config — si l'aménagement change, corriger ici.
 var ZONES_MENAGE_V2 = {
   Cellier: [
-    { nom: 'blancs', rangees: ['1', '2', '3'], couleur: 'vin-blanc' },
-    { nom: 'rouges', rangees: ['4', '5', '6'], couleur: 'vin-rouge' },
-    { nom: 'place du rouge', rangees: ['7'], espaces: ['1'], couleur: 'vin-rouge' }
+    { nom: 'chez les blancs', rangees: ['1', '2', '3'], couleur: 'vin-blanc' },
+    { nom: 'chez les rouges', rangees: ['4', '5', '6'], couleur: 'vin-rouge' },
+    { nom: 'à la place du rouge', rangees: ['7'], espaces: ['1'], couleur: 'vin-rouge' }
   ],
   Pigeonnier: [
-    { nom: 'blancs', rangees: ['1', '2', '3'], couleur: 'vin-blanc' },
-    { nom: 'rouges', rangees: ['4', '5', '6', '7', '8', '9'], couleur: 'vin-rouge' }
+    { nom: 'chez les blancs', rangees: ['1', '2', '3'], couleur: 'vin-blanc' },
+    { nom: 'chez les rouges', rangees: ['4', '5', '6', '7', '8', '9'], couleur: 'vin-rouge' }
   ]
 };
 var NOMS_COULEURS_MENAGE_V2 = { 'vin-blanc': 'blancs', 'vin-rouge': 'rouges', 'vin-bulles': 'bulles' };
@@ -416,7 +416,7 @@ function bouteillesMenageV2() {
     // Hors de sa zone : un rouge chez les blancs, ou l'inverse (les autres couleurs ne sont pas touchées)
     var z = zoneMenageV2(place);
     if (z && z.couleur !== b.coul && (b.coul === 'vin-blanc' || b.coul === 'vin-rouge')) {
-      b.horsZone = (b.coul === 'vin-rouge' ? 'rouge' : 'blanc') + ' rangé chez les ' + z.nom;
+      b.horsZone = (b.coul === 'vin-rouge' ? 'rouge' : 'blanc') + ' rangé ' + z.nom;   // « rouge rangé chez les blancs », « blanc rangé à la place du rouge »
     }
     return b;
   });
@@ -848,7 +848,7 @@ function afficherEtapeMenageV2() {
     if (e.sorte === 'sors') html += carteMenageV2(m, court(m.de) + ' · ' + decodeHTML(m.w.Nom || '—'), m.raison,
       '<span class="fs-12 color-white">' + boite + '</span><span class="fs-12">→ ' + dest[lieuMenageV2(m.vers)] + '</span>', false);
     else if (e.sorte === 'pose') html += carteMenageV2(m, boite + ' → ' + court(m.vers) + ' · ' + decodeHTML(m.w.Nom || '—'),
-      'vient de ' + court(m.de) + (m.raison ? ' · ' + m.raison : ''), '', false);
+      (lieuMenageV2(m.de) === 'aranger' ? 'vient d\'' : 'vient de ') + court(m.de) + (m.raison ? ' · ' + m.raison : ''), '', false);
     else html += carteMenageV2(m, court(m.de) + ' → ' + court(m.vers) + ' · ' + decodeHTML(m.w.Nom || '—'), m.raison, '', false);
   });
   html += '</div><div class="roundel mt-20" onclick="confirmerEtapeMenageV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Confirmer</span></div>';
