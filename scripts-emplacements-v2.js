@@ -710,7 +710,7 @@ function mouvementMenageV2(d) {
 function afficherDoublonsMenageV2(meuble, groupes, toutes, attente) {
   document.getElementById('empV2-compte').innerHTML = 'Tri Dionysos : les doublons ' + NOMS_MEUBLES_MENAGE_V2[meuble];
   var html = '<div class="emp-bloc"><div class="titre-2">Les doublons ' + NOMS_MEUBLES_MENAGE_V2[meuble] + '</div>' +
-    '<div class="texte-secondaire texte-gauche">Touche ceux que tu sors ; ceux que tu gardes restent à leur place.</div>';
+    '<div class="texte-secondaire texte-gauche">Coche ceux que tu sors ; ceux que tu gardes restent à leur place.</div>';
   ['vin-blanc', 'vin-rouge'].forEach(function(coul) {
     var a = attente[coul], siens = groupes.filter(function(g) { return g.coul === coul; });
     if (!siens.length) return;
