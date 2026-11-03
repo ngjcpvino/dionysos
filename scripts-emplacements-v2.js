@@ -777,11 +777,11 @@ var ETAPES_MENAGE_V2 = [
   { titre: '2 · Au Pigeonnier', action: 'Place', sorte: 'pose', de: ['cellier', 'pigeonnier'], vers: ['pigeonnier'] },
   { titre: '3 · Au cellier', action: 'Place ce qui vient du Pigeonnier', sorte: 'pose', de: ['pigeonnier'], vers: ['cellier'] },
   { titre: '4 · En bas, à la Réserve', action: 'Sors ce qui monte ou change de place', sorte: 'sors', de: ['reserve'], vers: ['cellier', 'pigeonnier', 'reserve'] },
-  { titre: '4 · En bas, à la Réserve', action: 'Sors ce qui va dans « À ranger » et pose-le', sorte: 'direct', de: ['reserve'], vers: ['aranger'] },
+  { titre: '4 · En bas, à la Réserve', action: 'Sors ce qui va dans « À ranger » et place-le', sorte: 'direct', de: ['reserve'], vers: ['aranger'] },
   { titre: '4 · En bas, à la Réserve', action: 'Place', sorte: 'pose', de: ['cellier', 'pigeonnier', 'reserve'], vers: ['reserve'] },
-  { titre: '5 · À ranger', action: 'Prends ce qui va à la Réserve et pose-le', sorte: 'direct', de: ['aranger'], vers: ['reserve'] },
+  { titre: '5 · À ranger', action: 'Prends ce qui va à la Réserve et place-le', sorte: 'direct', de: ['aranger'], vers: ['reserve'] },
   { titre: '5 · À ranger', action: 'Sors ce qui monte', sorte: 'sors', de: ['aranger'], vers: ['cellier', 'pigeonnier'] },
-  { titre: '5 · À ranger', action: 'Pose', sorte: 'pose', de: ['cellier', 'pigeonnier'], vers: ['aranger'] },
+  { titre: '5 · À ranger', action: 'Place', sorte: 'pose', de: ['cellier', 'pigeonnier'], vers: ['aranger'] },
   { titre: '6 · Au Pigeonnier', action: 'Place', sorte: 'pose', de: ['reserve', 'aranger'], vers: ['pigeonnier'] },
   { titre: '7 · Au cellier', action: 'Place', sorte: 'pose', de: ['reserve', 'aranger'], vers: ['cellier'] }
 ];
@@ -914,7 +914,7 @@ function recommencerMenageV2Html() {
 }
 function recommencerMenageV2() {
   var T = MENAGE_V2.tournee;
-  if (T && T.etape > 0 && T.etape < tourneeMenageV2(T.moves).ecrans.length) afficherMessage('Ce qui est resté dans les boîtes est « À ranger » dans l\'app : pose-le là');
+  if (T && T.etape > 0 && T.etape < tourneeMenageV2(T.moves).ecrans.length) afficherMessage('Ce qui est resté dans les boîtes est « À ranger » dans l\'app : place-le là');
   MENAGE_V2 = etatMenageVideV2();
   oublierMenageV2();
   remonterScrollV2('empV2Container');
