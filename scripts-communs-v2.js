@@ -156,6 +156,8 @@ function couleurClasseV2(couleur) {
   if (couleur.indexOf('spiritueux') !== -1) return 'vin-spiritueux';
   return 'vin-rouge';
 }
+// Les 5 couleurs, telles qu'écrites dans la fiche (la liste du crayon)
+var COULEURS_V2 = ['Rouge', 'Blanc', 'Rosé', 'Bulles', 'Spiritueux'];
 // Une couleur que l'app sait lire (sans elle, couleurClasseV2 répond « rouge » par défaut)
 function couleurConnueV2(couleur) { return /rouge|blanc|ros|bulle|mousseux|spiritueux/i.test(couleur || ''); }
 

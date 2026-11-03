@@ -1094,10 +1094,69 @@ var EDIT_FICHE_V2_CHAMPS = [
   ['Photo', 'photo', 'Photo URL']
 ];
 
+// Les champs du crayon qui se choisissent dans une liste (3 nov. 2026, l'utilisateur) : une faute de frappe y créerait un
+// faux « nouveau » (Tri, filtres, Profil). fermee : cette liste seulement ; sinon les valeurs de la cave, puis « + Nouveau… ».
+// parPays : les valeurs des vins du pays choisi plus haut. vide : le choix « sans valeur » (son libellé).
+var LISTES_EDIT_V2 = {
+  couleur: { fermee: function() { return COULEURS_V2; } },
+  pastille: { fermee: function() { return PASTILLES_SAQ_V2.slice().sort(function(a, b) { return a.localeCompare(b); }); }, vide: 'Aucune' },
+  pays: { vide: 'Aucun' }, region: { parPays: true, vide: 'Aucune' }, appellation: { parPays: true, vide: 'Aucune' },
+  acidite: { vide: 'Aucune' }, sucrosite: { vide: 'Aucune' }, corps: { vide: 'Aucun' }, bouche: { vide: 'Aucune' }, bois: { vide: 'Aucun' },
+  designation: { vide: 'Aucune' }, classification: { vide: 'Aucune' }, particularite: { vide: 'Aucune' }
+};
+// La valeur d'un champ du crayon : la liste (data-valeur) ou la case
+function valeurEditV2(champ) {
+  var d = document.getElementById('editV2-' + champ + '-display');
+  if (d) return d.getAttribute('data-valeur') || '';
+  var el = document.getElementById('editV2-' + champ);
+  return el ? el.value : '';
+}
+// Les choix d'une liste du crayon : la liste fermée, ou les valeurs de la cave (du pays choisi, pour parPays)
+function valeursEditV2(champ) {
+  var l = LISTES_EDIT_V2[champ];
+  if (l.fermee) return l.fermee();
+  var cle = EDIT_FICHE_V2_CHAMPS.filter(function(c) { return c[1] === champ; })[0][2];
+  var pays = l.parPays ? valeurEditV2('pays') : '';
+  var base = (ALL_DATA || []).filter(function(i) { return !pays || memeTexteV2(decodeHTML(i.Pays || ''), pays); });
+  return valeursUniquesV2(base.map(function(i) { return { v: decodeHTML((i[cle] || '').toString()) }; }), 'v');
+}
+function majListeEditV2(champ, valeur) {
+  var d = document.getElementById('editV2-' + champ + '-display');
+  d.setAttribute('data-valeur', valeur);
+  d.textContent = valeur || LISTES_EDIT_V2[champ].vide || '';
+}
+// Une liste à la fois : l'ouvrir referme les autres ; ses choix sont calculés à l'ouverture (le pays a pu changer)
+function basculerListeEditV2(champ) {
+  var menu = document.getElementById('editV2-' + champ + '-menu');
+  var ouvert = menu.classList.contains('ouvert');
+  Array.prototype.forEach.call(document.querySelectorAll('#editFicheV2-corps .menu-liste.ouvert'), function(m) { m.classList.remove('ouvert'); });
+  if (ouvert) return;
+  var l = LISTES_EDIT_V2[champ], cur = valeurEditV2(champ);
+  var ligne = function(v, texte) {
+    return '<div class="item-liste' + (memeTexteV2(v, cur) ? ' actif' : '') + '" onclick="choisirListeEditV2(\'' + champ + '\', \'' + String(v).replace(/'/g, "\\'").replace(/"/g, '&quot;') + '\')">' + texte + '</div>';
+  };
+  menu.innerHTML = (l.vide ? ligne('', l.vide) : '') + valeursEditV2(champ).map(function(v) { return ligne(v, v); }).join('') +
+    (l.fermee ? '' : '<div class="item-liste" id="editV2-' + champ + '-ajouter" onclick="ouvrirChampAjoutV2(\'editV2-' + champ + '\', \'Nouvelle valeur\', function() { confirmerAjoutListeEditV2(\'' + champ + '\'); })">+ Nouveau…</div>');
+  menu.classList.add('ouvert');
+}
+function choisirListeEditV2(champ, valeur) {
+  document.getElementById('editV2-' + champ + '-menu').classList.remove('ouvert');
+  majListeEditV2(champ, valeur);
+}
+// « + Nouveau… » : une valeur déjà connue (aux majuscules et accents près) est reprise telle quelle, sinon la nouvelle
+function confirmerAjoutListeEditV2(champ) {
+  var champTexte = document.getElementById('editV2-' + champ + '-champ');
+  var v = champTexte ? champTexte.value.trim() : '';
+  if (!v) { afficherMessage('Entrez une valeur'); return; }
+  choisirListeEditV2(champ, valeursEditV2(champ).filter(function(x) { return memeTexteV2(x, v); })[0] || v);
+}
+
 function ouvrirEditFicheV2() {
   var wine = CURRENT_WINE_DATA;
   if (!wine) return;
   var html = EDIT_FICHE_V2_CHAMPS.map(function(c) {
+    if (LISTES_EDIT_V2[c[1]]) return '<div class="titre-3">' + c[0] + '</div><div class="champ-cliquable" id="editV2-' + c[1] + '-display" onclick="basculerListeEditV2(\'' + c[1] + '\')"></div>' +
+      '<div id="editV2-' + c[1] + '-menu" class="menu-liste"></div>';
     var valeur = decodeHTML((wine[c[2]] || '').toString()).replace(/"/g, '&quot;');
     return '<div class="titre-3">' + c[0] + '</div><input type="text" id="editV2-' + c[1] + '" class="champ-saisie" value="' + valeur + '">';
   }).join('');
@@ -1105,6 +1164,7 @@ function ouvrirEditFicheV2() {
           '<div class="bloc-favori"><div class="cercle' + (wine.Favori === 'Oui' ? ' actif' : '') + '" id="editV2-favori" onclick="this.classList.toggle(\'actif\');this.textContent=this.classList.contains(\'actif\')?\'✓\':\'\';">' + (wine.Favori === 'Oui' ? '✓' : '') + '</div></div>';
   html += '<div class="roundel" onclick="photoSAQDepuisEditV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Photo SAQ</span></div>';
   document.getElementById('editFicheV2-corps').innerHTML = html;
+  EDIT_FICHE_V2_CHAMPS.forEach(function(c) { if (LISTES_EDIT_V2[c[1]]) majListeEditV2(c[1], decodeHTML((wine[c[2]] || '').toString())); });
   montrerPageV2('editFicheV2Overlay');
 }
 
@@ -1148,8 +1208,7 @@ function sauverEditFicheV2() {
   var data = { codebarre: CURRENT_WINE_CODEBARRE, aime: (CURRENT_WINE_DATA && CURRENT_WINE_DATA.Racheter) || 'Oui', favori: favoriVal };
   var champsMemoire = { 'Favori': favoriVal };
   EDIT_FICHE_V2_CHAMPS.forEach(function(c) {
-    var el = document.getElementById('editV2-' + c[1]);
-    var valeur = el ? el.value : '';
+    var valeur = valeurEditV2(c[1]);
     data[c[1]] = valeur;
     var cle = c[2];
     if (cle === 'Designation') cle = 'Désignation';
