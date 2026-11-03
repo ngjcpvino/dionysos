@@ -994,6 +994,12 @@ input[type="date"].champ-saisie::-webkit-date-and-time-value { text-align: left;
   z-index: 10002;
 }
 .cercle.actif { background: var(--gold); border-color: var(--gold); }
+/* Un rond posé sous le ✕ (la lampe du scanner, 3 nov. 2026, l'utilisateur) : même colonne, un rond plus bas */
+.sous-fermer {
+  position: fixed;
+  top: calc(var(--space-10) + var(--taille-44) + var(--space-10)); right: var(--space-10);
+  z-index: 10002;
+}
 /* Rond de choix (J'aime / J'aime pas…) : atténué tant qu'il n'est pas actif. Réutilisable. */
 .cercle-choix:not(.actif) { color: var(--white-60); border-color: var(--white-15); }
 
@@ -1136,6 +1142,7 @@ input[type="date"].champ-saisie::-webkit-date-and-time-value { text-align: left;
   position: relative;
   width: 100%;
   height: var(--taille-280);
+  flex: none;   /* le cadre garde sa taille : sur un petit écran, ce n'est pas lui qui rapetisse (3 nov. 2026) */
   background: var(--black);
   overflow: hidden;
   margin: var(--space-20) 0;

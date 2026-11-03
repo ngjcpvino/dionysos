@@ -107,23 +107,22 @@
 <div id="scannerV2Container" class="modal-v2-fullscreen" style="display:none;">
   <div class="modal-v2-content modale-haut">
     <button class="btn-fermer" onclick="fermerScannerV2()">✕</button>
+    <div id="scanV2-lampe" class="cercle sous-fermer" style="display:none;" onclick="basculerLampeScanV2()"><img src="images/lampe.svg" alt="Lampe" class="icone-loupe"></div>
     <h2 class="titre-1">Scanner un vin</h2>
     <div id="scanV2-box" class="scan-v2-box">
       <div id="interactiveV2"></div>
       <div class="scan-v2-viseur"></div>
     </div>
     <p id="scanV2-feedback" class="texte-secondaire">Alignez le code-barres dans le cadre</p>
-    <div id="scanV2-lampe" class="roundel" style="display:none;" onclick="basculerLampeScanV2()">
-      <span class="roundel-anneau"></span>
-      <span class="roundel-barre">Lampe</span>
-    </div>
-    <div class="roundel" onclick="rescannerV2()">
-      <span class="roundel-anneau"></span>
-      <span class="roundel-barre">Rescanner</span>
-    </div>
-    <div class="roundel" onclick="entreeManuelleV2()">
-      <span class="roundel-anneau"></span>
-      <span class="roundel-barre">Entrée manuelle</span>
+    <div class="ligne-ronds">
+      <div class="roundel" onclick="rescannerV2()">
+        <span class="roundel-anneau"></span>
+        <span class="roundel-barre">Rescanner</span>
+      </div>
+      <div class="roundel" onclick="entreeManuelleV2()">
+        <span class="roundel-anneau"></span>
+        <span class="roundel-barre">Entrée manuelle</span>
+      </div>
     </div>
   </div>
 </div>
