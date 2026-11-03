@@ -102,7 +102,7 @@ Chaque famille : ~~l'utilisateur choisit sur image~~ **Claude choisit le modèle
 3. **Après ces essais** (chantier 2) : si le lecteur est concluant, retirer Quagga (balise de `index-v2.html`, `EXTERNES` de `sw.js`, `demarrerQuaggaV2` et son appel) ; si le hors ligne ne l'est pas, le retirer (`outils/retirer-hors-ligne.md`).
 4. **Chantier 6, au fil de l'eau** : le garde-fou et les deux bancs d'essai avant chaque publication ; un geste nouveau s'ajoute à `outils/banc-app/scenarios.js`.
 
-La liste 2.0 sera alors close. Les autres envies (le crayon de la Couleur à 5 choix, le document des possibilités, le partage avec des ami.e.s, la tarte des Cépages du Profil) vivent dans `mise-a-jour.md` 📋 En attente et 📊 Profil.
+La liste 2.0 sera alors close. Les autres envies (les Cépages en liste dans le crayon — la Couleur et les autres listes : faites le 3 nov. —, le document des possibilités, le partage avec des ami.e.s, la tarte des Cépages du Profil) vivent dans `mise-a-jour.md` 📋 En attente et 📊 Profil.
 
 ## Décisions à prendre par l'utilisateur
 - Aucune pour la liste 2.0 : toutes ont été prises (clé complète pour le serveur, nouveau lecteur avant les essais, styles décidés par l'IA, découpage du serveur en 11 fichiers).

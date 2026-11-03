@@ -623,6 +623,9 @@ body::after {
 }
 /* Bloc de formulaire étroit, réutilisable (remplace les width:100%/max-width:400px en ligne) */
 .bloc-form { width: 100%; max-width: var(--taille-400); }
+/* Dans un formulaire, une liste à choisir tient la même place qu'une case à écrire (crayon de la fiche, Propositions) :
+   posée comme elle (en ligne, pleine largeur), sa marge du bas compte autant */
+.bloc-form .champ-cliquable { display: inline-block; width: 100%; box-sizing: border-box; margin-bottom: var(--space-10); }
 /* Colonne centrée avec espacement, réutilisable */
 .colonne-centree { display: flex; flex-direction: column; align-items: center; }
 

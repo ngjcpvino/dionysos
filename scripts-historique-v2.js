@@ -411,10 +411,12 @@ function classeCouleurTarteV2(nom) { return nom === 'Couleur inconnue' || nom.in
 
 // Les pastilles : chaque part prend la couleur de sa pastille à la SAQ (30 oct. 2026, l'utilisateur) ; une pastille que
 // la SAQ ne colore pas (« Corsé et fumé ») et « Autres » gardent leur nuance d'or
-var PASTILLES_SAQ_V2 = ['delicat-leger', 'fruite-vif', 'aromatique-rond', 'fruite-doux', 'fruite-extra-doux', 'fruite-leger', 'fruite-genereux', 'aromatique-souple', 'aromatique-charnu'];
+// Les pastilles de goût de la SAQ, sous leur nom (la liste du crayon de la fiche ; une couleur chacune, .pastille-*)
+var PASTILLES_SAQ_V2 = ['Délicat et léger', 'Fruité et vif', 'Aromatique et rond', 'Fruité et doux', 'Fruité et extra-doux', 'Fruité et léger', 'Fruité et généreux', 'Aromatique et souple', 'Aromatique et charnu'];
+function clePastilleV2(nom) { return normaliserRechercheV2(nom).trim().replace(/\s+et\s+/, '-').replace(/\s+/g, '-'); }
 function classePastilleV2(nom) {
-  var k = normaliserRechercheV2(nom).trim().replace(/\s+et\s+/, '-').replace(/\s+/g, '-');
-  return PASTILLES_SAQ_V2.indexOf(k) !== -1 ? 'pastille-' + k : '';
+  var k = clePastilleV2(nom);
+  return PASTILLES_SAQ_V2.some(function(p) { return clePastilleV2(p) === k; }) ? 'pastille-' + k : '';
 }
 
 // L'ordre des parts sur le cercle, dans le sens des aiguilles : la 1re (la plus grande) centrée en haut, les parts du côté
