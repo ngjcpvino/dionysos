@@ -94,7 +94,7 @@
 - **`.carte-titre` — le nom sur une carte** : blanc, 14. Une phrase posée au-dessus d'un groupe (« Pinot grigio : tu en as 3… ») est du **texte** (`.texte`), pas un titre.
 - La règle « titres blancs, jamais en or » ne vaut que pour `.titre-1`.
 
-**Les boutons d'action = des ronds dorés (`.roundel`), l'un sous l'autre** (3 nov. 2026, l'utilisateur : « pourquoi tu respectes pas les boutons d'action ? ») — « Confirmer », « Plus tard », « Tout recommencer », « Nouveau Tri »… jamais une ligne `.item-liste` (elle sert aux choix d'une liste).
+**Les boutons d'action = des ronds dorés (`.roundel`), l'un sous l'autre** (3 nov. 2026, l'utilisateur : « pourquoi tu respectes pas les boutons d'action ? ») — « Confirmer », « Plus tard », « Tout recommencer », « Nouveau Tri »… jamais une ligne `.item-liste` (elle sert aux choix d'une liste). Restent des lignes, voulu (l'utilisateur, 3 nov.) : « Terminé » de « Gérer mes favorites » et « ← Retour aux vins » de Selon SAQ.
 
 **Gabarit des pages VIN** (menu d'action compris) : ✕ en haut à droite ; NOM en capitales (`.titre-1`) ; origine Pays • Région • Appellation dessous (`.texte-secondaire`) ; action en petit titre (`.titre-3`). Boire/Donner/Arrivée/Déplacer passent par `rendreEnteteActionV2(prefixe)`.
 
