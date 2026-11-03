@@ -1141,7 +1141,7 @@ input[type="date"].champ-saisie::-webkit-date-and-time-value { text-align: left;
 .scan-v2-box {
   position: relative;
   width: 100%;
-  height: var(--taille-280);
+  height: var(--taille-180);   /* un rectangle allongé : la forme d'un code-barres (3 nov. 2026, l'utilisateur ; avant : 280) */
   flex: none;   /* le cadre garde sa taille : sur un petit écran, ce n'est pas lui qui rapetisse (3 nov. 2026) */
   background: var(--black);
   overflow: hidden;
