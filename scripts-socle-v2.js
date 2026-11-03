@@ -8,6 +8,10 @@
    - initialisation (window.onload) propre au V2
 ============================================================ */
 
+// L'iPad (iPadOS se dit « Macintosh », mais il est tactile) : ses fenêtres posent leurs boutons en haut à gauche ;
+// la classe .ipad fait descendre les ronds du haut et le haut des pages (styles-v2.css, 3 nov. 2026)
+if (/iPad/.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1)) document.documentElement.classList.add('ipad');
+
 // ==================== CONSTANTES ====================
 const API_URL = 'https://script.google.com/macros/s/AKfycbxRh6eOQDUy3hXoNNKF6n6gUxhppKB452UqZuPB1mZAC_rzb1jZ5LbPsBuZDH521uq1eA/exec';
 
