@@ -1097,8 +1097,10 @@ var EDIT_FICHE_V2_CHAMPS = [
 // Les champs du crayon qui se choisissent dans une liste (3 nov. 2026, l'utilisateur) : une faute de frappe y créerait un
 // faux « nouveau » (Tri, filtres, Profil). fermee : cette liste seulement ; sinon les valeurs de la cave, puis « + Nouveau… ».
 // parPays : les valeurs des vins du pays choisi plus haut. vide : le choix « sans valeur » (son libellé).
+// coches : une liste à cocher (les Cépages, 3 nov. : ceux de la cave de la couleur choisie plus haut, sans les %).
 var LISTES_EDIT_V2 = {
   couleur: { fermee: function() { return COULEURS_V2; } },
+  cepage: { coches: true, vide: 'Aucun' },
   pastille: { fermee: function() { return PASTILLES_SAQ_V2.slice().sort(function(a, b) { return a.localeCompare(b); }); }, vide: 'Aucune' },
   pays: { vide: 'Aucun' }, region: { parPays: true, vide: 'Aucune' }, appellation: { parPays: true, vide: 'Aucune' },
   acidite: { vide: 'Aucune' }, sucrosite: { vide: 'Aucune' }, corps: { vide: 'Aucun' }, bouche: { vide: 'Aucune' }, bois: { vide: 'Aucun' },
@@ -1115,6 +1117,13 @@ function valeurEditV2(champ) {
 function valeursEditV2(champ) {
   var l = LISTES_EDIT_V2[champ];
   if (l.fermee) return l.fermee();
+  if (l.coches) {   // les cépages : ceux des vins de la couleur choisie (toutes si elle est inconnue), le nom commun une fois
+    var coul = valeurEditV2('couleur'), noms = [];
+    (ALL_DATA || []).forEach(function(i) {
+      if (!couleurConnueV2(coul) || couleurClasseV2(i.Couleur) === couleurClasseV2(coul)) noms = noms.concat(cepagesDuTexteV2(i.Cepage));
+    });
+    return menuCepagesV2(noms);
+  }
   var cle = EDIT_FICHE_V2_CHAMPS.filter(function(c) { return c[1] === champ; })[0][2];
   var pays = l.parPays ? valeurEditV2('pays') : '';
   var base = (ALL_DATA || []).filter(function(i) { return !pays || memeTexteV2(decodeHTML(i.Pays || ''), pays); });
@@ -1123,7 +1132,27 @@ function valeursEditV2(champ) {
 function majListeEditV2(champ, valeur) {
   var d = document.getElementById('editV2-' + champ + '-display');
   d.setAttribute('data-valeur', valeur);
-  d.textContent = valeur || LISTES_EDIT_V2[champ].vide || '';
+  d.textContent = (LISTES_EDIT_V2[champ].coches ? cepagesDuTexteV2(valeur).join(', ') : valeur) || LISTES_EDIT_V2[champ].vide || '';
+}
+// « + Nouveau… » au bas d'une liste qui n'est pas fermée
+function nouveauListeEditV2Html(champ) {
+  return '<div class="item-liste" id="editV2-' + champ + '-ajouter" onclick="ouvrirChampAjoutV2(\'editV2-' + champ + '\', \'Nouvelle valeur\', function() { confirmerAjoutListeEditV2(\'' + champ + '\'); })">+ Nouveau…</div>';
+}
+// La liste à cocher : les cochés en tête, dans leur ordre (le premier = le principal), puis les autres
+function remplirCochesEditV2(champ) {
+  var choisis = cepagesDuTexteV2(valeurEditV2(champ));
+  var ligne = function(v, coche) { return ligneChoixPlacementV2(v, 'cocherListeEditV2(\'' + champ + '\', \'' + String(v).replace(/'/g, "\\'").replace(/"/g, '&quot;') + '\')', coche); };
+  document.getElementById('editV2-' + champ + '-menu').innerHTML = choisis.map(function(v) { return ligne(v, true); }).join('') +
+    valeursEditV2(champ).filter(function(v) { return !choisis.some(function(c) { return memeCepageV2(c, v); }); }).map(function(v) { return ligne(v, false); }).join('') +
+    nouveauListeEditV2Html(champ);
+}
+// Cocher ajoute à la fin, décocher enlève (seulement : ne fait qu'ajouter) ; le champ est alors réécrit sans les %
+function cocherListeEditV2(champ, nom, seulement) {
+  var noms = cepagesDuTexteV2(valeurEditV2(champ));
+  var i = noms.map(function(n) { return memeCepageV2(n, nom); }).indexOf(true);
+  if (i === -1) noms.push(nom); else if (!seulement) noms.splice(i, 1);
+  majListeEditV2(champ, noms.join(', '));
+  remplirCochesEditV2(champ);
 }
 // Une liste à la fois : l'ouvrir referme les autres ; ses choix sont calculés à l'ouverture (le pays a pu changer)
 function basculerListeEditV2(champ) {
@@ -1132,23 +1161,27 @@ function basculerListeEditV2(champ) {
   Array.prototype.forEach.call(document.querySelectorAll('#editFicheV2-corps .menu-liste.ouvert'), function(m) { m.classList.remove('ouvert'); });
   if (ouvert) return;
   var l = LISTES_EDIT_V2[champ], cur = valeurEditV2(champ);
+  if (l.coches) { remplirCochesEditV2(champ); menu.classList.add('ouvert'); return; }
   var ligne = function(v, texte) {
     return '<div class="item-liste' + (memeTexteV2(v, cur) ? ' actif' : '') + '" onclick="choisirListeEditV2(\'' + champ + '\', \'' + String(v).replace(/'/g, "\\'").replace(/"/g, '&quot;') + '\')">' + texte + '</div>';
   };
   menu.innerHTML = (l.vide ? ligne('', l.vide) : '') + valeursEditV2(champ).map(function(v) { return ligne(v, v); }).join('') +
-    (l.fermee ? '' : '<div class="item-liste" id="editV2-' + champ + '-ajouter" onclick="ouvrirChampAjoutV2(\'editV2-' + champ + '\', \'Nouvelle valeur\', function() { confirmerAjoutListeEditV2(\'' + champ + '\'); })">+ Nouveau…</div>');
+    (l.fermee ? '' : nouveauListeEditV2Html(champ));
   menu.classList.add('ouvert');
 }
 function choisirListeEditV2(champ, valeur) {
   document.getElementById('editV2-' + champ + '-menu').classList.remove('ouvert');
   majListeEditV2(champ, valeur);
 }
-// « + Nouveau… » : une valeur déjà connue (aux majuscules et accents près) est reprise telle quelle, sinon la nouvelle
+// « + Nouveau… » : une valeur déjà connue (aux majuscules et accents près ; un cépage : synonymes compris) est reprise
+// telle quelle, sinon la nouvelle — choisie, ou cochée dans une liste à cocher
 function confirmerAjoutListeEditV2(champ) {
   var champTexte = document.getElementById('editV2-' + champ + '-champ');
   var v = champTexte ? champTexte.value.trim() : '';
   if (!v) { afficherMessage('Entrez une valeur'); return; }
-  choisirListeEditV2(champ, valeursEditV2(champ).filter(function(x) { return memeTexteV2(x, v); })[0] || v);
+  var coches = LISTES_EDIT_V2[champ].coches;
+  var valeur = valeursEditV2(champ).filter(function(x) { return coches ? memeCepageV2(x, v) : memeTexteV2(x, v); })[0] || v;
+  if (coches) cocherListeEditV2(champ, valeur, true); else choisirListeEditV2(champ, valeur);
 }
 
 function ouvrirEditFicheV2() {
