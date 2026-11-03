@@ -157,6 +157,7 @@ html, body {
   --pastille-aromatique-souple: #E52D39;
   --pastille-aromatique-charnu: #770D35;
   --image-interdit: url("images/interdit.svg");
+  --space-30: 30px;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -1000,6 +1001,14 @@ input[type="date"].champ-saisie::-webkit-date-and-time-value { text-align: left;
   top: calc(var(--space-10) + var(--taille-44) + var(--space-10)); right: var(--space-10);
   z-index: 10002;
 }
+/* L'iPad (3 nov. 2026, l'utilisateur) : en fenêtre, ses boutons (les trois points de couleur) se posent en haut à gauche,
+   sur l'entonnoir. Sur l'iPad seulement (.ipad, posée sur <html> par le socle), les ronds du haut ET le haut des pages
+   descendent de --space-30, tous du même cran : rien ne se chevauche. L'iPhone ne bouge pas. */
+.ipad [id$="-loupe"], .ipad .btn-fermer, .ipad .filtre-toggle-haut, .ipad .btn-partager, .ipad .gauche { top: calc(var(--space-10) + var(--space-30)); }
+.ipad .sous-fermer { top: calc(var(--space-10) + var(--space-30) + var(--taille-44) + var(--space-10)); }
+.ipad .modale-haut, .ipad #photoV2Overlay.photo-ronde .modal-v2-content,
+.ipad .panneau-gauche, .ipad .panneau-droite { padding-top: calc(var(--taille-60) + var(--space-30)); }
+.ipad #topNavV2 { padding-top: calc(env(safe-area-inset-top, 0px) + var(--space-20) + var(--space-30)); }
 /* Rond de choix (J'aime / J'aime pas…) : atténué tant qu'il n'est pas actif. Réutilisable. */
 .cercle-choix:not(.actif) { color: var(--white-60); border-color: var(--white-15); }
 

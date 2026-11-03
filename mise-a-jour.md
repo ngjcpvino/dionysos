@@ -113,6 +113,7 @@
 - **Accordéons** : `.accordeon-1` / `.accordeon-2` + jeton `--space-7`, un seul style partout (menu burger, recettes SAQ, Chartier, Curieux Bégin, Recherche).
 - Jamais `100vh` : toujours `height:100%` (iOS recadre le fond). Fond de page toujours OPAQUE.
 - Loupe et ✕ d'une page-liste : `position:fixed` (`.gauche` reste `absolute`).
+- **L'iPad (3 nov. 2026, l'utilisateur)** : en fenêtre, ses boutons (les trois points de couleur) couvraient l'entonnoir. **Sur l'iPad seulement** (classe `.ipad` sur `<html>`, posée par le socle : « iPad », ou « Macintosh » tactile ; acceptée au garde-fou), les ronds du haut (entonnoir, interrupteur « en haut », ✕, lampe, Partager, ✎ de la fiche) **et** le haut des pages (`.modale-haut`, photo ronde, panneaux, barre de l'accueil) descendent de `--space-30`, tous du même cran. L'iPhone ne bouge pas (choix de l'utilisateur, sur recommandation : son scanner tient tout juste). Un nouveau rond du haut ou un nouveau haut de page s'ajoute à ce bloc de `styles-v2.css`.
 - Carte avec date à droite : `white-space:nowrap` (sauf items des panneaux, qui replient). Carte indentée pleine largeur : `width: calc(100% - indent)`.
 - `textarea.champ-saisie` ne rétrécit pas (`flex-shrink: 0`) ; la case du plat a 3 lignes au départ (Corriger, Ajouter à l'historique, Boire).
 
