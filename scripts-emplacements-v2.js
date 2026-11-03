@@ -923,7 +923,7 @@ function afficherFinMenageV2(n) {
 }
 
 function recommencerMenageV2Html() {
-  return '<div class="item-liste" onclick="recommencerMenageV2()">Tout recommencer</div>';
+  return '<div class="roundel" onclick="recommencerMenageV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Tout recommencer</span></div>';
 }
 function recommencerMenageV2() {
   var T = MENAGE_V2.tournee;
