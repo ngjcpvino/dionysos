@@ -679,6 +679,7 @@ var NOMS_MEUBLES_MENAGE_V2 = { Cellier: 'au cellier', Pigeonnier: 'au Pigeonnier
 // (calculée une fois, puis gardée) écran par écran.
 function afficherMenageEmpV2() {
   var M = MENAGE_V2;
+  if (M.tournee && !M.tournee.moves.length) M.tournee = null;   // « Rien à déplacer » ne se garde pas : on recalcule (3 nov.)
   if (M.tournee) { afficherEtapeMenageV2(); return; }
   var toutes = bouteillesMenageV2();
   // les doublons d'une couleur ne sont demandés que si du nouveau attend sans place libre de cette couleur, et que sortir un
@@ -695,9 +696,10 @@ function afficherMenageEmpV2() {
     return M.doublonsFaits.indexOf(m) === -1 && groupes.some(function(g) { return g.meuble === m; });
   })[0];
   if (meuble) { afficherDoublonsMenageV2(meuble, groupes.filter(function(g) { return g.meuble === meuble; }), toutes, attente); return; }
-  M.tournee = { moves: simulerMenageV2(toutes, groupes).moves.map(mouvementMenageV2), etape: 0, ecrits: {} };
+  var moves = simulerMenageV2(toutes, groupes).moves.map(mouvementMenageV2);
+  M.tournee = moves.length ? { moves: moves, etape: 0, ecrits: {} } : null;   // rien à déplacer : chaque ouverture recalcule
   garderMenageV2();
-  afficherEtapeMenageV2();
+  if (M.tournee) afficherEtapeMenageV2(); else afficherFinMenageV2(0);
 }
 
 // Un déplacement, gardé tel quel pour toute la tournée (le classeur change en chemin : on ne recalcule plus)
@@ -838,14 +840,7 @@ function afficherEtapeMenageV2() {
   var T = MENAGE_V2.tournee;
   var t = tourneeMenageV2(T.moves);
   var html = '';
-  if (T.etape >= t.ecrans.length) {
-    document.getElementById('empV2-compte').innerHTML = 'Tri Dionysos';
-    html = '<div class="texte">' + (T.moves.length ? '✓ Tournée terminée : ' + T.moves.length + ' bouteille' + (T.moves.length > 1 ? 's' : '') + ' à leur place'
-      : 'Rien à déplacer : les emplacements sont maximisés') + '</div>' +
-      '<div class="item-liste" onclick="recommencerMenageV2()">Nouveau Tri</div>';
-    document.getElementById('empV2-cartes').innerHTML = html;
-    return;
-  }
+  if (T.etape >= t.ecrans.length) { afficherFinMenageV2(T.moves.length); return; }
   var e = t.ecrans[T.etape];
   document.getElementById('empV2-compte').innerHTML = 'Tri Dionysos : ' + (T.etape + 1) + ' sur ' + t.ecrans.length;
   var court = function(p) { return emplacementV2(p && p.meuble, p && p.rangee, p && p.espace, true); };
@@ -907,6 +902,16 @@ function confirmerEtapeMenageV2() {
     garderMenageV2();   // ce qui est écrit le reste ; « Confirmer » reprend le reste
     signalerErreurV2(err);
   });
+}
+
+// La fin du Tri, au modèle des autres écrans (3 nov. 2026, l'utilisateur : « pas joli ») : le bloc, son titre, la phrase ;
+// « Nouveau Tri » seulement après une vraie tournée (n bouteilles déplacées) — rien à déplacer : rien à refaire
+function afficherFinMenageV2(n) {
+  document.getElementById('empV2-compte').innerHTML = 'Tri Dionysos';
+  var html = '<div class="emp-bloc"><div class="titre-2">' + (n ? 'Tournée terminée' : 'Rien à déplacer') + '</div>' +
+    '<div class="texte-secondaire texte-gauche">' + (n ? n + ' bouteille' + (n > 1 ? 's' : '') + ' à leur place' : 'Les emplacements sont maximisés') + '</div></div>';
+  if (n) html += '<div class="roundel mt-20" onclick="recommencerMenageV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Nouveau Tri</span></div>';
+  document.getElementById('empV2-cartes').innerHTML = html;
 }
 
 function recommencerMenageV2Html() {
