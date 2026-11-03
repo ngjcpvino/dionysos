@@ -14,6 +14,8 @@
 | **Serveur** (`Code.gs`, dépôt privé) | 3 131 lignes · 92 fonctions · 49 actions | 17 paires de fonctions jumelles, 58 blocs copiés, le classeur rouvert 47 fois, aucun verrou entre les deux téléphones |
 | **Notes** (`mise-a-jour.md`) | 118 Ko, lus en entier à chaque séance | des « à faire » périmés mêlés aux règles |
 
+**La photo du 3 nov. 2026** (après les chantiers 0 à 6) : app 7 593 lignes · 534 fonctions (sans l'ancien `scripts-scanner-v2.js`) · style 1 225 lignes, 121 réglages communs · page 774 lignes · serveur 11 fichiers, 2 551 lignes, 116 fonctions · notes 87 Ko (le récit daté dans `archives/`). Garde-fou `--tout` : **0** pour l'app, **0** pour le serveur (les cas voulus acceptés avec leur raison).
+
 **Méthode pour chaque chantier** (leçons du 28 oct.) : une famille à la fois · comparaison automatique avant / après (les écrans doivent rester identiques, sauf ce que l'utilisateur a choisi) · le garde-fou doit répondre « rien à signaler » · le style : l'IA décide et l'applique partout (règle du 28 oct., `REFERENCE.md`) ; une image seulement si l'utilisateur la demande · décision notée dans `mise-a-jour.md`.
 
 ---
@@ -43,7 +45,7 @@ Rien ne change à l'écran. On enlève ce qui ne sert plus, pour que la suite pa
 **Tout le reste du scan ne bouge pas** : `traiterResultatScanV2` reçoit un code comme avant (mémoire, inventaire de la succursale, autre code-barres, propositions…).
 **Vérification** : test automatique avec une **fausse caméra** (Chromium lit une vidéo de code-barres : on mesure le temps de lecture avant / après), puis l'essai de l'utilisateur au cellier et en succursale (béton, faible lumière).
 **Quand** : je recommande **après** les essais de la 1.0 en fin de semaine (tournée du Tri, hors ligne en succursale), pour ne pas changer ce qu'on s'apprête à tester — sauf si l'utilisateur préfère tester le nouveau scanner en même temps.
-**Fait le 28 oct. 2026** (l'utilisateur : « lent, pas assez de lumière, ça marche pas, lecture erronée » ; publié AVANT les essais, pour l'essayer en vrai) : `zxing-wasm` directement (plus simple que `barcode-detector`, même moteur) + préparation de l'image (contraste, lissage vertical) → 60/60 images de test, pénombre comprise ; 2 lectures de suite ; rond « Lampe » en premier (choix sur image, A) ; Quagga en secours automatique. Détail : `mise-a-jour.md` 📷. **Reste** : l'essai de l'utilisateur, puis retirer Quagga.
+**Fait le 28 oct. 2026** (l'utilisateur : « lent, pas assez de lumière, ça marche pas, lecture erronée » ; publié AVANT les essais, pour l'essayer en vrai) : `zxing-wasm` directement (plus simple que `barcode-detector`, même moteur) + préparation de l'image (contraste, lissage vertical) → 60/60 images de test, pénombre comprise ; 2 lectures de suite ; rond « Lampe » en premier (choix sur image, A) ; Quagga en secours automatique. Détail : `mise-a-jour.md` 📷. **Depuis (3 nov.)** : il lit sur l'iPhone, lampe comprise (un écran noir une fois, réglé en redémarrant l'iPhone) ; la lampe en petit rond sous le ✕, le cadre à 180 de haut. **Reste** : l'essai en succursale, puis retirer Quagga.
 
 ## Chantier 3 — Le style, uniformisé en images *(moyen ; chaque famille = un choix sur image)*
 Chaque famille : ~~l'utilisateur choisit sur image~~ **Claude choisit le modèle** parmi l'existant (règle du 28 oct. : « décide, mais respecte-le partout ») ; on remplace partout ; on supprime le reste.
@@ -94,16 +96,13 @@ Chaque famille : ~~l'utilisateur choisit sur image~~ **Claude choisit le modèle
 - **Renommer les fichiers `-v2`** : décidé non (11 juil.).
 - **Retirer les `onclick` du HTML** (269) : ils sont lisibles et marchent ; aucun gain pour toi.
 
-## L'ordre que je recommande
-1. **Chantier 0** (ménage sans risque) — tout de suite.
-2. **Les essais de la 1.0** en fin de semaine (tournée du Tri, hors ligne en succursale) — avec l'app actuelle.
-3. **Chantier 1** (si l'utilisateur dit oui) → **Chantier 5** (serveur), qui en profite.
-4. **Chantier 2** (scanner), testé au cellier et en succursale.
-5. **Chantier 3** (style, en images) et **Chantier 4** (code), en alternance : une famille de style, une famille de code.
-6. **Chantier 6** au fil de l'eau.
+## Ce qui reste, dans l'ordre (mis à jour le 3 nov. 2026)
+1. **À partir du 4 nov.** (chantier 0) : supprimer `scripts-scanner-v2.js` (+ sa ligne dans `mise-a-jour.md` 📂 Fichiers) et, le même jour, `ANCIENS_NOMS_` du serveur (`Routes.gs`, avec le scénario « anciens noms d'actions » de son banc) — puis publier l'app et le serveur.
+2. **Les essais de la 1.0** (l'utilisateur) : la nouvelle tournée du Tri, le hors ligne en succursale, le lecteur en succursale, l'iPad en fenêtre.
+3. **Après ces essais** (chantier 2) : si le lecteur est concluant, retirer Quagga (balise de `index-v2.html`, `EXTERNES` de `sw.js`, `demarrerQuaggaV2` et son appel) ; si le hors ligne ne l'est pas, le retirer (`outils/retirer-hors-ligne.md`).
+4. **Chantier 6, au fil de l'eau** : le garde-fou et les deux bancs d'essai avant chaque publication ; un geste nouveau s'ajoute à `outils/banc-app/scenarios.js`.
 
-## Décisions à prendre par l'utilisateur (une à la fois, au bon moment)
-- ~~Chantier 1 : activer l'API Apps Script et donner l'accès, oui ou non ?~~ **Oui, clé complète** (28 oct.) — reste à faire à l'ordinateur.
-- ~~Chantier 2 : nouveau scanner avant ou après les essais de fin de semaine ?~~ **Avant** (28 oct.) — publié, à essayer en fin de semaine.
-- Chantier 3 : les modèles de chaque famille (sur image) ; titres en or ou blancs ?
-- Chantier 5 : le découpage des fichiers du serveur (la liste ci-dessus, ou autrement ?).
+La liste 2.0 sera alors close. Les autres envies (le crayon de la Couleur à 5 choix, le document des possibilités, le partage avec des ami.e.s, la tarte des Cépages du Profil) vivent dans `mise-a-jour.md` 📋 En attente et 📊 Profil.
+
+## Décisions à prendre par l'utilisateur
+- Aucune pour la liste 2.0 : toutes ont été prises (clé complète pour le serveur, nouveau lecteur avant les essais, styles décidés par l'IA, découpage du serveur en 11 fichiers).
