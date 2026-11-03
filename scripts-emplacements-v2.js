@@ -848,7 +848,6 @@ function afficherEtapeMenageV2() {
   }
   var e = t.ecrans[T.etape];
   document.getElementById('empV2-compte').innerHTML = 'Tri Dionysos : ' + (T.etape + 1) + ' sur ' + t.ecrans.length;
-  if (T.etape === 0 && t.boites) html += '<div class="texte">Prends ' + t.boites + ' boîte' + (t.boites > 1 ? 's' : '') + '</div>';
   var court = function(p) { return emplacementV2(p && p.meuble, p && p.rangee, p && p.espace, true); };
   var dest = { cellier: 'cellier', pigeonnier: 'Pigeonnier', reserve: 'Réserve', aranger: 'À ranger' };
   html += '<div class="emp-bloc"><div class="titre-2">' + e.titre + '</div><div class="titre-3">' + e.action + '</div>';
