@@ -9,7 +9,7 @@
 // L'image est d'abord préparée (contraste étiré, puis lissée dans le sens des barres, de plus en plus fort d'une image à
 // l'autre) : c'est ce qui lit le flou, le bougé et la pénombre (essais du 28 oct. : 60 images sur 60, contre 44 sans).
 // Un code n'est accepté qu'après SCAN_THRESHOLD_V2 lectures identiques DE SUITE et un chiffre de contrôle valide.
-// Lampe : le rond n'apparaît que si la caméra la permet. Secours : si zxing ne démarre pas, l'ancien lecteur (Quagga).
+// Lampe : le rond sous le ✕ n'apparaît que si la caméra la permet (doré : allumée). Secours : si zxing ne démarre pas, l'ancien lecteur (Quagga).
 let isScanningV2 = false;
 let scanSuiteV2 = { code: '', n: 0 };
 const SCAN_THRESHOLD_V2 = 2;
@@ -101,7 +101,7 @@ function majLampeScanV2(visible) {
   var rond = document.getElementById('scanV2-lampe');
   if (!rond) return;
   rond.style.display = visible ? '' : 'none';
-  rond.querySelector('.roundel-barre').textContent = LAMPE_SCAN_V2 ? 'Éteindre' : 'Lampe';
+  rond.classList.toggle('actif', LAMPE_SCAN_V2);   // doré quand elle est allumée
 }
 
 function basculerLampeScanV2() {

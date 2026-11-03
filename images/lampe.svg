@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- La lampe du scanner : une lampe de poche, au trait blanc comme le ✕ (le rond devient doré quand elle est allumée) -->
+  <g fill="none" stroke="#ffffff" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M7 2.5h10v2.5l-2 4v11.5a1.5 1.5 0 0 1-1.5 1.5h-3a1.5 1.5 0 0 1-1.5-1.5V9L7 5z"/>
+    <line x1="7" y1="5" x2="17" y2="5"/>
+    <circle cx="12" cy="13.5" r="1.4"/>
+  </g>
+</svg>
