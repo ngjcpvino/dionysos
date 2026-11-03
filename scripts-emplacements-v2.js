@@ -495,13 +495,38 @@ function attenteCellierMenageV2(toutes) {
   return out;
 }
 
+// La règle, en briques communes (le Tri, et le remplaçant proposé après « Boire » ou « Donner ») :
+// ce que contient un meuble (cépages avec leur compte, appellations, par couleur ; la tablette ne compte pas)
+function ajouterContenuMenageV2(c, b) {
+  if (b.cep) c.cep[b.coul + '|' + b.cep] = (c.cep[b.coul + '|' + b.cep] || 0) + 1;
+  if (b.app) c.app[b.coul + '|' + b.app] = true;
+}
+// 1 = un cépage que le meuble n'a pas, 2 = une appellation qu'il n'a pas, 3 = le reste
+function palierMenageV2(c, b) { return b.cep && !c.cep[b.coul + '|' + b.cep] ? 1 : b.app && !c.app[b.coul + '|' + b.app] ? 2 : 3; }
+var NOMS_LIEUX_MENAGE_V2 = { cellier: 'au cellier', pigeonnier: 'au Pigeonnier', reserve: 'à la Réserve' };
+function texteEntreMenageV2(n, b, ici) {
+  return n === 1 ? 'nouveau cépage ' + NOMS_LIEUX_MENAGE_V2[ici] + ' : ' + libelleCepageMenageV2(b)
+    : n === 2 ? 'nouvelle appellation ' + NOMS_LIEUX_MENAGE_V2[ici] + ' : ' + b.appNom : 'une place libre ' + NOMS_LIEUX_MENAGE_V2[ici];
+}
+// Le meilleur candidat pour une place de « ici » : le palier, puis le déjà-là (il garde sa place), puis le cépage le moins
+// présent, puis le plus ancien, puis le moins de marches. lieuDe(b) : où est la bouteille en ce moment.
+function meilleurMenageV2(cand, c, ici, lieuDe) {
+  var marches = { pigeonnier: 0, reserve: 1, transit: 2, aranger: 3 };
+  return cand.map(function(b) { return { b: b, n: palierMenageV2(c, b) }; }).sort(function(x, y) {
+    var lx = lieuDe(x.b), ly = lieuDe(y.b);
+    return (x.n - y.n) || ((lx === ici ? 0 : 1) - (ly === ici ? 0 : 1)) ||
+      ((c.cep[x.b.coul + '|' + x.b.cep] || 0) - (c.cep[y.b.coul + '|' + y.b.cep] || 0)) ||
+      (rangRotationMenageV2(x.b) - rangRotationMenageV2(y.b)) || ((marches[lx] || 0) - (marches[ly] || 0));
+  })[0] || null;
+}
+
 function simulerMenageV2(toutes, groupes) {
   var M = MENAGE_V2;
   var TRANSIT = 'transit';
   var ou = {}, sort = {}, entre = {}, cede = {}, decide = {};
   toutes.forEach(function(b) { ou[b.cle] = b.place; });
   var lieu = function(p) { return p === TRANSIT ? 'transit' : lieuMenageV2(p); };
-  var noms = { cellier: 'au cellier', pigeonnier: 'au Pigeonnier', reserve: 'à la Réserve' };
+  var noms = NOMS_LIEUX_MENAGE_V2;
   // Les doublons d'abord : ceux que l'utilisateur sort partent (jamais vers leur meuble), ceux qu'il garde restent dans leur espace
   var garde = {};
   groupes.forEach(function(g) {
@@ -520,11 +545,7 @@ function simulerMenageV2(toutes, groupes) {
   var placesZone = function(meuble, z) {
     return placesMenageV2(meuble, z.rangees).filter(function(p) { return !z.espaces || z.espaces.indexOf(p.espace) !== -1; });
   };
-  // Ce que contiennent des meubles : cépages (avec leur compte) et appellations, par couleur ; la tablette ne compte pas
-  var ajouterContenu = function(c, b) {
-    if (b.cep) c.cep[b.coul + '|' + b.cep] = (c.cep[b.coul + '|' + b.cep] || 0) + 1;
-    if (b.app) c.app[b.coul + '|' + b.app] = true;
-  };
+  var ajouterContenu = ajouterContenuMenageV2;
   var contenu = function(lieux) {
     var c = { cep: {}, app: {} };
     toutes.forEach(function(b) {
@@ -533,22 +554,8 @@ function simulerMenageV2(toutes, groupes) {
     });
     return c;
   };
-  var palier = function(c, b) { return b.cep && !c.cep[b.coul + '|' + b.cep] ? 1 : b.app && !c.app[b.coul + '|' + b.app] ? 2 : 3; };
-  var texteEntre = function(n, b, ici) {
-    return n === 1 ? 'nouveau cépage ' + noms[ici] + ' : ' + libelleCepageMenageV2(b)
-      : n === 2 ? 'nouvelle appellation ' + noms[ici] + ' : ' + b.appNom : 'une place libre ' + noms[ici];
-  };
-  var marches = { pigeonnier: 0, reserve: 1, transit: 2, aranger: 3 };
-  // Le meilleur candidat pour une place de « ici » : le palier, puis le déjà-là (il garde sa place), puis le cépage
-  // le moins présent, puis le plus ancien, puis le moins de marches
-  var meilleur = function(cand, c, ici) {
-    return cand.map(function(b) { return { b: b, n: palier(c, b) }; }).sort(function(x, y) {
-      var lx = lieu(ou[x.b.cle]), ly = lieu(ou[y.b.cle]);
-      return (x.n - y.n) || ((lx === ici ? 0 : 1) - (ly === ici ? 0 : 1)) ||
-        ((c.cep[x.b.coul + '|' + x.b.cep] || 0) - (c.cep[y.b.coul + '|' + y.b.cep] || 0)) ||
-        (rangRotationMenageV2(x.b) - rangRotationMenageV2(y.b)) || ((marches[lx] || 0) - (marches[ly] || 0));
-    })[0] || null;
-  };
+  var texteEntre = texteEntreMenageV2;
+  var meilleur = function(cand, c, ici) { return meilleurMenageV2(cand, c, ici, function(b) { return lieu(ou[b.cle]); }); };
 
   // 0. La tablette : C-7-1 est la place d'un rouge ; ce qui l'occupe d'autre glisse sur la tablette
   var c71 = toutes.filter(function(b) { return b.place && memeTexteV2(b.place.meuble, 'Cellier') && b.place.rangee === '7' && b.place.espace === '1'; })[0];
@@ -663,9 +670,10 @@ function guillemetMenageV2(v) { return (v || '').toString().replace(/'/g, "\\'")
 
 // Carte d'une bouteille : la photo (place gardée même sans photo), le texte, à droite la case et la destination.
 // Toucher la carte = la fiche du vin. b : une bouteille du Tri, ou un déplacement gardé de la tournée ({ w, coul }).
-function carteMenageV2(b, titre, sous, droite, voile) {
+// tap (facultatif) : le geste du toucher à la place de la fiche ('' = aucun)
+function carteMenageV2(b, titre, sous, droite, voile, tap) {
   var cb = (b.w['Code-barres'] || '').toString().trim();
-  return carteV2({ classes: b.coul + (voile ? ' carte-vide' : ''), onclick: cb ? 'ouvrirFicheDepuisListeEmpV2(\'' + guillemetMenageV2(cb) + '\')' : '',
+  return carteV2({ classes: b.coul + (voile ? ' carte-vide' : ''), onclick: tap !== undefined ? tap : cb ? 'ouvrirFicheDepuisListeEmpV2(\'' + guillemetMenageV2(cb) + '\')' : '',
     photo: b.w['Photo URL'], placePhoto: true, titre: titre, sous: sous, droite: droite, droiteClasses: 'carte-droite-empilee' });
 }
 
@@ -924,6 +932,50 @@ function recommencerMenageV2() {
   oublierMenageV2();
   remonterScrollV2('empV2Container');
   afficherMenageEmpV2();
+}
+
+// ==================== LE REMPLAÇANT (3 nov. 2026, l'utilisateur) ====================
+// Une bouteille du cellier bue ou donnée : sa place (hors tablette) se libère. L'app propose d'y monter un vin DU PIGEONNIER
+// (juste à côté), de la couleur de la place, choisi par la règle du Tri (un cépage que le cellier n'a pas, puis une
+// appellation, puis le plus ancien). « Confirmer » : tu l'as monté, l'app l'inscrit. « Plus tard » / ✕ : le prochain Tri.
+var REMPLACANT_V2 = null;
+function remplacantCellierV2(place) {
+  if (!place || !memeTexteV2(place.meuble, 'Cellier') || tabletteMenageV2(place)) return null;
+  var z = zoneMenageV2(place);
+  if (!z) return null;
+  var toutes = bouteillesMenageV2();
+  if (toutes.some(function(b) { return placeMenageV2(b.place) === placeMenageV2(place); })) return null;   // déjà reprise
+  var c = { cep: {}, app: {} };
+  toutes.forEach(function(b) { if (b.lieu === 'cellier' && !b.tablette) ajouterContenuMenageV2(c, b); });
+  var cand = toutes.filter(function(b) { return b.lieu === 'pigeonnier' && b.coul === z.couleur && !figeeMenageV2(b); });
+  var m = meilleurMenageV2(cand, c, 'cellier', function(b) { return b.lieu; });
+  return m ? { b: m.b, vers: place, raison: texteEntreMenageV2(m.n, m.b, 'cellier') } : null;
+}
+// Après « Boire » ou « Donner » : la page du remplaçant, s'il y en a un (sinon rien : l'accueil, comme avant)
+function proposerRemplacantV2(place) {
+  var r = remplacantCellierV2(place);
+  if (!r) return;
+  REMPLACANT_V2 = r;
+  var court = function(p) { return emplacementV2(p.meuble, p.rangee, p.espace, true); };
+  document.getElementById('remplacantV2-titre').textContent = court(r.vers) + ' est libre';
+  document.getElementById('remplacantV2-carte').innerHTML = carteMenageV2(r.b, court(r.b.place) + ' → ' + court(r.vers) + ' · ' + nomMenageV2(r.b), r.raison, '', false, '');
+  montrerPageV2('remplacantV2Container');
+}
+function confirmerRemplacantV2() {
+  var r = REMPLACANT_V2;
+  if (!r) return;
+  var v = r.vers;
+  appelBackend('actionBouteille', { row: r.b.w.row, action: 'deplacer', bottle: r.b.w.bottle, meuble: v.meuble, rangee: v.rangee, espace: v.espace }, { spinner: 'Déplacement' }).then(function(res) {
+    if (res && res.success === false) throw new Error(res.message || res.error || 'écriture refusée');
+    return rechargerInventaireV2('Déplacement');
+  }).then(function() {
+    fermerRemplacantV2();
+    afficherMessage('Monté en ' + emplacementV2(v.meuble, v.rangee, v.espace, true));
+  }).catch(signalerErreurV2);
+}
+function fermerRemplacantV2() {
+  REMPLACANT_V2 = null;
+  cacherPageV2('remplacantV2Container');
 }
 
 // Ordre d'affichage des meubles (l'inverse de la chaîne de remplissage) ; « À ranger » toujours en dernier.

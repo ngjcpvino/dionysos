@@ -1231,6 +1231,7 @@ function confirmerBoireV2() {
   if (plat !== '' && actionV2Choix.note === 0) { afficherMessage('Choisissez une appréciation'); return; }
   var accords = accordsSelectionnesBoireV2();
   BOIRE_V2_EN_COURS = true;
+  var place = placeBouteilleV2(actionV2Choix.row, actionV2Choix.bottle);   // avant qu'elle sorte : pour son remplaçant
   appelBackend('actionBouteille', { row: actionV2Choix.row, action: 'boire', bottle: actionV2Choix.bottle, plat: plat, bonAccord: actionV2Choix.note }, { spinner: 'Santé' }).then(function() {
     if (accords.join(', ') !== BOIRE_V2_ACCORDS_INITIAUX) {
       return appelBackend('updateWineField', { codebarre: menuActionV2Context.code, field: 'Accords', value: accords.join(', ') }, { spinner: 'Santé' });
@@ -1247,6 +1248,7 @@ function confirmerBoireV2() {
     cacherToutesPagesV2();
     menuActionV2Context = null;
     afficherMessage('Santé');
+    proposerRemplacantV2(place);
   }).catch(function(err) { retourAccueilV2('Boire : ' + causeV2(err)); }).then(function() { BOIRE_V2_EN_COURS = false; });
 }
 
@@ -1261,13 +1263,21 @@ function construireDonnerV2() {
   document.getElementById('donnerV2Container').style.display = 'flex';
 }
 
+// La place d'une bouteille (avant qu'elle sorte) : { meuble, rangee, espace }, ou null si elle n'en a pas
+function placeBouteilleV2(row, bottle) {
+  var i = (ALL_DATA || []).filter(function(x) { return x.row === row && String(x.bottle) === String(bottle); })[0];
+  return i && i.Meuble && i.Rangee && i.Espace ? { meuble: String(i.Meuble), rangee: String(i.Rangee), espace: String(i.Espace) } : null;
+}
+
 function confirmerDonnerV2() {
+  var place = placeBouteilleV2(actionV2Choix.row, actionV2Choix.bottle);
   appelBackend('actionBouteille', { row: actionV2Choix.row, action: 'donner', bottle: actionV2Choix.bottle }, { spinner: 'Don' }).then(function() {
     return rechargerVinEnCoursV2('Don');
   }).then(function() {
     cacherToutesPagesV2();
     menuActionV2Context = null;
     afficherMessage('Bouteille donnée');
+    proposerRemplacantV2(place);
   }).catch(function(err) { retourAccueilV2('Donner : ' + causeV2(err)); });
 }
 

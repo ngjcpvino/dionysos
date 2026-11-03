@@ -34,6 +34,9 @@ module.exports = [
     "burgerV2Click('notes')", "ouvrirNoteEditV2(2)", "fermerNoteEditV2()", "fermerNotesV2()"]],
   ['scan d\'un vin connu, boire', ["traiterResultatScanV2('" + UN + "')", "menuV2Click('boire')", "choisirBouteilleActionV2('boire', 1)",
     { saisir: ['#boireV2-plat', 'Agneau grillé'] }, "choisirNoteBoireV2(5)", "confirmerBoireV2()"]],
+  // Le remplaçant (3 nov. 2026) : le faux classeur n'a pas de rouge au cellier ni au Pigeonnier rouge — on en pose un, en mémoire seulement
+  ['remplaçant après Boire', ["ALL_DATA.push({ row: 90, bottle: 1, 'Code-barres': '0900000000002', Nom: 'Malbec du Pigeonnier', Couleur: 'Rouge', Cepage: 'Malbec', Appellation: 'Cahors', Meuble: 'Pigeonnier', Rangee: '5', Espace: '2', Statut: 'En stock', Racheter: 'Oui' }); proposerRemplacantV2({ meuble: 'Cellier', rangee: '4', espace: '2' })",
+    "fermerRemplacantV2()"]],
   ['scan, donner et déplacer', ["traiterResultatScanV2('" + CINQ + "')", "menuV2Click('donner')", "fermerActionBouteilleV2('donner')",
     "menuV2Click('deplacer')", "fermerDeplacerV2()", "fermerMenuActionV2()"]],
   ['scan, arrivée', ["traiterResultatScanV2('" + UN + "')", "menuV2Click('arrivee')", "basculerListePlacementV2('arriveeV2', 'meuble')",
