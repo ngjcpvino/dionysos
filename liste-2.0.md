@@ -23,7 +23,7 @@
 ## Chantier 0 — Le grand ménage sans risque *(petit, une séance)*
 Rien ne change à l'écran. On enlève ce qui ne sert plus, pour que la suite parte d'un terrain propre.
 
-- [ ] **Supprimer `scripts-scanner-v2.js`** (le filet du découpage) — à partir du **4 nov.** ; le même jour, retirer `ANCIENS_NOMS_` du serveur.
+- [x] **Supprimer `scripts-scanner-v2.js`** (le filet du découpage) — fait le 4 nov. ; le même jour, `ANCIENS_NOMS_` retiré du serveur (avec son scénario du banc ; version 1147, publiée par l'IA). **Le chantier 0 est clos.**
 - [x] **Fichiers égarés à la racine** — fait le 28 oct. : `emi.json` et `rec.json` **supprimés** (dans `archives/`, ils restaient publiés ; l'historique du dépôt les garde) ; `a-coder.md` → `archives/a-coder-souhaits-5-sept-2026.md`.
 - [x] **Code mort de l'app** — fait le 28 oct. : `codeSAQDepuisBarcodeV2` (scan) et `grouperParCbEmpV2` (emplacements) supprimées.
 - [x] **Style mort** — fait le 28 oct. (+ `--white-70`, qui ne servait plus qu'à `--couleur-bordure-pale`) : classes jamais utilisées `centre`, `color-error`, `color-muted`, `emp-entete-meuble`, `lien-titre`, `ligne-dispo`, `mb-20`, `mt-10`, `mt-40`, `text-uppercase` ; 26 réglages `:root` jamais utilisés (`--gold-hover`, `--gold-40/50/60`, 7 `--largeur-bordure-*`, `--couleur-bordure-claire/subtile/pale`, `--bg-overlay`, `--bg-panel(-light)`, `--green`, `--orange`, `--info`, `--warning`, `--shadow-sm/md/lg`, `--fw-light`, `--fw-normal`).
@@ -97,7 +97,7 @@ Chaque famille : ~~l'utilisateur choisit sur image~~ **Claude choisit le modèle
 - **Retirer les `onclick` du HTML** (269) : ils sont lisibles et marchent ; aucun gain pour toi.
 
 ## Ce qui reste, dans l'ordre (mis à jour le 3 nov. 2026)
-1. **À partir du 4 nov.** (chantier 0) : supprimer `scripts-scanner-v2.js` (+ sa ligne dans `mise-a-jour.md` 📂 Fichiers) et, le même jour, `ANCIENS_NOMS_` du serveur (`Routes.gs`, avec le scénario « anciens noms d'actions » de son banc) — puis publier l'app et le serveur.
+1. ~~**À partir du 4 nov.** (chantier 0) : supprimer `scripts-scanner-v2.js` et `ANCIENS_NOMS_` du serveur~~ — **fait le 4 nov.** (serveur version 1147).
 2. **Les essais de la 1.0** (l'utilisateur) : la nouvelle tournée du Tri, le hors ligne en succursale, le lecteur en succursale, l'iPad en fenêtre.
 3. **Après ces essais** (chantier 2) : si le lecteur est concluant, retirer Quagga (balise de `index-v2.html`, `EXTERNES` de `sw.js`, `demarrerQuaggaV2` et son appel) ; si le hors ligne ne l'est pas, le retirer (`outils/retirer-hors-ligne.md`).
 4. **Chantier 6, au fil de l'eau** : le garde-fou et les deux bancs d'essai avant chaque publication ; un geste nouveau s'ajoute à `outils/banc-app/scenarios.js`.
