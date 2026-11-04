@@ -362,9 +362,11 @@ var TARTES_PROFIL_V2 = {
   pays: { id: 'profilV2-pays', valeur: function(w) { return w.Pays; }, inconnu: 'Pays inconnu', quoi: 'pays', filtre: 'pays' },
   couleurs: { id: 'profilV2-couleurs', valeur: function(w, h) { return w.Couleur || h.couleur; }, inconnu: 'Couleur inconnue', quoi: 'couleurs',
     classe: function(nom) { return classeCouleurTarteV2(nom); }, filtre: 'couleur' },
-  // sous chaque pastille, la couleur de ses vins : blanc ou rouge (l'utilisateur), rosé s'il y en a
+  // coupée en deux (3 nov. 2026, l'utilisateur) : les rouges à gauche, les blancs à droite, chaque moitié sur 100 % ; sous
+  // chaque pastille, la couleur de ses vins (« Rouge » / « Blanc ») ; toutes les pastilles montrées (pas d'« Autres »)
   pastilles: { id: 'profilV2-pastilles', valeur: function(w) { return w['Pastille gout']; }, inconnu: '', quoi: 'pastilles',
-    classe: function(nom) { return classePastilleV2(nom); }, precision: function(w) { return w.Couleur; }, filtre: 'pastille' }
+    classe: function(nom) { return classePastilleV2(nom); }, precision: function(w) { return w.Couleur; }, filtre: 'pastille',
+    moities: ['Rouge', 'Blanc'], max: 20 }
 };
 var ZOOM_PROFIL_V2 = {};    // tarte → les valeurs d'un « Autres » ouvert (absente : toutes)
 var PARTS_PROFIL_V2 = {};   // tarte → ses parts dessinées (ce que touche le doigt)
@@ -398,12 +400,28 @@ function partsParV2(liste, t, seulement) {
     var d = precisions[v] || {};
     return { nom: v, n: compte[v], sous: Object.keys(d).sort(function(a, b) { return d[b] - d[a]; }).join(' · ') };
   }).sort(function(a, b) { return b.n - a.n || a.nom.localeCompare(b.nom); });
-  var reste = parts.splice(PAYS_TARTE_V2);
+  var reste = parts.splice(t.max || PAYS_TARTE_V2);
   if (reste.length === 1) parts.push(reste[0]);
   else if (reste.length) parts.push({ nom: 'Autres (' + reste.length + ' ' + t.quoi + ')', n: reste.reduce(function(s, p) { return s + p.n; }, 0),
     membres: reste.map(function(p) { return p.nom; }) });
   if (t.classe) parts.forEach(function(p) { p.classe = t.classe(p.nom); });
   return parts;
+}
+
+// Une tarte coupée en deux (t.moities : la couleur de gauche, celle de droite) : les parts de chaque moitié, sur 100 % de sa
+// couleur (p.total) ; les vins d'une autre couleur ne comptent pas. p.couleur : la couleur telle qu'écrite (le filtre de la Cave).
+function partsMoitiesV2(liste, t) {
+  var vinDe = indexVinsHistoV2(), out = [];
+  t.moities.forEach(function(couleur, k) {
+    var siens = (liste || []).filter(function(h) {
+      var c = vinDe(h).Couleur || h.couleur;
+      return couleurConnueV2(c) && couleurClasseV2(c) === couleurClasseV2(couleur);
+    });
+    var parts = partsParV2(siens, t), total = parts.reduce(function(n, p) { return n + p.n; }, 0);
+    parts.forEach(function(p) { p.moitie = k ? 'droite' : 'gauche'; p.total = total; p.couleur = (p.sous || couleur).split(' · ')[0]; });
+    out = out.concat(parts);
+  });
+  return out;
 }
 
 // Les couleurs : chaque part prend la couleur de son vin (.vin-*, comme la bande des cartes)
@@ -433,29 +451,37 @@ function ordreTarteV2(parts) {
 // La tarte (SVG) : les parts placées par ordreTarteV2, mais écrites dans l'ordre du rang (leur nuance d'or suit ce rang : CSS).
 // La 1re et la 2e ont leur nom et leur % au-dessus et au-dessous de la tarte ; les autres, à côté de leur part, reliés à elle
 // par un trait fin. D'un même côté, les écritures s'écartent pour ne pas se chevaucher.
-// t : la tarte (TARTES_PROFIL_V2), pour le toucher d'une part (toucherPartProfilV2)
+// t : la tarte (TARTES_PROFIL_V2), pour le toucher d'une part (toucherPartProfilV2).
+// Coupée en deux (parts de partsMoitiesV2) : chaque moitié sur 100 % de sa couleur, la plus grande part en haut, et toutes
+// les écritures à côté de leur part (à gauche pour la moitié gauche, à droite pour l'autre).
 function tarteV2(parts, t) {
   var total = parts.reduce(function(s, p) { return s + p.n; }, 0);
   var cx = 230, r = 90, ecart = 34, f = function(v) { return v.toFixed(1); };
   var pt = function(a, rayon) { return [cx + rayon * Math.cos(a), rayon * Math.sin(a)]; };
-  var angle = -Math.PI / 2 - Math.PI * parts[0].n / total, place = [];
-  ordreTarteV2(parts).forEach(function(p) {
-    var fin = angle + 2 * Math.PI * p.n / total;
-    place[parts.indexOf(p)] = [angle, fin];
-    angle = fin;
-  });
+  var place = [], moities = parts.some(function(p) { return p.moitie; });
+  var poser = function(liste, angle, tour) {
+    liste.forEach(function(p) {
+      var fin = angle + tour * p.n / (p.total || total);
+      place[parts.indexOf(p)] = [angle, fin];
+      angle = fin;
+    });
+  };
+  if (moities) {
+    poser(parts.filter(function(p) { return p.moitie === 'gauche'; }).reverse(), Math.PI / 2, Math.PI);   // du bas vers le haut
+    poser(parts.filter(function(p) { return p.moitie === 'droite'; }), -Math.PI / 2, Math.PI);           // du haut vers le bas
+  } else poser(ordreTarteV2(parts), -Math.PI / 2 - Math.PI * parts[0].n / total, 2 * Math.PI);
   var formes = '', ecritures = '', cotes = { droite: [], gauche: [] }, haut = -r - 10, bas = r + 10;
   parts.forEach(function(p, i) {
-    var part = p.n / total, debut = place[i][0], fin = place[i][1], m = (debut + fin) / 2, pct = Math.round(part * 100);
-    var a = pt(debut, r), b = pt(fin, r);
+    var debut = place[i][0], fin = place[i][1], m = (debut + fin) / 2, pct = Math.round(p.n / (p.total || total) * 100);
+    var a = pt(debut, r), b = pt(fin, r), arc = fin - debut;
     var classe = (p.classe ? ' class="' + p.classe + '"' : '') + ' onclick="toucherPartProfilV2(\'' + t + '\', ' + i + ')"';
-    formes += part >= 1 ? '<circle' + classe + ' cx="' + cx + '" cy="0" r="' + r + '"/>'
-      : '<path' + classe + ' d="M' + cx + ' 0 L' + f(a[0]) + ' ' + f(a[1]) + ' A' + r + ' ' + r + ' 0 ' + (part > 0.5 ? 1 : 0) + ' 1 ' + f(b[0]) + ' ' + f(b[1]) + 'Z"/>';
+    formes += arc >= 2 * Math.PI - 1e-9 ? '<circle' + classe + ' cx="' + cx + '" cy="0" r="' + r + '"/>'
+      : '<path' + classe + ' d="M' + cx + ' 0 L' + f(a[0]) + ' ' + f(a[1]) + ' A' + r + ' ' + r + ' 0 ' + (arc > Math.PI ? 1 : 0) + ' 1 ' + f(b[0]) + ' ' + f(b[1]) + 'Z"/>';
     // sous le nom : sa précision s'il en a une (« Rouge »), puis le % ; une ligne de plus = 16 de plus
     var sous = (p.sous && p.nom.indexOf('Autres') !== 0) ? p.sous : '', plus = sous ? 16 : 0;
     var toucher = ' onclick="toucherPartProfilV2(\'' + t + '\', ' + i + ')"';
     var lignes = function(x) { return (sous ? '<tspan x="' + x + '" dy="16">' + sous + '</tspan>' : '') + '<tspan x="' + x + '" dy="16">' + pct + ' %</tspan>'; };
-    if (i < 2) {   // le nom, puis le reste dessous : juste au-dessus de la tarte (la 1re), juste au-dessous (la 2e)
+    if (i < 2 && !moities) {   // le nom, puis le reste dessous : juste au-dessus de la tarte (la 1re), juste au-dessous (la 2e)
       var x = f(pt(m, r)[0]), enBas = i === 1;
       ecritures += '<text x="' + x + '" y="' + (enBas ? r + 22 : -r - 28 - plus) + '" text-anchor="middle"' + toucher + '>' + p.nom + lignes(x) + '</text>';
       if (enBas) bas = Math.max(bas, r + 44 + plus); else haut = Math.min(haut, -r - 46 - plus);
@@ -478,7 +504,8 @@ function tarteV2(parts, t) {
 function rendreProfilV2() {
   var achats = ALL_ACHATS || [];
   Object.keys(TARTES_PROFIL_V2).forEach(function(t) {
-    var parts = PARTS_PROFIL_V2[t] = partsParV2(achats, TARTES_PROFIL_V2[t], ZOOM_PROFIL_V2[t]);
+    var d = TARTES_PROFIL_V2[t];
+    var parts = PARTS_PROFIL_V2[t] = d.moities ? partsMoitiesV2(achats, d) : partsParV2(achats, d, ZOOM_PROFIL_V2[t]);
     var el = document.getElementById(TARTES_PROFIL_V2[t].id);
     // un « Autres » ouvert : le rond « Tout » remet la tarte entière
     el.innerHTML = parts.length ? tarteV2(parts, t) + (ZOOM_PROFIL_V2[t] ? '<div class="roundel" onclick="toutProfilV2(\'' + t + '\')">' +
@@ -503,6 +530,7 @@ function toucherPartProfilV2(t, i) {
   naviguerV2(function() {
     viderFiltresV2('caveV2');
     filtresCaveV2[d.filtre] = p.nom;
+    if (p.couleur) filtresCaveV2.couleur = p.couleur;   // une moitié : sa couleur aussi
     ouvrirCaveV2();
     CAVE_DEPUIS_PROFIL_V2 = true;
   });
