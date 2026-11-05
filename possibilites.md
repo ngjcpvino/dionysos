@@ -1,7 +1,7 @@
 # 🍷 Dionysos — ce que fait l'app
 
 > Brouillon du 30 oct. 2026, remis à jour le 4 nov. : la liste des actions, écrite à partir du code, à relire et corriger.
-> Point de départ du document des possibilités et du futur mode d'emploi (voir `mise-a-jour.md`, En attente).
+> Point de départ du document des possibilités (voir `mise-a-jour.md`, En attente). Le mode d'emploi est un document séparé.
 
 ## À la SAQ
 - **Scanner une bouteille** (la lampe : le petit rond sous le ✕ ; ou en tapant le code) : l'app dit si tu l'as déjà, combien de bouteilles et où elles sont. Elle montre aussi ce que les sommeliers en ont dit, si Curieux Bégin l'a proposée, et tes vins de la même appellation ou du même cépage.
