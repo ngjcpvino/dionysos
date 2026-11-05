@@ -376,7 +376,7 @@ var TARTES_PROFIL_V2 = {
   cepages: { id: 'profilV2-cepages', valeur: function(w) {
       var c = decodeHTML(cepageDominant(w)).trim();
       return c && !/^autre/.test(cleCepageV2(c)) ? cepageCommunV2(c) : '';
-    }, inconnu: '', quoi: 'cépages', filtre: 'cepage', moities: ['Rouge', 'Blanc'] }
+    }, cle: cleCepageV2, inconnu: '', quoi: 'cépages', filtre: 'cepage', moities: ['Rouge', 'Blanc'] }
 };
 var ZOOM_PROFIL_V2 = {};    // tarte → les valeurs d'un « Autres » ouvert (absente : toutes)
 var PARTS_PROFIL_V2 = {};   // tarte → ses parts dessinées (ce que touche le doigt)
@@ -396,16 +396,26 @@ function fermerProfilV2() {
 // Sans valeur : la part t.inconnu, ou rien si elle est vide (les pastilles : la tarte ne parle que de goût). t.classe(nom),
 // facultative : la couleur d'une part (sa classe CSS) ; '' = sa nuance d'or. t.cote(nom), facultative : la moitié où
 // se centre la part (« gauche » / « droite »). seulement : les valeurs gardées.
+// Une même valeur écrite autrement (« Pinot noir », « Pinot Noir », « pinot noir » — 5 nov. 2026) compte UNE fois, sous
+// l'écriture la plus fréquente : t.cle(valeur), sinon sans majuscules ni accents.
 function partsParV2(liste, t, seulement) {
   var vinDe = indexVinsHistoV2();
-  var compte = {}, inconnu = t.inconnu;
+  var cleDe = t.cle || function(v) { return normaliserRechercheV2(v).trim(); };
+  var garder = seulement ? seulement.map(cleDe) : null;
+  var compte = {}, ecritures = {}, inconnu = t.inconnu;
   (liste || []).forEach(function(h) {
     var w = vinDe(h), v = decodeHTML(t.valeur(w, h) || '').trim() || inconnu;
-    if (!v || (seulement && seulement.indexOf(v) === -1)) return;
-    compte[v] = (compte[v] || 0) + 1;
+    if (!v) return;
+    var k = cleDe(v);
+    if (garder && garder.indexOf(k) === -1) return;
+    compte[k] = (compte[k] || 0) + 1;
+    ecritures[k] = ecritures[k] || {};
+    ecritures[k][v] = (ecritures[k][v] || 0) + 1;
   });
-  var parts = Object.keys(compte).map(function(v) { return { nom: v, n: compte[v] }; })
-    .sort(function(a, b) { return b.n - a.n || a.nom.localeCompare(b.nom); });
+  var parts = Object.keys(compte).map(function(k) {
+    var e = ecritures[k];
+    return { nom: Object.keys(e).sort(function(a, b) { return e[b] - e[a] || a.localeCompare(b); })[0], n: compte[k] };
+  }).sort(function(a, b) { return b.n - a.n || a.nom.localeCompare(b.nom); });
   var reste = parts.splice(t.max || PAYS_TARTE_V2);
   if (reste.length === 1) parts.push(reste[0]);
   else if (reste.length) parts.push({ nom: 'Autres (' + reste.length + ' ' + t.quoi + ')', n: reste.reduce(function(s, p) { return s + p.n; }, 0),
