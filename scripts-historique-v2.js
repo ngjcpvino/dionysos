@@ -526,6 +526,13 @@ function tarteV2(parts, t) {
     });
   });
   if (moities) formes = '<g>' + groupes.gauche + '</g><g>' + groupes.droite + '</g>';
+  // un « Autres » ouvert n'a que sa moitié : l'autre, vide, porte le rond du retour à la tarte entière (5 nov. 2026,
+  // l'utilisateur) — le rond de l'app, avec une petite tarte rouge et blanc dedans
+  if (moities && ZOOM_PROFIL_V2[t] && (!groupes.gauche || !groupes.droite)) {
+    var rx = groupes.gauche ? cx + r / 2 : cx - r / 2;
+    formes += '<g onclick="toutProfilV2(\'' + t + '\')"><circle class="retour-tarte" cx="' + rx + '" cy="0" r="22"/>' +
+      '<path class="vin-rouge" d="M' + rx + ' -10 A10 10 0 0 0 ' + rx + ' 10Z"/><path class="vin-blanc" d="M' + rx + ' -10 A10 10 0 0 1 ' + rx + ' 10Z"/></g>';
+  }
   return '<svg viewBox="0 ' + f(haut) + ' ' + (2 * cx) + ' ' + f(bas - haut) + '">' + formes + ecritures + '</svg>';
 }
 
@@ -536,7 +543,7 @@ function rendreProfilV2() {
     var parts = PARTS_PROFIL_V2[t] = (d.moities ? partsMoitiesV2 : partsParV2)(achats, d, ZOOM_PROFIL_V2[t]);
     var el = document.getElementById(TARTES_PROFIL_V2[t].id);
     // un « Autres » ouvert : le rond « Tout » remet la tarte entière
-    el.innerHTML = parts.length ? tarteV2(parts, t) + (ZOOM_PROFIL_V2[t] ? '<div class="roundel" onclick="toutProfilV2(\'' + t + '\')">' +
+    el.innerHTML = parts.length ? tarteV2(parts, t) + (ZOOM_PROFIL_V2[t] && !d.moities ? '<div class="roundel" onclick="toutProfilV2(\'' + t + '\')">' +
       '<span class="roundel-anneau"></span><span class="roundel-barre">Tout</span></div>' : '') : '';
     el.style.display = parts.length ? '' : 'none';   // une tarte vide n'est pas montrée (ni la ligne qui la sépare)
   });
