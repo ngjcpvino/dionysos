@@ -11,7 +11,6 @@
 // ==================== LA PRÉSENTATION ====================
 var PRESENTATION_V2 = {
   titre: "Ta cave, ton goût, ta SAQ",
-  fiche: "Nourriture et boissons · 18+ · Gratuit · Sans pub · Sans compte",
   accroche: [
     "Tu es dans une allée de la SAQ, une bouteille à la main : « Est-ce que j'en ai déjà ? » Scanne-la. Dionysos te répond avant que tu aies fini de te poser la question.",
     "Ta cave n'a jamais été aussi bien entourée."
@@ -202,7 +201,7 @@ function rendreModeEmploiV2() {
     return '<div class="item-liste' + (ouvert ? ' actif' : '') + '" id="modeEmploiV2-' + cle + '-titre" onclick="basculerVoletsV2(\'modeEmploiV2-\', \'' + cle + '\')">' + titre + '</div>' +
       '<div id="modeEmploiV2-' + cle + '"' + (ouvert ? '' : ' style="display:none;"') + '>' + html + '</div>';
   };
-  var presentation = '<h3 class="titre-2">' + p.titre + '</h3><div class="texte-secondaire">' + p.fiche + '</div>' +
+  var presentation = '<h3 class="titre-2">' + p.titre + '</h3>' +
     p.accroche.map(function(t) { return '<div class="texte">' + t + '</div>'; }).join('') +
     p.blocs.map(function(b) { return '<div class="titre-3">' + b[0] + '</div><div class="texte">' + b[1] + '</div>'; }).join('') +
     '<div class="texte text-center">' + p.avis + '</div>';
