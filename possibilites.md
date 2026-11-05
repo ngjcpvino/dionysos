@@ -22,7 +22,7 @@
 
 ## Dans la cave
 - **Cave à vin** : tous tes vins, avec des filtres (couleur, cépage, pays, appellation, accord, pastille, acidité). Dans un filtre, un toucher = « seulement », deux = « sauf », trois = « tous ».
-- **Emplacements** : le plan des meubles et la photo de chaque bouteille. Aussi les vins en double, et ce qui manque (cépages, appellations, familles).
+- **Emplacements** : le plan des meubles et la photo de chaque bouteille. Aussi la liste d'un meuble (par cépage) et les familles d'accords qui manquent.
 - **Tri Dionysos** (Emplacements → Afficher) : le rangement, pour avoir le plus de cépages possible par meuble, puis le plus d'appellations.
   - d'abord, seulement quand ça sert : les doublons du cellier — tu coches ceux que tu sors, les autres gardent leur place ;
   - puis la tournée, une étape par écran (cellier, Pigeonnier, Réserve, À ranger, puis on remonte) : chaque bouteille avec sa place, sa destination et sa case dans la boîte ; « Confirmer » inscrit l'écran ;

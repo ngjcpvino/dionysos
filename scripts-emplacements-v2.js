@@ -9,7 +9,7 @@ var filtresEmpV2 = filtresVidesV2('empV2');
 // Mode d'affichage de la page (section « Afficher » du panneau) : le plan des
 // meubles, ou l'une des six listes. La PORTÉE des listes vient du filtre Meuble.
 var empV2Mode = 'plan';
-var MODES_EMP_V2 = ['plan', 'doubles', 'cepdoubles', 'listemeuble', 'cepmanquants', 'appmanquante', 'fammanquante', 'menage'];
+var MODES_EMP_V2 = ['plan', 'listemeuble', 'fammanquante', 'menage'];   // 5 nov. 2026 : « Vins en double », « Cépages doubles », « Cépages manquants » et « Appellation manquante » retirés (le Tri fait ce travail)
 
 function ouvrirEmpV2() {
   montrerPageV2('empV2Container');
@@ -44,8 +44,8 @@ function apresChoixFiltreEmpV2(cle) {
       !appellationsEmpV2(baseFiltresVinEmpV2()).some(function(a){ return memeTexteV2(a, valeurChoixV2(filtresEmpV2.appellation)); })) {
     filtresEmpV2.appellation = '';
   }
-  // Deux modes n'existent que dans un meuble : sans meuble, retour au plan.
-  if (!filtresEmpV2.meuble && (empV2Mode === 'cepdoubles' || empV2Mode === 'listemeuble')) empV2Mode = 'plan';
+  // « Liste du meuble » n'existe que dans un meuble : sans meuble, retour au plan.
+  if (!filtresEmpV2.meuble && empV2Mode === 'listemeuble') empV2Mode = 'plan';
 }
 
 function remplirFiltresEmpV2() {
@@ -69,14 +69,11 @@ function remplirFiltresEmpV2() {
                  appellation: appellationsEmpV2(baseVin) };
   Object.keys(listes).forEach(function(cle){ remplirMenuFiltreV2('empV2', cle, listes[cle]); });
 
-  // Afficher : le mode courant est allumé ; les deux modes « dans un meuble »
-  // n'apparaissent que si un meuble est choisi.
+  // Afficher : le mode courant est allumé ; « Liste du meuble » n'apparaît que si un meuble est choisi.
   MODES_EMP_V2.forEach(function(m){
     var el = document.getElementById('empV2-mode-' + m);
     if (el) el.classList.toggle('actif', empV2Mode === m);
   });
-  var cepd = document.getElementById('empV2-mode-cepdoubles');
-  if (cepd) cepd.style.display = f.meuble ? 'block' : 'none';
   var lstm = document.getElementById('empV2-mode-listemeuble');
   if (lstm) lstm.style.display = (f.meuble && f.meuble !== 'À ranger') ? 'block' : 'none';
 
@@ -92,10 +89,10 @@ function appellationsEmpV2(baseVin) {
 }
 
 // Les vins dans lesquels puiser les valeurs de Cépage / Couleur / Pays.
-// Les listes « manquants » montrent des vins hors stock : elles puisent partout.
+// La liste « Familles manquantes » montre des vins hors stock : elle puise partout.
 function baseFiltresVinEmpV2() {
   var f = filtresEmpV2;
-  if (empV2Mode === 'cepmanquants' || empV2Mode === 'appmanquante' || empV2Mode === 'fammanquante') {
+  if (empV2Mode === 'fammanquante') {
     return (ALL_DATA || []).filter(function(i){ return !estPropositionV2(i); });
   }
   if (f.meuble === 'À ranger') return bouteillesEnCaveV2('aranger');
@@ -1037,15 +1034,7 @@ function afficherListeEmpV2(type) {
   var html = '';
   var titre = '';
 
-  if (type === 'doubles') {
-    // Même code-barres en 2+ bouteilles. Si meuble choisi → dans le meuble, sinon tous.
-    var portee = f.meuble ? tousRanges.filter(function(i){ return String(i.Meuble) === String(f.meuble); }) : tousRanges;
-    var groupes = groupesFiltresEmpV2(grouperParSaqEmpV2(portee)).filter(function(g){ return g.count >= 2; });
-    titre = 'Vins en double';
-    if (groupes.length === 0) { html = '<div class="texte-secondaire">Aucun vin en double</div>'; }
-    else { html = groupes.map(function(g){ return empCarteVinV2(g); }).join(''); }
-
-  } else if (type === 'listemeuble') {
+  if (type === 'listemeuble') {
     // Tout le meuble choisi, en sections par cépage dominant
     var dansMeubleL = tousRanges.filter(function(i){ return String(i.Meuble) === String(f.meuble); });
     var parCepL = {};
@@ -1065,85 +1054,6 @@ function afficherListeEmpV2(type) {
           return normaliserRechercheV2(decodeHTML(a.wine.Nom || '')).localeCompare(normaliserRechercheV2(decodeHTML(b.wine.Nom || '')));
         });
         return '<div class="titre-2">' + nomCepL[k] + '</div>' + vins.map(function(g){
-          return empCarteVinV2(g, true);
-        }).join('');
-      }).join('');
-    }
-
-  } else if (type === 'cepdoubles') {
-    // Cépage dominant présent sur 2+ vins DIFFÉRENTS du meuble choisi
-    var dansMeuble = tousRanges.filter(function(i){ return String(i.Meuble) === String(f.meuble); });
-    var parCb = groupesFiltresEmpV2(grouperParSaqEmpV2(dansMeuble));
-    var parCepage = {};
-    var nomCepage = {};
-    parCb.forEach(function(g){
-      var cep = cepageDominant(g.wine);
-      if (!cep) return;
-      var k = cleCommuneCepageV2(cep);
-      if (!parCepage[k]) { parCepage[k] = []; nomCepage[k] = cepageCommunV2(decodeHTML(cep)); }
-      parCepage[k].push(g);
-    });
-    titre = 'Cépages doubles';
-    var cles = Object.keys(parCepage).filter(function(c){ return parCepage[c].length >= 2; }).sort(function(a,b){ return a.localeCompare(b); });
-    if (cles.length === 0) { html = '<div class="texte-secondaire">Aucun cépage en double</div>'; }
-    else {
-      html = cles.map(function(cep){
-        return '<div class="titre-2">' + nomCepage[cep] + '</div>' + parCepage[cep].map(function(g){
-          return empCarteVinV2(g, true);
-        }).join('');
-      }).join('');
-    }
-
-  } else if (type === 'cepmanquants' && !f.meuble) {
-    // Global : cépages de ma liste de vins absents du stock actif (pour prioriser les achats)
-    titre = 'Cépages manquants';
-    var actifsTous = bouteillesEnCaveV2();
-    var cepStock = {};
-    actifsTous.forEach(function(w){ var c = cepageDominant(w); if (c) cepStock[cleCommuneCepageV2(c)] = true; });
-    var parCepGlobal = {};
-    var nomCepGlobal = {};
-    groupesFiltresEmpV2(grouperVinsV2(ALL_DATA || [])).forEach(function(g){
-      var cep = cepageDominant(g.wine);
-      if (!cep) return;
-      var k = cleCommuneCepageV2(cep);
-      if (cepStock[k]) return;
-      if (!parCepGlobal[k]) { parCepGlobal[k] = []; nomCepGlobal[k] = cepageCommunV2(decodeHTML(cep)); }
-      parCepGlobal[k].push(g);
-    });
-    var clesG = Object.keys(parCepGlobal).sort(function(a,b){ return a.localeCompare(b); });
-    if (clesG.length === 0) { html = '<div class="texte-secondaire">Aucun cépage manquant</div>'; }
-    else {
-      html = clesG.map(function(cep){
-        return '<div class="titre-2">' + nomCepGlobal[cep] + '</div>' + parCepGlobal[cep].map(function(g){
-          return empCarteVinV2(g, true);
-        }).join('');
-      }).join('');
-    }
-
-  } else if (type === 'cepmanquants') {
-    // Cépage présent dans d'AUTRES meubles, absent du meuble choisi
-    var dansMeuble2 = tousRanges.filter(function(i){ return String(i.Meuble) === String(f.meuble); });
-    var amont = meublesAmontV2(f.meuble);
-    var horsMeuble = tousRanges.filter(function(i){
-      return amont.some(function(m){ return memeTexteV2(m, i.Meuble); });
-    }).concat(bouteillesEnCaveV2('aranger'));
-    var cepDansMeuble = {};
-    dansMeuble2.forEach(function(w){ var c = cepageDominant(w); if (c) cepDansMeuble[cleCommuneCepageV2(c)] = true; });
-    var parCepageHors = {};
-    var nomCepageHors = {};
-    groupesFiltresEmpV2(grouperParSaqEmpV2(horsMeuble)).forEach(function(g){
-      var cep = cepageDominant(g.wine);
-      if (!cep || cepDansMeuble[cleCommuneCepageV2(cep)]) return;
-      var k = cleCommuneCepageV2(cep);
-      if (!parCepageHors[k]) { parCepageHors[k] = []; nomCepageHors[k] = cepageCommunV2(decodeHTML(cep)); }
-      parCepageHors[k].push(g);
-    });
-    titre = 'Cépages manquants';
-    var cles2 = Object.keys(parCepageHors).sort(function(a,b){ return a.localeCompare(b); });
-    if (cles2.length === 0) { html = '<div class="texte-secondaire">Aucun cépage manquant</div>'; }
-    else {
-      html = cles2.map(function(cep){
-        return '<div class="titre-2">' + nomCepageHors[cep] + '</div>' + parCepageHors[cep].map(function(g){
           return empCarteVinV2(g, true);
         }).join('');
       }).join('');
@@ -1199,60 +1109,6 @@ function afficherListeEmpV2(type) {
       }).join('');
     }
 
-  } else if (type === 'appmanquante' && !f.meuble) {
-    // Global : appellations de ma liste de vins absentes du stock actif
-    titre = 'Appellation manquante';
-    var actifsTousApp = bouteillesEnCaveV2();
-    var appStock = {};
-    actifsTousApp.forEach(function(w){ var a = (w.Appellation || '').toString().trim(); if (a) appStock[normaliserRechercheV2(a)] = true; });
-    var parAppGlobal = {};
-    var nomAppGlobal = {};
-    groupesFiltresEmpV2(grouperVinsV2(ALL_DATA || [])).forEach(function(g){
-      var app = (g.wine.Appellation || '').toString().trim();
-      if (!app) return;
-      var k = normaliserRechercheV2(app);
-      if (appStock[k]) return;
-      if (!parAppGlobal[k]) { parAppGlobal[k] = []; nomAppGlobal[k] = app; }
-      parAppGlobal[k].push(g);
-    });
-    var clesAG = Object.keys(parAppGlobal).sort(function(a,b){ return a.localeCompare(b); });
-    if (clesAG.length === 0) { html = '<div class="texte-secondaire">Aucune appellation manquante</div>'; }
-    else {
-      html = clesAG.map(function(app){
-        return '<div class="titre-2">' + nomAppGlobal[app] + '</div>' + parAppGlobal[app].map(function(g){
-          return empCarteVinV2(g, true);
-        }).join('');
-      }).join('');
-    }
-
-  } else if (type === 'appmanquante') {
-    // Appellation présente dans d'AUTRES meubles (en amont), absente du meuble choisi
-    var dansMeuble3 = tousRanges.filter(function(i){ return String(i.Meuble) === String(f.meuble); });
-    var amontApp = meublesAmontV2(f.meuble);
-    var horsMeubleApp = tousRanges.filter(function(i){
-      return amontApp.some(function(m){ return memeTexteV2(m, i.Meuble); });
-    }).concat(bouteillesEnCaveV2('aranger'));
-    var appDansMeuble = {};
-    dansMeuble3.forEach(function(w){ var a = (w.Appellation || '').toString().trim(); if (a) appDansMeuble[normaliserRechercheV2(a)] = true; });
-    var parAppHors = {};
-    var nomAppHors = {};
-    groupesFiltresEmpV2(grouperParSaqEmpV2(horsMeubleApp)).forEach(function(g){
-      var app = (g.wine.Appellation || '').toString().trim();
-      if (!app || appDansMeuble[normaliserRechercheV2(app)]) return;
-      var k = normaliserRechercheV2(app);
-      if (!parAppHors[k]) { parAppHors[k] = []; nomAppHors[k] = app; }
-      parAppHors[k].push(g);
-    });
-    titre = 'Appellation manquante';
-    var clesA2 = Object.keys(parAppHors).sort(function(a,b){ return a.localeCompare(b); });
-    if (clesA2.length === 0) { html = '<div class="texte-secondaire">Aucune appellation manquante</div>'; }
-    else {
-      html = clesA2.map(function(app){
-        return '<div class="titre-2">' + nomAppHors[app] + '</div>' + parAppHors[app].map(function(g){
-          return empCarteVinV2(g, true);
-        }).join('');
-      }).join('');
-    }
   }
 
   document.getElementById('empV2-compte').textContent = f.meuble ? (titre + ' · ' + f.meuble) : titre;

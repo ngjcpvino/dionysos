@@ -475,11 +475,7 @@ var PANNEAUX_V2 = {
     apresChoix: function(cle) { apresChoixFiltreEmpV2(cle); }, remiseAZero: function() { empV2Mode = 'plan'; },
     avant: '<div class="titre-3">Afficher</div>' +
            '<div class="item-liste" id="empV2-mode-plan" onclick="choisirModeEmpV2(\'plan\')">Plan des meubles</div>' +
-           '<div class="item-liste" id="empV2-mode-doubles" onclick="choisirModeEmpV2(\'doubles\')">Vins en double</div>' +
-           '<div class="item-liste" id="empV2-mode-cepdoubles" style="display:none;" onclick="choisirModeEmpV2(\'cepdoubles\')">Cépages doubles</div>' +
            '<div class="item-liste" id="empV2-mode-listemeuble" style="display:none;" onclick="choisirModeEmpV2(\'listemeuble\')">Liste du meuble</div>' +
-           '<div class="item-liste" id="empV2-mode-cepmanquants" onclick="choisirModeEmpV2(\'cepmanquants\')">Cépages manquants</div>' +
-           '<div class="item-liste" id="empV2-mode-appmanquante" onclick="choisirModeEmpV2(\'appmanquante\')">Appellation manquante</div>' +
            '<div class="item-liste" id="empV2-mode-fammanquante" onclick="choisirModeEmpV2(\'fammanquante\')">Familles manquantes</div>' +
            '<div class="item-liste" id="empV2-mode-menage" onclick="choisirModeEmpV2(\'menage\')">Tri Dionysos</div>' +
            '<div class="panneau-separateur"></div>',
