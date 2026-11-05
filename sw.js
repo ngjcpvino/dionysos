@@ -14,7 +14,7 @@ var DELAI_RESEAU = 4000; // au-delà, la copie répond
 var FICHIERS = [
   'index-v2.html', 'styles-v2.css', 'scripts-socle-v2.js', 'scripts-communs-v2.js', 'scripts-scan-v2.js',
   'scripts-cave-v2.js', 'scripts-achat-v2.js', 'scripts-recherche-v2.js', 'scripts-accords-v2.js',
-  'scripts-emplacements-v2.js', 'scripts-historique-v2.js', 'scripts-fiche-v2.js',
+  'scripts-emplacements-v2.js', 'scripts-historique-v2.js', 'scripts-fiche-v2.js', 'scripts-mode-emploi-v2.js',
   'images/scan.png', 'images/saq1.PNG', 'images/partager-spinner-3.svg', 'images/ne-pas-racheter.svg',
   'images/interdit.svg', 'images/lampe.svg', 'images/icone-ipad.png', 'images/vin.ico',
   'lecteur/zxing-wasm-3.1.6.js', 'lecteur/zxing_reader-3.1.6.wasm'

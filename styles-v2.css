@@ -1015,7 +1015,7 @@ input[type="date"].champ-saisie::-webkit-date-and-time-value { text-align: left;
 .ipad [id$="-loupe"], .ipad .btn-fermer, .ipad .filtre-toggle-haut, .ipad .btn-partager, .ipad .gauche { top: calc(var(--space-10) + var(--space-30)); }
 .ipad .sous-fermer { top: calc(var(--space-10) + var(--space-30) + var(--taille-44) + var(--space-10)); }
 .ipad .modale-haut, .ipad #photoV2Overlay.photo-ronde .modal-v2-content,
-.ipad .panneau-gauche, .ipad .panneau-droite { padding-top: calc(var(--taille-60) + var(--space-30)); }
+.ipad .panneau-gauche, .ipad .panneau-droite, .ipad .visite.haut { padding-top: calc(var(--taille-60) + var(--space-30)); }
 .ipad #topNavV2 { padding-top: calc(env(safe-area-inset-top, 0px) + var(--space-20) + var(--space-30)); }
 /* Rond de choix (J'aime / J'aime pas…) : atténué tant qu'il n'est pas actif. Réutilisable. */
 .cercle-choix:not(.actif) { color: var(--white-60); border-color: var(--white-15); }
@@ -1186,6 +1186,30 @@ input[type="date"].champ-saisie::-webkit-date-and-time-value { text-align: left;
   0%, 100% { top: 20%; }
   50% { top: 80%; }
 }
+
+/* =========================================
+   VISITE GUIDÉE (Mode d'emploi, 5 nov. 2026)
+   ========================================= */
+/* Le voile : transparent, par-dessus toute l'app (sous le spinner et le toast) — le doigt n'atteint que la bulle,
+   rien ne s'enregistre pendant une visite. La bulle (.bloc-form) : en bas, ou en haut (.haut) quand ce qu'elle montre est en bas. */
+.visite {
+  position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 10020;
+  flex-direction: column; justify-content: flex-end; align-items: center;
+  padding: var(--space-20) var(--space-20) calc(var(--space-20) + env(safe-area-inset-bottom, 0px));
+}
+.visite.haut { justify-content: flex-start; padding-top: calc(var(--taille-60) + env(safe-area-inset-top, 0px)); }
+.visite > .bloc-form { background: var(--noir-92); border: var(--largeur-bordure-1) solid var(--gold); padding: var(--space-15); }
+.visite .titre-3 { margin-top: 0; }
+/* Ce que la visite montre : un contour d'or qui respire, sur n'importe quel élément (rond, ligne, carte, champ) */
+.visite-cible {
+  outline: var(--largeur-bordure-1-5) solid var(--gold);
+  outline-offset: var(--space-3);
+  box-shadow: var(--lueur-or-8);
+  animation: visite-lueur 1.5s ease-in-out infinite;
+}
+@keyframes visite-lueur { 50% { outline-color: var(--gold-30); box-shadow: none; } }
 
 /* =========================================
    UTILITAIRES

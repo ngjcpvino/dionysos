@@ -317,6 +317,7 @@ function burgerV2Click(cible) {
   if (cible === 'selonsaq') { cacherToutesPagesV2(); ouvrirSelonSaqV2(); return; }
   if (cible === 'curieuxbegin') { cacherToutesPagesV2(); ouvrirCurieuxBeginV2(); return; }
   if (cible === 'notes') { cacherToutesPagesV2(); ouvrirNotesV2(); return; }
+  if (cible === 'modeemploi') { cacherToutesPagesV2(); ouvrirModeEmploiV2(); return; }
 
   
   if (cible === 'majaccordssaq') { majAccordsSaqBoucleV2(0); return; }
