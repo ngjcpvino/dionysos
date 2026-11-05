@@ -787,6 +787,9 @@ body::after {
 .contenu > svg path.pastille-aromatique-souple, .contenu > svg circle.pastille-aromatique-souple { fill: var(--pastille-aromatique-souple); }
 .contenu > svg path.pastille-aromatique-charnu, .contenu > svg circle.pastille-aromatique-charnu { fill: var(--pastille-aromatique-charnu); }
 .contenu > svg line { stroke: var(--white-60); stroke-width: var(--largeur-bordure-1); }
+/* Le rond du retour à la tarte entière (Profil, « Autres » ouvert, dans la moitié vide) : le rond de l'app — fond sombre,
+   bordure or — dessiné dans la tarte ; sa petite tarte prend les couleurs .vin-rouge / .vin-blanc */
+.contenu > svg circle.retour-tarte { fill: var(--noir-50); stroke: var(--gold); stroke-width: var(--largeur-bordure-1); cursor: pointer; }
 .contenu > svg text { fill: var(--white); font-size: var(--fs-14); }
 .contenu > svg tspan { fill: var(--white-60); font-size: var(--fs-12); }
 /* iPad : la tarte grandit avec l'écran, ses écritures non (les mêmes proportions que sur l'iPhone — l'utilisateur, 29 oct.) */
