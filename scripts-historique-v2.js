@@ -403,10 +403,11 @@ function partsParV2(liste, t, seulement) {
   var vinDe = indexVinsHistoV2();
   var cleDe = t.cle || function(v) { return normaliserRechercheV2(v).trim(); };
   var garder = seulement ? seulement.map(cleDe) : null;
-  var compte = {}, ecritures = {}, inconnu = t.inconnu;
+  var compte = {}, ecritures = {}, inconnu = t.inconnu, tous = 0;
   (liste || []).forEach(function(h) {
     var w = vinDe(h), v = decodeHTML(t.valeur(w, h) || '').trim() || inconnu;
     if (!v) return;
+    tous++;
     var k = cleDe(v);
     if (garder && garder.indexOf(k) === -1) return;
     compte[k] = (compte[k] || 0) + 1;
@@ -422,6 +423,9 @@ function partsParV2(liste, t, seulement) {
   else if (reste.length) parts.push({ nom: 'Autres (' + reste.length + ' ' + t.quoi + ')', n: reste.reduce(function(s, p) { return s + p.n; }, 0),
     membres: reste.map(function(p) { return p.nom; }) });
   if (t.classe) parts.forEach(function(p) { p.classe = t.classe(p.nom); });
+  // un « Autres » ouvert (seulement) : le dessin s'agrandit, mais chaque % reste celui de TOUTE la tarte (p.base) —
+  // ses parts redonnent ensemble le % d'« Autres » (6 nov. 2026, l'utilisateur)
+  if (seulement) parts.forEach(function(p) { p.base = tous; });
   if (t.cote) parts.forEach(function(p) { p.moitie = t.cote(p.nom); });
   return parts;
 }
@@ -517,7 +521,7 @@ function tarteV2(parts, t) {
   // coupée en deux : les parts de chaque moitié dans leur groupe, leur nuance d'or suit leur rang DANS la moitié (CSS)
   var formes = '', ecritures = '', cotes = { droite: [], gauche: [] }, haut = -r - 10, bas = r + 10, groupes = { gauche: '', droite: '' };
   parts.forEach(function(p, i) {
-    var debut = place[i][0], fin = place[i][1], m = (debut + fin) / 2, pct = Math.round(p.n / (p.total || total) * 100);
+    var debut = place[i][0], fin = place[i][1], m = (debut + fin) / 2, pct = Math.round(p.n / (p.base || p.total || total) * 100);
     var a = pt(debut, r), b = pt(fin, r), arc = fin - debut;
     var classe = (p.classe ? ' class="' + p.classe + '"' : '') + ' onclick="toucherPartProfilV2(\'' + t + '\', ' + i + ')"';
     var forme = arc >= 2 * Math.PI - 1e-9 ? '<circle' + classe + ' cx="' + cx + '" cy="0" r="' + r + '"/>'
