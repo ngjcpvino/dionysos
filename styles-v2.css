@@ -791,11 +791,12 @@ body::after {
    bordure or — dessiné dans la tarte ; sa petite tarte prend les couleurs .vin-rouge / .vin-blanc */
 .contenu > svg circle.retour-tarte { fill: var(--noir-50); stroke: var(--gold); stroke-width: var(--largeur-bordure-1); cursor: pointer; }
 .contenu > svg text { fill: var(--white); font-size: var(--fs-14); }
-.contenu > svg tspan { fill: var(--white-60); font-size: var(--fs-12); }
+/* le % sous le nom (la dernière ligne) ; les lignes de plus d'un long nom restent comme le nom */
+.contenu > svg tspan:last-of-type { fill: var(--white-60); font-size: var(--fs-12); }
 /* iPad : la tarte grandit avec l'écran, ses écritures non (les mêmes proportions que sur l'iPhone — l'utilisateur, 29 oct.) */
 @media (min-width: 600px) {
   .contenu > svg text { font-size: var(--fs-10); }
-  .contenu > svg tspan { font-size: var(--fs-9); }
+  .contenu > svg tspan:last-of-type { font-size: var(--fs-9); }
 }
 
 /* ===== Photo V2 — mode rond (Emplacements) ===== */

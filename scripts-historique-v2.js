@@ -472,6 +472,24 @@ function ordreTarteV2(parts) {
 // La tarte (SVG) : les parts placées par ordreTarteV2, mais écrites dans l'ordre du rang (leur nuance d'or suit ce rang : CSS).
 // La 1re et la 2e ont leur nom et leur % au-dessus et au-dessous de la tarte ; les autres, à côté de leur part, reliés à elle
 // par un trait fin. D'un même côté, les écritures s'écartent pour ne pas se chevaucher.
+// Un nom de plus de NOM_TARTE_V2 caractères passe à la ligne, à une espace ou après un trait d'union (5 nov. 2026,
+// l'utilisateur : un long nom élargissait l'image, et toute la tarte rapetissait) → ses lignes
+var NOM_TARTE_V2 = 16;
+function lignesNomTarteV2(nom) {
+  var mots = [];
+  (nom.match(/\([^)]*\)|\S+/g) || []).forEach(function(m) {   // une parenthèse reste entière : « Autres » / « (18 cépages) »
+    var bouts = m.length > NOM_TARTE_V2 ? m.split('-') : [m];
+    bouts.forEach(function(b, i) { mots.push(b + (i < bouts.length - 1 ? '-' : '')); });
+  });
+  var lignes = [];
+  mots.forEach(function(m) {
+    var der = lignes[lignes.length - 1];
+    var colle = der !== undefined && /-$/.test(der) ? der + m : der + ' ' + m;
+    if (der !== undefined && colle.length <= NOM_TARTE_V2) lignes[lignes.length - 1] = colle; else lignes.push(m);
+  });
+  return lignes;
+}
+
 // t : la tarte (TARTES_PROFIL_V2), pour le toucher d'une part (toucherPartProfilV2).
 // Coupée en deux (parts de partsMoitiesV2) : chaque moitié sur 100 % de sa couleur, la plus grande part en haut, et toutes
 // les écritures à côté de leur part (à gauche pour la moitié gauche, à droite pour l'autre).
@@ -506,23 +524,28 @@ function tarteV2(parts, t) {
       : '<path' + classe + ' d="M' + cx + ' 0 L' + f(a[0]) + ' ' + f(a[1]) + ' A' + r + ' ' + r + ' 0 ' + (arc > Math.PI ? 1 : 0) + ' 1 ' + f(b[0]) + ' ' + f(b[1]) + 'Z"/>';
     if (p.moitie) groupes[p.moitie] += forme; else formes += forme;
     // sous le nom : le %
+    // le nom, sur une ou plusieurs lignes, puis le % ; chaque ligne de plus = 16 de plus
     var toucher = ' onclick="toucherPartProfilV2(\'' + t + '\', ' + i + ')"';
-    var lignes = function(x) { return '<tspan x="' + x + '" dy="16">' + pct + ' %</tspan>'; };
+    var nom = lignesNomTarteV2(p.nom), plus = 16 * (nom.length - 1);
+    var lignes = function(x) {
+      return nom[0] + nom.slice(1).map(function(l) { return '<tspan x="' + x + '" dy="16">' + l + '</tspan>'; }).join('') +
+        '<tspan x="' + x + '" dy="16">' + pct + ' %</tspan>';
+    };
     if (i < 2 && !moities) {   // le nom, puis le reste dessous : juste au-dessus de la tarte (la 1re), juste au-dessous (la 2e)
       var x = f(pt(m, r)[0]), enBas = i === 1;
-      ecritures += '<text x="' + x + '" y="' + (enBas ? r + 22 : -r - 28) + '" text-anchor="middle"' + toucher + '>' + p.nom + lignes(x) + '</text>';
-      if (enBas) bas = Math.max(bas, r + 44); else haut = Math.min(haut, -r - 46);
+      ecritures += '<text x="' + x + '" y="' + (enBas ? r + 22 : -r - 28 - plus) + '" text-anchor="middle"' + toucher + '>' + lignes(x) + '</text>';
+      if (enBas) bas = Math.max(bas, r + 44 + plus); else haut = Math.min(haut, -r - 46 - plus);
       return;
     }
-    cotes[Math.cos(m) >= 0 ? 'droite' : 'gauche'].push({ nom: p.nom, lignes: lignes, toucher: toucher, bord: pt(m, r), y: pt(m, r + 20)[1] });
+    cotes[Math.cos(m) >= 0 ? 'droite' : 'gauche'].push({ lignes: lignes, plus: plus, toucher: toucher, bord: pt(m, r), y: pt(m, r + 20)[1] });
   });
   Object.keys(cotes).forEach(function(cote) {
     var x = cote === 'droite' ? cx + r + 30 : cx - r - 30;
     cotes[cote].sort(function(e1, e2) { return e1.y - e2.y; }).forEach(function(e, i, l) {
-      if (i && e.y < l[i - 1].y + ecart) e.y = l[i - 1].y + ecart;
+      if (i && e.y < l[i - 1].y + ecart + l[i - 1].plus) e.y = l[i - 1].y + ecart + l[i - 1].plus;
       ecritures += '<line x1="' + f(e.bord[0]) + '" y1="' + f(e.bord[1]) + '" x2="' + (cote === 'droite' ? x - 6 : x + 6) + '" y2="' + f(e.y) + '"/>' +
-        '<text x="' + x + '" y="' + f(e.y - 3) + '"' + (cote === 'droite' ? '' : ' text-anchor="end"') + e.toucher + '>' + e.nom + e.lignes(x) + '</text>';
-      haut = Math.min(haut, e.y - 20); bas = Math.max(bas, e.y + 20);
+        '<text x="' + x + '" y="' + f(e.y - 3) + '"' + (cote === 'droite' ? '' : ' text-anchor="end"') + e.toucher + '>' + e.lignes(x) + '</text>';
+      haut = Math.min(haut, e.y - 20); bas = Math.max(bas, e.y + 20 + e.plus);
     });
   });
   if (moities) formes = '<g>' + groupes.gauche + '</g><g>' + groupes.droite + '</g>';
