@@ -372,11 +372,12 @@ var TARTES_PROFIL_V2 = {
   pastilles: { id: 'profilV2-pastilles', valeur: function(w) { return w['Pastille gout']; }, inconnu: '', quoi: 'pastilles',
     classe: function(nom) { return classePastilleV2(nom); }, filtre: 'pastille', moities: ['Rouge', 'Blanc'], max: 20 },
   // la 4e (5 nov. 2026, l'utilisateur) : le cépage principal (nom commun : Garnacha compte avec Grenache), coupée en deux
-  // comme les pastilles ; 7 cépages par moitié puis « Autres » ; un cépage non nommé (« Autres cépages ») ne compte pas
+  // comme les pastilles ; 12 cépages par moitié puis « Autres » (5 nov. : 7 laissaient « Autres » à 34 %) ; un cépage
+  // non nommé (« Autres cépages ») ne compte pas
   cepages: { id: 'profilV2-cepages', valeur: function(w) {
       var c = decodeHTML(cepageDominant(w)).trim();
       return c && !/^autre/.test(cleCepageV2(c)) ? cepageCommunV2(c) : '';
-    }, cle: cleCepageV2, inconnu: '', quoi: 'cépages', filtre: 'cepage', moities: ['Rouge', 'Blanc'] }
+    }, cle: cleCepageV2, inconnu: '', quoi: 'cépages', filtre: 'cepage', moities: ['Rouge', 'Blanc'], max: 12 }
 };
 var ZOOM_PROFIL_V2 = {};    // tarte → les valeurs d'un « Autres » ouvert (absente : toutes)
 var PARTS_PROFIL_V2 = {};   // tarte → ses parts dessinées (ce que touche le doigt)
@@ -427,7 +428,8 @@ function partsParV2(liste, t, seulement) {
 
 // Une tarte coupée en deux (t.moities : la couleur de gauche, celle de droite) : les parts de chaque moitié, sur 100 % de sa
 // couleur (p.total) ; les vins d'une autre couleur ne comptent pas. p.couleur : la couleur telle qu'écrite (le filtre de la Cave).
-// zoom ({ membres, couleur } : un « Autres » ouvert) : ses valeurs seulement, de sa couleur, en une tarte entière.
+// zoom ({ membres, couleur } : un « Autres » ouvert) : ses valeurs seulement, de sa couleur, dans SA moitié, sur 100 %
+// (5 nov. 2026, l'utilisateur : une tarte entière mettait des rouges à droite).
 function partsMoitiesV2(liste, t, zoom) {
   var vinDe = indexVinsHistoV2(), out = [];
   t.moities.forEach(function(couleur, k) {
@@ -437,10 +439,7 @@ function partsMoitiesV2(liste, t, zoom) {
       return couleurConnueV2(c) && couleurClasseV2(c) === couleurClasseV2(couleur);
     });
     var parts = partsParV2(siens, t, zoom ? zoom.membres : null), total = parts.reduce(function(n, p) { return n + p.n; }, 0);
-    parts.forEach(function(p) {
-      if (!zoom) { p.moitie = k ? 'droite' : 'gauche'; p.total = total; }
-      p.couleur = couleur;
-    });
+    parts.forEach(function(p) { p.moitie = k ? 'droite' : 'gauche'; p.total = total; p.couleur = couleur; });
     out = out.concat(parts);
   });
   return out;
