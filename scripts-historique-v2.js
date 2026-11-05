@@ -366,7 +366,13 @@ var TARTES_PROFIL_V2 = {
   // chaque pastille, la couleur de ses vins (« Rouge » / « Blanc ») ; toutes les pastilles montrées (pas d'« Autres »)
   pastilles: { id: 'profilV2-pastilles', valeur: function(w) { return w['Pastille gout']; }, inconnu: '', quoi: 'pastilles',
     classe: function(nom) { return classePastilleV2(nom); }, precision: function(w) { return w.Couleur; }, filtre: 'pastille',
-    moities: ['Rouge', 'Blanc'], max: 20 }
+    moities: ['Rouge', 'Blanc'], max: 20 },
+  // la 4e (5 nov. 2026, l'utilisateur) : le cépage principal (nom commun : Garnacha compte avec Grenache), coupée en deux
+  // comme les pastilles ; 7 cépages par moitié puis « Autres » ; un cépage non nommé (« Autres cépages ») ne compte pas
+  cepages: { id: 'profilV2-cepages', valeur: function(w) {
+      var c = decodeHTML(cepageDominant(w)).trim();
+      return c && !/^autre/.test(cleCepageV2(c)) ? cepageCommunV2(c) : '';
+    }, inconnu: '', quoi: 'cépages', precision: function(w) { return w.Couleur; }, filtre: 'cepage', moities: ['Rouge', 'Blanc'] }
 };
 var ZOOM_PROFIL_V2 = {};    // tarte → les valeurs d'un « Autres » ouvert (absente : toutes)
 var PARTS_PROFIL_V2 = {};   // tarte → ses parts dessinées (ce que touche le doigt)
@@ -410,15 +416,20 @@ function partsParV2(liste, t, seulement) {
 
 // Une tarte coupée en deux (t.moities : la couleur de gauche, celle de droite) : les parts de chaque moitié, sur 100 % de sa
 // couleur (p.total) ; les vins d'une autre couleur ne comptent pas. p.couleur : la couleur telle qu'écrite (le filtre de la Cave).
-function partsMoitiesV2(liste, t) {
+// zoom ({ membres, couleur } : un « Autres » ouvert) : ses valeurs seulement, de sa couleur, en une tarte entière.
+function partsMoitiesV2(liste, t, zoom) {
   var vinDe = indexVinsHistoV2(), out = [];
   t.moities.forEach(function(couleur, k) {
+    if (zoom && couleurClasseV2(zoom.couleur) !== couleurClasseV2(couleur)) return;
     var siens = (liste || []).filter(function(h) {
       var c = vinDe(h).Couleur || h.couleur;
       return couleurConnueV2(c) && couleurClasseV2(c) === couleurClasseV2(couleur);
     });
-    var parts = partsParV2(siens, t), total = parts.reduce(function(n, p) { return n + p.n; }, 0);
-    parts.forEach(function(p) { p.moitie = k ? 'droite' : 'gauche'; p.total = total; p.couleur = (p.sous || couleur).split(' · ')[0]; });
+    var parts = partsParV2(siens, t, zoom ? zoom.membres : null), total = parts.reduce(function(n, p) { return n + p.n; }, 0);
+    parts.forEach(function(p) {
+      if (!zoom) { p.moitie = k ? 'droite' : 'gauche'; p.total = total; }
+      p.couleur = (p.sous || couleur).split(' · ')[0];
+    });
     out = out.concat(parts);
   });
   return out;
@@ -470,13 +481,15 @@ function tarteV2(parts, t) {
     poser(parts.filter(function(p) { return p.moitie === 'gauche'; }).reverse(), Math.PI / 2, Math.PI);   // du bas vers le haut
     poser(parts.filter(function(p) { return p.moitie === 'droite'; }), -Math.PI / 2, Math.PI);           // du haut vers le bas
   } else poser(ordreTarteV2(parts), -Math.PI / 2 - Math.PI * parts[0].n / total, 2 * Math.PI);
-  var formes = '', ecritures = '', cotes = { droite: [], gauche: [] }, haut = -r - 10, bas = r + 10;
+  // coupée en deux : les parts de chaque moitié dans leur groupe, leur nuance d'or suit leur rang DANS la moitié (CSS)
+  var formes = '', ecritures = '', cotes = { droite: [], gauche: [] }, haut = -r - 10, bas = r + 10, groupes = { gauche: '', droite: '' };
   parts.forEach(function(p, i) {
     var debut = place[i][0], fin = place[i][1], m = (debut + fin) / 2, pct = Math.round(p.n / (p.total || total) * 100);
     var a = pt(debut, r), b = pt(fin, r), arc = fin - debut;
     var classe = (p.classe ? ' class="' + p.classe + '"' : '') + ' onclick="toucherPartProfilV2(\'' + t + '\', ' + i + ')"';
-    formes += arc >= 2 * Math.PI - 1e-9 ? '<circle' + classe + ' cx="' + cx + '" cy="0" r="' + r + '"/>'
+    var forme = arc >= 2 * Math.PI - 1e-9 ? '<circle' + classe + ' cx="' + cx + '" cy="0" r="' + r + '"/>'
       : '<path' + classe + ' d="M' + cx + ' 0 L' + f(a[0]) + ' ' + f(a[1]) + ' A' + r + ' ' + r + ' 0 ' + (arc > Math.PI ? 1 : 0) + ' 1 ' + f(b[0]) + ' ' + f(b[1]) + 'Z"/>';
+    if (p.moitie) groupes[p.moitie] += forme; else formes += forme;
     // sous le nom : sa précision s'il en a une (« Rouge »), puis le % ; une ligne de plus = 16 de plus
     var sous = (p.sous && p.nom.indexOf('Autres') !== 0) ? p.sous : '', plus = sous ? 16 : 0;
     var toucher = ' onclick="toucherPartProfilV2(\'' + t + '\', ' + i + ')"';
@@ -498,6 +511,7 @@ function tarteV2(parts, t) {
       haut = Math.min(haut, e.y - 20); bas = Math.max(bas, e.y + 20 + e.plus);
     });
   });
+  if (moities) formes = '<g>' + groupes.gauche + '</g><g>' + groupes.droite + '</g>';
   return '<svg viewBox="0 ' + f(haut) + ' ' + (2 * cx) + ' ' + f(bas - haut) + '">' + formes + ecritures + '</svg>';
 }
 
@@ -505,7 +519,7 @@ function rendreProfilV2() {
   var achats = ALL_ACHATS || [];
   Object.keys(TARTES_PROFIL_V2).forEach(function(t) {
     var d = TARTES_PROFIL_V2[t];
-    var parts = PARTS_PROFIL_V2[t] = d.moities ? partsMoitiesV2(achats, d) : partsParV2(achats, d, ZOOM_PROFIL_V2[t]);
+    var parts = PARTS_PROFIL_V2[t] = (d.moities ? partsMoitiesV2 : partsParV2)(achats, d, ZOOM_PROFIL_V2[t]);
     var el = document.getElementById(TARTES_PROFIL_V2[t].id);
     // un « Autres » ouvert : le rond « Tout » remet la tarte entière
     el.innerHTML = parts.length ? tarteV2(parts, t) + (ZOOM_PROFIL_V2[t] ? '<div class="roundel" onclick="toutProfilV2(\'' + t + '\')">' +
@@ -525,7 +539,7 @@ function rendreProfilV2() {
 function toucherPartProfilV2(t, i) {
   var p = (PARTS_PROFIL_V2[t] || [])[i], d = TARTES_PROFIL_V2[t];
   if (!p) return;
-  if (p.membres) { ZOOM_PROFIL_V2[t] = p.membres; rendreProfilV2(); return; }
+  if (p.membres) { ZOOM_PROFIL_V2[t] = d.moities ? { membres: p.membres, couleur: p.couleur } : p.membres; rendreProfilV2(); return; }
   if (p.nom === d.inconnu) return;
   naviguerV2(function() {
     viderFiltresV2('caveV2');
