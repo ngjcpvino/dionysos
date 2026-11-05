@@ -48,5 +48,11 @@ module.exports = [
     "traiterResultatScanV2('" + CINQ + "')", "menuV2Click('deplacer')", "document.querySelector('#deplacerV2-bouteille-menu .item-liste').click()", "deplacerARangerV2(true)"]],
   ['importer des achats', ["burgerV2Click('importachats')", { saisir: ['#importAchatsV2-texte', HISTORIQUE_SAQ] }, "lireImportAchatsV2()", "importerAchatsV2()",
     "fermerImportAchatsV2()", "ouvrirFicheV2('" + UN + "', 'cave')"]],
-  ['facture SAQ', ["burgerV2Click('facture')", { fichier: ['#recuV2-fichier', 'recu.png'] }, "confirmerRecuVinV2()", "passerRecuVinV2()"]]
+  ['facture SAQ', ["burgerV2Click('facture')", { fichier: ['#recuV2-fichier', 'recu.png'] }, "confirmerRecuVinV2()", "passerRecuVinV2()"]],
+  // Le Mode d'emploi (5 nov. 2026) : chaque étape de chaque visite (12 « › » par visite : au-delà de sa dernière étape, elle est finie
+  // et « › » ne fait plus rien), puis une question, et la sortie au milieu d'une visite. Rien ne doit partir au serveur en écriture.
+  ['mode d\'emploi et visites', ["burgerV2Click('modeemploi')", "basculerVoletsV2('modeEmploiV2-', 'visites')"].concat(
+    [0, 1, 2, 3, 4, 5, 6].reduce((l, v) => l.concat(["lancerVisiteV2(" + v + ", 0)"], new Array(12).fill("avancerVisiteV2(1)")), []),
+    ["basculerVoletsV2('modeEmploiV2-', 'questions')", "document.querySelectorAll('#modeEmploiV2-questions .item-liste')[3].click()",
+     "avancerVisiteV2(-1)", "quitterVisiteV2()", "fermerModeEmploiV2()"])]
 ];

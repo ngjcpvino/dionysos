@@ -60,3 +60,6 @@
 - **Importer des achats** : tu colles ton historique d'achat de saq.com ; les vins qui manquent entrent dans Dionysos (0 bouteille, voilés dans la Cave) et chaque achat est compté. Les bouteilles ne sont jamais touchées.
 - **Mises à jour** : Accords SAQ et Curieux Bégin, puis **Données** pour tout recharger.
 - **Sans réseau** : l'app s'ouvre et se consulte avec la dernière copie, mais rien ne peut s'enregistrer.
+
+## Le mode d'emploi
+- **Mode d'emploi** (au bas du menu) : la présentation, les visites guidées (les vrais écrans, le bouton allumé en or, une bulle qui explique ; rien ne s'enregistre) et les questions « Je veux… » (la visite part de l'étape qui y répond).

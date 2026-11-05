@@ -88,6 +88,7 @@
       Données
     </div>
   </div>
+  <div class="item-liste" onclick="burgerV2Click('modeemploi')">MODE D'EMPLOI</div>
 </div>
 
 <!-- ====================== MOT DE PASSE V2 ====================== -->
@@ -320,6 +321,15 @@
     <div id="profilV2-couleurs" class="contenu section"></div>
     <div id="profilV2-pastilles" class="contenu section"></div>
     <div id="profilV2-cepages" class="contenu"></div>
+  </div>
+</div>
+
+<!-- ====================== MODE D'EMPLOI V2 ====================== -->
+<div id="modeEmploiV2Container" class="modal-v2-fullscreen" style="display:none;">
+  <div class="modal-v2-content modale-haut">
+    <div class="btn-fermer" onclick="fermerModeEmploiV2()">✕</div>
+    <h2 class="titre-1">Mode d'emploi</h2>
+    <div id="modeEmploiV2-corps" class="contenu"></div>
   </div>
 </div>
 
@@ -780,6 +790,20 @@
   </div>
 </div>
 
+<!-- ====================== VISITE GUIDÉE (Mode d'emploi) ====================== -->
+<!-- Par-dessus toute l'app : le doigt n'atteint que la bulle, rien ne s'enregistre pendant une visite -->
+<div id="visiteV2" class="visite" style="display:none;">
+  <div class="bloc-form">
+    <div id="visiteV2-titre" class="titre-3"></div>
+    <div id="visiteV2-texte" class="texte"></div>
+    <div class="ligne-ronds">
+      <div class="cercle" id="visiteV2-avant" onclick="avancerVisiteV2(-1)">‹</div>
+      <div class="cercle" onclick="quitterVisiteV2()">✕</div>
+      <div class="cercle" id="visiteV2-apres" onclick="avancerVisiteV2(1)">›</div>
+    </div>
+  </div>
+</div>
+
 <script src="lecteur/zxing-wasm-3.1.6.js"></script>
 <!-- Ancien lecteur, en secours seulement jusqu'après les essais en succursale (liste 2.0, chantier 2) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
@@ -788,7 +812,7 @@
   var v = Math.floor(Date.now() / 3600000);
   ['scripts-socle-v2.js', 'scripts-communs-v2.js', 'scripts-scan-v2.js', 'scripts-cave-v2.js', 'scripts-achat-v2.js',
    'scripts-recherche-v2.js', 'scripts-accords-v2.js', 'scripts-emplacements-v2.js', 'scripts-historique-v2.js',
-   'scripts-fiche-v2.js'].forEach(function(f) {
+   'scripts-fiche-v2.js', 'scripts-mode-emploi-v2.js'].forEach(function(f) {
     document.write('<script src="' + f + '?v=' + v + '"><\/script>');
   });
 })();
