@@ -300,8 +300,8 @@ function parcoursMeubleEmpV2(meuble) {
 //    sortie devient « À ranger » (elle voyage), une bouteille posée prend sa place — seulement si cette place est libre
 //    (31 oct. : deux bouteilles s'étaient retrouvées en C-7-1). L'app dit donc vrai même si on arrête en chemin. Pas
 //    d'« Enregistrer » à la fin, et la tournée ne se recalcule jamais en chemin (plus de 2e passage).
-// 4. LES BOÎTES (4 cases par rangée, 3 rangées par boîte) : à la sortie, l'app dit la case ; les cases suivent l'ordre
-//    de la POSE — à la pose, on reprend case 1-1, 1-2… en remplissant le meuble rangée par rangée.
+// 4. LES BOÎTES (4 cases par rangée, 3 rangées par boîte) : à la sortie, l'app dit la case (écrite « boîte 1-1 ») ; les
+//    cases suivent l'ordre de la POSE — à la pose, on reprend 1-1, 1-2… en remplissant le meuble rangée par rangée.
 // Zones : meubles et rangées de l'onglet config — si l'aménagement change, corriger ici.
 var ZONES_MENAGE_V2 = {
   Cellier: [
@@ -781,9 +781,9 @@ var ETAPES_MENAGE_V2 = [
   { titre: '2 · Au Pigeonnier', action: 'Sors ce qui va au cellier ou change de place', sorte: 'sors', de: ['pigeonnier'], vers: ['cellier', 'pigeonnier'] },
   { titre: '2 · Au Pigeonnier', action: 'Place', sorte: 'pose', de: ['cellier', 'pigeonnier'], vers: ['pigeonnier'] },
   { titre: '3 · Au cellier', action: 'Place ce qui vient du Pigeonnier', sorte: 'pose', de: ['pigeonnier'], vers: ['cellier'] },
-  { titre: '4 · En bas, à la Réserve', action: 'Sors ce qui monte ou change de place', sorte: 'sors', de: ['reserve'], vers: ['cellier', 'pigeonnier', 'reserve'] },
-  { titre: '4 · En bas, à la Réserve', action: 'Sors ce qui va dans « À ranger » et place-le', sorte: 'direct', de: ['reserve'], vers: ['aranger'] },
-  { titre: '4 · En bas, à la Réserve', action: 'Place', sorte: 'pose', de: ['cellier', 'pigeonnier', 'reserve'], vers: ['reserve'] },
+  { titre: '4 · Réserve', action: 'Sors ce qui monte ou change de place', sorte: 'sors', de: ['reserve'], vers: ['cellier', 'pigeonnier', 'reserve'] },
+  { titre: '4 · Réserve', action: 'Sors ce qui va dans « À ranger » et place-le', sorte: 'direct', de: ['reserve'], vers: ['aranger'] },
+  { titre: '4 · Réserve', action: 'Place', sorte: 'pose', de: ['cellier', 'pigeonnier', 'reserve'], vers: ['reserve'] },
   { titre: '5 · À ranger', action: 'Prends ce qui va à la Réserve et place-le', sorte: 'direct', de: ['aranger'], vers: ['reserve'] },
   { titre: '5 · À ranger', action: 'Sors ce qui monte', sorte: 'sors', de: ['aranger'], vers: ['cellier', 'pigeonnier'] },
   { titre: '5 · À ranger', action: 'Place', sorte: 'pose', de: ['cellier', 'pigeonnier'], vers: ['aranger'] },
@@ -832,10 +832,10 @@ function tourneeMenageV2(moves) {
   return { ecrans: ecrans, caseDe: caseDe, boites: Math.ceil(max / 12) };
 }
 
-// « case 2-3 » (et la boîte, s'il en faut plusieurs)
+// « boîte 2-3 » ; s'il en faut plusieurs, « boîte 2 · 2-3 » (6 nov. 2026, l'utilisateur : « boîte », plus « case »)
 function caseMenageV2(i, boites) {
   var c = i % 12;
-  return (boites > 1 ? 'boîte ' + (Math.floor(i / 12) + 1) + ' · ' : '') + 'case ' + (Math.floor(c / 4) + 1) + '-' + (c % 4 + 1);
+  return 'boîte ' + (boites > 1 ? (Math.floor(i / 12) + 1) + ' · ' : '') + (Math.floor(c / 4) + 1) + '-' + (c % 4 + 1);
 }
 
 // Un écran de la tournée : où on est, ce qu'on fait, les bouteilles de la rangée ; « Confirmer » passe au suivant
