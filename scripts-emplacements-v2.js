@@ -52,8 +52,7 @@ function remplirFiltresEmpV2() {
   var f = filtresEmpV2;
   var base = bouteillesEnCaveV2('rangees');
 
-  var meubles = valeursUniquesV2(base, 'Meuble');
-  if (bouteillesEnCaveV2('aranger').length) meubles.push('À ranger');
+  var meubles = meublesEnCaveV2();
   var forRangee = f.meuble ? base.filter(function(i){ return String(i.Meuble) === String(f.meuble); }) : base;
   var rangees = valeursUniquesV2(forRangee, 'Rangee');
   var forEspace = base.filter(function(i){
@@ -96,9 +95,8 @@ function baseFiltresVinEmpV2() {
     return (ALL_DATA || []).filter(function(i){ return !estPropositionV2(i); });
   }
   if (f.meuble === 'À ranger') return bouteillesEnCaveV2('aranger');
-  return bouteillesEnCaveV2('rangees').filter(function(i){
-    return (!f.meuble || String(i.Meuble) === String(f.meuble)) &&
-      (!f.rangee || String(i.Rangee) === String(f.rangee)) &&
+  return (f.meuble ? bouteillesDuMeubleV2(f.meuble) : bouteillesEnCaveV2('rangees')).filter(function(i){
+    return (!f.rangee || String(i.Rangee) === String(f.rangee)) &&
       (!f.espace || String(i.Espace) === String(f.espace));
   });
 }
