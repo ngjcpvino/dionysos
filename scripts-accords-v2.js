@@ -341,11 +341,12 @@ function calculerResultatsChartierV2() {
     return liste.filter(function(s) { return s.aliments.length === combien && (!aliment || s.aliments[0] === aliment); });
   };
   var lesDeux = avec(2);
-  div.innerHTML = '<div class="titre-3">Avec ' + alims.join(' et ') + '</div>' +
+  // Les petits titres « Avec … » en blanc (6 nov. 2026, l'utilisateur : en or, on ne les voyait pas parmi les cépages)
+  div.innerHTML = '<div class="titre-3 color-white">Avec ' + alims.join(' et ') + '</div>' +
     (lesDeux.length ? '<div>' + blocs(lesDeux) + '</div>' : '<div class="texte-secondaire">Aucun cépage ne va avec les deux</div>') +
     alims.map(function(a) {
       var seul = avec(1, a);
-      return seul.length ? '<div class="titre-3">Avec ' + a + ' seulement</div><div>' + blocs(seul) + '</div>' : '';
+      return seul.length ? '<div class="titre-3 color-white">Avec ' + a + ' seulement</div><div>' + blocs(seul) + '</div>' : '';
     }).join('');
 }
 
