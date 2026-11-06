@@ -228,6 +228,17 @@ function bouteillesEnCaveV2(ou) {
     return bouteilleEnCaveV2(i) && (!ou || (ou === 'rangees') === !!(i.Meuble && i.Rangee && i.Espace));
   });
 }
+// Les meubles où il y a des bouteilles, « À ranger » en dernier s'il en reste — le menu Meuble (Emplacements, Chartier)
+function meublesEnCaveV2() {
+  var meubles = valeursUniquesV2(bouteillesEnCaveV2('rangees'), 'Meuble');
+  if (bouteillesEnCaveV2('aranger').length) meubles.push('À ranger');
+  return meubles;
+}
+// Les bouteilles en cave d'un meuble ; « À ranger » : celles qui n'ont pas meuble, rangée et espace
+function bouteillesDuMeubleV2(meuble) {
+  if (meuble === 'À ranger') return bouteillesEnCaveV2('aranger');
+  return bouteillesEnCaveV2('rangees').filter(function(i) { return String(i.Meuble) === String(meuble); });
+}
 // Vrai si le vin a au moins une bouteille en cave — par son code-barres, ou par champ ('Code SAQ')
 function vinEnCaveV2(code, champ) {
   return bouteillesEnCaveV2().some(function(i) { return memeCodeV2(i[champ || 'Code-barres'], code); });
@@ -542,11 +553,11 @@ var PANNEAUX_V2 = {
   },
   chartier: {
     prefixe: 'chartierV2',
-    etat: function() { return filtresChartierV2; }, vide: { couleur: '', cepage: '', dispo: false },
+    etat: function() { return filtresChartierV2; }, vide: { meuble: '', couleur: '', cepage: '', dispo: false },
     rafraichir: function() { remplirFiltresChartierV2(); majSelectionChartierV2(); calculerResultatsChartierV2(); },
-    sansSauf: ['couleur', 'cepage'], remiseAZero: function() { chartierV2Aliment = ''; },
+    sansSauf: ['meuble', 'couleur', 'cepage'], remiseAZero: function() { chartierV2Aliments = []; },
     avant: '<div class="titre-3">Aliment</div><div id="chartierV2-aliments" style="display:contents;"></div><div class="panneau-separateur"></div>',
-    filtres: [['couleur', 'Couleur'], ['cepage', 'Cépage']]
+    filtres: [['meuble', 'Meuble'], ['couleur', 'Couleur'], ['cepage', 'Cépage']]
   }
 };
 

@@ -130,7 +130,7 @@ var VISITES_V2 = [
   ] },
   { titre: "Qu'est-ce que je sers avec…", etapes: [
     { ecran: 'chartierFiltres', cible: "#chartierV2-aliments .champ-cliquable", question: "Je veux un vin pour un aliment",
-      texte: "Selon Chartier : choisis un aliment. Dionysos montre les cépages qui l'accompagnent, puis tes vins de ces cépages." },
+      texte: "Selon Chartier : choisis un aliment, ou deux. Dionysos montre les cépages qui les accompagnent (ceux qui vont avec les deux d'abord), puis tes vins de ces cépages. Le menu Meuble ne garde que les vins qui ont une bouteille dans ce meuble." },
     { ecran: 'selonsaq', cible: "#selonSaqV2-loupe", question: "Je veux un vin qui va avec plusieurs ingrédients",
       texte: "Selon la SAQ : choisis des ingrédients ou des plats, et tes vins qui vont avec apparaissent. Sous chaque choix, « les recettes » de la SAQ." },
     { ecran: 'curieuxbegin', cible: "#curieuxBeginV2-loupe", question: "Je veux les vins de Curieux Bégin",

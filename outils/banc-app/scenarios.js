@@ -29,7 +29,11 @@ module.exports = [
   ['emplacements', ["burgerV2Click('emplacements')"].concat(['fammanquante', 'menage', 'plan'].map(m => "choisirModeEmpV2('" + m + "')"),
     ["ouvrirFiltresV2('empV2')", "basculerFiltreV2('empV2', 'meuble')", "choisirFiltreV2('empV2', 'meuble', 'Cellier')", "choisirModeEmpV2('fammanquante')",
      "choisirModeEmpV2('listemeuble')", "reinitialiserFiltresV2('empV2')", "fermerEmpV2()"])],
-  ['chartier, selon SAQ, Curieux Bégin, notes', ["burgerV2Click('accords')", "choisirAlimentChartierV2('Agneau')", "fermerChartierV2()",
+  // Deux aliments et le meuble (6 nov. 2026) : le faux classeur n'a que Syrah-Agneau et Chardonnay-Crabe — on en pose d'autres, en mémoire seulement
+  ['chartier, selon SAQ, Curieux Bégin, notes', ["burgerV2Click('accords')", "choisirAlimentChartierV2('Agneau')",
+    "ALL_ACCORDS.push({ cepage: 'Syrah', aliment: 'Romarin', nuance: 'du Rhône' }, { cepage: 'Grenache', aliment: 'Romarin', nuance: '' }, { cepage: 'Grenache', aliment: 'Ail', nuance: '' }); choisirAlimentChartierV2('Romarin')",
+    "basculerAutresChartierV2(1)", "choisirAlimentChartierV2('Ail', 'Romarin')", "ouvrirFiltresV2('chartierV2')", "basculerFiltreV2('chartierV2', 'meuble')",
+    "choisirFiltreV2('chartierV2', 'meuble', 'Cellier')", "choisirAlimentChartierV2('Romarin')", "reinitialiserFiltresV2('chartierV2')", "fermerChartierV2()",
     "burgerV2Click('selonsaq')", "fermerSelonSaqV2()", "burgerV2Click('curieuxbegin')", "choisirModeCurieuxBeginV2('horscave')", "fermerCurieuxBeginV2()",
     "burgerV2Click('notes')", "ouvrirNoteEditV2(2)", "fermerNoteEditV2()", "fermerNotesV2()"]],
   ['scan d\'un vin connu, boire', ["traiterResultatScanV2('" + UN + "')", "menuV2Click('boire')", "choisirBouteilleActionV2('boire', 1)",
