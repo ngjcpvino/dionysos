@@ -774,21 +774,22 @@ function confirmerDoublonsMenageV2(meuble) {
 // En haut, ce qui reste en haut s'échange sur place (le cellier, puis le Pigeonnier : ce qui descend d'abord, puis ce
 // qui monte au cellier ; on place au Pigeonnier ce qui vient du cellier, puis au cellier ce qui vient du Pigeonnier) ;
 // en bas, la Réserve (ce qui monte, ce qui va dans « À ranger », puis on place), puis « À ranger » ; on remonte.
+// À l'écran (6 nov. 2026, l'utilisateur) : « Sortir », « Ranger », « Sortir et ranger » (sans boîte) — le détail est dans l'ordre des écrans.
 var ETAPES_MENAGE_V2 = [
-  { titre: '1 · Au cellier', action: 'Sors', sorte: 'sors', de: ['cellier'], vers: ['cellier', 'pigeonnier', 'reserve', 'aranger'] },
-  { titre: '1 · Au cellier', action: 'Replace', sorte: 'pose', de: ['cellier'], vers: ['cellier'] },
-  { titre: '2 · Au Pigeonnier', action: 'Sors ce qui descend', sorte: 'sors', de: ['pigeonnier'], vers: ['reserve', 'aranger'] },
-  { titre: '2 · Au Pigeonnier', action: 'Sors ce qui va au cellier ou change de place', sorte: 'sors', de: ['pigeonnier'], vers: ['cellier', 'pigeonnier'] },
-  { titre: '2 · Au Pigeonnier', action: 'Place', sorte: 'pose', de: ['cellier', 'pigeonnier'], vers: ['pigeonnier'] },
-  { titre: '3 · Au cellier', action: 'Place ce qui vient du Pigeonnier', sorte: 'pose', de: ['pigeonnier'], vers: ['cellier'] },
-  { titre: '4 · Réserve', action: 'Sors ce qui monte ou change de place', sorte: 'sors', de: ['reserve'], vers: ['cellier', 'pigeonnier', 'reserve'] },
-  { titre: '4 · Réserve', action: 'Sors ce qui va dans « À ranger » et place-le', sorte: 'direct', de: ['reserve'], vers: ['aranger'] },
-  { titre: '4 · Réserve', action: 'Place', sorte: 'pose', de: ['cellier', 'pigeonnier', 'reserve'], vers: ['reserve'] },
-  { titre: '5 · À ranger', action: 'Prends ce qui va à la Réserve et place-le', sorte: 'direct', de: ['aranger'], vers: ['reserve'] },
-  { titre: '5 · À ranger', action: 'Sors ce qui monte', sorte: 'sors', de: ['aranger'], vers: ['cellier', 'pigeonnier'] },
-  { titre: '5 · À ranger', action: 'Place', sorte: 'pose', de: ['cellier', 'pigeonnier'], vers: ['aranger'] },
-  { titre: '6 · Au Pigeonnier', action: 'Place', sorte: 'pose', de: ['reserve', 'aranger'], vers: ['pigeonnier'] },
-  { titre: '7 · Au cellier', action: 'Place', sorte: 'pose', de: ['reserve', 'aranger'], vers: ['cellier'] }
+  { titre: '1 · Au cellier', action: 'Sortir', sorte: 'sors', de: ['cellier'], vers: ['cellier', 'pigeonnier', 'reserve', 'aranger'] },
+  { titre: '1 · Au cellier', action: 'Ranger', sorte: 'pose', de: ['cellier'], vers: ['cellier'] },
+  { titre: '2 · Au Pigeonnier', action: 'Sortir', sorte: 'sors', de: ['pigeonnier'], vers: ['reserve', 'aranger'] },
+  { titre: '2 · Au Pigeonnier', action: 'Sortir', sorte: 'sors', de: ['pigeonnier'], vers: ['cellier', 'pigeonnier'] },
+  { titre: '2 · Au Pigeonnier', action: 'Ranger', sorte: 'pose', de: ['cellier', 'pigeonnier'], vers: ['pigeonnier'] },
+  { titre: '3 · Au cellier', action: 'Ranger', sorte: 'pose', de: ['pigeonnier'], vers: ['cellier'] },
+  { titre: '4 · Réserve', action: 'Sortir', sorte: 'sors', de: ['reserve'], vers: ['cellier', 'pigeonnier', 'reserve'] },
+  { titre: '4 · Réserve', action: 'Sortir et ranger', sorte: 'direct', de: ['reserve'], vers: ['aranger'] },
+  { titre: '4 · Réserve', action: 'Ranger', sorte: 'pose', de: ['cellier', 'pigeonnier', 'reserve'], vers: ['reserve'] },
+  { titre: '5 · À ranger', action: 'Sortir et ranger', sorte: 'direct', de: ['aranger'], vers: ['reserve'] },
+  { titre: '5 · À ranger', action: 'Sortir', sorte: 'sors', de: ['aranger'], vers: ['cellier', 'pigeonnier'] },
+  { titre: '5 · À ranger', action: 'Ranger', sorte: 'pose', de: ['cellier', 'pigeonnier'], vers: ['aranger'] },
+  { titre: '6 · Au Pigeonnier', action: 'Ranger', sorte: 'pose', de: ['reserve', 'aranger'], vers: ['pigeonnier'] },
+  { titre: '7 · Au cellier', action: 'Ranger', sorte: 'pose', de: ['reserve', 'aranger'], vers: ['cellier'] }
 ];
 
 // Les écrans de la tournée : une étape par écran, ses bouteilles dans l'ordre des places (la place quittée pour sortir,
@@ -847,15 +848,16 @@ function afficherEtapeMenageV2() {
   var e = t.ecrans[T.etape];
   document.getElementById('empV2-compte').innerHTML = 'Tri Dionysos : ' + (T.etape + 1) + ' sur ' + t.ecrans.length;
   var court = function(p) { return emplacementV2(p && p.meuble, p && p.rangee, p && p.espace, true); };
-  var dest = { cellier: 'cellier', pigeonnier: 'Pigeonnier', reserve: 'Réserve', aranger: 'À ranger' };
   html += '<div class="emp-bloc"><div class="titre-2">' + e.titre + '</div><div class="titre-3">' + e.action + '</div>';
   e.lignes.forEach(function(m) {
     var boite = caseMenageV2(t.caseDe[m.cle], t.boites);
-    if (e.sorte === 'sors') html += carteMenageV2(m, court(m.de) + ' · ' + decodeHTML(m.w.Nom || '—'), m.raison,
-      '<span class="fs-12 color-white">' + boite + '</span><span class="fs-12">→ ' + dest[lieuMenageV2(m.vers)] + '</span>', false);
-    else if (e.sorte === 'pose') html += carteMenageV2(m, boite + ' → ' + court(m.vers) + ' · ' + decodeHTML(m.w.Nom || '—'),
-      (lieuMenageV2(m.de) === 'aranger' ? 'vient d\'' : 'vient de ') + court(m.de) + (m.raison ? ' · ' + m.raison : ''), '', false);
-    else html += carteMenageV2(m, court(m.de) + ' → ' + court(m.vers) + ' · ' + decodeHTML(m.w.Nom || '—'), m.raison, '', false);
+    // Chaque carte (6 nov. 2026, l'utilisateur) : l'emplacement sur la 1re ligne, le nom du vin dessous, sans le pourquoi ;
+    // une sortie : la boîte à droite, rien d'autre
+    var nom = '<br>' + decodeHTML(m.w.Nom || '—');
+    if (e.sorte === 'sors') html += carteMenageV2(m, court(m.de) + nom, null, '<span class="fs-12 color-white">' + boite + '</span>', false);
+    else if (e.sorte === 'pose') html += carteMenageV2(m, boite + ' → ' + court(m.vers) + nom,
+      (lieuMenageV2(m.de) === 'aranger' ? 'vient d\'' : 'vient de ') + court(m.de), '', false);
+    else html += carteMenageV2(m, court(m.de) + ' → ' + court(m.vers) + nom, null, '', false);
   });
   html += '</div><div class="roundel mt-20" onclick="confirmerEtapeMenageV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Confirmer</span></div>';
   html += recommencerMenageV2Html();
