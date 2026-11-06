@@ -948,13 +948,23 @@ function remplacantCellierV2(place) {
 }
 // Après « Boire » ou « Donner » : la page du remplaçant, s'il y en a un (sinon rien : l'accueil, comme avant)
 function proposerRemplacantV2(place) {
+  if (dessinerRemplacantV2(place)) montrerPageV2('remplacantV2Container');
+}
+// La page, pour une place libre : le titre et la carte du vin proposé — la toucher ouvre sa fiche (6 nov. 2026, l'utilisateur),
+// dont le ✕ ramène ici (provenance 'remplacant'). Faux s'il n'y a rien (plus rien) à proposer.
+function dessinerRemplacantV2(place) {
   var r = remplacantCellierV2(place);
-  if (!r) return;
   REMPLACANT_V2 = r;
+  if (!r) return false;
   var court = function(p) { return emplacementV2(p.meuble, p.rangee, p.espace, true); };
   document.getElementById('remplacantV2-titre').textContent = court(r.vers) + ' est libre';
-  document.getElementById('remplacantV2-carte').innerHTML = carteMenageV2(r.b, court(r.b.place) + ' → ' + court(r.vers) + ' · ' + nomMenageV2(r.b), r.raison, '', false, '');
-  montrerPageV2('remplacantV2Container');
+  document.getElementById('remplacantV2-carte').innerHTML = carteMenageV2(r.b, court(r.b.place) + ' → ' + court(r.vers) + ' · ' + nomMenageV2(r.b), r.raison, '', false,
+    tapFicheV2((r.b.w['Code-barres'] || '').toString().trim(), 'remplacant'));
+  return true;
+}
+// Retour de la fiche : la proposition recalculée (la fiche a pu changer le vin) ; plus rien à proposer → l'accueil
+function redessinerRemplacantV2() {
+  if (!REMPLACANT_V2 || !dessinerRemplacantV2(REMPLACANT_V2.vers)) fermerRemplacantV2();
 }
 function confirmerRemplacantV2() {
   var r = REMPLACANT_V2;

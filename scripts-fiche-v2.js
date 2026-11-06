@@ -996,6 +996,8 @@ function fermerFicheV2() {
     revenirPageV2('curieuxBeginV2Container', chargerCurieuxBeginV2);
   } else if (FICHE_V2_PROVENANCE === 'notes') {
     revenirPageV2('notesV2Container', afficherNotesV2);
+  } else if (FICHE_V2_PROVENANCE === 'remplacant') {
+    revenirPageV2('remplacantV2Container', redessinerRemplacantV2);
   }
 
   FICHE_V2_PROVENANCE = null;
