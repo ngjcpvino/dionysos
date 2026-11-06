@@ -31,6 +31,7 @@
 
 ## Format des échanges
 - Réponses courtes, en clair, jamais en jargon ni en code dans les explications.
+- **Tout ce qui s'affiche est en français (6 nov. 2026, l'utilisateur : « Le nom des sections en anglais, j'hais ça ! »)** : aussi le nom de chaque étape de travail (la description d'une commande, d'un agent…), jamais en anglais.
 - Jamais de boutons à cliquer / choix multiples. Une question = une phrase en texte. Options = puces.
 - Une seule question à la fois, et seulement si la réponse n'est pas déjà connue ou décidée. Ne jamais redemander la permission pour un morceau déjà au plan.
 - Scénarios et options en puces, jamais en paragraphes.
