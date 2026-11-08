@@ -849,15 +849,19 @@ function afficherEtapeMenageV2() {
   document.getElementById('empV2-compte').innerHTML = 'Tri Dionysos : ' + (T.etape + 1) + ' sur ' + t.ecrans.length;
   var court = function(p) { return emplacementV2(p && p.meuble, p && p.rangee, p && p.espace, true); };
   html += '<div class="emp-bloc"><div class="titre-2">' + e.titre + '</div><div class="titre-3">' + e.action + '</div>';
+  // Chaque carte (6-8 nov. 2026, l'utilisateur) : le nom du vin, puis dessous où il va (sans le pourquoi) ; une sortie :
+  // la boîte à droite, rien d'autre. À l'écran d'« À ranger », « À ranger » ne s'écrit pas : on y est, et ses bouteilles
+  // n'ont pas de place — on les trouve par leur nom.
+  var etape = ETAPES_MENAGE_V2[e.etape];
+  var dansARanger = (e.sorte === 'pose' ? etape.vers : etape.de).join() === 'aranger';
+  var ou = function(p) { return dansARanger && lieuMenageV2(p) === 'aranger' ? '' : court(p); };
   e.lignes.forEach(function(m) {
+    var titre = function(lieux) { var l = lieux.filter(Boolean).join(' → '); return decodeHTML(m.w.Nom || '—') + (l ? '<br>' + l : ''); };
     var boite = caseMenageV2(t.caseDe[m.cle], t.boites);
-    // Chaque carte (6 nov. 2026, l'utilisateur) : l'emplacement sur la 1re ligne, le nom du vin dessous, sans le pourquoi ;
-    // une sortie : la boîte à droite, rien d'autre
-    var nom = '<br>' + decodeHTML(m.w.Nom || '—');
-    if (e.sorte === 'sors') html += carteMenageV2(m, court(m.de) + nom, null, '<span class="fs-12 color-white">' + boite + '</span>', false);
-    else if (e.sorte === 'pose') html += carteMenageV2(m, boite + ' → ' + court(m.vers) + nom,
+    if (e.sorte === 'sors') html += carteMenageV2(m, titre([ou(m.de)]), null, '<span class="fs-12 color-white">' + boite + '</span>', false);
+    else if (e.sorte === 'pose') html += carteMenageV2(m, titre([boite, ou(m.vers)]),
       (lieuMenageV2(m.de) === 'aranger' ? 'vient d\'' : 'vient de ') + court(m.de), '', false);
-    else html += carteMenageV2(m, court(m.de) + ' → ' + court(m.vers) + nom, null, '', false);
+    else html += carteMenageV2(m, titre([ou(m.de), ou(m.vers)]), null, '', false);
   });
   html += '</div><div class="roundel mt-20" onclick="confirmerEtapeMenageV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Confirmer</span></div>';
   html += recommencerMenageV2Html();
