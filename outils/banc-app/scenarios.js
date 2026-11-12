@@ -59,7 +59,9 @@ module.exports = [
     [0, 1, 2, 3, 4, 5, 6].reduce((l, v) => l.concat(["lancerVisiteV2(" + v + ", 0)"], new Array(12).fill("avancerVisiteV2(1)")), []),
     ["basculerVoletsV2('modeEmploiV2-', 'questions')", "document.querySelectorAll('#modeEmploiV2-questions .item-liste')[3].click()",
      "avancerVisiteV2(-1)", "quitterVisiteV2()", "fermerModeEmploiV2()"])],
-  // Hors ligne (12 nov. 2026) : le cadre de l'accueil, la bande du bas sur une page et sur le menu, puis le retour du réseau
+  // Hors ligne (12 nov. 2026) : le cadre de l'accueil, la bande du bas sur une page et sur le menu, puis le retour du réseau ;
+  // ensuite la perte du réseau en cours de route (le téléphone l'annonce) et son retour (resynchronisation tout de suite)
   ['hors ligne', ["afficherHorsLigneV2(Date.now() - 600000)", "burgerV2Click('cave')", "cacherToutesPagesV2(); toggleMenuV2()",
-    "toggleMenuV2(); document.getElementById('accueilV2-horsligne').style.display = 'none'; burgerV2Click('cave')"]]
+    "toggleMenuV2(); document.getElementById('accueilV2-horsligne').style.display = 'none'; burgerV2Click('cave')",
+    "cacherToutesPagesV2(); window.dispatchEvent(new Event('offline'))", "burgerV2Click('cave')", "window.dispatchEvent(new Event('online'))"]]
 ];
