@@ -218,14 +218,17 @@ function demarrerSurCopieV2() {
   });
 }
 
-// « Hors ligne — données de 14 h 05 » sous le logo (avec le jour si la copie n'est pas d'aujourd'hui)
+// « Hors ligne — données de 14 h 05 » sous le logo (avec le jour si la copie n'est pas d'aujourd'hui), et la même phrase
+// dans le pied, qui devient la bande du bas sur toutes les pages tant que celle de l'accueil est affichée (CSS)
 function afficherHorsLigneV2(date) {
   var el = document.getElementById('accueilV2-horsligne');
   if (!el) return;
   var d = new Date(date);
   var mois = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
-  var jour = (d.toDateString() === new Date().toDateString()) ? '' : ' le ' + d.getDate() + ' ' + mois[d.getMonth()];
-  el.textContent = 'Hors ligne — données de ' + d.getHours() + ' h ' + ('0' + d.getMinutes()).slice(-2) + jour;
+  // espaces insécables : « données de 20 h 21 » et le jour ne se coupent jamais (au besoin, la ligne passe après « — »)
+  var jour = (d.toDateString() === new Date().toDateString()) ? '' : ' le\u00a0' + d.getDate() + '\u00a0' + mois[d.getMonth()];
+  el.textContent = 'Hors ligne — données\u00a0de\u00a0' + d.getHours() + '\u00a0h\u00a0' + ('0' + d.getMinutes()).slice(-2) + jour;
+  document.getElementById('accueilV2-pied-horsligne').textContent = el.textContent;
   el.style.display = '';
 }
 
