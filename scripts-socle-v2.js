@@ -154,8 +154,8 @@ function demarrerAppV2(essai) {
 
 // ==================== COPIE HORS LIGNE (24 oct. 2026) ====================
 // Chaque réponse utile du serveur est gardée dans le téléphone (IndexedDB, quelques Mo) : sans réseau,
-// l'app démarre sur cette copie, l'accueil affiche « Hors ligne — données de 14 h 05 », et elle se
-// resynchronise seule dès que le réseau revient. Les écritures (Boire, Arrivée…) restent impossibles sans réseau.
+// l'app démarre sur cette copie ; sans réseau (au démarrage ou en cours de route) l'accueil affiche « Hors ligne —
+// données de 14 h 05 », la bande du bas aussi, et elle se resynchronise seule dès que le réseau revient. Les écritures (Boire, Arrivée…) restent impossibles sans réseau.
 var COPIES_V2 = { getConfig: 'config', getInventoryData: 'inventaire', getSuggestions: 'suggestions', getCurieuxBegin: 'curieuxbegin' };
 var COPIE_V2_BD = null;
 var RESYNC_V2 = null;
@@ -213,10 +213,41 @@ function demarrerSurCopieV2() {
     ALL_SUGGESTIONS = c[2] ? (c[2].valeur || []) : [];
     if (c[3] && !ALL_CURIEUXBEGIN) ALL_CURIEUXBEGIN = c[3].valeur || [];
     restaurerInventaireSuccV2(true);
-    afficherHorsLigneV2(c[1].date);
+    passerHorsLigneV2();
+  });
+}
+
+// Hors ligne = la phrase de l'accueil affichée (elle commande aussi la bande du bas, en CSS)
+function horsLigneV2() {
+  var el = document.getElementById('accueilV2-horsligne');
+  return !!el && el.style.display !== 'none';
+}
+
+// Le réseau manque — au démarrage, ou en cours de route (12 nov. 2026, l'utilisateur : « quand je perds le réseau je ne le
+// sais pas ») : la phrase et la bande apparaissent, avec l'heure des données en mémoire (le dernier inventaire reçu, gardé
+// dans la copie), et on retente le serveur toutes les 20 s. Sans copie (toute 1re ouverture), rien à montrer.
+function passerHorsLigneV2() {
+  if (horsLigneV2()) return;
+  lireCopieV2('inventaire').then(function(c) {
+    if (!c || horsLigneV2()) return;
+    afficherHorsLigneV2(c.date);
     resynchroniserV2();
   });
 }
+
+// Trois façons de s'en apercevoir en cours de route : un appel raté (appelBackend), le téléphone qui annonce la perte du
+// réseau, et une vérification chaque minute tant que l'app est à l'écran (et dès qu'elle y revient) — un petit appel de
+// fond, sans spinner : pas de réponse en 10 s = hors ligne. Le retour du réseau annoncé par le téléphone resynchronise tout de suite.
+function verifierReseauV2() {
+  if (document.visibilityState !== 'visible' || !CONFIG || horsLigneV2() || !localStorage.getItem('vinoSecret')) return;
+  appelBackend('getConfig', {}, { spinner: '', timeout: 10000 }).catch(function(err) {
+    if (!err.reseau) journaliserV2('Vérification du réseau')(err);
+  });
+}
+window.addEventListener('offline', passerHorsLigneV2);
+window.addEventListener('online', function() { if (horsLigneV2()) resynchroniserV2(0); });
+document.addEventListener('visibilitychange', verifierReseauV2);
+setInterval(verifierReseauV2, 60000);
 
 // « Hors ligne — données de 14 h 05 » sous le logo (avec le jour si la copie n'est pas d'aujourd'hui), et la même phrase
 // dans le pied, qui devient la bande du bas sur toutes les pages tant que celle de l'accueil est affichée (CSS)
@@ -232,8 +263,8 @@ function afficherHorsLigneV2(date) {
   el.style.display = '';
 }
 
-// Démarrée sur la copie : toutes les 20 s, on retente le serveur ; au retour du réseau, données fraîches et le signe s'efface
-function resynchroniserV2() {
+// Hors ligne : toutes les 20 s (ou après « delai »), on retente le serveur ; au retour du réseau, données fraîches et le signe s'efface
+function resynchroniserV2(delai) {
   clearTimeout(RESYNC_V2);
   RESYNC_V2 = setTimeout(function() {
     var opt = { spinner: '' };
@@ -251,7 +282,7 @@ function resynchroniserV2() {
       if (e && e.message === 'Mot de passe incorrect') return;
       resynchroniserV2();
     });
-  }, 20000);
+  }, delai === undefined ? 20000 : delai);
 }
 
 // Porte de sortie (bouton « Données », avec réseau seulement) : oublie la copie de l'app et la recharge
@@ -305,8 +336,10 @@ async function appelBackend(action, data = {}, options = {}) {
     if (COPIES_V2[action]) garderCopieV2(COPIES_V2[action], json.result); // copie hors ligne
     return json.result;
   } catch (e) {
-    if (e.name === 'AbortError') throw new Error('Le serveur ne répond pas');
-    throw e;
+    // Une panne du réseau (pas de réponse, ou trop lente) : l'app passe hors ligne, et l'appelant le sait (err.reseau)
+    var err = (e.name === 'AbortError') ? new Error('Le serveur ne répond pas') : e;
+    if (e.name === 'AbortError' || e instanceof TypeError) { err.reseau = true; passerHorsLigneV2(); }
+    throw err;
   } finally {
     clearTimeout(minuterie);
     if (texteSpinner) _cacherSpinner();
