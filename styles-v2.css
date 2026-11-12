@@ -329,13 +329,18 @@ body::after {
 }
 
 /* Pied de page de l'accueil — ligne dorée (assise) + droit d'auteur */
-/* « Hors ligne — données de 14 h 05 » : l'app tourne sur la copie gardée dans le téléphone */
+/* « Hors ligne — données de 14 h 05 » : l'app tourne sur la copie gardée dans le téléphone.
+   À l'accueil, un cadre doré sous le logo, à voir d'un coup d'œil (12 nov. 2026, l'utilisateur) */
 #accueilV2-horsligne {
-  font-size: var(--fs-13);
-  color: var(--white-70);
+  font-size: var(--fs-18);
+  color: var(--white);
   text-align: center;
+  width: fit-content;
+  max-width: calc(100% - var(--space-25) - var(--space-25));
   margin: 0 auto;
-  padding: 0 var(--space-25);
+  padding: var(--space-10) var(--space-20);
+  border: var(--largeur-bordure-1) solid var(--gold);
+  background: var(--noir-50);
 }
 
 #accueilV2-pied {
@@ -357,6 +362,30 @@ body::after {
 #accueilV2-pied .pied-texte {
   color: var(--white-70);
   font-size: var(--fs-11);
+}
+/* Hors ligne, dès qu'une page ou le menu est ouvert (12 nov. 2026, l'utilisateur : « toujours visible même quand on
+   navigue ») : le pied devient une bande par-dessus tout (sous la visite, le spinner et le toast), la ligne dorée sur
+   toute la largeur, « Hors ligne — données de 14 h 05 » à la place du © ; le bas des pages et des panneaux remonte d'autant.
+   Hors ligne = la phrase de l'accueil affichée (afficherHorsLigneV2 la montre, resynchroniserV2 la cache). */
+#accueilV2-pied-horsligne { display: none; }
+body:has(#accueilV2-horsligne:not([style*="none"])):has(.modal-v2-fullscreen:not([style*="none"]), #burgerV2.ouvert) #accueilV2-pied {
+  z-index: 10015;
+  background: var(--noir-70);
+  backdrop-filter: var(--flou-8);
+  padding-bottom: calc(var(--space-10) + env(safe-area-inset-bottom, 0px));
+}
+body:has(#accueilV2-horsligne:not([style*="none"])):has(.modal-v2-fullscreen:not([style*="none"]), #burgerV2.ouvert) #accueilV2-pied .pied-ligne {
+  width: 100%;
+  margin-bottom: var(--space-10);
+}
+body:has(#accueilV2-horsligne:not([style*="none"])):has(.modal-v2-fullscreen:not([style*="none"]), #burgerV2.ouvert) #accueilV2-pied .pied-texte:not(#accueilV2-pied-horsligne) { display: none; }
+body:has(#accueilV2-horsligne:not([style*="none"])):has(.modal-v2-fullscreen:not([style*="none"]), #burgerV2.ouvert) #accueilV2-pied-horsligne {
+  display: block;
+  color: var(--white);
+  font-size: var(--fs-14);
+}
+body:has(#accueilV2-horsligne:not([style*="none"])):has(.modal-v2-fullscreen:not([style*="none"]), #burgerV2.ouvert) :is(.modal-v2-content, .panneau-gauche, .panneau-droite) {
+  padding-bottom: calc(var(--space-40) + var(--space-20) + env(safe-area-inset-bottom, 0px));
 }
 
 /* =========================================
