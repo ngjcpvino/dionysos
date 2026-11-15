@@ -158,7 +158,8 @@ function demarrerAppV2(essai) {
 // données de 14 h 05 », la bande du bas aussi, et elle se resynchronise seule dès que le réseau revient. Les écritures (Boire, Arrivée…) restent impossibles sans réseau.
 var COPIES_V2 = { getConfig: 'config', getInventoryData: 'inventaire', getSuggestions: 'suggestions', getCurieuxBegin: 'curieuxbegin' };
 var COPIE_V2_BD = null;
-var RESYNC_V2 = null;
+var RESYNC_V2 = null;  // le prochain essai du serveur (null = aucun prévu : le réseau répond)
+var RETOUR_V2 = 0;     // l'heure du dernier retour de l'app à l'écran
 
 function baseCopieV2() {
   if (!COPIE_V2_BD) {
@@ -223,30 +224,29 @@ function horsLigneV2() {
   return !!el && el.style.display !== 'none';
 }
 
-// Le réseau manque — au démarrage, ou en cours de route (12 nov. 2026, l'utilisateur : « quand je perds le réseau je ne le
-// sais pas ») : la phrase et la bande apparaissent, avec l'heure des données en mémoire (le dernier inventaire reçu, gardé
-// dans la copie), et on retente le serveur toutes les 20 s. Sans copie (toute 1re ouverture), rien à montrer.
+// Le réseau semble manquer — au démarrage, ou en cours de route (12 nov. 2026, l'utilisateur : « quand je perds le réseau je ne
+// le sais pas »). Un seul raté ne suffit pas (15 nov. 2026, l'utilisateur : la bande paraissait sans raison sur l'iPhone) : le
+// serveur est réinterrogé 5 s plus tard, et la phrase et la bande n'apparaissent que s'il rate encore (resynchroniserV2).
 function passerHorsLigneV2() {
-  if (horsLigneV2()) return;
-  lireCopieV2('inventaire').then(function(c) {
-    if (!c || horsLigneV2()) return;
-    afficherHorsLigneV2(c.date);
-    resynchroniserV2();
-  });
+  if (horsLigneV2() || RESYNC_V2) return;
+  resynchroniserV2(5000);
 }
 
 // Trois façons de s'en apercevoir en cours de route : un appel raté (appelBackend), le téléphone qui annonce la perte du
 // réseau, et une vérification chaque minute tant que l'app est à l'écran (et dès qu'elle y revient) — un petit appel de
-// fond, sans spinner : pas de réponse en 10 s = hors ligne. Le retour du réseau annoncé par le téléphone resynchronise tout de suite.
+// fond, sans spinner : pas de réponse en 10 s = un raté. Le retour du réseau annoncé par le téléphone resynchronise tout de suite.
 function verifierReseauV2() {
-  if (document.visibilityState !== 'visible' || !CONFIG || horsLigneV2() || !localStorage.getItem('vinoSecret')) return;
+  if (document.visibilityState !== 'visible' || !CONFIG || horsLigneV2() || RESYNC_V2 || !localStorage.getItem('vinoSecret')) return;
   appelBackend('getConfig', {}, { spinner: '', timeout: 10000 }).catch(function(err) {
     if (!err.reseau) journaliserV2('Vérification du réseau')(err);
   });
 }
 window.addEventListener('offline', passerHorsLigneV2);
 window.addEventListener('online', function() { if (horsLigneV2()) resynchroniserV2(0); });
-document.addEventListener('visibilitychange', verifierReseauV2);
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'visible') RETOUR_V2 = Date.now();
+  verifierReseauV2();
+});
 setInterval(verifierReseauV2, 60000);
 
 // « Hors ligne — données de 14 h 05 » sous le logo (avec le jour si la copie n'est pas d'aujourd'hui), et la même phrase
@@ -263,14 +263,18 @@ function afficherHorsLigneV2(date) {
   el.style.display = '';
 }
 
-// Hors ligne : toutes les 20 s (ou après « delai »), on retente le serveur ; au retour du réseau, données fraîches et le signe s'efface
+// Après « delai » (20 s par défaut), on retente le serveur. Il répond : données fraîches, et le signe s'efface. Il rate : la phrase
+// et la bande apparaissent, avec l'heure des données en mémoire (le dernier inventaire reçu, gardé dans la copie), et on retente
+// toutes les 20 s — sauf un raté de l'app en arrière-plan ou dans ses 5 premières secondes de retour à l'écran (l'iPhone y rate
+// souvent un appel) : il ne compte pas, on retente 5 s plus tard. Sans copie (toute 1re ouverture), rien à montrer.
 function resynchroniserV2(delai) {
   clearTimeout(RESYNC_V2);
   RESYNC_V2 = setTimeout(function() {
     var opt = { spinner: '' };
-    appelBackend('getConfig', {}, opt).then(function(cfg) {
+    appelBackend('getConfig', {}, { spinner: '', timeout: 15000 }).then(function(cfg) {
       return appelBackend('getInventoryData', {}, opt).then(function(data) {
         return appelBackend('getSuggestions', {}, opt).then(function(sugg) {
+          RESYNC_V2 = null;
           CONFIG = cfg;
           ALL_DATA = data || [];
           ALL_SUGGESTIONS = sugg || [];
@@ -279,8 +283,13 @@ function resynchroniserV2(delai) {
         });
       });
     }).catch(function(e) {
-      if (e && e.message === 'Mot de passe incorrect') return;
-      resynchroniserV2();
+      if (e && e.message === 'Mot de passe incorrect') { RESYNC_V2 = null; return; }
+      if (!horsLigneV2() && (document.visibilityState !== 'visible' || Date.now() - RETOUR_V2 < 5000)) { resynchroniserV2(5000); return; }
+      lireCopieV2('inventaire').then(function(c) {
+        if (!c) { RESYNC_V2 = null; return; }
+        afficherHorsLigneV2(c.date);
+        resynchroniserV2();
+      });
     });
   }, delai === undefined ? 20000 : delai);
 }

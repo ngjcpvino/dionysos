@@ -60,8 +60,12 @@ module.exports = [
     ["basculerVoletsV2('modeEmploiV2-', 'questions')", "document.querySelectorAll('#modeEmploiV2-questions .item-liste')[3].click()",
      "avancerVisiteV2(-1)", "quitterVisiteV2()", "fermerModeEmploiV2()"])],
   // Hors ligne (12 nov. 2026) : le cadre de l'accueil, la bande du bas sur une page et sur le menu, puis le retour du réseau ;
-  // ensuite la perte du réseau en cours de route (le téléphone l'annonce) et son retour (resynchronisation tout de suite)
+  // ensuite (15 nov. 2026) un seul raté — le réseau revient avant le 2e essai, 5 s plus tard : pas de bande ; puis la vraie perte
+  // du réseau en cours de route (le téléphone l'annonce, le 2e essai rate : la bande) et son retour (resynchronisation tout de suite)
   ['hors ligne', ["afficherHorsLigneV2(Date.now() - 600000)", "burgerV2Click('cave')", "cacherToutesPagesV2(); toggleMenuV2()",
     "toggleMenuV2(); document.getElementById('accueilV2-horsligne').style.display = 'none'; burgerV2Click('cave')",
-    "cacherToutesPagesV2(); window.dispatchEvent(new Event('offline'))", "burgerV2Click('cave')", "window.dispatchEvent(new Event('online'))"]]
+    "cacherToutesPagesV2(); window.fetchVrai = window.fetch; window.fetch = function() { return Promise.reject(new TypeError('Load failed')); }; verifierReseauV2()",
+    "window.fetch = window.fetchVrai", "burgerV2Click('cave')",
+    "cacherToutesPagesV2(); window.fetch = function() { return Promise.reject(new TypeError('Load failed')); }; window.dispatchEvent(new Event('offline'))",
+    "burgerV2Click('cave')", "window.fetch = window.fetchVrai; window.dispatchEvent(new Event('online'))"]]
 ];
