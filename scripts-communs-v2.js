@@ -474,9 +474,9 @@ var PANNEAUX_V2 = {
   },
   histo: {
     prefixe: 'histoV2',
-    etat: function() { return filtresHistoV2; }, vide: { mets: '', vin: '', note: '', sortie: '', couleur: '', cepage: '', pays: '', appellation: '', accord: '', pastille: '', acidite: '', cave: false },
+    etat: function() { return filtresHistoV2; }, vide: { mets: '', sortie: '', vin: '', note: '', couleur: '', cepage: '', pays: '', appellation: '', accord: '', pastille: '', acidite: '', cave: false },
     rafraichir: function() { remplirFiltresHistoV2(); afficherHistoV2(); }, champs: ['histoV2-f-mets'],
-    filtres: [['vin', 'Vin'], ['note', 'Appréciation'], ['sortie', 'Bu ou donné'], ['couleur', 'Couleur'], ['cepage', 'Cépage'], ['pays', 'Pays'], ['appellation', 'Appellation'], ['accord', 'Accord'], ['pastille', 'Pastille de goût'], ['acidite', 'Acidité']],
+    filtres: [['sortie', 'Bu ou donné'], ['vin', 'Vin'], ['note', 'Appréciation'], ['couleur', 'Couleur'], ['cepage', 'Cépage'], ['pays', 'Pays'], ['appellation', 'Appellation'], ['accord', 'Accord'], ['pastille', 'Pastille de goût'], ['acidite', 'Acidité']],
     apres: '<div class="panneau-separateur"></div>' +
            '<input type="text" id="histoV2-f-mets" class="champ-saisie" placeholder="Rechercher un mets" oninput="filtrerMetsHistoV2()">',
     apresReinit: '<div class="roundel" onclick="ouvrirHistoAjoutV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Ajouter</span></div>'

@@ -5,8 +5,8 @@
 ============================================================ */
 
 // ==================== HISTORIQUE V2 ====================
-// Filtres : ce qui est propre à la page (Vin, Appréciation), puis le vin, puis le goût — comme la Cave
-var libellesFiltreHistoV2 = { vin: 'Vin', note: 'Appréciation', sortie: 'Bu ou donné', couleur: 'Couleur', cepage: 'Cépage', pays: 'Pays', appellation: 'Appellation', accord: 'Accord', pastille: 'Pastille de goût', acidite: 'Acidité' };
+// Filtres : ce qui est propre à la page (Bu ou donné en premier, 21 nov. 2026 ; Vin, Appréciation), puis le vin, puis le goût — comme la Cave
+var libellesFiltreHistoV2 = { sortie: 'Bu ou donné', vin: 'Vin', note: 'Appréciation', couleur: 'Couleur', cepage: 'Cépage', pays: 'Pays', appellation: 'Appellation', accord: 'Accord', pastille: 'Pastille de goût', acidite: 'Acidité' };
 var filtresHistoV2 = filtresVidesV2('histoV2');
 var histoEditV2 = { row: 0, note: 0 };
 
@@ -121,8 +121,13 @@ function afficherHistoV2() {
   groupes.forEach(function(g) { g.dernier = dateHistoIsoV2(derniereDateHistoV2(g.mets.map(function(m) { return m.date; }))); });
   groupes.sort(function(a, b) { return b.dernier < a.dernier ? -1 : b.dernier > a.dernier ? 1 : 0; });
 
+  // le compte (21 nov. 2026, l'utilisateur) : « 81 vins », « 97 bouteilles bues », « 1 bouteille donnée » — ce qui est affiché ;
+  // une ligne à zéro n'est pas montrée
   var div = document.getElementById('histoV2-cartes');
-  document.getElementById('histoV2-compte').textContent = groupes.length + ' vin' + (groupes.length > 1 ? 's' : '');
+  var dons = base.filter(estDonV2).length, bues = base.length - dons;
+  var pluriel = function(n, texte) { return n + ' ' + texte.replace(/(\S+)/g, '$1' + (n > 1 ? 's' : '')); };
+  document.getElementById('histoV2-compte').innerHTML = [pluriel(groupes.length, 'vin'), bues ? pluriel(bues, 'bouteille bue') : '',
+    dons ? pluriel(dons, 'bouteille donnée') : ''].filter(Boolean).join('<br>');
   if (groupes.length === 0) { div.innerHTML = '<div class="texte-secondaire">Aucune entrée</div>'; return; }
 
   var cbInfos = {};
