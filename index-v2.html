@@ -633,21 +633,24 @@
 <div id="recuValidationV2Container" class="modal-v2-fullscreen" style="display:none;">
   <div class="modal-v2-content modale-haut">
     <button class="btn-fermer" onclick="fermerRecuV2()">✕</button>
-    <h2 class="titre-1">Valider l'achat</h2>
+    <h2 id="recuValidationV2-titre" class="titre-1">Valider l'achat</h2>
     <div id="recuValidationV2-compte" class="texte-secondaire"></div>
-    <input type="text" id="recuValidationV2-nom" class="champ-saisie" placeholder="Nom du vin">
-    <input type="text" id="recuValidationV2-codesaq" class="champ-saisie" placeholder="Code SAQ" inputmode="numeric" oninput="majBingoRecuV2()">
-    <div id="recuValidationV2-bingo" class="text-center"></div>
-    <input type="number" id="recuValidationV2-qte" class="champ-saisie" placeholder="Quantité" inputmode="numeric" min="1" value="1">
-    <div id="recuValidationV2-statut" class="texte-secondaire"></div>
-    <div class="roundel" onclick="confirmerRecuVinV2()">
-      <span class="roundel-anneau"></span>
-      <span class="roundel-barre">OK</span>
+    <div id="recuValidationV2-saisie" class="bloc-form colonne-centree">
+      <input type="text" id="recuValidationV2-nom" class="champ-saisie" placeholder="Nom du vin">
+      <input type="text" id="recuValidationV2-codesaq" class="champ-saisie" placeholder="Code SAQ" inputmode="numeric" oninput="majBingoRecuV2()">
+      <div id="recuValidationV2-bingo" class="text-center"></div>
+      <input type="number" id="recuValidationV2-qte" class="champ-saisie" placeholder="Quantité" inputmode="numeric" min="1" value="1">
+      <div id="recuValidationV2-statut" class="texte-secondaire"></div>
+      <div class="roundel" onclick="confirmerRecuVinV2()">
+        <span class="roundel-anneau"></span>
+        <span class="roundel-barre">OK</span>
+      </div>
+      <div class="roundel" onclick="passerRecuVinV2()">
+        <span class="roundel-anneau"></span>
+        <span class="roundel-barre">Passer</span>
+      </div>
     </div>
-    <div class="roundel" onclick="passerRecuVinV2()">
-      <span class="roundel-anneau"></span>
-      <span class="roundel-barre">Passer</span>
-    </div>
+    <div id="recuValidationV2-ticket" class="emp-bloc bloc-form ticket-facture" style="display:none;"></div>
   </div>
 </div>
 

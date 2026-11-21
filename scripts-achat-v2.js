@@ -784,6 +784,7 @@ function finirGererFavoritesV2() {
 var RECU_V2_ITEMS = [];
 var RECU_V2_INDEX = 0;
 var RECU_V2_BINGOS = 0;   // vins de la facture proposés dans Curieux Bégin (« Facture traitée — 2 bingos »)
+var RECU_V2_ENTRES = [];  // les vins entrés, pour le ticket sous la validation : { nom, codeSAQ, qte }
 
 function ouvrirRecuV2() {
   document.getElementById('recuV2-fichier').value = '';
@@ -806,6 +807,7 @@ function fermerRecuV2() {
   RECU_V2_ITEMS = [];
   RECU_V2_INDEX = 0;
   RECU_V2_BINGOS = 0;
+  RECU_V2_ENTRES = [];
 }
 
 function traiterPhotoRecuV2(input) {
@@ -827,6 +829,7 @@ function traiterPhotoRecuV2(input) {
       }
       RECU_V2_ITEMS = res.items;
       RECU_V2_INDEX = 0;
+      RECU_V2_ENTRES = [];
       document.getElementById('recuV2Container').style.display = 'none';
       document.getElementById('recuValidationV2Container').style.display = 'flex';
       afficherProchainRecuVinV2();
@@ -838,11 +841,18 @@ function traiterPhotoRecuV2(input) {
   lecteur.readAsDataURL(fichier);
 }
 
+// Après le dernier vin, l'écran reste sur le ticket complet (le ✕ le ferme) ; rien d'entré → il se ferme sur le message
 function afficherProchainRecuVinV2() {
-  if (RECU_V2_INDEX >= RECU_V2_ITEMS.length) {
+  var fini = RECU_V2_INDEX >= RECU_V2_ITEMS.length;
+  rendreTicketRecuV2();
+  document.getElementById('recuValidationV2-saisie').style.display = fini ? 'none' : '';
+  document.getElementById('recuValidationV2-titre').textContent = fini ? 'Facture SAQ' : 'Valider l\'achat';
+  if (fini) {
     var bingos = RECU_V2_BINGOS;
+    var message = bingos ? 'Facture traitée — ' + bingos + ' bingo' + (bingos > 1 ? 's' : '') : 'Facture traitée';
+    if (RECU_V2_ENTRES.length) { document.getElementById('recuValidationV2-compte').textContent = message; return; }
     fermerRecuV2();
-    afficherMessage(bingos ? 'Facture traitée — ' + bingos + ' bingo' + (bingos > 1 ? 's' : '') : 'Facture traitée');
+    afficherMessage(message);
     return;
   }
   var item = RECU_V2_ITEMS[RECU_V2_INDEX];
@@ -856,7 +866,7 @@ function afficherProchainRecuVinV2() {
   document.getElementById('recuValidationV2-nom').value = codeSAQ ? 'Recherche...' : '';
   if (!codeSAQ) return;
 
-  var connu = (ALL_DATA || []).filter(function(i) { return (i['Code SAQ'] || '').toString().trim() === codeSAQ; })[0];
+  var connu = vinParCodeSAQV2(codeSAQ);
   if (connu) {
     document.getElementById('recuValidationV2-nom').value = decodeHTML(connu.Nom || '');
     return;
@@ -899,6 +909,8 @@ function confirmerRecuVinV2() {
       ALL_ACHATS = null;   // le serveur a compté l'achat
       return rechargerInventaireV2('Ajout').then(function() {
         if (platsCurieuxBeginV2(codeSAQ).length) RECU_V2_BINGOS++;
+        var vin = vinParCodeSAQV2(codeSAQ);
+        RECU_V2_ENTRES.push({ nom: vin ? decodeHTML(vin.Nom || '') : document.getElementById('recuValidationV2-nom').value, codeSAQ: codeSAQ, qte: qte });
         RECU_V2_INDEX++;
         afficherProchainRecuVinV2();
       });
@@ -906,6 +918,18 @@ function confirmerRecuVinV2() {
   }).catch(function() {
     statutEl.textContent = 'Erreur, réessayez';
   });
+}
+
+// Le ticket des vins entrés (21 nov. 2026, l'utilisateur : « l'aspect de la facture ») : Article · Qté, puis chaque vin —
+// son nom en majuscules, dessous son code SAQ et sa quantité —, le total des bouteilles en bas. Caché tant que rien n'est entré.
+function rendreTicketRecuV2() {
+  var ticket = document.getElementById('recuValidationV2-ticket');
+  var total = 0;
+  ticket.style.display = RECU_V2_ENTRES.length ? '' : 'none';
+  ticket.innerHTML = '<span>Article</span><span>Qté</span>' + RECU_V2_ENTRES.map(function(e) {
+    total += e.qte;
+    return '<div>' + e.nom + '</div><span>' + e.codeSAQ + '</span><span>' + e.qte + '</span>';
+  }).join('') + '<p>Total : ' + total + ' bouteille' + (total > 1 ? 's' : '') + '</p>';
 }
 
 // ==================== IMPORTER DES ACHATS (30 oct. 2026) ====================

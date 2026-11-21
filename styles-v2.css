@@ -158,6 +158,7 @@ html, body {
   --pastille-aromatique-charnu: #770D35;
   --image-interdit: url("images/interdit.svg");
   --space-30: 30px;
+  --police-caisse: "Courier New", Courier, monospace;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -1244,6 +1245,23 @@ input[type="date"].champ-saisie::-webkit-date-and-time-value { text-align: left;
    UTILITAIRES
    ========================================= */
 .mt-20 { margin-top: var(--space-20); }
+
+/* Le ticket de la Facture SAQ (21 nov. 2026, l'utilisateur : « l'aspect de la facture », fond sombre de l'app) : écriture
+   de caisse, deux colonnes comme la facture (Article · Qté) ; le nom d'un vin sur toute la largeur, en majuscules,
+   son code SAQ et sa quantité dessous ; le total en bas. Le cadre est celui de .emp-bloc, la largeur celle de .bloc-form. */
+.ticket-facture {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  row-gap: var(--space-3);
+  font-family: var(--police-caisse);
+  font-size: var(--fs-12);
+  color: var(--white);
+  text-align: left;
+}
+.ticket-facture > span:nth-child(-n+2) { color: var(--white-70); padding-bottom: var(--space-5); border-bottom: var(--largeur-bordure-1) solid var(--white-10); }
+.ticket-facture > div, .ticket-facture > p { grid-column: 1 / -1; margin-top: var(--space-10); }
+.ticket-facture > div { text-transform: uppercase; }
+.ticket-facture > p { padding-top: var(--space-10); border-top: var(--largeur-bordure-1) solid var(--white-10); }
 /* Petit titre gris aligné à gauche, en lettres normales (« Rien à faire ici » du Tri Dionysos). Réutilisable. */
 .texte-secondaire.texte-gauche { text-align: left; margin-bottom: var(--space-10); text-transform: none; letter-spacing: normal; }
 .text-center    { text-align: center; }
