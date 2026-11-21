@@ -613,6 +613,25 @@
       <span class="roundel-anneau"></span>
       <span class="roundel-barre">Enregistrer</span>
     </div>
+    <div id="editFicheV2-supprimer"></div>
+  </div>
+</div>
+
+<!-- ====================== RETIRER UNE BOUTEILLE, SUPPRIMER LE VIN (par-dessus le crayon de la fiche) ====================== -->
+<div id="retraitV2Overlay" class="modal-v2-fullscreen modal-v2-avant" style="display:none;">
+  <div class="modal-v2-content modale-haut">
+    <button class="btn-fermer" onclick="fermerRetraitV2()">✕</button>
+    <h2 id="retraitV2-nom" class="titre-1"></h2>
+    <div id="retraitV2-origine" class="texte-secondaire"></div>
+    <div id="retraitV2-action" class="titre-3"></div>
+    <div class="bloc-form">
+      <div id="retraitV2-texte" class="texte"></div>
+      <div id="retraitV2-entrop"></div>
+    </div>
+    <div class="roundel" onclick="confirmerRetraitV2()">
+      <span class="roundel-anneau"></span>
+      <span id="retraitV2-barre" class="roundel-barre"></span>
+    </div>
   </div>
 </div>
 

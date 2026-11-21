@@ -16,6 +16,14 @@ module.exports = [
   ['fiche', ["burgerV2Click('cave')", "ouvrirFicheV2('" + UN + "', 'cave')", "basculerVoletsV2('ficheV2-selon-', 'som')", "basculerVoletsV2('ficheV2-selon-', 'cb')",
     "basculerVoletsV2('ficheV2-selon-', 'chartier')", "basculerVoletsV2('ficheV2-selon-', 'saq')", "toggleFavoriV2()", "ouvrirEditFicheV2()", "fermerEditFicheV2()",
     "fermerFicheV2()", "ouvrirFicheV2('" + DEUX + "', 'cave')", "fermerFicheV2()"]],
+  // Retirer une bouteille, supprimer un vin (21 nov. 2026) : dans le crayon de la fiche, toujours une confirmation. Château Un
+  // (bu : pas de « Supprimer ce vin ») : une bouteille retirée, entrée en trop (l'achat du 1er sept. baisse) ; Proposé Six
+  // (jamais bu ni donné) : supprimé depuis la Cave, retour à la Cave sans lui.
+  ['retirer une bouteille, supprimer un vin', ["burgerV2Click('cave')", "ouvrirFicheV2('" + UN + "', 'cave')", "ouvrirEditFicheV2()",
+    "document.querySelector('#editFicheV2-bouteilles .item-liste').click()", "basculerEnTropRetraitV2()", "fermerRetraitV2()",
+    "document.querySelector('#editFicheV2-bouteilles .item-liste').click()", "basculerEnTropRetraitV2()", "confirmerRetraitV2()",
+    "fermerEditFicheV2()", "fermerFicheV2()", "basculerInterrupteurV2('caveV2', 'dispo')", "ouvrirFicheV2('0555555555555', 'cave')", "ouvrirEditFicheV2()",
+    "ouvrirRetraitV2()", "confirmerRetraitV2()"]],
   ['recherche', ["ouvrirRechercheV2()", { saisir: ['#rechercheV2-champ', 'ch'] }, "lancerRechercheV2()", "basculerSectionRechercheV2(1)",
     { saisir: ['#rechercheV2-champ', 'syrah'] }, "lancerRechercheV2()", "fermerRechercheV2()"]],
   ['historique', ["burgerV2Click('historique')", "ouvrirFiltresV2('histoV2')", "basculerFiltreV2('histoV2', 'note')", "choisirFiltreV2('histoV2', 'note', '5 verres')",

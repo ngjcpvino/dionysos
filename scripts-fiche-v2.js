@@ -752,13 +752,7 @@ function chargerPlatsV2(codebarre) {
   if (!conteneur) return;
 
   function rendrePlats(historique) {
-    var codes = codesBarresDuVinV2(CURRENT_WINE_DATA || {}).concat([codebarre]);
-    // n'importe lequel des codes du vin (une vieille ligne garde toute la liste)
-    var mets = (historique || []).filter(function(h) {
-      return (h.codebarre || '').toString().split(',').some(function(c) {
-        return codes.some(function(k) { return memeCodeV2(c, k); });
-      });
-    });
+    var mets = histoVinFicheV2(historique);
     rendreComptesFicheV2(mets.map(function(m) { return m.date; }));
     if (mets.length === 0) { conteneur.innerHTML = ''; return; }
     mets.sort(platPlusRecentV2);
@@ -797,22 +791,44 @@ function ligneCompteFicheV2(verbe, dates, n) {
 function rendreComptesFicheV2(bus) {
   var div = document.getElementById('ficheV2-comptes');
   if (!div) return;
-  var w = CURRENT_WINE_DATA || {};
-  var saq = (w['Code SAQ'] || '').toString().trim();
-  var codes = codesBarresDuVinV2(w).concat([CURRENT_WINE_CODEBARRE]);
   function rendre(achats) {
-    var siens = achats.filter(function(a) {
-      return (saq && memeCodeV2(a.codeSAQ, saq)) || codes.some(function(k) { return memeCodeV2(a.codebarre, k); });
-    });
-    var achetees = siens.reduce(function(s, a) { return s + (parseInt(a.quantite, 10) || 1); }, 0);
-    var enCave = bouteillesEnCaveV2().filter(function(i) { return codes.some(function(k) { return memeCodeV2(i['Code-barres'], k); }); }).length;
-    div.innerHTML = ligneCompteFicheV2('Acheté', siens.map(function(a) { return a.date; })) + ligneCompteFicheV2('Bu', bus, achetees - enCave);
+    var siens = achatsVinFicheV2(achats);
+    div.innerHTML = ligneCompteFicheV2('Acheté', siens.map(function(a) { return a.date; })) +
+      ligneCompteFicheV2('Bu', bus, bouteillesAcheteesV2(siens) - bouteillesVinFicheV2().length);
+    rendreRetraitsEditV2();   // le crayon ouvert : « Supprimer ce vin » attendait l'Historique et les achats
   }
   achatsV2('').then(rendre).catch(function(err) {
     ALL_ACHATS = [];
     rendre([]);
     journaliserV2('Achats de la fiche')(err);
   });
+}
+
+// Le vin de la fiche : ses codes-barres (tous, plus celui qui a ouvert la fiche), ses bouteilles en cave (l'inventaire),
+// ses lignes de l'Historique (n'importe lequel de ses codes : une vieille ligne garde toute la liste), ses achats (son code
+// SAQ ou l'un de ses codes-barres) et le nombre de bouteilles achetées (une par jour quand la quantité n'est pas connue)
+function codesVinFicheV2() { return codesBarresDuVinV2(CURRENT_WINE_DATA || {}).concat([CURRENT_WINE_CODEBARRE]); }
+function bouteillesVinFicheV2() {
+  var codes = codesVinFicheV2();
+  return bouteillesEnCaveV2().filter(function(i) { return codes.some(function(k) { return memeCodeV2(i['Code-barres'], k); }); });
+}
+function histoVinFicheV2(historique) {
+  var codes = codesVinFicheV2();
+  return (historique || []).filter(function(h) {
+    return (h.codebarre || '').toString().split(',').some(function(c) { return codes.some(function(k) { return memeCodeV2(c, k); }); });
+  });
+}
+function achatsVinFicheV2(achats) {
+  var saq = ((CURRENT_WINE_DATA || {})['Code SAQ'] || '').toString().trim(), codes = codesVinFicheV2();
+  return achats.filter(function(a) { return (saq && memeCodeV2(a.codeSAQ, saq)) || codes.some(function(k) { return memeCodeV2(a.codebarre, k); }); });
+}
+function bouteillesAcheteesV2(achats) { return achats.reduce(function(s, a) { return s + (parseInt(a.quantite, 10) || 1); }, 0); }
+
+// Jamais bu ni donné (« Supprimer ce vin ») : aucune ligne à l'Historique, et pas plus de bouteilles achetées que de bouteilles
+// en cave — le « Bu N fois » de la fiche à zéro. Sans l'Historique ou les achats en mémoire, on ne peut pas le dire : non.
+function vinJamaisBuFicheV2() {
+  if (!ALL_HISTORIQUE.length || !ALL_ACHATS) return false;
+  return !histoVinFicheV2(ALL_HISTORIQUE).length && bouteillesAcheteesV2(achatsVinFicheV2(ALL_ACHATS)) <= bouteillesVinFicheV2().length;
 }
 
 // Les achats en mémoire (onglet Achats), lus au besoin — la fiche, le Profil. Un serveur sans la route répond { error } : une panne.
@@ -1197,14 +1213,117 @@ function ouvrirEditFicheV2() {
   }).join('');
   html += '<div class="titre-3">Vin pour cépage favori</div>' +
           '<div class="bloc-favori"><div class="cercle' + (wine.Favori === 'Oui' ? ' actif' : '') + '" id="editV2-favori" onclick="this.classList.toggle(\'actif\');this.textContent=this.classList.contains(\'actif\')?\'✓\':\'\';">' + (wine.Favori === 'Oui' ? '✓' : '') + '</div></div>';
+  html += '<div id="editFicheV2-bouteilles"></div>';
   html += '<div class="roundel" onclick="photoSAQDepuisEditV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Photo SAQ</span></div>';
   document.getElementById('editFicheV2-corps').innerHTML = html;
+  rendreRetraitsEditV2();
   EDIT_FICHE_V2_CHAMPS.forEach(function(c) { if (LISTES_EDIT_V2[c[1]]) majListeEditV2(c[1], decodeHTML((wine[c[2]] || '').toString())); });
   montrerPageV2('editFicheV2Overlay');
 }
 
 function fermerEditFicheV2() {
   document.getElementById('editFicheV2Overlay').style.display = 'none';
+}
+
+// ==================== RETIRER UNE BOUTEILLE, SUPPRIMER LE VIN (21 nov. 2026, l'utilisateur) ====================
+// Dans le crayon seulement (l'utilisateur : « pas facilement accessible » : corriger l'inventaire n'est pas un geste de tous
+// les jours), et toujours une confirmation. Retirer : la bouteille sort de la cave, rien à l'historique ; « Entrée en trop »
+// (une facture entrée deux fois) fait aussi baisser l'achat du jour de son entrée. Supprimer : seulement un vin jamais bu ni
+// donné (le rond n'apparaît qu'alors ; le serveur revérifie) ; ses achats disparaissent.
+var RETRAIT_V2 = null;   // la confirmation ouverte : { row, bottle, entree, enTrop } (une bouteille) ou { vin: true }
+
+// La date d'entrée d'une bouteille de l'inventaire, « jj-mm-aaaa » (vide si on ne la connaît pas)
+function entreeBouteilleV2(i) {
+  var d = Date.parse(i['Date d\'ajout'] || '');
+  return d ? dateIsoV2(new Date(d)).split('-').reverse().join('-') : '';
+}
+// « À ranger, entrée le 20-11-2026 »
+function texteBouteilleRetraitV2(i) {
+  var entree = entreeBouteilleV2(i);
+  return emplacementV2(i.Meuble, i.Rangee, i.Espace) + (entree ? ', entrée le ' + entree : '');
+}
+
+// La section « Bouteilles » du crayon et le rond « Supprimer ce vin » : à l'ouverture du crayon, après un retrait, et quand
+// l'Historique et les achats de la fiche arrivent (rendreComptesFicheV2)
+function rendreRetraitsEditV2() {
+  var div = document.getElementById('editFicheV2-bouteilles');
+  if (div) div.innerHTML = bouteillesVinFicheV2().map(function(i, k) {
+    return (k ? '' : '<div class="titre-3">Bouteilles</div>') +
+      '<div class="item-liste" onclick="ouvrirRetraitV2(' + i.row + ', ' + i.bottle + ')">' + texteBouteilleRetraitV2(i) + '</div>';
+  }).join('');
+  document.getElementById('editFicheV2-supprimer').innerHTML = vinJamaisBuFicheV2() ?
+    '<div class="roundel" onclick="ouvrirRetraitV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Supprimer ce vin</span></div>' : '';
+}
+
+// La confirmation, par-dessus le crayon : une bouteille (row, bottle) ou, sans argument, le vin entier
+function ouvrirRetraitV2(row, bottle) {
+  var bouteilles = bouteillesVinFicheV2();
+  var b = bouteilles.filter(function(i) { return i.row === row && i.bottle === bottle; })[0];
+  if (row && !b) return;
+  var n = bouteilles.length;
+  RETRAIT_V2 = b ? { row: row, bottle: bottle, entree: entreeBouteilleV2(b), enTrop: false } : { vin: true };
+  document.getElementById('retraitV2-nom').textContent = document.getElementById('ficheV2-nom').textContent;
+  document.getElementById('retraitV2-origine').textContent = document.getElementById('ficheV2-origine').textContent;
+  document.getElementById('retraitV2-action').textContent = b ? 'Retirer' : 'Supprimer';
+  document.getElementById('retraitV2-barre').textContent = b ? 'Retirer' : 'Supprimer';
+  document.getElementById('retraitV2-texte').textContent = b
+    ? 'Retirer la bouteille ' + texteBouteilleRetraitV2(b) + ' ? Elle sort de la cave, sans rien à l\'historique.'
+    : 'Supprimer ce vin' + (n > 1 ? ' et ses ' + n + ' bouteilles' : n ? ' et sa bouteille' : '') + ' ? Ses achats disparaissent aussi.';
+  rendreEnTropRetraitV2();
+  montrerPageV2('retraitV2Overlay');
+}
+// « Entrée en trop » : seulement pour une bouteille dont on connaît le jour d'entrée (c'est ce jour-là que l'achat baisse)
+function rendreEnTropRetraitV2() {
+  var r = RETRAIT_V2;
+  document.getElementById('retraitV2-entrop').innerHTML = (r.vin || !r.entree) ? '' :
+    ligneChoixPlacementV2('Entrée en trop', 'basculerEnTropRetraitV2()', r.enTrop) +
+    '<div class="texte-secondaire texte-gauche">Une facture entrée deux fois : l\'achat du ' + r.entree + ' baisse aussi d\'une bouteille.</div>';
+}
+function basculerEnTropRetraitV2() {
+  RETRAIT_V2.enTrop = !RETRAIT_V2.enTrop;
+  rendreEnTropRetraitV2();
+}
+function fermerRetraitV2() {
+  cacherPageV2('retraitV2Overlay');
+  RETRAIT_V2 = null;
+}
+
+// Confirmer : écrit au serveur, relit l'inventaire, puis — une bouteille : la fiche et le crayon redessinés, le crayon reste
+// ouvert (une facture en double, c'est souvent plusieurs bouteilles) ; le vin : la fiche se ferme (finSuppressionVinV2).
+// Un serveur pas redéployé ne connaît ni « retirer » (il répond oui sans rien faire : pas de « retire ») ni supprimerVin.
+function confirmerRetraitV2() {
+  var r = RETRAIT_V2;
+  if (!r || r.enCours) return;
+  r.enCours = true;
+  var appel = r.vin
+    ? appelBackend('supprimerVin', { codebarre: CURRENT_WINE_CODEBARRE }, { spinner: 'Suppression' })
+    : appelBackend('actionBouteille', { row: r.row, action: 'retirer', bottle: r.bottle, enTrop: r.enTrop }, { spinner: 'Retrait' });
+  appel.then(function(res) {
+    verifierReponseV2(res);
+    if (!res || res.success === false) throw new Error((res && res.message) || 'refusé');
+    if (!r.vin && !res.retire && !res.dejaFait) throw new Error('Action inconnue : retirer');
+    if (r.vin || r.enTrop) ALL_ACHATS = null;   // le serveur a retiré des achats
+    return rechargerInventaireV2(r.vin ? 'Suppression' : 'Retrait').then(function() {
+      fermerRetraitV2();
+      if (r.vin) { finSuppressionVinV2(); return; }
+      afficherFicheV2(ficheDepuisMemoireV2(CURRENT_WINE_CODEBARRE));
+      rendreRetraitsEditV2();
+      afficherMessage(r.enTrop && res.achat === false ? 'Bouteille retirée — aucun achat ce jour-là' : 'Bouteille retirée');
+    });
+  }).catch(function(err) {
+    r.enCours = false;
+    afficherMessage('Erreur : ' + causeServeurV2(err));
+  });
+}
+
+// Le vin supprimé : le crayon et la fiche se ferment ; retour à la page d'où venait la fiche, redessinée sans lui — jamais
+// au menu d'action de ce vin-là
+function finSuppressionVinV2() {
+  var codes = codesVinFicheV2();
+  if (menuActionV2Context && codes.some(function(k) { return memeCodeV2(menuActionV2Context.code, k); })) menuActionV2Context = null;
+  fermerEditFicheV2();
+  fermerFicheV2();
+  afficherMessage('Vin supprimé');
 }
 
 function photoSAQDepuisEditV2() {
