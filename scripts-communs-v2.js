@@ -203,10 +203,11 @@ function carteGroupeVinV2(g, onclick, classes) {
 function carteMetHistoV2(m, nom, provenance) {
   var note = parseInt(m.bonAccord) || 0;
   var esc = function(v) { return (v || '').toString().replace(/'/g, "\\'"); };
-  return carteV2({ classes: 'histo-mets' + ((note >= 1 && note <= 5) ? ' note-' + note : ''), titre: estDonV2(m) ? 'Donné' : m.plat || '—', droite: m.date || '',
+  return carteV2({ classes: 'histo-mets' + ((note >= 1 && note <= 5) ? ' note-' + note : ''), titre: estDonV2(m) ? 'Donné' : m.sortie === 'Import' ? 'Import SAQ' : m.plat || '—', droite: m.date || '',
     onclick: 'ouvrirApresTap(function(){ouvrirHistoEditV2(' + m.row + ', \'' + esc(m.plat) + '\', ' + note + ', \'' + esc(nom) + '\', \'' + provenance + '\', \'' + (m.codeSAQ || '') + '\', \'' + (m.codebarre || '') + '\')})' });
 }
-// Une entrée de l'Historique qui est un don (21 nov. 2026 : Donner y inscrit « Donné », colonne Sortie) — pas un passage à table
+// Une entrée de l'Historique qui est un don (21 nov. 2026 : Donner y inscrit « Donné », colonne Sortie) — pas un passage à table.
+// (« Import » dans Sortie : un vin bu avant l'app, connu par l'import de saq.com — compté avec les bus, affiché « Import SAQ ».)
 function estDonV2(h) { return h.sortie === 'Donné'; }
 // …une proposition d'un sommelier → la corriger (retour : la page où revenir)
 function carteSuggestionV2(s, codeSAQ, nom, retour) {

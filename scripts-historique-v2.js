@@ -359,9 +359,11 @@ function confirmerHistoAjoutV2() {
 }
 
 // ===================== PROFIL =====================
-// Ce que disent les achats (30 oct. 2026, l'utilisateur : « selon les achats » — tout ce qui est acheté se boit dans les
-// 6 mois, et l'historique d'achat SAQ remonte avant l'app ; un vin acheté un jour = une part). Se lit d'un coup : pas de
-// phrase, pas de liste.
+// Les vraies bouteilles (21 nov. 2026, l'utilisateur : « il faut partir de ces données pour toutes les tartes ») : chaque
+// ligne de l'Historique — bue, donnée, ou « Import » (un vin connu seulement par l'import de saq.com, bu avant l'app : un
+// achat importé = une bouteille, inscrite par l'outil inscrireBusImport) — et chaque bouteille en cave : une bouteille, une
+// part. L'onglet Achats n'y compte plus (l'import n'a pas les quantités : mêlé aux vraies, il faussait tout). Se lit d'un
+// coup : pas de phrase, pas de liste.
 var PAYS_TARTE_V2 = 7;   // au-delà, les plus petits pays vont dans « Autres »
 
 // Les quatre tartes : la valeur du vin qu'elles comptent, et le filtre de la Cave qu'ouvre une part (30 oct. 2026)
@@ -392,16 +394,17 @@ var PARTS_PROFIL_V2 = {};   // tarte → ses parts dessinées (ce que touche le 
 function ouvrirProfilV2() {
   ZOOM_PROFIL_V2 = {};
   montrerPageV2('profilV2Container');
-  achatsV2(' ').then(rendreProfilV2).catch(function(err) { retourAccueilV2('Profil : ' + causeServeurV2(err)); });
+  (ALL_HISTORIQUE.length ? Promise.resolve() : appelBackend('getHistorique', {}, { spinner: ' ' }).then(function(d) { ALL_HISTORIQUE = d || []; }))
+    .then(rendreProfilV2).catch(function(err) { retourAccueilV2('Profil : ' + causeServeurV2(err)); });
 }
 
 function fermerProfilV2() {
   cacherPageV2('profilV2Container');
 }
 
-// Les entrées (achats, ou bus : { codebarre, codeSAQ }) regroupées par une valeur de leur vin (t.valeur(vin, entrée)),
-// comptées en bouteilles (21 nov. 2026, l'utilisateur : la quantité d'un achat quand on la connaît — Facture, Arrivée —,
-// sinon 1 : l'import de saq.com n'en a pas), de la plus grande part à la plus petite ; PAYS_TARTE_V2 parts, puis « Autres (N quoi) » (ses valeurs dans membres).
+// Les entrées ({ codebarre, codeSAQ } : les bouteilles du Profil, bouteillesProfilV2) regroupées par une valeur de leur vin
+// (t.valeur(vin, entrée)), comptées en bouteilles (une entrée = sa quantité si elle en a une, sinon 1), de la plus grande
+// part à la plus petite ; PAYS_TARTE_V2 parts, puis « Autres (N quoi) » (ses valeurs dans membres).
 // Sans valeur : la part t.inconnu, ou rien si elle est vide (les pastilles : la tarte ne parle que de goût). t.classe(nom),
 // facultative : la couleur d'une part (sa classe CSS) ; '' = sa nuance d'or. t.cote(nom), facultative : la moitié où
 // se centre la part (« gauche » / « droite »). seulement : les valeurs gardées.
@@ -571,27 +574,32 @@ function tarteV2(parts, t) {
   return '<svg viewBox="0 ' + f(haut) + ' ' + (2 * cx) + ' ' + f(bas - haut) + '">' + formes + ecritures + '</svg>';
 }
 
+// Les bouteilles du Profil : chaque ligne de l'Historique (bue, donnée, Import) et chaque bouteille en cave
+function bouteillesProfilV2() {
+  return (ALL_HISTORIQUE || []).concat(bouteillesEnCaveV2().map(function(i) { return { codebarre: i['Code-barres'], codeSAQ: i['Code SAQ'] }; }));
+}
+
 function rendreProfilV2() {
-  var achats = ALL_ACHATS || [];
+  var bouteilles = bouteillesProfilV2();
   Object.keys(TARTES_PROFIL_V2).forEach(function(t) {
     var d = TARTES_PROFIL_V2[t];
-    var parts = PARTS_PROFIL_V2[t] = (d.moities ? partsMoitiesV2 : partsParV2)(achats, d, ZOOM_PROFIL_V2[t]);
+    var parts = PARTS_PROFIL_V2[t] = (d.moities ? partsMoitiesV2 : partsParV2)(bouteilles, d, ZOOM_PROFIL_V2[t]);
     var el = document.getElementById(TARTES_PROFIL_V2[t].id);
     // un « Autres » ouvert : le rond « Tout » remet la tarte entière
     el.innerHTML = parts.length ? tarteV2(parts, t) + (ZOOM_PROFIL_V2[t] && !d.moities ? '<div class="roundel" onclick="toutProfilV2(\'' + t + '\')">' +
       '<span class="roundel-anneau"></span><span class="roundel-barre">Tout</span></div>' : '') : '';
     el.style.display = parts.length ? '' : 'none';   // une tarte vide n'est pas montrée (ni la ligne qui la sépare)
   });
-  if (!achats.length) {
+  if (!bouteilles.length) {
     var pays = document.getElementById('profilV2-pays');
-    pays.innerHTML = '<div class="texte-secondaire">Aucun achat : Outils → Importer des achats</div>';
+    pays.innerHTML = '<div class="texte-secondaire">Aucune bouteille</div>';
     pays.style.display = '';
   }
   Array.prototype.forEach.call(document.querySelectorAll('#profilV2Container svg'), cadrerTarteV2);
 }
 
 // Toucher une part (30 oct. 2026, l'utilisateur) : « Autres » s'ouvre en sa propre tarte ; une autre part ouvre la Cave
-// filtrée sur ce qu'elle représente — tous les vins, voilés compris (le Profil compte les achats) ; le ✕ de la Cave ramène ici
+// filtrée sur ce qu'elle représente — tous les vins, voilés compris (le Profil compte aussi les bues) ; le ✕ de la Cave ramène ici
 function toucherPartProfilV2(t, i) {
   var p = (PARTS_PROFIL_V2[t] || [])[i], d = TARTES_PROFIL_V2[t];
   if (!p) return;
