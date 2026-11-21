@@ -32,10 +32,10 @@ function fermerARangerV2() {
   document.getElementById('aRangerV2Container').style.display = 'none';
 }
 
-// Une page-liste de vins (Cave, À ranger, Sans cépage) : le compte (« N vins », puis la ligne suite), les cartes, ou siVide.
-// tap(g) : le JS du tap d'une carte.
-function afficherCartesVinsV2(prefixe, groups, siVide, tap, suite) {
-  document.getElementById(prefixe + '-compte').innerHTML = groups.length + ' vin' + (groups.length > 1 ? 's' : '') + (suite ? '<br>' + suite : '');
+// Une page-liste de vins (Cave, À ranger, Sans cépage) : le compte (avant, puis « N vins », puis la ligne suite), les cartes,
+// ou siVide. tap(g) : le JS du tap d'une carte.
+function afficherCartesVinsV2(prefixe, groups, siVide, tap, suite, avant) {
+  document.getElementById(prefixe + '-compte').innerHTML = (avant || '') + groups.length + ' vin' + (groups.length > 1 ? 's' : '') + (suite ? '<br>' + suite : '');
   document.getElementById(prefixe + '-cartes').innerHTML = groups.length ?
     groups.map(function(g) { return carteGroupeVinV2(g, tap(g)); }).join('') : '<div class="texte-secondaire">' + siVide + '</div>';
 }
@@ -67,11 +67,15 @@ function afficherCartesSansCepageV2() {
   afficherCartesVinsV2('sansCepageV2', grouperVinsV2(vinsSansCepageV2()), 'Aucun vin sans cépage', function(g) { return tapFicheV2(g.cb, 'sanscepage'); });
 }
 
+// Le compte de la Cave (21 nov. 2026, l'utilisateur) : « Liste de 240 vins », « 115 vins en cave », « 134 bouteilles en stock »
+// — les trois suivent ce qui est affiché (filtres, « En cave »)
 function afficherCartesCaveV2(data) {
   var groups = grouperVinsV2(data);
   if (filtresCaveV2.dispo) groups = groups.filter(function(g){ return g.count > 0; });
+  var enCave = groups.filter(function(g) { return g.count > 0; }).length;
   var totalBtl = groups.reduce(function(t, g){ return t + (g.count || 0); }, 0);
-  afficherCartesVinsV2('caveV2', groups, 'Aucun vin', function(g) { return tapFicheV2(g.cb, 'cave'); }, totalBtl + ' bouteille' + (totalBtl > 1 ? 's' : '') + ' en stock');
+  afficherCartesVinsV2('caveV2', groups, 'Aucun vin', function(g) { return tapFicheV2(g.cb, 'cave'); },
+    enCave + ' vin' + (enCave > 1 ? 's' : '') + ' en cave<br>' + totalBtl + ' bouteille' + (totalBtl > 1 ? 's' : '') + ' en stock', 'Liste de ');
 }
 
 var filtresCaveV2 = filtresVidesV2('caveV2');
