@@ -788,7 +788,8 @@ function achatsVinFicheV2(achats) {
   var saq = ((CURRENT_WINE_DATA || {})['Code SAQ'] || '').toString().trim(), codes = codesVinFicheV2();
   return achats.filter(function(a) { return (saq && memeCodeV2(a.codeSAQ, saq)) || codes.some(function(k) { return memeCodeV2(a.codebarre, k); }); });
 }
-function bouteillesAcheteesV2(achats) { return achats.reduce(function(s, a) { return s + (parseInt(a.quantite, 10) || 1); }, 0); }
+function bouteillesAchatV2(a) { return parseInt(a.quantite, 10) || 1; }
+function bouteillesAcheteesV2(achats) { return achats.reduce(function(s, a) { return s + bouteillesAchatV2(a); }, 0); }
 
 // Jamais bu ni donné (« Supprimer ce vin ») : aucune ligne à l'Historique, et pas plus de bouteilles achetées que de bouteilles
 // en cave (une bouteille retirée, ou donnée avant le 21 nov. 2026, n'y est plus). Sans l'Historique ou les achats en mémoire, on ne peut pas le dire : non.

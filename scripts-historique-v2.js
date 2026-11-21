@@ -395,7 +395,8 @@ function fermerProfilV2() {
 }
 
 // Les entrées (achats, ou bus : { codebarre, codeSAQ }) regroupées par une valeur de leur vin (t.valeur(vin, entrée)),
-// de la plus grande part à la plus petite ; PAYS_TARTE_V2 parts, puis « Autres (N quoi) » (ses valeurs dans membres).
+// comptées en bouteilles (21 nov. 2026, l'utilisateur : la quantité d'un achat quand on la connaît — Facture, Arrivée —,
+// sinon 1 : l'import de saq.com n'en a pas), de la plus grande part à la plus petite ; PAYS_TARTE_V2 parts, puis « Autres (N quoi) » (ses valeurs dans membres).
 // Sans valeur : la part t.inconnu, ou rien si elle est vide (les pastilles : la tarte ne parle que de goût). t.classe(nom),
 // facultative : la couleur d'une part (sa classe CSS) ; '' = sa nuance d'or. t.cote(nom), facultative : la moitié où
 // se centre la part (« gauche » / « droite »). seulement : les valeurs gardées.
@@ -407,14 +408,14 @@ function partsParV2(liste, t, seulement) {
   var garder = seulement ? seulement.map(cleDe) : null;
   var compte = {}, ecritures = {}, inconnu = t.inconnu, tous = 0;
   (liste || []).forEach(function(h) {
-    var w = vinDe(h), v = decodeHTML(t.valeur(w, h) || '').trim() || inconnu;
+    var w = vinDe(h), v = decodeHTML(t.valeur(w, h) || '').trim() || inconnu, n = bouteillesAchatV2(h);
     if (!v) return;
-    tous++;
+    tous += n;
     var k = cleDe(v);
     if (garder && garder.indexOf(k) === -1) return;
-    compte[k] = (compte[k] || 0) + 1;
+    compte[k] = (compte[k] || 0) + n;
     ecritures[k] = ecritures[k] || {};
-    ecritures[k][v] = (ecritures[k][v] || 0) + 1;
+    ecritures[k][v] = (ecritures[k][v] || 0) + n;
   });
   var parts = Object.keys(compte).map(function(k) {
     var e = ecritures[k];
