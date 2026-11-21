@@ -24,7 +24,7 @@ const TYPES = { '.html': 'text/html', '.js': 'application/javascript', '.css': '
 const CORS = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*', 'Access-Control-Allow-Methods': 'POST, GET, OPTIONS' };
 const dormir = (ms) => new Promise(r => setTimeout(r, ms));
 
-// Le faux classeur du serveur, plus quelques achats (le Profil, « Acheté N fois »)
+// Le faux classeur du serveur, plus quelques achats (le Profil, « Supprimer ce vin »)
 function classeur() {
   const f = fixture();
   const D = (s) => new Date(s);

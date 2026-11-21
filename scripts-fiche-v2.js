@@ -209,7 +209,6 @@ function afficherFicheV2(result) {
   // === NOTES : HISTORIQUE ===
   html += '<div class="section" id="ficheV2-plats-section">';
   html += '<div class="ligne-ajout"><h3 class="titre-2">Historique</h3><div class="cercle" onclick="ouvrirHistoAjoutDepuisFicheV2()">+</div></div>';
-  html += '<div id="ficheV2-comptes"></div>';
   html += '<div id="ficheV2-plats"></div>';
   html += '</div>';
 
@@ -753,7 +752,7 @@ function chargerPlatsV2(codebarre) {
 
   function rendrePlats(historique) {
     var mets = histoVinFicheV2(historique);
-    rendreComptesFicheV2(mets.filter(function(m) { return !estDonV2(m); }).map(function(m) { return m.date; }));   // « Bu N fois » : sans les dons
+    rendreRetraitsEditV2();   // le crayon ouvert : « Supprimer ce vin » attendait l'Historique
     if (mets.length === 0) { conteneur.innerHTML = ''; return; }
     mets.sort(platPlusRecentV2);
     var nom = decodeHTML((CURRENT_WINE_DATA && CURRENT_WINE_DATA.Nom) || '');
@@ -768,40 +767,7 @@ function chargerPlatsV2(codebarre) {
   appelBackend('getHistorique', {}, { spinner: '' }).then(function(data) {
     ALL_HISTORIQUE = data || [];
     rendrePlats(ALL_HISTORIQUE);
-  }).catch(function(err) {
-    rendreComptesFicheV2([]);
-    journaliserV2('Plats de la fiche')(err);
-  });
-}
-
-// « Bu 3 fois · la dernière fois le 12-10-2026 » — dates « jj-mm-aaaa » ; n : un nombre plus grand que celui des dates
-// (les bus d'avant l'app) ; rien si aucun
-function ligneCompteFicheV2(verbe, dates, n) {
-  n = Math.max(n || 0, dates.length);
-  if (!n) return '';
-  var derniere = derniereDateHistoV2(dates);
-  return '<div class="texte-secondaire">' + verbe + ' ' + n + ' fois' + (derniere ? ' · la dernière fois le ' + derniere : '') + '</div>';
-}
-
-// En tête de l'Historique de la fiche : « Acheté N fois » (30 oct. 2026 : les jours d'achat de l'onglet Achats, par le code SAQ
-// ou l'un des codes-barres du vin), puis « Bu N fois » — bus : les dates de l'Historique. Bu = l'Historique, ou, si c'est plus,
-// les bouteilles achetées moins celles en cave (31 oct. 2026, l'utilisateur : les achats d'avant l'app n'ont pas de ligne
-// à l'Historique) ; une bouteille par jour d'achat quand la quantité n'est pas connue (saq.com ne la donne pas).
-// Un serveur sans la route (Code.gs à recoller) : seulement l'Historique, la trace au journal.
-function rendreComptesFicheV2(bus) {
-  var div = document.getElementById('ficheV2-comptes');
-  if (!div) return;
-  function rendre(achats) {
-    var siens = achatsVinFicheV2(achats);
-    div.innerHTML = ligneCompteFicheV2('Acheté', siens.map(function(a) { return a.date; })) +
-      ligneCompteFicheV2('Bu', bus, bouteillesAcheteesV2(siens) - bouteillesVinFicheV2().length);
-    rendreRetraitsEditV2();   // le crayon ouvert : « Supprimer ce vin » attendait l'Historique et les achats
-  }
-  achatsV2('').then(rendre).catch(function(err) {
-    ALL_ACHATS = [];
-    rendre([]);
-    journaliserV2('Achats de la fiche')(err);
-  });
+  }).catch(journaliserV2('Plats de la fiche'));
 }
 
 // Le vin de la fiche : ses codes-barres (tous, plus celui qui a ouvert la fiche), ses bouteilles en cave (l'inventaire),
@@ -825,7 +791,7 @@ function achatsVinFicheV2(achats) {
 function bouteillesAcheteesV2(achats) { return achats.reduce(function(s, a) { return s + (parseInt(a.quantite, 10) || 1); }, 0); }
 
 // Jamais bu ni donné (« Supprimer ce vin ») : aucune ligne à l'Historique, et pas plus de bouteilles achetées que de bouteilles
-// en cave — le « Bu N fois » de la fiche à zéro. Sans l'Historique ou les achats en mémoire, on ne peut pas le dire : non.
+// en cave (une bouteille retirée, ou donnée avant le 21 nov. 2026, n'y est plus). Sans l'Historique ou les achats en mémoire, on ne peut pas le dire : non.
 function vinJamaisBuFicheV2() {
   if (!ALL_HISTORIQUE.length || !ALL_ACHATS) return false;
   return !histoVinFicheV2(ALL_HISTORIQUE).length && bouteillesAcheteesV2(achatsVinFicheV2(ALL_ACHATS)) <= bouteillesVinFicheV2().length;
@@ -1216,7 +1182,7 @@ function ouvrirEditFicheV2() {
   html += '<div id="editFicheV2-bouteilles"></div>';
   html += '<div class="roundel" onclick="photoSAQDepuisEditV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Photo SAQ</span></div>';
   document.getElementById('editFicheV2-corps').innerHTML = html;
-  rendreRetraitsEditV2();
+  majRetraitsEditV2();
   EDIT_FICHE_V2_CHAMPS.forEach(function(c) { if (LISTES_EDIT_V2[c[1]]) majListeEditV2(c[1], decodeHTML((wine[c[2]] || '').toString())); });
   montrerPageV2('editFicheV2Overlay');
 }
@@ -1244,7 +1210,7 @@ function texteBouteilleRetraitV2(i) {
 }
 
 // La section « Bouteilles » du crayon et le rond « Supprimer ce vin » : à l'ouverture du crayon, après un retrait, et quand
-// l'Historique et les achats de la fiche arrivent (rendreComptesFicheV2)
+// l'Historique de la fiche (chargerPlatsV2) ou les achats (majRetraitsEditV2) arrivent
 function rendreRetraitsEditV2() {
   var div = document.getElementById('editFicheV2-bouteilles');
   if (div) div.innerHTML = bouteillesVinFicheV2().map(function(i, k) {
@@ -1253,6 +1219,13 @@ function rendreRetraitsEditV2() {
   }).join('');
   document.getElementById('editFicheV2-supprimer').innerHTML = vinJamaisBuFicheV2() ?
     '<div class="roundel" onclick="ouvrirRetraitV2()"><span class="roundel-anneau"></span><span class="roundel-barre">Supprimer ce vin</span></div>' : '';
+}
+
+// Les achats, lus au besoin (seul « Supprimer ce vin » s'en sert, depuis que la fiche ne montre plus « Acheté N fois »),
+// puis la section et le rond ; une panne : pas de rond, une trace au journal
+function majRetraitsEditV2() {
+  rendreRetraitsEditV2();
+  achatsV2('').then(rendreRetraitsEditV2).catch(journaliserV2('Achats du crayon'));
 }
 
 // La confirmation, par-dessus le crayon : une bouteille (row, bottle) ou, sans argument, le vin entier
@@ -1307,7 +1280,7 @@ function confirmerRetraitV2() {
       fermerRetraitV2();
       if (r.vin) { finSuppressionVinV2(); return; }
       afficherFicheV2(ficheDepuisMemoireV2(CURRENT_WINE_CODEBARRE));
-      rendreRetraitsEditV2();
+      majRetraitsEditV2();
       afficherMessage(r.enTrop && res.achat === false ? 'Bouteille retirée — aucun achat ce jour-là' : 'Bouteille retirée');
     });
   }).catch(function(err) {
