@@ -784,7 +784,7 @@ function finirGererFavoritesV2() {
 var RECU_V2_ITEMS = [];
 var RECU_V2_INDEX = 0;
 var RECU_V2_BINGOS = 0;   // vins de la facture proposés dans Curieux Bégin (« Facture traitée — 2 bingos »)
-var RECU_V2_ENTRES = [];  // les vins entrés, pour le ticket sous la validation : { nom, codeSAQ, qte }
+var RECU_V2_ENTRES = [];  // les vins entrés, pour le ticket sous la validation : { nom, codeSAQ, qte, couleur, photo }
 
 function ouvrirRecuV2() {
   document.getElementById('recuV2-fichier').value = '';
@@ -909,8 +909,9 @@ function confirmerRecuVinV2() {
       ALL_ACHATS = null;   // le serveur a compté l'achat
       return rechargerInventaireV2('Ajout').then(function() {
         if (platsCurieuxBeginV2(codeSAQ).length) RECU_V2_BINGOS++;
-        var vin = vinParCodeSAQV2(codeSAQ);
-        RECU_V2_ENTRES.push({ nom: vin ? decodeHTML(vin.Nom || '') : document.getElementById('recuValidationV2-nom').value, codeSAQ: codeSAQ, qte: qte });
+        var vin = vinParCodeSAQV2(codeSAQ) || {};
+        RECU_V2_ENTRES.push({ nom: vin.Nom ? decodeHTML(vin.Nom) : document.getElementById('recuValidationV2-nom').value, codeSAQ: codeSAQ, qte: qte,
+          couleur: vin.Couleur || '', photo: vin['Photo URL'] || '' });
         RECU_V2_INDEX++;
         afficherProchainRecuVinV2();
       });
@@ -920,16 +921,17 @@ function confirmerRecuVinV2() {
   });
 }
 
-// Le ticket des vins entrés (21 nov. 2026, l'utilisateur : « l'aspect de la facture ») : Article · Qté, puis chaque vin —
-// son nom en majuscules, dessous son code SAQ et sa quantité —, le total des bouteilles en bas. Caché tant que rien n'est entré.
+// Le ticket des vins entrés (21 nov. 2026, l'utilisateur : « pendant la validation », « c'est pareil qu'une fiche vin ») : la
+// carte d'un vin de l'app — photo, couleur, nom, son code SAQ dessous, « 2 btl » à droite —, puis le total des bouteilles.
+// Caché tant que rien n'est entré.
 function rendreTicketRecuV2() {
   var ticket = document.getElementById('recuValidationV2-ticket');
   var total = 0;
   ticket.style.display = RECU_V2_ENTRES.length ? '' : 'none';
-  ticket.innerHTML = '<span>Article</span><span>Qté</span>' + RECU_V2_ENTRES.map(function(e) {
+  ticket.innerHTML = RECU_V2_ENTRES.map(function(e) {
     total += e.qte;
-    return '<div>' + e.nom + '</div><span>' + e.codeSAQ + '</span><span>' + e.qte + '</span>';
-  }).join('') + '<p>Total : ' + total + ' bouteille' + (total > 1 ? 's' : '') + '</p>';
+    return carteV2({ classes: couleurClasseV2(e.couleur), photo: e.photo, placePhoto: true, titre: e.nom, sous: e.codeSAQ, droite: e.qte + ' btl' });
+  }).join('') + '<div class="texte-secondaire">Total : ' + total + ' bouteille' + (total > 1 ? 's' : '') + '</div>';
 }
 
 // ==================== IMPORTER DES ACHATS (30 oct. 2026) ====================
