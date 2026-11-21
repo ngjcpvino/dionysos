@@ -1272,6 +1272,7 @@ function placeBouteilleV2(row, bottle) {
 function confirmerDonnerV2() {
   var place = placeBouteilleV2(actionV2Choix.row, actionV2Choix.bottle);
   appelBackend('actionBouteille', { row: actionV2Choix.row, action: 'donner', bottle: actionV2Choix.bottle }, { spinner: 'Don' }).then(function() {
+    ALL_HISTORIQUE = [];   // le don y est inscrit (21 nov. 2026)
     return rechargerVinEnCoursV2('Don');
   }).then(function() {
     cacherToutesPagesV2();

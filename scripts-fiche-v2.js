@@ -753,7 +753,7 @@ function chargerPlatsV2(codebarre) {
 
   function rendrePlats(historique) {
     var mets = histoVinFicheV2(historique);
-    rendreComptesFicheV2(mets.map(function(m) { return m.date; }));
+    rendreComptesFicheV2(mets.filter(function(m) { return !estDonV2(m); }).map(function(m) { return m.date; }));   // « Bu N fois » : sans les dons
     if (mets.length === 0) { conteneur.innerHTML = ''; return; }
     mets.sort(platPlusRecentV2);
     var nom = decodeHTML((CURRENT_WINE_DATA && CURRENT_WINE_DATA.Nom) || '');

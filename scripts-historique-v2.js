@@ -6,7 +6,7 @@
 
 // ==================== HISTORIQUE V2 ====================
 // Filtres : ce qui est propre à la page (Vin, Appréciation), puis le vin, puis le goût — comme la Cave
-var libellesFiltreHistoV2 = { vin: 'Vin', note: 'Appréciation', couleur: 'Couleur', cepage: 'Cépage', pays: 'Pays', appellation: 'Appellation', accord: 'Accord', pastille: 'Pastille de goût', acidite: 'Acidité' };
+var libellesFiltreHistoV2 = { vin: 'Vin', note: 'Appréciation', sortie: 'Bu ou donné', couleur: 'Couleur', cepage: 'Cépage', pays: 'Pays', appellation: 'Appellation', accord: 'Accord', pastille: 'Pastille de goût', acidite: 'Acidité' };
 var filtresHistoV2 = filtresVidesV2('histoV2');
 var histoEditV2 = { row: 0, note: 0 };
 
@@ -32,11 +32,13 @@ function indexVinsHistoV2() {
   return function(h) { return parCb[(h.codebarre || '').toString().trim()] || parSaq[(h.codeSAQ || '').toString().trim()] || {}; };
 }
 
-// Les valeurs d'une entrée pour un filtre (une liste : un vin peut avoir plusieurs accords) ; appréciation « 0 » = aucune
+// Les valeurs d'une entrée pour un filtre (une liste : un vin peut avoir plusieurs accords) ; appréciation « 0 » = aucune ;
+// un don n'a pas d'appréciation (aucune valeur : il ne passe pas « Sans appréciation ») ; « Bu ou donné » (21 nov. 2026)
 function valeursFiltreHistoV2(cle, h, w) {
   switch (cle) {
     case 'vin': return [h.nom || ''];
-    case 'note': return [String(parseInt(h.bonAccord, 10) || 0)];
+    case 'note': return estDonV2(h) ? [] : [String(parseInt(h.bonAccord, 10) || 0)];
+    case 'sortie': return [estDonV2(h) ? 'Donné' : 'Bu'];
     case 'couleur': return [w.Couleur || h.couleur || ''];
     case 'cepage': return [cepageDominant(w) ? cepageCommunV2(decodeHTML(cepageDominant(w))) : ''];
     case 'pays': return [w.Pays || ''];

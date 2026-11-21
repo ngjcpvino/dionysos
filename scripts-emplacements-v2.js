@@ -372,7 +372,7 @@ function derniersPassagesMenageV2() {
   var der = {};
   (ALL_HISTORIQUE || []).forEach(function(h) {
     var m = (h.date || '').match(/^(\d{2})-(\d{2})-(\d{4})$/);
-    if (!m) return;
+    if (!m || estDonV2(h)) return;   // un don n'est pas un passage à table
     var quand = new Date(+m[3], +m[2] - 1, +m[1]).getTime();
     [h.codeSAQ, h.codebarre].forEach(function(c) {
       c = (c || '').toString().trim().replace(/^0+/, '');

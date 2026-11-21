@@ -24,6 +24,10 @@ module.exports = [
     "document.querySelector('#editFicheV2-bouteilles .item-liste').click()", "basculerEnTropRetraitV2()", "confirmerRetraitV2()",
     "fermerEditFicheV2()", "fermerFicheV2()", "basculerInterrupteurV2('caveV2', 'dispo')", "ouvrirFicheV2('0555555555555', 'cave')", "ouvrirEditFicheV2()",
     "ouvrirRetraitV2()", "confirmerRetraitV2()"]],
+  // Donner (21 nov. 2026) : la bouteille sort et l'Historique l'inscrit « Donné » ; le filtre « Bu ou donné », puis la fiche
+  ['donner, puis l\'historique', ["traiterResultatScanV2('" + CINQ + "')", "menuV2Click('donner')", "choisirBouteilleActionV2('donner', 1)", "confirmerDonnerV2()",
+    "burgerV2Click('historique')", "ouvrirFiltresV2('histoV2')", "basculerFiltreV2('histoV2', 'sortie')", "choisirFiltreV2('histoV2', 'sortie', 'Donné')",
+    "fermerFiltresV2('histoV2')", "ouvrirFicheV2('" + CINQ + "', 'histo')"]],
   ['recherche', ["ouvrirRechercheV2()", { saisir: ['#rechercheV2-champ', 'ch'] }, "lancerRechercheV2()", "basculerSectionRechercheV2(1)",
     { saisir: ['#rechercheV2-champ', 'syrah'] }, "lancerRechercheV2()", "fermerRechercheV2()"]],
   ['historique', ["burgerV2Click('historique')", "ouvrirFiltresV2('histoV2')", "basculerFiltreV2('histoV2', 'note')", "choisirFiltreV2('histoV2', 'note', '5 verres')",
