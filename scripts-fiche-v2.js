@@ -1196,7 +1196,7 @@ function fermerEditFicheV2() {
 // Dans le crayon seulement (l'utilisateur : « pas facilement accessible » : corriger l'inventaire n'est pas un geste de tous
 // les jours), et toujours une confirmation. Retirer : la bouteille sort de la cave, rien à l'historique ; « Entrée en trop »
 // (une facture entrée deux fois) fait aussi baisser l'achat du jour de son entrée. Supprimer : seulement un vin jamais bu ni
-// donné (le rond n'apparaît qu'alors ; le serveur revérifie) ; ses achats disparaissent.
+// donné (le rond n'apparaît qu'alors ; le serveur revérifie) ; ses achats et ses notes de sommelier disparaissent.
 var RETRAIT_V2 = null;   // la confirmation ouverte : { row, bottle, entree, enTrop } (une bouteille) ou { vin: true }
 
 // La date d'entrée d'une bouteille de l'inventaire, « jj-mm-aaaa » (vide si on ne la connaît pas)
@@ -1234,7 +1234,8 @@ function ouvrirRetraitV2(row, bottle) {
   var bouteilles = bouteillesVinFicheV2();
   var b = bouteilles.filter(function(i) { return i.row === row && i.bottle === bottle; })[0];
   if (row && !b) return;
-  var n = bouteilles.length;
+  var n = bouteilles.length, saq = ((CURRENT_WINE_DATA || {})['Code SAQ'] || '').toString().trim();
+  var notes = saq ? (ALL_SUGGESTIONS || []).filter(function(s) { return memeCodeV2(s.codeSAQ, saq); }).length : 0;   // ses notes de sommelier
   RETRAIT_V2 = b ? { row: row, bottle: bottle, entree: entreeBouteilleV2(b), enTrop: false } : { vin: true };
   document.getElementById('retraitV2-nom').textContent = document.getElementById('ficheV2-nom').textContent;
   document.getElementById('retraitV2-origine').textContent = document.getElementById('ficheV2-origine').textContent;
@@ -1242,7 +1243,8 @@ function ouvrirRetraitV2(row, bottle) {
   document.getElementById('retraitV2-barre').textContent = b ? 'Retirer' : 'Supprimer';
   document.getElementById('retraitV2-texte').textContent = b
     ? 'Retirer la bouteille ' + texteBouteilleRetraitV2(b) + ' ? Elle sort de la cave, sans rien à l\'historique.'
-    : 'Supprimer ce vin' + (n > 1 ? ' et ses ' + n + ' bouteilles' : n ? ' et sa bouteille' : '') + ' ? Ses achats disparaissent aussi.';
+    : 'Supprimer ce vin' + (n > 1 ? ' et ses ' + n + ' bouteilles' : n ? ' et sa bouteille' : '') + ' ? Ses achats' +
+      (notes > 1 ? ' et ses ' + notes + ' notes de sommelier' : notes ? ' et sa note de sommelier' : '') + ' disparaissent aussi.';
   rendreEnTropRetraitV2();
   montrerPageV2('retraitV2Overlay');
 }
@@ -1278,6 +1280,9 @@ function confirmerRetraitV2() {
     if (!r.vin && !res.retire && !res.dejaFait) throw new Error('Action inconnue : retirer');
     if (r.vin || r.enTrop) ALL_ACHATS = null;   // le serveur a retiré des achats
     return rechargerInventaireV2(r.vin ? 'Suppression' : 'Retrait').then(function() {
+      // ses notes de sommelier sont parties avec lui (21 nov. 2026) : les Propositions relues
+      if (r.vin && res.notes) return appelBackend('getSuggestions', {}, { spinner: 'Suppression' }).then(function(d) { ALL_SUGGESTIONS = d || []; });
+    }).then(function() {
       fermerRetraitV2();
       if (r.vin) { finSuppressionVinV2(); return; }
       afficherFicheV2(ficheDepuisMemoireV2(CURRENT_WINE_CODEBARRE));
