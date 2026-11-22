@@ -382,11 +382,12 @@ var TARTES_PROFIL_V2 = {
     classe: function(nom) { return classePastilleV2(nom); }, filtre: 'pastille', moities: ['Rouge', 'Blanc'], max: 20 },
   // la 4e (5 nov. 2026, l'utilisateur) : le cépage principal (nom commun : Garnacha compte avec Grenache), coupée en deux
   // comme les pastilles ; 12 cépages par moitié puis « Autres » (5 nov. : 7 laissaient « Autres » à 34 %) ; un cépage
-  // non nommé (« Autres cépages ») ne compte pas
+  // non nommé (« Autres cépages ») ne compte pas ; trait : la fine ligne de haut en bas qui sépare les rouges des blancs
+  // (21 nov. 2026, l'utilisateur : toutes les parts sont d'or, rien ne marquait la frontière ; pas sur les Pastilles)
   cepages: { id: 'profilV2-cepages', valeur: function(w) {
       var c = decodeHTML(cepageDominant(w)).trim();
       return c && !/^autre/.test(cleCepageV2(c)) ? cepageCommunV2(c) : '';
-    }, cle: cleCepageV2, inconnu: '', quoi: 'cépages', filtre: 'cepage', moities: ['Rouge', 'Blanc'], max: 12 }
+    }, cle: cleCepageV2, inconnu: '', quoi: 'cépages', filtre: 'cepage', moities: ['Rouge', 'Blanc'], max: 12, trait: true }
 };
 var ZOOM_PROFIL_V2 = {};    // tarte → les valeurs d'un « Autres » ouvert (absente : toutes)
 var PARTS_PROFIL_V2 = {};   // tarte → ses parts dessinées (ce que touche le doigt)
@@ -564,6 +565,8 @@ function tarteV2(parts, t) {
     });
   });
   if (moities) formes = '<g>' + groupes.gauche + '</g><g>' + groupes.droite + '</g>';
+  // la ligne entre les rouges et les blancs (TARTES_PROFIL_V2[t].trait), seulement quand les deux moitiés sont là
+  if (TARTES_PROFIL_V2[t].trait && groupes.gauche && groupes.droite) formes += '<line x1="' + cx + '" y1="' + (-r) + '" x2="' + cx + '" y2="' + r + '"/>';
   // un « Autres » ouvert n'a que sa moitié : l'autre, vide, porte le rond du retour à la tarte entière (5 nov. 2026,
   // l'utilisateur) — le rond de l'app, avec une petite tarte rouge et blanc dedans
   if (moities && ZOOM_PROFIL_V2[t] && (!groupes.gauche || !groupes.droite)) {
