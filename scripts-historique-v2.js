@@ -564,9 +564,10 @@ function tarteV2(parts, t) {
       haut = Math.min(haut, e.y - 20); bas = Math.max(bas, e.y + 20 + e.plus);
     });
   });
-  if (moities) formes = '<g>' + groupes.gauche + '</g><g>' + groupes.droite + '</g>';
-  // la ligne entre les rouges et les blancs (TARTES_PROFIL_V2[t].trait), seulement quand les deux moitiés sont là
-  if (TARTES_PROFIL_V2[t].trait && groupes.gauche && groupes.droite) formes += '<line x1="' + cx + '" y1="' + (-r) + '" x2="' + cx + '" y2="' + r + '"/>';
+  // la ligne entre les rouges et les blancs (TARTES_PROFIL_V2[t].trait), seulement quand les deux moitiés sont là ; dans
+  // le groupe de droite (son or vif : .contenu > svg g line), par-dessus les deux moitiés
+  var trait = TARTES_PROFIL_V2[t].trait && groupes.gauche && groupes.droite ? '<line x1="' + cx + '" y1="' + (-r) + '" x2="' + cx + '" y2="' + r + '"/>' : '';
+  if (moities) formes = '<g>' + groupes.gauche + '</g><g>' + groupes.droite + trait + '</g>';
   // un « Autres » ouvert n'a que sa moitié : l'autre, vide, porte le rond du retour à la tarte entière (5 nov. 2026,
   // l'utilisateur) — le rond de l'app, avec une petite tarte rouge et blanc dedans
   if (moities && ZOOM_PROFIL_V2[t] && (!groupes.gauche || !groupes.droite)) {
