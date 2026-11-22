@@ -577,9 +577,12 @@ function tarteV2(parts, t) {
   return '<svg viewBox="0 ' + f(haut) + ' ' + (2 * cx) + ' ' + f(bas - haut) + '">' + formes + ecritures + '</svg>';
 }
 
-// Les bouteilles du Profil : chaque ligne de l'Historique (bue, donnée, Import) et chaque bouteille en cave
+// Les bouteilles du Profil : chaque ligne de l'Historique (bue, donnée, Import) et chaque bouteille en cave — les vins
+// seulement, pas les spiritueux (21 nov. 2026, l'utilisateur)
 function bouteillesProfilV2() {
-  return (ALL_HISTORIQUE || []).concat(bouteillesEnCaveV2().map(function(i) { return { codebarre: i['Code-barres'], codeSAQ: i['Code SAQ'] }; }));
+  var vinDe = indexVinsHistoV2();
+  return (ALL_HISTORIQUE || []).concat(bouteillesEnCaveV2().map(function(i) { return { codebarre: i['Code-barres'], codeSAQ: i['Code SAQ'] }; }))
+    .filter(function(h) { return couleurClasseV2(vinDe(h).Couleur || h.couleur) !== 'vin-spiritueux'; });
 }
 
 function rendreProfilV2() {
@@ -612,6 +615,7 @@ function toucherPartProfilV2(t, i) {
     viderFiltresV2('caveV2');
     filtresCaveV2[d.filtre] = p.nom;
     if (p.couleur) filtresCaveV2.couleur = p.couleur;   // une moitié : sa couleur aussi
+    else if (d.filtre !== 'couleur') filtresCaveV2.couleur = SAUF_FILTRE_V2 + 'Spiritueux';   // un pays : comme la tarte, sans les spiritueux
     ouvrirCaveV2();
     CAVE_DEPUIS_PROFIL_V2 = true;
   });
