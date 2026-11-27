@@ -896,9 +896,11 @@ function confirmerRecuVinV2() {
   for (var b = 0; b < qte; b++) bouteilles.push({ meuble: '', rangee: '', espace: '' });
 
   testSAQAvecRetryV2(codeSAQ).then(function(scrap) {
-    var codeCUP = scrap && scrap.success && scrap.data ? (scrap.data.codeCUP || '').replace(/\D/g, '').trim() : '';
+    var trouve = scrap && scrap.success && scrap.data;
+    var codeCUP = trouve ? (scrap.data.codeCUP || '').replace(/\D/g, '').trim() : '';
     if (!codeCUP) {
-      statutEl.textContent = 'Vin introuvable, corrigez le code';
+      // trouvé, mais sans code-barres à la SAQ (ni sur sa page ni au catalogue) : le dire, pas « introuvable »
+      statutEl.textContent = trouve && scrap.data.nom ? 'Pas de code-barres à la SAQ pour ce vin' : 'Vin introuvable, corrigez le code';
       return;
     }
     return appelBackend('ajouterVinAvecBouteilles', { codebarre: codeCUP, codeSAQ: codeSAQ, note: '', bouteilles: JSON.stringify(bouteilles), nom: '', source: 'Facture' }, { spinner: 'Ajout' }).then(function(res) {
@@ -916,8 +918,9 @@ function confirmerRecuVinV2() {
         afficherProchainRecuVinV2();
       });
     });
-  }).catch(function() {
-    statutEl.textContent = 'Erreur, réessayez';
+  }).catch(function(err) {
+    statutEl.textContent = 'Erreur : ' + causeV2(err);
+    logErreurV2('Facture : ' + causeV2(err), 'facture');
   });
 }
 
