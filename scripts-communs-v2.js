@@ -446,7 +446,7 @@ function choisirCopieRestaurationV2(i) {
 function ouvrirConfirmationRestaurationV2() {
   var c = RESTAURATION_V2.choix;
   if (!c) return;
-  RESTAURATION_V2.jeton = Date.now() + '-' + Math.random().toString(36).slice(2);
+  RESTAURATION_V2.jeton = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
   document.getElementById('restaurationConfirmV2-date').textContent = dateCopieV2(c);
   document.getElementById('restaurationConfirmV2-texte').textContent = 'Les données redeviennent celles du ' + dateCopieV2(c, true) +
     ' : tout ce qui s\'est fait depuis sera perdu. Une copie de ce qui existe présentement sera disponible.';
