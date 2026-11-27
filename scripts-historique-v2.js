@@ -210,11 +210,13 @@ function sauverHistoEditV2() {
   }).catch(function(err) { retourAccueilV2('Correction : ' + causeV2(err)); });
 }
 
-function supprimerHistoEditV2() {
-  appelBackend('supprimerHistorique', { row: histoEditV2.row }, { spinner: 'Suppression' }).then(function(res){
-    if (!res || !res.success) { messageErreurV2('Suppression : ' + ((res && (res.message || res.error)) || 'refusée')); return; }
-    return rechargerHistoriqueV2('histoEditV2Overlay', histoEditV2.provenance, 'Suppression', 'Supprimé');
-  }).catch(function(err) { retourAccueilV2('Suppression : ' + causeV2(err)); });
+// Annuler une entrée (27 nov. 2026, l'utilisateur : une entrée ne s'efface jamais, une autre écriture l'annule) : le serveur
+// ajoute une ligne « Annulation » ; l'entrée reste dans la feuille, l'app ne la montre plus. La bouteille ne revient pas.
+function annulerHistoEditV2() {
+  appelBackend('annulerHistorique', { row: histoEditV2.row }, { spinner: 'Annulation' }).then(function(res){
+    if (!res || !res.success) { messageErreurV2('Annulation : ' + ((res && (res.message || res.error)) || 'refusée')); return; }
+    return rechargerHistoriqueV2('histoEditV2Overlay', histoEditV2.provenance, 'Annulation', 'Annulé');
+  }).catch(function(err) { retourAccueilV2('Annulation : ' + causeServeurV2(err)); });
 }
 
 // Après une écriture dans l'historique : relu, l'éditeur (overlay) fermé, puis la fiche (provenance 'fiche')
