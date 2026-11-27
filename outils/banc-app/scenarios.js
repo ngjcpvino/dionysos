@@ -16,6 +16,13 @@ module.exports = [
   ['fiche', ["burgerV2Click('cave')", "ouvrirFicheV2('" + UN + "', 'cave')", "basculerVoletsV2('ficheV2-selon-', 'som')", "basculerVoletsV2('ficheV2-selon-', 'cb')",
     "basculerVoletsV2('ficheV2-selon-', 'chartier')", "basculerVoletsV2('ficheV2-selon-', 'saq')", "toggleFavoriV2()", "ouvrirEditFicheV2()", "fermerEditFicheV2()",
     "fermerFicheV2()", "ouvrirFicheV2('" + DEUX + "', 'cave')", "fermerFicheV2()"]],
+  // Les montants et les messages (27 nov. 2026, règles communes) : un prix tapé « 1.234,56 » est refusé (rien d'écrit), « 27,5 »
+  // s'écrit 27,50 $ (avant : tronqué à 27) ; le rond du message se ferme quand on le touche (un vrai toucher au centre de
+  // l'écran, le crayon ouvert : il n'y était pas sensible) ; un message d'erreur est gardé au journal des erreurs.
+  ['prix et messages', ["burgerV2Click('cave')", "ouvrirFicheV2('" + UN + "', 'cave')", "ouvrirEditFicheV2()",
+    { saisir: ['#editV2-prix', '1.234,56'] }, "sauverEditFicheV2()",
+    "afficherMessage('Touchez-moi'); var t = document.getElementById('toast'), r = t.getBoundingClientRect(); document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2).click(); if (t.classList.contains('show')) throw new Error('le message ne se ferme pas au toucher')",
+    { saisir: ['#editV2-prix', '27,5'] }, "sauverEditFicheV2()", "signalerErreurV2(new Error('panne simulée'))", "fermerFicheV2()", "fermerCaveV2()"]],
   // Retirer une bouteille, supprimer un vin (21 nov. 2026) : dans le crayon de la fiche, toujours une confirmation. Château Un
   // (bu : pas de « Supprimer ce vin ») : une bouteille retirée, entrée en trop (l'achat du 1er sept. baisse) ; Proposé Six
   // (jamais bu ni donné) : supprimé depuis la Cave, retour à la Cave sans lui.

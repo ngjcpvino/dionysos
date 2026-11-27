@@ -462,11 +462,11 @@ function boisPointsAchatV2(pts) {
 function blocPrixAchatV2(w) {
   var promo = promoDuVinV2(w);
   if (promo) {
-    var barre = (promo.rabais > 0.01 && promo.prixRegulier != null) ? '<span class="prix-barre">' + Number(promo.prixRegulier).toFixed(2) + ' $</span><br>' : '';
-    var fin = (promo.prixFinal != null) ? Number(promo.prixFinal).toFixed(2) + ' $' : '';
+    var barre = (promo.rabais > 0.01 && promo.prixRegulier != null) ? '<span class="prix-barre">' + montantV2(promo.prixRegulier) + '</span><br>' : '';
+    var fin = (promo.prixFinal != null) ? montantV2(promo.prixFinal) : '';
     return '<div class="fs-12 color-white">' + barre + fin + boisPointsAchatV2(promo.pointsBonis) + '</div>';
   }
-  var prix = (w.Prix !== '' && w.Prix != null && !isNaN(parseFloat(w.Prix))) ? parseFloat(w.Prix).toFixed(2) + ' $' : '';
+  var prix = montantV2(w.Prix);
   return prix ? '<div class="fs-12 color-white">' + prix + '</div>' : '';
 }
 
@@ -731,7 +731,7 @@ function gererFavoritesV2(cible) {
   appelBackend('getToutesSuccursales', {}, { spinner: ' ' }).then(function(liste) {
     toutesSuccursalesV2 = liste || [];
     rendreGererFavoritesV2();
-  }).catch(function() { afficherMessage('Liste des succursales indisponible'); });
+  }).catch(function(err) { messageErreurV2('Liste des succursales indisponible : ' + causeV2(err)); });
 }
 
 function rendreGererFavoritesV2() {
@@ -818,7 +818,7 @@ function traiterPhotoRecuV2(input) {
     var base64 = lecteur.result.split(',')[1];
     appelBackend('extraireRecuSAQ', { image: base64 }, { spinner: 'Lecture de la facture', timeout: 60000 }).then(function(res) {
       if (!res || !res.success) {
-        afficherMessage('Erreur OCR : ' + ((res && res.error) || 'inconnue'));
+        messageErreurV2('Erreur OCR : ' + ((res && res.error) || 'inconnue'));
         fermerRecuV2();
         return;
       }
@@ -833,8 +833,8 @@ function traiterPhotoRecuV2(input) {
       document.getElementById('recuV2Container').style.display = 'none';
       document.getElementById('recuValidationV2Container').style.display = 'flex';
       afficherProchainRecuVinV2();
-    }).catch(function() {
-      afficherMessage('Erreur de lecture de la facture');
+    }).catch(function(err) {
+      messageErreurV2('Erreur de lecture de la facture : ' + causeV2(err));
       fermerRecuV2();
     });
   };
@@ -1017,7 +1017,7 @@ function lireImportAchatsV2() {
     });
     IMPORT_ACHATS_V2 = { visites: lu.visites, vins: lu.vins, aVerifier: [], ajoutes: 0, achats: 0 };
     afficherImportAchatsV2();
-  }).catch(function(err) { afficherMessage('Importer des achats : ' + causeServeurV2(err)); });
+  }).catch(function(err) { messageErreurV2('Importer des achats : ' + causeServeurV2(err)); });
 }
 
 function basculerAchatV2(i) {
@@ -1122,7 +1122,7 @@ function choisirAchatAVerifierV2(i, j) {
   }).then(function() {
     return rechargerInventaireV2('Ajout');
   }).then(afficherImportAchatsV2).catch(function(err) {
-    afficherMessage('Importer des achats : ' + causeServeurV2(err));
+    messageErreurV2('Importer des achats : ' + causeServeurV2(err));
   });
 }
 

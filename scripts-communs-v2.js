@@ -355,7 +355,7 @@ function burgerV2Click(cible) {
       effacerCopieV2('inventaireSucc');
       afficherMessage('✓ Synchronisé');
       mettreAJourAppV2(); // porte de sortie : la dernière version de l'app, pas une vieille copie
-    }).catch(function() { afficherMessage('Erreur de synchronisation'); });
+    }).catch(function(err) { messageErreurV2('Erreur de synchronisation : ' + causeV2(err)); });
     return;
   }
   afficherMessage('À venir');
@@ -366,14 +366,14 @@ function burgerV2Click(cible) {
 function majCurieuxBeginBoucleV2(ajoutsCumul) {
   appelBackend('majCurieuxBegin', {}, { spinner: 'Mise à jour Curieux Bégin', timeout: 330000 }).then(function(res) {
     if (!res || res.success === false || res.error) {
-      afficherMessage('Curieux Bégin : ' + ((res && res.error) ? res.error : 'réponse inattendue'));
+      messageErreurV2('Curieux Bégin : ' + ((res && res.error) ? res.error : 'réponse inattendue'));
       return;
     }
     var ajouts = ajoutsCumul + (res.ajoutees || 0);
     if (!res.termine) { majCurieuxBeginBoucleV2(ajouts); return; }
     ALL_CURIEUXBEGIN = null;
     afficherMessage('✓ Curieux Bégin à jour (' + ajouts + ' ajout' + (ajouts > 1 ? 's' : '') + ')');
-  }).catch(function(e) { afficherMessage('Curieux Bégin : ' + causeV2(e)); });
+  }).catch(function(e) { messageErreurV2('Curieux Bégin : ' + causeV2(e)); });
 }
 
 // Mise à jour Accords SAQ — remplit les familles des vins (relance auto s'il en reste) puis les recettes,
@@ -381,7 +381,7 @@ function majCurieuxBeginBoucleV2(ajoutsCumul) {
 function majAccordsSaqBoucleV2(faitsCumul) {
   appelBackend('majAccordsSAQ', {}, { spinner: 'Mise à jour Accords SAQ', timeout: 330000 }).then(function(res) {
     if (!res || res.success === false || res.error) {
-      afficherMessage('Accords SAQ : ' + ((res && res.error) ? res.error : 'réponse inattendue'));
+      messageErreurV2('Accords SAQ : ' + ((res && res.error) ? res.error : 'réponse inattendue'));
       return;
     }
     var faits = faitsCumul + (res.faits || 0);
@@ -391,8 +391,8 @@ function majAccordsSaqBoucleV2(faitsCumul) {
       ALL_DATA = data || [];
       ALL_HISTORIQUE = [];
       afficherMessage('✓ Accords SAQ à jour (' + (res.ajoutees || 0) + ' recette' + ((res.ajoutees > 1) ? 's' : '') + ')');
-    }).catch(function() { afficherMessage('✓ Accords SAQ à jour'); });
-  }).catch(function(e) { afficherMessage('Accords SAQ : ' + causeV2(e)); });
+    }).catch(function(err) { messageErreurV2('Accords SAQ à jour, mais les vins pas relus : ' + causeV2(err)); });
+  }).catch(function(e) { messageErreurV2('Accords SAQ : ' + causeV2(e)); });
 }
 
 // ==================== L'APPRÉCIATION EN VERRES (Boire, Corriger, Ajouter à l'historique) ====================

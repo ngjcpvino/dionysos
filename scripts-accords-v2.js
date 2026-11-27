@@ -780,8 +780,7 @@ function groupeCurieuxBeginV2(g, provenance) {
     var a0 = g.ref;
     classeCoul = couleurClasseV2(a0.type);
     var nomV = decodeHTML(a0.vin || '—');
-    var prixNum = parseFloat((a0.prix || '').toString().replace(',', '.'));
-    var prix = isFinite(prixNum) ? (prixNum.toFixed(2).replace('.', ',') + ' $') : '';
+    var prix = montantV2((a0.prix || '').toString().replace(',', '.'));
     var ligne1 = [decodeHTML(a0.cepage || ''), prix].filter(Boolean).join(' • ');
     var sousV = [ligne1, 'Vin à découvrir à la SAQ'].filter(Boolean).join('<br>');
     carteVin = carteV2({ classes: 'histo-vin ' + classeCoul, onclick: 'window.open(\'https://www.saq.com/fr/' + g.codeSAQ + '\', \'_blank\')', photo: a0.photo, titre: nomV, sous: sousV });

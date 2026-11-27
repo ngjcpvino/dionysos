@@ -73,7 +73,7 @@ function chargerSourcesRechercheV2() {
   chaine.then(function() {
     if (document.getElementById('rechercheV2Container').style.display !== 'none') lancerRechercheV2();
   }).catch(function(err) {
-    afficherMessage('Recherche : ' + causeV2(err));
+    messageErreurV2('Recherche : ' + causeV2(err));
   });
 }
 

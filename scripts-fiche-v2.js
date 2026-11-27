@@ -146,7 +146,7 @@ function afficherFicheV2(result) {
   if (wine.Description || wine.Prix) {
     html += '<div class="section">';
     if (wine.Description) html += '<div class="texte">' + decodeHTML(wine.Description) + '</div>';
-    if (wine.Prix) html += '<div class="ligne-info"><span id="ficheV2-prix">' + parseFloat(wine.Prix).toFixed(2) + '</span> $</div>';
+    if (wine.Prix) html += '<div class="ligne-info"><span id="ficheV2-prix">' + montantV2(wine.Prix) + '</span></div>';
 	 html += ligne('Code-barres', wine['Code-barres']);
   html += ligne('Code SAQ', wine['Code SAQ']);
     if (wine.Cellier === 'Oui') html += '<div class="ligne-info"><span class="color-primary">Espace Cellier</span></div>';
@@ -448,7 +448,7 @@ function sauverCorrigerRecetteV2() {
     typesPlats: etat.typesPlats.join(';;'),
     ingredients: etat.ingredients.join(';;')
   }, { spinner: 'Enregistrement' }).then(function(res) {
-    if (!res || res.success === false || res.error) { afficherMessage((res && (res.message || res.error)) ? (res.message || res.error) : 'Correction refusée'); return undefined; }
+    if (!res || res.success === false || res.error) { messageErreurV2((res && (res.message || res.error)) ? (res.message || res.error) : 'Correction refusée'); return undefined; }
     return appelBackend('getRecettes', {}, { spinner: 'Enregistrement' });
   }).then(function(data) {
     if (data === undefined) return; // échec déjà signalé
@@ -628,9 +628,7 @@ function confirmerAjoutAccordV2() {
       return '<div class="item-liste' + (sel ? ' actif' : '') + '" onclick="toggleAccordV2(this)" data-accord="' + acc + '">' + acc + '</div>';
     }).join('') + '<div class="item-liste" id="ficheV2-accord-ajouter" onclick="ouvrirChampAjoutV2(\'ficheV2-accord\', \'Nouvel accord\', confirmerAjoutAccordV2)">+ Ajouter</div>';
     cocherAccordV2(valeur);
-  }).catch(function() {
-    afficherMessage('Erreur, réessayez');
-  });
+  }).catch(signalerErreurV2);
 }
 
 function toggleAccordV2(element) {
@@ -734,7 +732,7 @@ function verifierPrixV2(codebarre, codeSAQ) {
   appelBackend('verifierEtMettreAJourPrixSAQ', { codebarre: codebarre, codeSAQ: codeSAQ }, { spinner: '' }).then(function(res) {
     if (res && res.updated) {
       var el = document.getElementById('ficheV2-prix');
-      if (el) el.textContent = res.nouveauPrix.toFixed(2);
+      if (el) el.textContent = montantV2(res.nouveauPrix);
     }
     if (res && res.cepages) {
       var elCep = document.getElementById('ficheV2-cepages');
@@ -1175,7 +1173,7 @@ function ouvrirEditFicheV2() {
   var html = EDIT_FICHE_V2_CHAMPS.map(function(c) {
     if (LISTES_EDIT_V2[c[1]]) return '<div class="titre-3">' + c[0] + '</div><div class="champ-cliquable" id="editV2-' + c[1] + '-display" onclick="basculerListeEditV2(\'' + c[1] + '\')"></div>' +
       '<div id="editV2-' + c[1] + '-menu" class="menu-liste"></div>';
-    var valeur = decodeHTML((wine[c[2]] || '').toString()).replace(/"/g, '&quot;');
+    var valeur = (c[1] === 'prix' ? montantV2(wine.Prix || '', true) : decodeHTML((wine[c[2]] || '').toString())).replace(/"/g, '&quot;');
     return '<div class="titre-3">' + c[0] + '</div><input type="text" id="editV2-' + c[1] + '" class="champ-saisie" value="' + valeur + '">';
   }).join('');
   html += '<div class="titre-3">Vin pour cépage favori</div>' +
@@ -1291,7 +1289,7 @@ function confirmerRetraitV2() {
     });
   }).catch(function(err) {
     r.enCours = false;
-    afficherMessage('Erreur : ' + causeServeurV2(err));
+    messageErreurV2('Erreur : ' + causeServeurV2(err));
   });
 }
 
@@ -1338,17 +1336,20 @@ function photoSAQDepuisEditV2() {
 function sauverEditFicheV2() {
   var favoriEl = document.getElementById('editV2-favori');
   var favoriVal = (favoriEl && favoriEl.classList.contains('actif')) ? 'Oui' : '';
+  var prix = lireMontantV2(valeurEditV2('prix'));
+  if (prix === null) { afficherMessage('Prix pas clair — entrez-le comme 24,95'); return; }
   var data = { codebarre: CURRENT_WINE_CODEBARRE, aime: (CURRENT_WINE_DATA && CURRENT_WINE_DATA.Racheter) || 'Oui', favori: favoriVal };
   var champsMemoire = { 'Favori': favoriVal };
   EDIT_FICHE_V2_CHAMPS.forEach(function(c) {
-    var valeur = valeurEditV2(c[1]);
+    var valeur = c[1] === 'prix' ? prix : valeurEditV2(c[1]);
     data[c[1]] = valeur;
     var cle = c[2];
     if (cle === 'Designation') cle = 'Désignation';
     if (cle === 'Temperature') cle = 'Température';
     champsMemoire[cle] = valeur;
   });
-  appelBackend('saveWineEdits', data, { spinner: 'Sauvegarde' }).then(function() {
+  appelBackend('saveWineEdits', data, { spinner: 'Sauvegarde' }).then(function(res) {
+    if (!res || res.success === false) throw new Error((res && res.message) || 'refusé');
     majMemoireVinV2(CURRENT_WINE_CODEBARRE, champsMemoire);
     document.getElementById('editFicheV2Overlay').style.display = 'none';
     afficherMessage('Modifications enregistrées');

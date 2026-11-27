@@ -203,7 +203,7 @@ function sauverHistoEditV2() {
   if (date && date > dateIsoV2()) { afficherMessage('Cette date est dans le futur'); return; }
   var nouvelleDate = date && date !== histoEditV2.date ? date : '';
   appelBackend('corrigerHistorique', { row: histoEditV2.row, plat: plat, note: histoEditV2.note || '', date: nouvelleDate }, { spinner: 'Sauvegarde' }).then(function(res){
-    if (!res || !res.success) { afficherMessage('Erreur'); return; }
+    if (!res || !res.success) { messageErreurV2('Correction : ' + ((res && (res.message || res.error)) || 'refusée')); return; }
     // un serveur pas encore redéployé ignore la date sans le dire
     var dateIgnoree = nouvelleDate && !res.avecDate;
     return rechargerHistoriqueV2('histoEditV2Overlay', histoEditV2.provenance, 'Sauvegarde', dateIgnoree ? 'Corrigé, sauf la date : Code.gs à recoller' : 'Corrigé');
@@ -212,7 +212,7 @@ function sauverHistoEditV2() {
 
 function supprimerHistoEditV2() {
   appelBackend('supprimerHistorique', { row: histoEditV2.row }, { spinner: 'Suppression' }).then(function(res){
-    if (!res || !res.success) { afficherMessage('Erreur'); return; }
+    if (!res || !res.success) { messageErreurV2('Suppression : ' + ((res && (res.message || res.error)) || 'refusée')); return; }
     return rechargerHistoriqueV2('histoEditV2Overlay', histoEditV2.provenance, 'Suppression', 'Supprimé');
   }).catch(function(err) { retourAccueilV2('Suppression : ' + causeV2(err)); });
 }

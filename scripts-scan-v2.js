@@ -298,8 +298,8 @@ function validerSaisieManuelleV2() {
     }).catch(function(err) {
       retourAccueilV2('Recherche du code : ' + causeV2(err));
     });
-  }).catch(function() {
-    afficherMessage('Erreur, réessayez');
+  }).catch(function(err) {
+    messageErreurV2('Code SAQ : ' + causeV2(err));
   });
 }
 
@@ -719,9 +719,9 @@ function creerVinManuelV2(mode) {
     if (codeTrouve) { suite(codeTrouve); return; }
     if (nom) { suite(''); return; }
     afficherMessage('Toujours introuvable — entrez un code SAQ ou un nom');
-  }).catch(function() {
+  }).catch(function(err) {
     if (nom) { suite(''); return; }
-    afficherMessage('Toujours introuvable — entrez un code SAQ ou un nom');
+    messageErreurV2('Recherche SAQ : ' + causeV2(err));
   });
 }
 
@@ -954,7 +954,7 @@ function verifierEtPoserPlacementV2(prefixe) {
       document.getElementById(prefixe + '-espace-menu').classList.add('ouvert');
     });
   }).catch(function(err) {
-    afficherMessage('Vérification de l\'espace impossible : ' + causeV2(err));
+    messageErreurV2('Vérification de l\'espace impossible : ' + causeV2(err));
   });
 }
 

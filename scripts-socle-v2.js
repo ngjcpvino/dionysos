@@ -75,8 +75,10 @@ function causeServeurV2(err) {
 function verifierReponseV2(res) {
   if (res && res.error) throw new Error(res.error);
 }
+// Un message d'erreur : le rond le dit, et le journal des erreurs le garde (onglet « Erreurs »), pour le relire
+function messageErreurV2(texte) { afficherMessage(texte); logErreurV2(texte, 'message'); }
 // Une écriture qui échoue : le toast le dit, avec la cause. Usage : .catch(signalerErreurV2)
-function signalerErreurV2(err) { afficherMessage('Erreur : ' + causeV2(err)); }
+function signalerErreurV2(err) { messageErreurV2('Erreur : ' + causeV2(err)); }
 // Un appel de fond qui échoue ne dérange pas l'écran (la page reste utilisable), mais laisse sa trace dans le journal
 // des erreurs (onglet « Erreurs ») : jamais une panne avalée en silence. Usage : .catch(journaliserV2('Promotions'))
 function journaliserV2(quoi) { return function(err) { logErreurV2(quoi + ' : ' + causeV2(err), 'fond'); }; }
@@ -147,7 +149,7 @@ function demarrerAppV2(essai) {
       if (copie) { demarrerSurCopieV2(); return; }
       // Réseau/serveur momentané (« Failed to fetch », « Le serveur ne répond pas ») : réessayer avant d'abandonner.
       if (essai < 3) { setTimeout(function() { demarrerAppV2(essai + 1); }, 1500); return; }
-      afficherMessage('Connexion au serveur impossible (' + msg + '). Vérifiez le réseau, puis rechargez.');
+      messageErreurV2('Connexion au serveur impossible (' + msg + '). Vérifiez le réseau, puis rechargez.');
     });
   });
 }
@@ -208,7 +210,7 @@ function restaurerInventaireSuccV2(horsLigne) {
 
 function demarrerSurCopieV2() {
   return Promise.all(['config', 'inventaire', 'suggestions', 'curieuxbegin'].map(lireCopieV2)).then(function(c) {
-    if (!c[0] || !c[1]) { afficherMessage('Connexion au serveur impossible. Vérifiez le réseau, puis rechargez.'); return; }
+    if (!c[0] || !c[1]) { messageErreurV2('Connexion au serveur impossible. Vérifiez le réseau, puis rechargez.'); return; }
     CONFIG = c[0].valeur;
     ALL_DATA = c[1].valeur || [];
     ALL_SUGGESTIONS = c[2] ? (c[2].valeur || []) : [];
@@ -417,26 +419,50 @@ window.addEventListener('unhandledrejection', function(e) {
 });
 
 // ==================== MESSAGES ====================
-// Le toast : un seul, réutilisé — montré avec son contenu, puis caché en fondu
+// Le toast : un seul, réutilisé — montré avec son contenu, puis caché en fondu ; le toucher le ferme.
+// Ses minuteries sont annulées à chaque nouveau message : celles d'un message précédent ne le cachent jamais trop tôt.
+var MINUTERIES_TOAST_V2 = { cacher: null, fondu: null };
 function montrerToastV2(html) {
   let t = document.getElementById('toast') || document.createElement('div');
   t.id = 'toast';
   t.className = 'toast';
   document.body.appendChild(t);
+  clearTimeout(MINUTERIES_TOAST_V2.cacher);
+  clearTimeout(MINUTERIES_TOAST_V2.fondu);
+  t.onclick = function() { cacherToastV2(t); };
   t.style.display = '';
   t.innerHTML = html;
   t.classList.add('show');
   return t;
 }
 function cacherToastV2(t) {
+  clearTimeout(MINUTERIES_TOAST_V2.cacher);
   t.classList.remove('show');
-  setTimeout(function() { t.style.display = 'none'; }, 400);
+  MINUTERIES_TOAST_V2.fondu = setTimeout(function() { t.style.display = 'none'; }, 400);
 }
 
 function afficherMessage(m) {
   var t = montrerToastV2('');
   t.textContent = m;
-  setTimeout(function() { cacherToastV2(t); }, 3000);
+  MINUTERIES_TOAST_V2.cacher = setTimeout(function() { cacherToastV2(t); }, 3000);
+}
+
+// ==================== MONTANTS (français du Canada) ====================
+// Un montant affiché comme ici : « 1 234,56 $ » (espaces insécables : jamais coupé). Lit un nombre, ou un texte venu
+// d'un système, qui garde son point (« 1234.56 »). Illisible → rien. sansDollar : pour une case à corriger (« 24,95 »).
+function montantV2(valeur, sansDollar) {
+  var n = typeof valeur === 'number' ? valeur : parseFloat(valeur);
+  if (!isFinite(n)) return '';
+  var p = n.toFixed(2).split('.');
+  return p[0].replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0') + ',' + p[1] + (sansDollar ? '' : '\u00a0$');
+}
+// Un montant tapé : la virgule ou le point pour les cents, des espaces entre les milliers, « $ » permis.
+// Vide → '' ; pas clair (« 1.234,56 », « 12..50 », des lettres) → null : refusé, jamais deviné.
+function lireMontantV2(texte) {
+  var t = (texte == null ? '' : String(texte)).replace(/[\s$]/g, '');
+  if (!t) return '';
+  if (!/^\d+([.,]\d{1,2})?$/.test(t)) return null;
+  return parseFloat(t.replace(',', '.'));
 }
 
 // Une image (« Ne pas racheter ») : reste jusqu'au prochain toucher
