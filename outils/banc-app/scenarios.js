@@ -80,10 +80,11 @@ module.exports = [
     "traiterResultatScanV2('" + CINQ + "')", "menuV2Click('deplacer')", "document.querySelector('#deplacerV2-bouteille-menu .item-liste').click()", "deplacerARangerV2(true)"]],
   ['importer des achats', ["burgerV2Click('importachats')", { saisir: ['#importAchatsV2-texte', HISTORIQUE_SAQ] }, "lireImportAchatsV2()", "importerAchatsV2()",
     "fermerImportAchatsV2()", "ouvrirFicheV2('" + UN + "', 'cave')"]],
-  // Un vin dont la page SAQ ne montre pas le code-barres (27 nov. 2026, Cune Rioja 15528861 : « Vin introuvable ») : le
-  // catalogue le donne, le vin entre ; un vin sans code-barres nulle part : « Pas de code-barres à la SAQ pour ce vin »
+  // 27 nov. 2026 (trois vins d'une Facture « introuvables ») : le 1er, déjà dans la cave, entre sans demander à la SAQ ; un vin
+  // sans code-barres nulle part : « Pas de code-barres à la SAQ pour ce vin » ; un vin dont la SAQ refuse la page : le
+  // catalogue donne sa fiche et son code-barres, il entre
   ['facture SAQ', ["burgerV2Click('facture')", { fichier: ['#recuV2-fichier', 'recu.png'] }, "confirmerRecuVinV2()",
-    { saisir: ['#recuValidationV2-codesaq', '10004'] }, "confirmerRecuVinV2()", { saisir: ['#recuValidationV2-codesaq', '15528861'] }, "confirmerRecuVinV2()",
+    { saisir: ['#recuValidationV2-codesaq', '15528880'] }, "confirmerRecuVinV2()", { saisir: ['#recuValidationV2-codesaq', '15528870'] }, "confirmerRecuVinV2()",
     "passerRecuVinV2()", "fermerRecuV2()"]],
   // Le Mode d'emploi (5 nov. 2026) : chaque étape de chaque visite (12 « › » par visite : au-delà de sa dernière étape, elle est finie
   // et « › » ne fait plus rien), puis une question, et la sortie au milieu d'une visite. Rien ne doit partir au serveur en écriture.

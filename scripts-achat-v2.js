@@ -895,12 +895,19 @@ function confirmerRecuVinV2() {
   var bouteilles = [];
   for (var b = 0; b < qte; b++) bouteilles.push({ meuble: '', rangee: '', espace: '' });
 
-  testSAQAvecRetryV2(codeSAQ).then(function(scrap) {
+  // Un vin déjà dans la cave (son code SAQ) : son code-barres est connu, la SAQ n'a pas à répondre (27 nov. 2026 : trois vins
+  // d'une Facture « introuvables », dont un déjà acheté). Un vin nouveau : son code-barres à la SAQ (page, sinon catalogue).
+  var connu = vinParCodeSAQV2(codeSAQ);
+  var cupConnu = connu ? (connu['Code-barres'] || '').toString().replace(/\D/g, '') : '';
+  (cupConnu ? Promise.resolve({ success: true, data: { codeCUP: cupConnu } }) : testSAQAvecRetryV2(codeSAQ)).then(function(scrap) {
     var trouve = scrap && scrap.success && scrap.data;
     var codeCUP = trouve ? (scrap.data.codeCUP || '').replace(/\D/g, '').trim() : '';
     if (!codeCUP) {
-      // trouvé, mais sans code-barres à la SAQ (ni sur sa page ni au catalogue) : le dire, pas « introuvable »
-      statutEl.textContent = trouve && scrap.data.nom ? 'Pas de code-barres à la SAQ pour ce vin' : 'Vin introuvable, corrigez le code';
+      // trouvé sans code-barres (ni sur sa page ni au catalogue), ou la SAQ qui ne répond pas : le dire, jamais « introuvable » à tort
+      var cause = trouve ? '' : (scrap && scrap.error) || '';
+      statutEl.textContent = trouve && scrap.data.nom ? 'Pas de code-barres à la SAQ pour ce vin'
+        : /^Code HTTP: 404$/.test(cause) || !cause ? 'Vin introuvable, corrigez le code' : 'La SAQ ne répond pas (' + cause + '), réessayez';
+      if (cause && !/^Code HTTP: 404$/.test(cause)) logErreurV2('Facture, SAQ : ' + cause, 'facture', codeSAQ);
       return;
     }
     return appelBackend('ajouterVinAvecBouteilles', { codebarre: codeCUP, codeSAQ: codeSAQ, note: '', bouteilles: JSON.stringify(bouteilles), nom: '', source: 'Facture' }, { spinner: 'Ajout' }).then(function(res) {
