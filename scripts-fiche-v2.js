@@ -171,14 +171,9 @@ function afficherFicheV2(result) {
   html += '<div class="controle"><span class="libelle">Notes du sommelier</span>' +
           '<div id="ficheV2-notes-display" class="champ-cliquable" onclick="editerNotesSommelierV2()">' + (wine['Notes temporaires'] ? decodeHTML(wine['Notes temporaires'].toString()) : 'Aucune') + '</div></div>';
   var accordsActuels = (wine.Accords || '').split(',').map(function(a) { return a.trim(); }).filter(Boolean);
-  var itemsAccords = (CONFIG && CONFIG.accords ? CONFIG.accords : []).map(function(acc) {
-    var sel = accordsActuels.indexOf(acc) !== -1;
-    return '<div class="item-liste' + (sel ? ' actif' : '') + '" onclick="toggleAccordV2(this)" data-accord="' + acc + '">' + acc + '</div>';
-  }).join('');
   html += '<div class="controle"><span class="libelle">Accords</span>' +
-          '<div id="ficheV2-accords-display" class="champ-cliquable" onclick="basculerMenuAccordsV2()">' + (accordsActuels.length ? accordsActuels.join(', ') : 'Aucun') + '</div></div>';
-  itemsAccords += '<div class="item-liste" id="ficheV2-accord-ajouter" onclick="ouvrirChampAjoutV2(\'ficheV2-accord\', \'Nouvel accord\', confirmerAjoutAccordV2)">+ Ajouter</div>';
-  html += '<div id="ficheV2-accords-menu" class="menu-liste">' + itemsAccords + '</div>';
+          '<div id="ficheV2-accords-display" class="champ-cliquable" onclick="basculerMenuAccordsListeV2(\'ficheV2-accord\')">' + (accordsActuels.length ? accordsActuels.join(', ') : 'Aucun') + '</div></div>';
+  html += '<div id="ficheV2-accords-menu" class="menu-liste">' + menuAccordsHtmlV2('ficheV2-accord', accordsActuels) + '</div>';
 
   var aime = wine.Racheter || '';
   html += '<div class="colonnes-controle">' +
@@ -588,53 +583,9 @@ function ouvrirActionDepuisFicheV2() {
   naviguerV2(function() { ouvrirMenuActionV2(code, result); });
 }
 
-function basculerMenuAccordsV2() {
-  var menu = document.getElementById('ficheV2-accords-menu');
-  if (!menu) return;
-  var ouvert = menu.classList.toggle('ouvert');
-  if (!ouvert) remettreAjoutAccordV2();
-}
-
-function remettreAjoutAccordV2() {
-  var champ = document.getElementById('ficheV2-accord-champ');
-  if (!champ) return;
-  champ.outerHTML = '<div class="item-liste" id="ficheV2-accord-ajouter" onclick="ouvrirChampAjoutV2(\'ficheV2-accord\', \'Nouvel accord\', confirmerAjoutAccordV2)">+ Ajouter</div>';
-}
-
-function cocherAccordV2(accord) {
-  var menu = document.getElementById('ficheV2-accords-menu');
-  var item = Array.prototype.filter.call(menu.querySelectorAll('.item-liste'), function(el) { return el.getAttribute('data-accord') === accord; })[0];
-  if (item && !item.classList.contains('actif')) toggleAccordV2(item);
-}
-
-function confirmerAjoutAccordV2() {
-  var champ = document.getElementById('ficheV2-accord-champ');
-  if (!champ) return;
-  var valeur = champ.value.trim();
-  if (!valeur) { afficherMessage('Entrez un accord'); return; }
-  var existant = (CONFIG && CONFIG.accords ? CONFIG.accords : []).filter(function(a) { return memeTexteV2(a, valeur); })[0];
-  if (existant) {
-    remettreAjoutAccordV2();
-    cocherAccordV2(existant);
-    return;
-  }
-  appelBackend('ajouterAccordConfig', { accord: valeur }, { spinner: 'Sauvegarde' }).then(function() {
-    CONFIG.accords.push(valeur);
-    CONFIG.accords.sort(function(a, b) { return normaliserRechercheV2(a).localeCompare(normaliserRechercheV2(b)); });
-    var menu = document.getElementById('ficheV2-accords-menu');
-    var selectionnes = Array.prototype.map.call(menu.querySelectorAll('.item-liste.actif'), function(el) { return el.getAttribute('data-accord'); });
-    menu.innerHTML = CONFIG.accords.map(function(acc) {
-      var sel = selectionnes.indexOf(acc) !== -1;
-      return '<div class="item-liste' + (sel ? ' actif' : '') + '" onclick="toggleAccordV2(this)" data-accord="' + acc + '">' + acc + '</div>';
-    }).join('') + '<div class="item-liste" id="ficheV2-accord-ajouter" onclick="ouvrirChampAjoutV2(\'ficheV2-accord\', \'Nouvel accord\', confirmerAjoutAccordV2)">+ Ajouter</div>';
-    cocherAccordV2(valeur);
-  }).catch(signalerErreurV2);
-}
-
 function toggleAccordV2(element) {
   element.classList.toggle('actif');
-  var menu = document.getElementById('ficheV2-accords-menu');
-  var selectionnes = Array.prototype.map.call(menu.querySelectorAll('.item-liste.actif'), function(el) { return el.getAttribute('data-accord'); });
+  var selectionnes = accordsChoisisV2('ficheV2-accord');
   var display = document.getElementById('ficheV2-accords-display');
   if (display) display.textContent = selectionnes.length ? selectionnes.join(', ') : 'Aucun';
   enregistrerChampFicheV2('Accords', selectionnes.join(', ')).catch(signalerErreurV2);

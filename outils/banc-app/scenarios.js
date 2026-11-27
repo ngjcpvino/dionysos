@@ -64,8 +64,11 @@ module.exports = [
     "choisirFiltreV2('chartierV2', 'meuble', 'Cellier')", "choisirAlimentChartierV2('Romarin')", "reinitialiserFiltresV2('chartierV2')", "fermerChartierV2()",
     "burgerV2Click('selonsaq')", "fermerSelonSaqV2()", "burgerV2Click('curieuxbegin')", "choisirModeCurieuxBeginV2('horscave')", "fermerCurieuxBeginV2()",
     "burgerV2Click('notes')", "ouvrirNoteEditV2(2)", "fermerNoteEditV2()", "fermerNotesV2()"]],
+  // Un accord nouveau ajouté en buvant (27 nov. 2026, l'utilisateur : « J'ai besoin de porc, je ne peux pas l'ajouter ») :
+  // la même liste des accords partout, avec « + Ajouter » ; il entre dans config, choisi, puis écrit sur le vin avec Boire
   ['scan d\'un vin connu, boire', ["traiterResultatScanV2('" + UN + "')", "menuV2Click('boire')", "choisirBouteilleActionV2('boire', 1)",
-    { saisir: ['#boireV2-plat', 'Agneau grillé'] }, "choisirNoteBoireV2(5)", "confirmerBoireV2()"]],
+    "basculerMenuAccordsListeV2('boireV2-accord')", "document.getElementById('boireV2-accord-ajouter').click()", { saisir: ['#boireV2-accord-champ', 'Porc'] },
+    "confirmerAjoutAccordV2('boireV2-accord')", { saisir: ['#boireV2-plat', 'Agneau grillé'] }, "choisirNoteBoireV2(5)", "confirmerBoireV2()"]],
   // Le remplaçant (3 nov. 2026) : le faux classeur n'a pas de rouge au cellier ni au Pigeonnier rouge — on en pose un, en mémoire seulement
   ['remplaçant après Boire', ["ALL_DATA.push({ row: 90, bottle: 1, 'Code-barres': '0900000000002', Nom: 'Malbec du Pigeonnier', Couleur: 'Rouge', Cepage: 'Malbec', Appellation: 'Cahors', Meuble: 'Pigeonnier', Rangee: '5', Espace: '2', Statut: 'En stock', Racheter: 'Oui' }); proposerRemplacantV2({ meuble: 'Cellier', rangee: '4', espace: '2' })",
     "document.querySelector('#remplacantV2-carte .carte').click()", "fermerFicheV2()", "fermerRemplacantV2()"]],

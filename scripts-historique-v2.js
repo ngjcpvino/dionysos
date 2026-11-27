@@ -311,10 +311,7 @@ function choisirVinHistoAjoutV2(cb, saq, nom) {
   var accordsActuels = [];
   var vin = (ALL_DATA || []).filter(function(d){ return (d['Code-barres'] || '').toString().trim().replace(/\s+/g, '') === cb; })[0];
   if (vin && vin.Accords) accordsActuels = vin.Accords.split(',').map(function(a){ return a.trim(); }).filter(Boolean);
-  document.getElementById('histoAjoutV2-accords-menu').innerHTML = (CONFIG && CONFIG.accords ? CONFIG.accords : []).map(function(acc){
-    var sel = accordsActuels.indexOf(acc) !== -1;
-    return '<div class="item-liste' + (sel ? ' actif' : '') + '" onclick="toggleAccordHistoAjoutV2(this)" data-accord="' + acc + '">' + acc + '</div>';
-  }).join('');
+  remplirMenuAccordsV2('histoAjoutV2-accord', accordsActuels);
   majAccordsDisplayHistoAjoutV2();
   document.getElementById('histoAjoutV2-form').style.display = 'block';
 }
@@ -324,17 +321,13 @@ function choisirNoteHistoAjoutV2(note) {
   allumerVerresV2('histoAjoutV2-verres', note);
 }
 
-function basculerMenuAccordsHistoAjoutV2() {
-  document.getElementById('histoAjoutV2-accords-menu').classList.toggle('ouvert');
-}
-
 function toggleAccordHistoAjoutV2(el) {
   el.classList.toggle('actif');
   majAccordsDisplayHistoAjoutV2();
 }
 
 function majAccordsDisplayHistoAjoutV2() {
-  var sel = Array.prototype.map.call(document.querySelectorAll('#histoAjoutV2-accords-menu .item-liste.actif'), function(el){ return el.getAttribute('data-accord'); });
+  var sel = accordsChoisisV2('histoAjoutV2-accord');
   var disp = document.getElementById('histoAjoutV2-accords-display');
   if (disp) disp.textContent = sel.length ? sel.join(', ') : 'Accords';
 }
@@ -346,7 +339,7 @@ function confirmerHistoAjoutV2() {
   var date = document.getElementById('histoAjoutV2-date').value || dateIsoV2();
   if (date > dateIsoV2()) { afficherMessage('Cette date est dans le futur'); return; }
   var dateIgnoree = false;
-  var accords = Array.prototype.map.call(document.querySelectorAll('#histoAjoutV2-accords-menu .item-liste.actif'), function(el){ return el.getAttribute('data-accord'); });
+  var accords = accordsChoisisV2('histoAjoutV2-accord');
   appelBackend('ajouterHistoriqueManuel', { codebarre: histoAjoutV2.codebarre, plat: plat, note: histoAjoutV2.note || '', date: date }, { spinner: 'Enregistrement' }).then(function(res){
     // un serveur pas encore redéployé écrit la date du jour sans le dire
     dateIgnoree = date !== dateIsoV2() && !(res && res.avecDate);

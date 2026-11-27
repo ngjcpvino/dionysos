@@ -1187,16 +1187,9 @@ function construireFormBoireV2() {
   v.classList.add('desactive');
   dessinerVerresV2('boireV2-verres', 0, 'choisirNoteBoireV2');
   var accordsActuels = (menuActionV2Context.wineResult.wine.accords || '').split(',').map(function(a) { return a.trim(); }).filter(Boolean);
-  document.getElementById('boireV2-accords-menu').innerHTML = (CONFIG && CONFIG.accords ? CONFIG.accords : []).map(function(acc) {
-    var sel = accordsActuels.indexOf(acc) !== -1;
-    return '<div class="item-liste' + (sel ? ' actif' : '') + '" onclick="toggleAccordBoireV2(this)" data-accord="' + acc + '">' + acc + '</div>';
-  }).join('');
-  BOIRE_V2_ACCORDS_INITIAUX = accordsSelectionnesBoireV2().join(', ');
+  remplirMenuAccordsV2('boireV2-accord', accordsActuels);
+  BOIRE_V2_ACCORDS_INITIAUX = accordsChoisisV2('boireV2-accord').join(', ');
   majAccordsDisplayBoireV2();
-}
-
-function accordsSelectionnesBoireV2() {
-  return Array.prototype.map.call(document.querySelectorAll('#boireV2-accords-menu .item-liste.actif'), function(el) { return el.getAttribute('data-accord'); });
 }
 
 function toggleAccordBoireV2(el) {
@@ -1205,7 +1198,7 @@ function toggleAccordBoireV2(el) {
 }
 
 function majAccordsDisplayBoireV2() {
-  var sel = accordsSelectionnesBoireV2();
+  var sel = accordsChoisisV2('boireV2-accord');
   var disp = document.getElementById('boireV2-accords-display');
   if (disp) disp.textContent = sel.length ? sel.join(', ') : 'Accords';
 }
@@ -1221,15 +1214,11 @@ function choisirNoteBoireV2(note) {
   allumerVerresV2('boireV2-verres', note);
 }
 
-function basculerMenuAccordsBoireV2() {
-  document.getElementById('boireV2-accords-menu').classList.toggle('ouvert');
-}
-
 function confirmerBoireV2() {
   if (BOIRE_V2_EN_COURS) return;
   var plat = document.getElementById('boireV2-plat').value.trim();
   if (plat !== '' && actionV2Choix.note === 0) { afficherMessage('Choisissez une appréciation'); return; }
-  var accords = accordsSelectionnesBoireV2();
+  var accords = accordsChoisisV2('boireV2-accord');
   BOIRE_V2_EN_COURS = true;
   var place = placeBouteilleV2(actionV2Choix.row, actionV2Choix.bottle);   // avant qu'elle sorte : pour son remplaçant
   appelBackend('actionBouteille', { row: actionV2Choix.row, action: 'boire', bottle: actionV2Choix.bottle, plat: plat, bonAccord: actionV2Choix.note }, { spinner: 'Santé' }).then(function() {

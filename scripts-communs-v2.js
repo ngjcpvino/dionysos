@@ -804,6 +804,55 @@ function basculerVoletsV2(base, quel) {
   });
 }
 
+// ==================== LA LISTE DES ACCORDS (fiche, Boire, Ajouter à l'historique) ====================
+// Une seule façon partout : les accords de config, les choisis allumés, puis « + Ajouter » (27 nov. 2026, l'utilisateur :
+// « je ne peux pas ajouter d'accord » — seule la fiche l'offrait). base : le préfixe des ids (base + 's-menu' : la liste ;
+// base + '-ajouter' / '-champ' : la ligne d'ajout) ; le toucher d'un accord, propre à chaque page : MENUS_ACCORDS_V2.
+var MENUS_ACCORDS_V2 = { 'ficheV2-accord': 'toggleAccordV2', 'boireV2-accord': 'toggleAccordBoireV2', 'histoAjoutV2-accord': 'toggleAccordHistoAjoutV2' };
+function ligneAjoutAccordV2(base) {
+  return '<div class="item-liste" id="' + base + '-ajouter" onclick="ouvrirChampAjoutV2(\'' + base + '\', \'Nouvel accord\', function() { confirmerAjoutAccordV2(\'' + base + '\'); })">+ Ajouter</div>';
+}
+function menuAccordsHtmlV2(base, choisis) {
+  return (CONFIG && CONFIG.accords ? CONFIG.accords : []).map(function(acc) {
+    return '<div class="item-liste' + (choisis.indexOf(acc) !== -1 ? ' actif' : '') + '" onclick="' + MENUS_ACCORDS_V2[base] + '(this)" data-accord="' + acc + '">' + acc + '</div>';
+  }).join('') + ligneAjoutAccordV2(base);
+}
+function remplirMenuAccordsV2(base, choisis) { document.getElementById(base + 's-menu').innerHTML = menuAccordsHtmlV2(base, choisis); }
+function accordsChoisisV2(base) {
+  return Array.prototype.map.call(document.querySelectorAll('#' + base + 's-menu .item-liste.actif'), function(el) { return el.getAttribute('data-accord'); });
+}
+// Ouvrir / fermer la liste ; fermée, la ligne d'ajout redevient « + Ajouter »
+function basculerMenuAccordsListeV2(base) {
+  if (!document.getElementById(base + 's-menu').classList.toggle('ouvert')) remettreAjoutAccordV2(base);
+}
+function remettreAjoutAccordV2(base) {
+  var champ = document.getElementById(base + '-champ');
+  if (champ) champ.outerHTML = ligneAjoutAccordV2(base);
+}
+// Le nouvel accord : déjà dans la liste (aux majuscules et accents près), il est choisi ; sinon il entre dans config, puis il
+// est choisi — par le toucher de la page (la fiche l'enregistre sur le vin ; Boire et l'Historique, à leur confirmation)
+function confirmerAjoutAccordV2(base) {
+  var champ = document.getElementById(base + '-champ');
+  if (!champ) return;
+  var valeur = champ.value.trim();
+  if (!valeur) { afficherMessage('Entrez un accord'); return; }
+  var choisir = function(acc) {
+    var choisis = accordsChoisisV2(base);
+    remplirMenuAccordsV2(base, choisis);
+    if (choisis.indexOf(acc) !== -1) return;
+    var item = Array.prototype.filter.call(document.querySelectorAll('#' + base + 's-menu .item-liste'), function(el) { return el.getAttribute('data-accord') === acc; })[0];
+    if (item) window[MENUS_ACCORDS_V2[base]](item);
+  };
+  var existant = (CONFIG && CONFIG.accords ? CONFIG.accords : []).filter(function(a) { return memeTexteV2(a, valeur); })[0];
+  if (existant) { choisir(existant); return; }
+  appelBackend('ajouterAccordConfig', { accord: valeur }, { spinner: 'Sauvegarde' }).then(function(res) {
+    if (res && res.success === false) throw new Error(res.message || 'refusé');
+    CONFIG.accords.push(valeur);
+    CONFIG.accords.sort(function(a, b) { return normaliserRechercheV2(a).localeCompare(normaliserRechercheV2(b)); });
+    choisir(valeur);
+  }).catch(signalerErreurV2);
+}
+
 // « + Ajouter » d'un menu devient un champ (ids base-ajouter → base-champ) ; Entrée appelle confirmer()
 function ouvrirChampAjoutV2(base, invite, confirmer) {
   var item = document.getElementById(base + '-ajouter');
