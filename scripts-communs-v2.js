@@ -334,6 +334,7 @@ function burgerV2Click(cible) {
   if (cible === 'modeemploi') { cacherToutesPagesV2(); ouvrirModeEmploiV2(); return; }
 
   
+  if (cible === 'restauration') { cacherToutesPagesV2(); ouvrirRestaurationV2(); return; }
   if (cible === 'majaccordssaq') { majAccordsSaqBoucleV2(0); return; }
   if (cible === 'majcurieux') { majCurieuxBeginBoucleV2(0); return; }
   if (cible === 'refresh') {
@@ -393,6 +394,78 @@ function majAccordsSaqBoucleV2(faitsCumul) {
       afficherMessage('✓ Accords SAQ à jour (' + (res.ajoutees || 0) + ' recette' + ((res.ajoutees > 1) ? 's' : '') + ')');
     }).catch(function(err) { messageErreurV2('Accords SAQ à jour, mais les vins pas relus : ' + causeV2(err)); });
   }).catch(function(e) { messageErreurV2('Accords SAQ : ' + causeV2(e)); });
+}
+
+// ==================== RESTAURATION DES DONNÉES (Outils, 27 nov. 2026, l'utilisateur) ====================
+// Les données reprennent une copie de la nuit : une liste déroulante des copies (la plus récente en haut, la date seulement),
+// le rond « Restaurer », puis la confirmation. Le serveur garde d'abord une copie de ce qui existe présentement (elle
+// s'ajoute à la liste : la restaurer défait la restauration), puis écrase la même feuille. Ensuite l'app se recharge ;
+// sur l'autre téléphone : « Données ». Un deuxième toucher ne refait rien (jeton de la confirmation, revérifié au serveur).
+var RESTAURATION_V2 = { copies: [], choix: null, jeton: '', enCours: false };
+
+function ouvrirRestaurationV2() {
+  RESTAURATION_V2.choix = null;
+  appelBackend('getCopiesSauvegarde', {}, { spinner: 'Copies' }).then(function(copies) {
+    verifierReponseV2(copies);
+    if (!copies || !copies.length) { afficherMessage('Aucune copie trouvée'); return; }
+    RESTAURATION_V2.copies = copies;
+    rendreRestaurationV2();
+    montrerPageV2('restaurationV2Container');
+  }).catch(function(err) { messageErreurV2('Restauration : ' + causeServeurV2(err)); });
+}
+function fermerRestaurationV2() { cacherPageV2('restaurationV2Container'); }
+
+// « Jeudi 26 novembre · 2 h 45 » (dansPhrase : « jeudi… », après « la copie du »)
+function dateCopieV2(copie, dansPhrase) {
+  var d = new Date(copie.date), t = dateLongueV2(d) + ' · ' + heureV2(d);
+  return dansPhrase ? t : t.charAt(0).toUpperCase() + t.slice(1);
+}
+
+function rendreRestaurationV2() {
+  var c = RESTAURATION_V2.choix;
+  document.getElementById('restaurationV2-sous').textContent = 'Les données seront restaurées avec ' + (c ? 'la copie du ' + dateCopieV2(c, true) : 'la copie choisie');
+  document.getElementById('restaurationV2-choix').textContent = c ? dateCopieV2(c) : 'Choisir une copie';
+  document.getElementById('restaurationV2-menu').classList.remove('ouvert');
+  document.getElementById('restaurationV2-restaurer').style.display = c ? '' : 'none';
+}
+
+// La liste déroulante : la copie gardée avant une restauration le dit sur une 2e ligne
+function basculerListeRestaurationV2() {
+  var menu = document.getElementById('restaurationV2-menu');
+  if (!menu.classList.toggle('ouvert')) return;
+  menu.innerHTML = RESTAURATION_V2.copies.map(function(c, i) {
+    return '<div class="item-liste' + (c.avant ? ' multiligne' : '') + (c === RESTAURATION_V2.choix ? ' actif' : '') + '" onclick="choisirCopieRestaurationV2(' + i + ')">' +
+      dateCopieV2(c) + (c.avant ? '<br>avant la restauration' : '') + '</div>';
+  }).join('');
+}
+function choisirCopieRestaurationV2(i) {
+  RESTAURATION_V2.choix = RESTAURATION_V2.copies[i];
+  rendreRestaurationV2();
+}
+
+function ouvrirConfirmationRestaurationV2() {
+  var c = RESTAURATION_V2.choix;
+  if (!c) return;
+  RESTAURATION_V2.jeton = Date.now() + '-' + Math.random().toString(36).slice(2);
+  document.getElementById('restaurationConfirmV2-date').textContent = dateCopieV2(c);
+  document.getElementById('restaurationConfirmV2-texte').textContent = 'Les données redeviennent celles du ' + dateCopieV2(c, true) +
+    ' : tout ce qui s\'est fait depuis sera perdu. Une copie de ce qui existe présentement sera disponible.';
+  montrerPageV2('restaurationConfirmV2Overlay');
+}
+function fermerConfirmationRestaurationV2() { cacherPageV2('restaurationConfirmV2Overlay'); }
+
+function confirmerRestaurationV2() {
+  if (RESTAURATION_V2.enCours) return;
+  RESTAURATION_V2.enCours = true;
+  appelBackend('restaurerCopie', { id: RESTAURATION_V2.choix.id, jeton: RESTAURATION_V2.jeton }, { spinner: 'Restauration', timeout: 330000 }).then(function(res) {
+    verifierReponseV2(res);
+    if (!res || res.success === false) throw new Error((res && res.message) || 'refusée');
+    afficherMessage('Données restaurées');
+    mettreAJourAppV2();   // l'app se recharge sur les données restaurées
+  }).catch(function(err) {
+    RESTAURATION_V2.enCours = false;
+    messageErreurV2('Restauration : ' + causeServeurV2(err));
+  });
 }
 
 // ==================== L'APPRÉCIATION EN VERRES (Boire, Corriger, Ajouter à l'historique) ====================

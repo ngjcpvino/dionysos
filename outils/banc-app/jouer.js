@@ -33,6 +33,8 @@ function classeur() {
     [D('2026-10-01T16:00:00Z'), "'10001", "'0061872600004", 'Château Un', 'SAQ Laval', 2, 'Arrivée'],
     [D('2026-08-15T16:00:00Z'), "'10002", "'0778810000012", 'Blanc Deux', 'SAQ Joliette', '', 'Import'],
     [D('2026-07-01T16:00:00Z'), "'10008", '', 'Huit', 'SAQ Laval', '', 'Import']];
+  // Les copies de la nuit (Restauration des données) : deux de Dionysos, une d'une autre app (jamais montrée)
+  f.__dossiersDrive = { 'Sauvegardes Apps': ['Dionysos_Backup_2026-10-26.xlsx', 'Reserve_Backup_2026-10-27.xlsx', 'Dionysos_Backup_2026-10-27.xlsx'] };
   return f;
 }
 

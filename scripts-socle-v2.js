@@ -260,7 +260,7 @@ function afficherHorsLigneV2(date) {
   var mois = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
   // espaces insécables : « données de 20 h 21 » et le jour ne se coupent jamais (au besoin, la ligne passe après « — »)
   var jour = (d.toDateString() === new Date().toDateString()) ? '' : ' le\u00a0' + d.getDate() + '\u00a0' + mois[d.getMonth()];
-  el.textContent = 'Hors ligne — données\u00a0de\u00a0' + d.getHours() + '\u00a0h\u00a0' + ('0' + d.getMinutes()).slice(-2) + jour;
+  el.textContent = 'Hors ligne — données\u00a0de\u00a0' + heureV2(d) + jour;
   document.getElementById('accueilV2-pied-horsligne').textContent = el.textContent;
   el.style.display = '';
 }
@@ -446,6 +446,14 @@ function afficherMessage(m) {
   t.textContent = m;
   MINUTERIES_TOAST_V2.cacher = setTimeout(function() { cacherToastV2(t); }, 3000);
 }
+
+// ==================== DATES (français du Canada) ====================
+// L'heure comme ici : « 14 h 05 » (espaces insécables : jamais coupée)
+function heureV2(d) { return d.getHours() + '\u00a0h\u00a0' + ('0' + d.getMinutes()).slice(-2); }
+// « jeudi 26 novembre », « lundi 1er décembre »
+var JOURS_V2 = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
+var MOIS_V2 = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+function dateLongueV2(d) { return JOURS_V2[d.getDay()] + ' ' + (d.getDate() === 1 ? '1er' : d.getDate()) + ' ' + MOIS_V2[d.getMonth()]; }
 
 // ==================== MONTANTS (français du Canada) ====================
 // Un montant affiché comme ici : « 1 234,56 $ » (espaces insécables : jamais coupé). Lit un nombre, ou un texte venu

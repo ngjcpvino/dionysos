@@ -23,6 +23,11 @@ module.exports = [
     { saisir: ['#editV2-prix', '1.234,56'] }, "sauverEditFicheV2()",
     "afficherMessage('Touchez-moi'); var t = document.getElementById('toast'), r = t.getBoundingClientRect(); document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2).click(); if (t.classList.contains('show')) throw new Error('le message ne se ferme pas au toucher')",
     { saisir: ['#editV2-prix', '27,5'] }, "sauverEditFicheV2()", "signalerErreurV2(new Error('panne simulée'))", "fermerFicheV2()", "fermerCaveV2()"]],
+  // Restauration des données (27 nov. 2026) : Outils, la liste déroulante des copies, une copie choisie, la confirmation (le ✕ y
+  // revient), puis « Restaurer » touché deux fois (une seule restauration) ; l'app se recharge, la copie d'avant est dans la liste
+  ['restauration des données', ["toggleMenuV2()", "basculerSousMenuV2('burgerV2-outils')", "burgerV2Click('restauration')", "basculerListeRestaurationV2()",
+    "choisirCopieRestaurationV2(1)", "ouvrirConfirmationRestaurationV2()", "fermerConfirmationRestaurationV2()", "ouvrirConfirmationRestaurationV2()",
+    "confirmerRestaurationV2(); confirmerRestaurationV2()", "burgerV2Click('restauration')", "basculerListeRestaurationV2()"]],
   // Retirer une bouteille, supprimer un vin (21 nov. 2026) : dans le crayon de la fiche, toujours une confirmation. Château Un
   // (bu : pas de « Supprimer ce vin ») : une bouteille retirée, entrée en trop (l'achat du 1er sept. baisse) ; Proposé Six
   // (jamais bu ni donné) : supprimé depuis la Cave, retour à la Cave sans lui.

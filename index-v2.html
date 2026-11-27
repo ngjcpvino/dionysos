@@ -88,6 +88,7 @@
       </svg>
       Données
     </div>
+    <div class="item-liste accordeon-1" onclick="burgerV2Click('restauration')">Restauration des données</div>
   </div>
   <div class="item-liste" onclick="burgerV2Click('modeemploi')">MODE D'EMPLOI</div>
 </div>
@@ -690,6 +691,39 @@
     <div id="importAchatsV2-importer" class="roundel" style="display:none;" onclick="importerAchatsV2()">
       <span class="roundel-anneau"></span>
       <span class="roundel-barre">Importer</span>
+    </div>
+  </div>
+</div>
+
+<!-- ====================== RESTAURATION DES DONNÉES V2 ====================== -->
+<div id="restaurationV2Container" class="modal-v2-fullscreen" style="display:none;">
+  <div class="modal-v2-content modale-haut">
+    <button class="btn-fermer" onclick="fermerRestaurationV2()">✕</button>
+    <h2 class="titre-1">Restauration des données</h2>
+    <div id="restaurationV2-sous" class="texte-secondaire"></div>
+    <div class="bloc-form">
+      <div class="titre-3">Copie</div>
+      <div id="restaurationV2-choix" class="champ-cliquable" onclick="basculerListeRestaurationV2()"></div>
+      <div id="restaurationV2-menu" class="menu-liste"></div>
+    </div>
+    <div id="restaurationV2-restaurer" class="roundel" style="display:none;" onclick="ouvrirConfirmationRestaurationV2()">
+      <span class="roundel-anneau"></span>
+      <span class="roundel-barre">Restaurer</span>
+    </div>
+  </div>
+</div>
+<div id="restaurationConfirmV2Overlay" class="modal-v2-fullscreen modal-v2-avant" style="display:none;">
+  <div class="modal-v2-content modale-haut">
+    <button class="btn-fermer" onclick="fermerConfirmationRestaurationV2()">✕</button>
+    <h2 class="titre-1">Restauration des données</h2>
+    <div id="restaurationConfirmV2-date" class="texte-secondaire"></div>
+    <div class="titre-3">Restaurer</div>
+    <div class="bloc-form">
+      <div id="restaurationConfirmV2-texte" class="texte"></div>
+    </div>
+    <div class="roundel" onclick="confirmerRestaurationV2()">
+      <span class="roundel-anneau"></span>
+      <span class="roundel-barre">Restaurer</span>
     </div>
   </div>
 </div>
