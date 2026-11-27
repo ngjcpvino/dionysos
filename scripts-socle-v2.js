@@ -298,8 +298,12 @@ function resynchroniserV2(delai) {
 
 // Porte de sortie (bouton « Données », avec réseau seulement) : oublie la copie de l'app et la recharge
 // depuis le site — au cas où elle resterait coincée sur une vieille version.
+// Le rechargement arrive toujours : si la mise à jour de la copie reste prise (le réseau qui ne répond pas, 27 nov. 2026 —
+// après une restauration, l'app restait sur les anciennes données et « Restaurer » ne répondait plus), on recharge quand même.
 function mettreAJourAppV2() {
-  var fin = function() { setTimeout(function() { location.reload(); }, 1200); };
+  var parti = false;
+  var fin = function() { if (parti) return; parti = true; setTimeout(function() { location.reload(); }, 1200); };
+  setTimeout(fin, 2500);
   if (!('caches' in window)) { fin(); return; }
   var maj = ('serviceWorker' in navigator) ? navigator.serviceWorker.getRegistration().then(function(r) { return r && r.update(); }).catch(function() {}) : Promise.resolve();
   maj.then(function() { return caches.keys(); }).then(function(cles) {

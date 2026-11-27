@@ -28,6 +28,9 @@ module.exports = [
   ['restauration des données', ["toggleMenuV2()", "basculerSousMenuV2('burgerV2-outils')", "burgerV2Click('restauration')", "basculerListeRestaurationV2()",
     "choisirCopieRestaurationV2(1)", "ouvrirConfirmationRestaurationV2()", "fermerConfirmationRestaurationV2()", "ouvrirConfirmationRestaurationV2()",
     "confirmerRestaurationV2(); confirmerRestaurationV2()", "burgerV2Click('restauration')", "basculerListeRestaurationV2()"]],
+  // Le rechargement après une restauration (ou « Données ») arrive même si la mise à jour de la copie hors ligne reste prise
+  // (27 nov. 2026, sur l'iPad : l'app restait sur les anciennes données) : la page se recharge et relit le serveur (à l'étape « 0 »)
+  ['rechargement qui ne reste jamais pris', ["navigator.serviceWorker.getRegistration = function() { return new Promise(function() {}); }; mettreAJourAppV2()", "0"]],
   // Retirer une bouteille, supprimer un vin (21 nov. 2026) : dans le crayon de la fiche, toujours une confirmation. Château Un
   // (bu : pas de « Supprimer ce vin ») : une bouteille retirée, entrée en trop (l'achat du 1er sept. baisse) ; Proposé Six
   // (jamais bu ni donné) : supprimé depuis la Cave, retour à la Cave sans lui.
