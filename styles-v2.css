@@ -139,6 +139,7 @@ html, body {
   --vw-80: 80vw;
   --vw-100: 100vw;
   --gold-90: rgba(201,129,60,0.9);
+  --gold-90-plein: rgb(181,116,54);   /* --gold-90 posé sur le noir, mais opaque : la même nuance, qui se voit aussi sur l'or */
   --gold-80: rgba(201,129,60,0.8);
   --gold-70: rgba(201,129,60,0.7);
   --gold-60: rgba(201,129,60,0.6);
@@ -817,8 +818,9 @@ body:has(#accueilV2-horsligne:not([style*="none"])):has(.modal-v2-fullscreen:not
 .contenu > svg path.pastille-aromatique-charnu, .contenu > svg circle.pastille-aromatique-charnu { fill: var(--pastille-aromatique-charnu); }
 .contenu > svg line { stroke: var(--white-60); stroke-width: var(--largeur-bordure-1); }
 /* La ligne entre les rouges et les blancs (Cépages, dans le groupe de droite) : la nuance de la 2e part de chaque côté
-   (27 nov. 2026, l'utilisateur : « Le 2e choix est un peu différent. C'est cette couleur que je veux ») */
-.contenu > svg g line { stroke: var(--gold-90); }
+   (27 nov. 2026, l'utilisateur : « Le 2e choix est un peu différent. C'est cette couleur que je veux »). Opaque : --gold-90,
+   transparent, disparaissait sur l'or des deux premières parts — la moitié du haut de la ligne ne se voyait pas. */
+.contenu > svg g line { stroke: var(--gold-90-plein); }
 /* Le rond du retour à la tarte entière (Profil, « Autres » ouvert, dans la moitié vide) : le rond de l'app — fond sombre,
    bordure or — dessiné dans la tarte ; sa petite tarte prend les couleurs .vin-rouge / .vin-blanc */
 .contenu > svg circle.retour-tarte { fill: var(--noir-50); stroke: var(--gold); stroke-width: var(--largeur-bordure-1); cursor: pointer; }

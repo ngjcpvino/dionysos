@@ -38,7 +38,8 @@ function classeur() {
   return f;
 }
 
-// La photo de l'écran : chaque élément visible (balise, id, classes, son texte, sa boîte, quelques styles calculés)
+// La photo de l'écran : chaque élément visible (balise, id, classes, son texte, sa boîte, quelques styles calculés ; le trait
+// d'un dessin aussi, depuis le 27 nov. 2026 : la ligne des Cépages, transparente, ne se voyait pas sur l'or)
 function photo() {
   const out = [];
   const marche = (el, prof) => {
@@ -50,7 +51,7 @@ function photo() {
     const valeur = 'value' in el && typeof el.value === 'string' && el.tagName !== 'BUTTON' && el.tagName !== 'LI' ? ' =' + el.value.slice(0, 80) : '';
     out.push(prof + ' ' + el.tagName.toLowerCase() + (el.id ? '#' + el.id : '') + (classes ? '.' + classes : '') + ' «' + texte + '»' + valeur +
       ' [' + [r.x, r.y, r.width, r.height].map(Math.round).join(',') + '] ' + [s.color, s.backgroundColor, s.fontSize, s.fontWeight, s.opacity,
-      s.borderBottomColor, s.borderLeftColor, s.fill].join(' '));
+      s.borderBottomColor, s.borderLeftColor, s.fill, s.stroke].join(' '));
     for (const c of el.children) marche(c, prof + 1);
   };
   marche(document.body, 0);
