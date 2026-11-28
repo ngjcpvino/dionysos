@@ -314,7 +314,6 @@ var ZONES_MENAGE_V2 = {
     { nom: 'chez les rouges', rangees: ['4', '5', '6', '7', '8', '9'], couleur: 'vin-rouge' }
   ]
 };
-var NOMS_COULEURS_MENAGE_V2 = { 'vin-blanc': 'blancs', 'vin-rouge': 'rouges', 'vin-bulles': 'bulles' };
 
 // La tablette : rangée 7 du cellier, sauf C-7-1
 function tabletteMenageV2(p) { return !!p && memeTexteV2(p.meuble, 'Cellier') && String(p.rangee) === '7' && String(p.espace) !== '1'; }
@@ -650,15 +649,6 @@ function ouvrirMenageEmpV2() {
   }).catch(journaliserV2('Historique du Tri')).then(function() { if (empV2Mode === 'menage') afficherMenageEmpV2(); });
 }
 
-// « bu le 27 mars ★★★★ » quand l'Historique le sait, sinon « arrivée le 20 févr. »
-function passeMenageV2(b) {
-  var quand = b.passe ? b.passe.quand : b.arrivee;
-  if (!quand) return '';
-  var d = new Date(quand);
-  var mois = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
-  var txt = (b.passe ? 'bu le ' : 'arrivée le ') + d.getDate() + ' ' + mois[d.getMonth()] + (d.getFullYear() !== new Date().getFullYear() ? ' ' + d.getFullYear() : '');
-  return txt + (b.passe && b.passe.note ? ' ' + new Array(b.passe.note + 1).join('★') : '');
-}
 
 function nomMenageV2(b) { return decodeHTML(b.w.Nom || '—'); }
 function guillemetMenageV2(v) { return (v || '').toString().replace(/'/g, "\\'"); }
@@ -698,7 +688,7 @@ function afficherMenageEmpV2() {
   var meuble = MEUBLES_DOUBLONS_MENAGE_V2.filter(function(m) {
     return M.doublonsFaits.indexOf(m) === -1 && groupes.some(function(g) { return g.meuble === m; });
   })[0];
-  if (meuble) { afficherDoublonsMenageV2(meuble, groupes.filter(function(g) { return g.meuble === meuble; }), toutes, attente); return; }
+  if (meuble) { afficherDoublonsMenageV2(meuble, groupes.filter(function(g) { return g.meuble === meuble; }), toutes); return; }
   var moves = simulerMenageV2(toutes, groupes).moves.map(mouvementMenageV2);
   M.tournee = moves.length ? { moves: moves, etape: 0, ecrits: {} } : null;   // rien à déplacer : chaque ouverture recalcule
   garderMenageV2();
@@ -711,17 +701,14 @@ function mouvementMenageV2(d) {
     w: { Nom: d.b.w.Nom, 'Code-barres': d.b.w['Code-barres'], 'Photo URL': d.b.w['Photo URL'] }, coul: d.b.coul };
 }
 
-// Les doublons d'un meuble : on touche ceux qu'on sort, on confirme
-function afficherDoublonsMenageV2(meuble, groupes, toutes, attente) {
+// Les doublons d'un meuble : on coche ceux qu'on sort, on confirme. Sans bla-bla (27 nov. 2026, l'utilisateur, sur aperçu :
+// « 3 ») : une seule ligne, puis chaque cépage en petit titre et ses bouteilles, les blancs d'abord
+function afficherDoublonsMenageV2(meuble, groupes, toutes) {
   document.getElementById('empV2-compte').innerHTML = 'Tri Dionysos : les doublons ' + NOMS_MEUBLES_MENAGE_V2[meuble];
   var html = '<div class="emp-bloc"><div class="titre-2">Les doublons ' + NOMS_MEUBLES_MENAGE_V2[meuble] + '</div>' +
-    '<div class="texte-secondaire texte-gauche">Coche ceux que tu sors ; ceux que tu gardes restent à leur place.</div>';
+    '<div class="texte-secondaire texte-gauche">Coche ceux que tu sors.</div>';
   ['vin-blanc', 'vin-rouge'].forEach(function(coul) {
-    var a = attente[coul], siens = groupes.filter(function(g) { return g.coul === coul; });
-    if (!siens.length) return;
-    html += '<div class="texte">Chez les ' + NOMS_COULEURS_MENAGE_V2[coul] + ', ' + a.libres + ' place' + (a.libres > 1 ? 's' : '') + ' libre' + (a.libres > 1 ? 's' : '') +
-      ' pour ' + a.nouveautes.length + ' nouveauté' + (a.nouveautes.length > 1 ? 's' : '') + ' : ' + a.nouveautes.join(' · ') + '</div>';
-    siens.forEach(function(g) { html += choixMenageV2Html(g); });
+    groupes.filter(function(g) { return g.coul === coul; }).forEach(function(g) { html += choixMenageV2Html(g); });
   });
   html += '</div><div class="roundel mt-20" onclick="confirmerDoublonsMenageV2(\'' + meuble + '\')"><span class="roundel-anneau"></span><span class="roundel-barre">Confirmer</span></div>';
   var aVerifier = toutes.filter(function(b) { return b.doute; });
@@ -734,16 +721,13 @@ function afficherDoublonsMenageV2(meuble, groupes, toutes, attente) {
   document.getElementById('empV2-cartes').innerHTML = html;
 }
 
-// « Grenache : tu en as 3 » — en titre au-dessus du groupe, pas collé au premier vin
+// Un cépage en petit titre, puis ses bouteilles : le nom du vin en haut, l'emplacement dessous (comme les cartes de la tournée)
 function choixMenageV2Html(g) {
   var M = MENAGE_V2;
-  var nSortis = g.bouteilles.filter(function(b) { return M.cedes[b.cle]; }).length;
-  var html = '<div class="texte">' + g.titre + ' : tu en as ' + g.bouteilles.length + (nSortis ? ', tu en sors ' + nSortis : '') + '</div>' +
-    '<div class="histo-groupe ' + g.coul + '">';
+  var html = '<div class="titre-3">' + g.titre + '</div><div class="histo-groupe ' + g.coul + '">';
   g.bouteilles.forEach(function(b) {
     var sorti = !!M.cedes[b.cle];
-    var autreNom = cleCepageV2(b.cepNom) !== cleCepageV2(b.cepCommun) ? b.cepNom : '';
-    html += carteMenageV2(b, libellePlaceMenageV2(b.place) + ' · ' + nomMenageV2(b), [autreNom, passeMenageV2(b)].filter(Boolean).join(' · '),
+    html += carteMenageV2(b, nomMenageV2(b), libellePlaceMenageV2(b.place),
       cocheMenageV2("cederMenageV2('" + b.cle + "', '" + guillemetMenageV2(g.cle) + "')", sorti) + '<span class="fs-12">' + (sorti ? 'sortie' : 'sortir') + '</span>', false);
   });
   return html + '</div>';

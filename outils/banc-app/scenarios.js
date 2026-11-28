@@ -69,6 +69,11 @@ module.exports = [
   ['scan d\'un vin connu, boire', ["traiterResultatScanV2('" + UN + "')", "menuV2Click('boire')", "choisirBouteilleActionV2('boire', 1)",
     "basculerMenuAccordsListeV2('boireV2-accord')", "document.getElementById('boireV2-accord-ajouter').click()", { saisir: ['#boireV2-accord-champ', 'Porc'] },
     "confirmerAjoutAccordV2('boireV2-accord')", { saisir: ['#boireV2-plat', 'Agneau grillé'] }, "choisirNoteBoireV2(5)", "confirmerBoireV2()"]],
+  // L'écran des doublons au cellier, sans bla-bla (27 nov. 2026, l'utilisateur, sur aperçu : « 3 ») : une ligne, chaque cépage en
+  // petit titre, ses bouteilles (le nom en haut, l'emplacement dessous) ; deux Chardonnay posés au cellier, en mémoire seulement
+  ['Tri : les doublons au cellier', ["burgerV2Click('emplacements')", "choisirModeEmpV2('menage')",
+    "ALL_DATA.push({ row: 91, bottle: 1, 'Code-barres': '0910000000001', Nom: 'Chardonnay Un', Couleur: 'Blanc', Cepage: 'Chardonnay', Appellation: 'Chablis', Meuble: 'Cellier', Rangee: '1', Espace: '4', Statut: 'En stock', Racheter: 'Oui' }, { row: 92, bottle: 1, 'Code-barres': '0920000000002', Nom: 'Chardonnay Deux', Couleur: 'Blanc', Cepage: 'Chardonnay', Appellation: 'Navarra', Meuble: 'Cellier', Rangee: '3', Espace: '5', Statut: 'En stock', Racheter: 'Oui' }); var t = bouteillesMenageV2(); afficherDoublonsMenageV2('Cellier', groupesDoublonsMenageV2(t).filter(function(g) { return g.meuble === 'Cellier'; }), t)",
+    "document.querySelector('#empV2-cartes .coche-panier').click()", "fermerEmpV2()"]],
   // Le remplaçant (3 nov. 2026) : le faux classeur n'a pas de rouge au cellier ni au Pigeonnier rouge — on en pose un, en mémoire seulement
   ['remplaçant après Boire', ["ALL_DATA.push({ row: 90, bottle: 1, 'Code-barres': '0900000000002', Nom: 'Malbec du Pigeonnier', Couleur: 'Rouge', Cepage: 'Malbec', Appellation: 'Cahors', Meuble: 'Pigeonnier', Rangee: '5', Espace: '2', Statut: 'En stock', Racheter: 'Oui' }); proposerRemplacantV2({ meuble: 'Cellier', rangee: '4', espace: '2' })",
     "document.querySelector('#remplacantV2-carte .carte').click()", "fermerFicheV2()", "fermerRemplacantV2()"]],
