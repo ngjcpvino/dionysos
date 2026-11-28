@@ -359,7 +359,10 @@ function confirmerHistoAjoutV2() {
 // achat importé = une bouteille, inscrite par l'outil inscrireBusImport) — et chaque bouteille en cave : une bouteille, une
 // part. L'onglet Achats n'y compte plus (l'import n'a pas les quantités : mêlé aux vraies, il faussait tout). Se lit d'un
 // coup : pas de phrase, pas de liste.
-var PAYS_TARTE_V2 = 7;   // au-delà, les plus petits pays vont dans « Autres »
+// Une part a au moins 2 % de sa tarte (27 nov. 2026, l'utilisateur : « 2 % de la tarte c'est le minimum ») : plus petite, elle
+// va dans « Autres ». Le nombre de parts suit la cave (avant : 7 pays, un nombre fixe — « Il doit bien avoir une façon de
+// présenter sans fixer le nombre de pays ! »). Les tartes qui ont leur propre nombre (t.max : pastilles, cépages) le gardent.
+var PART_MIN_TARTE_V2 = 0.02;
 
 // Les quatre tartes : la valeur du vin qu'elles comptent, et le filtre de la Cave qu'ouvre une part (30 oct. 2026)
 var TARTES_PROFIL_V2 = {
@@ -400,7 +403,8 @@ function fermerProfilV2() {
 
 // Les entrées ({ codebarre, codeSAQ } : les bouteilles du Profil, bouteillesProfilV2) regroupées par une valeur de leur vin
 // (t.valeur(vin, entrée)), comptées en bouteilles (une entrée = sa quantité si elle en a une, sinon 1), de la plus grande
-// part à la plus petite ; PAYS_TARTE_V2 parts, puis « Autres (N quoi) » (ses valeurs dans membres).
+// part à la plus petite ; les parts d'au moins 2 % de la tarte dessinée (PART_MIN_TARTE_V2 ; t.max parts si la tarte a son
+// nombre), puis « Autres (N quoi) » (ses valeurs dans membres).
 // Sans valeur : la part t.inconnu, ou rien si elle est vide (les pastilles : la tarte ne parle que de goût). t.classe(nom),
 // facultative : la couleur d'une part (sa classe CSS) ; '' = sa nuance d'or. t.cote(nom), facultative : la moitié où
 // se centre la part (« gauche » / « droite »). seulement : les valeurs gardées.
@@ -425,7 +429,9 @@ function partsParV2(liste, t, seulement) {
     var e = ecritures[k];
     return { nom: Object.keys(e).sort(function(a, b) { return e[b] - e[a] || a.localeCompare(b); })[0], n: compte[k] };
   }).sort(function(a, b) { return b.n - a.n || a.nom.localeCompare(b.nom); });
-  var reste = parts.splice(t.max || PAYS_TARTE_V2);
+  var dessine = parts.reduce(function(n, p) { return n + p.n; }, 0);
+  var petite = parts.findIndex(function(p) { return p.n / dessine < PART_MIN_TARTE_V2; });
+  var reste = parts.splice(t.max || (petite === -1 ? parts.length : petite));
   if (reste.length === 1) parts.push(reste[0]);
   else if (reste.length) parts.push({ nom: 'Autres (' + reste.length + ' ' + t.quoi + ')', n: reste.reduce(function(s, p) { return s + p.n; }, 0),
     membres: reste.map(function(p) { return p.nom; }) });
@@ -480,7 +486,7 @@ function ordreTarteV2(parts) {
   return parts.slice(0, 1).concat(droite, parts.slice(1, 2), gauche.reverse());
 }
 
-// La tarte (SVG) : les parts placées par ordreTarteV2, mais écrites dans l'ordre du rang (leur nuance d'or suit ce rang : CSS).
+// La tarte (SVG) : les parts placées par ordreTarteV2, mais écrites dans l'ordre du rang ; leurs nuances d'or alternent (plus bas).
 // La 1re et la 2e ont leur nom et leur % au-dessus et au-dessous de la tarte ; les autres, à côté de leur part, reliés à elle
 // par un trait fin. D'un même côté, les écritures s'écartent pour ne pas se chevaucher.
 // Un nom de plus de NOM_TARTE_V2 caractères passe à la ligne, à une espace ou après un trait d'union (5 nov. 2026,
@@ -525,12 +531,28 @@ function tarteV2(parts, t) {
     poser(gauche, Math.PI - Math.PI * sg, 2 * Math.PI);
     poser(droite, Math.PI + Math.PI * sg, 2 * Math.PI);
   } else poser(ordreTarteV2(parts), -Math.PI / 2 - Math.PI * parts[0].n / total, 2 * Math.PI);
-  // coupée en deux : les parts de chaque moitié dans leur groupe, leur nuance d'or suit leur rang DANS la moitié (CSS)
+  // Les parts d'or (sans couleur à elles) : trois nuances qui alternent dans l'ordre où elles se suivent sur le cercle — deux
+  // voisines jamais pareilles, peu importe le nombre de parts (27 nov. 2026, l'utilisateur : « Alterner 2 ou 3 couleurs ? » ;
+  // avant : la nuance suivait le rang, et recommençait au-delà de 8 parts). Coupée en deux : chaque moitié part du haut (son
+  // ordre = son rang). Entière : le cercle se referme — si la dernière tombait sur la nuance de la première, elle prend la 2e.
+  var nuances = {};
+  var alterner = function(suite, ferme) {
+    var dor = suite.filter(function(i) { return !parts[i].classe; });
+    dor.forEach(function(i, k) { nuances[i] = k % 3; });
+    if (ferme && dor.length > 1 && dor.length % 3 === 1) nuances[dor[dor.length - 1]] = 1;
+  };
+  var indices = parts.map(function(p, i) { return i; });
+  if (moities) ['gauche', 'droite'].forEach(function(c) { alterner(indices.filter(function(i) { return parts[i].moitie === c; }), false); });
+  else {
+    var depart = place[0][0], tour = function(i) { return ((place[i][0] - depart) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI); };
+    alterner(indices.slice().sort(function(i, j) { return tour(i) - tour(j); }), true);
+  }
   var formes = '', ecritures = '', cotes = { droite: [], gauche: [] }, haut = -r - 10, bas = r + 10, groupes = { gauche: '', droite: '' };
   parts.forEach(function(p, i) {
     var debut = place[i][0], fin = place[i][1], m = (debut + fin) / 2, pct = Math.round(p.n / (p.base || p.total || total) * 100);
     var a = pt(debut, r), b = pt(fin, r), arc = fin - debut;
-    var classe = (p.classe ? ' class="' + p.classe + '"' : '') + ' onclick="toucherPartProfilV2(\'' + t + '\', ' + i + ')"';
+    var cl = p.classe || (nuances[i] !== undefined ? 'nuance-' + nuances[i] : '');
+    var classe = (cl ? ' class="' + cl + '"' : '') + ' onclick="toucherPartProfilV2(\'' + t + '\', ' + i + ')"';
     var forme = arc >= 2 * Math.PI - 1e-9 ? '<circle' + classe + ' cx="' + cx + '" cy="0" r="' + r + '"/>'
       : '<path' + classe + ' d="M' + cx + ' 0 L' + f(a[0]) + ' ' + f(a[1]) + ' A' + r + ' ' + r + ' 0 ' + (arc > Math.PI ? 1 : 0) + ' 1 ' + f(b[0]) + ' ' + f(b[1]) + 'Z"/>';
     if (p.moitie) groupes[p.moitie] += forme; else formes += forme;
@@ -560,7 +582,7 @@ function tarteV2(parts, t) {
     });
   });
   // la ligne entre les rouges et les blancs (TARTES_PROFIL_V2[t].trait), seulement quand les deux moitiés sont là ; dans
-  // le groupe de droite (la nuance de la 2e part : .contenu > svg g line), par-dessus les deux moitiés
+  // le groupe de droite (sa couleur : .contenu > svg g line), par-dessus les deux moitiés
   var trait = TARTES_PROFIL_V2[t].trait && groupes.gauche && groupes.droite ? '<line x1="' + cx + '" y1="' + (-r) + '" x2="' + cx + '" y2="' + r + '"/>' : '';
   if (moities) formes = '<g>' + groupes.gauche + '</g><g>' + groupes.droite + trait + '</g>';
   // un « Autres » ouvert n'a que sa moitié : l'autre, vide, porte le rond du retour à la tarte entière (5 nov. 2026,

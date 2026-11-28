@@ -138,12 +138,8 @@ html, body {
   --vh-100: 100vh;
   --vw-80: 80vw;
   --vw-100: 100vw;
-  --gold-90: rgba(201,129,60,0.9);
-  --gold-90-plein: rgb(181,116,54);   /* --gold-90 posé sur le noir, mais opaque : la même nuance, qui se voit aussi sur l'or */
-  --gold-80: rgba(201,129,60,0.8);
+  --gold-90-plein: rgb(181,116,54);   /* l'or à 90 % posé sur le noir, mais opaque : il se voit aussi sur l'or (la ligne des Cépages) */
   --gold-70: rgba(201,129,60,0.7);
-  --gold-60: rgba(201,129,60,0.6);
-  --gold-50: rgba(201,129,60,0.5);
   --gold-40: rgba(201,129,60,0.4);
   --fs-9: 9px;
   --fs-10: 10px;
@@ -788,18 +784,14 @@ body:has(#accueilV2-horsligne:not([style*="none"])):has(.modal-v2-fullscreen:not
 .carte.vin-bulles { border-bottom-color: var(--vin-bulles); border-left: none; }
 .carte.vin-spiritueux { border-bottom-color: var(--vin-spiritueux); border-left: none; }
 
-/* ===== Un graphique dans un bloc de contenu (Profil, 28 oct. 2026) : l'or, du plus soutenu (la 1re part, la plus grande)
-   au plus pâle ; à côté de chaque part, son nom et son % (dessous, atténué), relié par un trait fin ===== */
+/* ===== Un graphique dans un bloc de contenu (Profil, 28 oct. 2026) : l'or, en nuances ; à côté de chaque part, son nom et
+   son % (dessous, atténué), relié par un trait fin ===== */
 .contenu > svg { display: block; width: 100%; max-width: var(--taille-600); height: auto; margin: var(--space-20) auto; }
-/* Les nuances d'or suivent le rang de la part ; au-delà de 8 (les 12 cépages d'une moitié), elles recommencent */
-.contenu > svg path:nth-of-type(8n+1), .contenu > svg circle { fill: var(--gold); }
-.contenu > svg path:nth-of-type(8n+2) { fill: var(--gold-90); }
-.contenu > svg path:nth-of-type(8n+3) { fill: var(--gold-80); }
-.contenu > svg path:nth-of-type(8n+4) { fill: var(--gold-70); }
-.contenu > svg path:nth-of-type(8n+5) { fill: var(--gold-60); }
-.contenu > svg path:nth-of-type(8n+6) { fill: var(--gold-50); }
-.contenu > svg path:nth-of-type(8n+7) { fill: var(--gold-40); }
-.contenu > svg path:nth-of-type(8n+8) { fill: var(--gold-30); }
+/* Les parts d'or : trois nuances qui alternent autour du cercle (tarteV2 : .nuance-0, -1, -2 ; 27 nov. 2026, l'utilisateur :
+   « Alterner 2 ou 3 couleurs ? ») ; une tarte d'une seule part, l'or */
+.contenu > svg path.nuance-0, .contenu > svg circle { fill: var(--gold); }
+.contenu > svg path.nuance-1 { fill: var(--gold-70); }
+.contenu > svg path.nuance-2 { fill: var(--gold-40); }
 /* une part qui porte la couleur d'un vin (Profil → Couleurs) la prend, à la place de sa nuance d'or */
 .contenu > svg path.vin-rouge, .contenu > svg circle.vin-rouge { fill: var(--vin-rouge); }
 .contenu > svg path.vin-blanc, .contenu > svg circle.vin-blanc { fill: var(--vin-blanc); }
@@ -817,9 +809,10 @@ body:has(#accueilV2-horsligne:not([style*="none"])):has(.modal-v2-fullscreen:not
 .contenu > svg path.pastille-aromatique-souple, .contenu > svg circle.pastille-aromatique-souple { fill: var(--pastille-aromatique-souple); }
 .contenu > svg path.pastille-aromatique-charnu, .contenu > svg circle.pastille-aromatique-charnu { fill: var(--pastille-aromatique-charnu); }
 .contenu > svg line { stroke: var(--white-60); stroke-width: var(--largeur-bordure-1); }
-/* La ligne entre les rouges et les blancs (Cépages, dans le groupe de droite) : la nuance de la 2e part de chaque côté
-   (27 nov. 2026, l'utilisateur : « Le 2e choix est un peu différent. C'est cette couleur que je veux »). Opaque : --gold-90,
-   transparent, disparaissait sur l'or des deux premières parts — la moitié du haut de la ligne ne se voyait pas. */
+/* La ligne entre les rouges et les blancs (Cépages, dans le groupe de droite) : la nuance qu'avait la 2e part de chaque côté
+   (27 nov. 2026, l'utilisateur : « Le 2e choix est un peu différent. C'est cette couleur que je veux »), l'or à 90 %. Opaque :
+   transparente, elle disparaissait sur l'or des deux premières parts — la moitié du haut de la ligne ne se voyait pas.
+   Gardée telle quelle quand les parts sont passées aux trois nuances qui alternent (le même jour). */
 .contenu > svg g line { stroke: var(--gold-90-plein); }
 /* Le rond du retour à la tarte entière (Profil, « Autres » ouvert, dans la moitié vide) : le rond de l'app — fond sombre,
    bordure or — dessiné dans la tarte ; sa petite tarte prend les couleurs .vin-rouge / .vin-blanc */

@@ -50,6 +50,12 @@ module.exports = [
     "sauverHistoEditV2()", "document.querySelector('#histoV2-cartes .histo-mets').click()", "annulerHistoEditV2()",
     "ouvrirHistoAjoutV2()", "fermerHistoAjoutV2()", "fermerHistoV2()"]],
   ['profil', ["burgerV2Click('profil')", "toucherPartProfilV2('pays', 0)", "fermerCaveV2()", "fermerProfilV2()"]],
+  // La tarte des Pays (27 nov. 2026) : une part a au moins 2 % de sa tarte, le reste va dans « Autres » (ici la Grèce et la
+  // Hongrie : chacune sa bouteille en cave, 1 % de 78) ; trois nuances d'or qui alternent, deux voisines jamais pareilles ; « Autres » touché, puis « Tout »
+  ['profil : la règle des 2 % et les nuances', ["burgerV2Click('profil')",
+    "ALL_DATA.push(...['France', 'Espagne', 'Chili', 'Liban', 'Grèce', 'Hongrie'].map((p, k) => ({ 'Code-barres': '990' + k, 'Code SAQ': '990' + k, Nom: 'Essai ' + p, Pays: p, Couleur: 'Rouge' }))); " +
+      "ALL_HISTORIQUE = ALL_HISTORIQUE.concat([[0, 30], [1, 20], [2, 6], [3, 3]].flatMap(([k, n]) => Array.from({ length: n }, () => ({ codebarre: '990' + k })))); rendreProfilV2();",
+    "toucherPartProfilV2('pays', PARTS_PROFIL_V2.pays.findIndex(p => p.membres))", "toutProfilV2('pays')", "fermerProfilV2()"]],
   ['propositions', ["burgerV2Click('suggestions')", "ouvrirFiltresV2('suggestionsV2')", "fermerFiltresV2('suggestionsV2')", "document.querySelector('#suggestionsV2Container .histo-mets').click()",
     "fermerSuggestionEditV2()", "fermerSuggestionsV2()"]],
   ['liste d\'achat', ["burgerV2Click('racheter')", "choisirModeAchatV2('favoris')", "choisirModeAchatV2('suggestions')", "choisirModeAchatV2('nepasracheter')",
