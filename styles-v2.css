@@ -1169,10 +1169,10 @@ input[type="date"].champ-saisie::-webkit-date-and-time-value { text-align: left;
   border: var(--largeur-bordure-1) solid var(--white-10);
 }
 
-/* Groupe d'un vin (sa carte puis ses cartes en retrait) : le trait de gauche est celui de .vin-* */
+/* Groupe d'un vin (sa carte puis ses cartes en retrait). Plus de trait de couleur à gauche (27 nov. 2026, l'utilisateur : « ça
+   fait une mèche que j'ai pu ça dans une liste ») : la couleur du vin reste la bande du bas de sa carte, comme partout. */
 .histo-groupe {
   margin-bottom: var(--space-25);
-  padding-left: var(--space-10);
 }
 .histo-vin {
   padding-top: var(--space-10);

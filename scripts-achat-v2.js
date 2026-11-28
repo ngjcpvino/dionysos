@@ -85,7 +85,7 @@ function groupeSuggestionV2(g) {
     sous: sousVinV2(w), droite: prix || null, droiteClasses: 'carte-droite-empilee' });
   var cartesSugg = g.items.map(function(s) { return carteSuggestionV2(s, g.codeSAQ, nom, 'liste'); }).join('');
 
-  return '<div class="histo-groupe ' + couleurClasseV2(w.Couleur) + '">' + carteVin + cartesSugg + '</div>';
+  return '<div class="histo-groupe">' + carteVin + cartesSugg + '</div>';
 }
 
 // ---------- Overlay Ajout/Correction suggestion ----------

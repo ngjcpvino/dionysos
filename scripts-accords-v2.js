@@ -788,5 +788,5 @@ function groupeCurieuxBeginV2(g, provenance) {
 
   var cartesPlats = g.items.map(function(a) { return cartePlatCurieuxBeginV2(a); }).join('');
 
-  return '<div class="histo-groupe ' + classeCoul + '">' + carteVin + cartesPlats + '</div>';
+  return '<div class="histo-groupe">' + carteVin + cartesPlats + '</div>';
 }

@@ -724,7 +724,7 @@ function afficherDoublonsMenageV2(meuble, groupes, toutes) {
 // Un cépage en petit titre, puis ses bouteilles : le nom du vin en haut, l'emplacement dessous (comme les cartes de la tournée)
 function choixMenageV2Html(g) {
   var M = MENAGE_V2;
-  var html = '<div class="titre-3">' + g.titre + '</div><div class="histo-groupe ' + g.coul + '">';
+  var html = '<div class="titre-3">' + g.titre + '</div><div class="histo-groupe">';
   g.bouteilles.forEach(function(b) {
     var sorti = !!M.cedes[b.cle];
     html += carteMenageV2(b, nomMenageV2(b), libellePlaceMenageV2(b.place),

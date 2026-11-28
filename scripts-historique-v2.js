@@ -142,7 +142,7 @@ function afficherHistoV2() {
     var mets = g.mets.slice().sort(platPlusRecentV2);
     var cartesMets = mets.map(function(m){ return carteMetHistoV2(m, nom, 'histo'); }).join('');
 
-    return '<div class="histo-groupe ' + couleurClasseV2(g.couleur) + '">' + carteVin + cartesMets + '</div>';
+    return '<div class="histo-groupe">' + carteVin + cartesMets + '</div>';
   }).join('');
 }
 
